@@ -1,4 +1,4 @@
-.PHONY: spec generate build clean tidy spec-all generate-all build-all compare help
+.PHONY: spec generate build clean tidy spec-all generate-all build-all compare changelog changelog-all help
 
 GOPATH_BIN      := $(shell GOTOOLCHAIN=go1.25.8 go env GOPATH)/bin
 CAMUNDA_REPO    ?= /Users/amanyadav/camunda/camunda
@@ -72,6 +72,20 @@ build:
 tidy:
 	GOTOOLCHAIN=go1.25.8 go mod tidy
 
+# ---------------------------------------------------------------------------
+# Changelog
+# ---------------------------------------------------------------------------
+
+OLD_VERSION ?= 8.8
+NEW_VERSION ?= 8.9
+
+changelog:
+	@GOTOOLCHAIN=go1.25.8 go run ./cmd/changelog \
+		--old-version $(OLD_VERSION) --new-version $(NEW_VERSION)
+
+changelog-all:
+	@GOTOOLCHAIN=go1.25.8 go run ./cmd/changelog --all
+
 clean:
 	rm -rf pkg/camunda/8.*/
 	rm -rf pkg/camunda/main/
@@ -88,6 +102,8 @@ help:
 	@echo "  make generate-all                            # Generate clients for all versions"
 	@echo "  make build-all                               # Tidy + build everything"
 	@echo "  make compare                                 # Compare generated clients"
+	@echo "  make changelog         OLD_VERSION=8.8 NEW_VERSION=8.9"
+	@echo "  make changelog-all                             # Changelog for all version pairs"
 	@echo "  make clean                                   # Remove generated files"
 	@echo ""
 	@echo "Versions: $(VERSIONS)"
