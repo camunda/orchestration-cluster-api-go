@@ -3,7 +3,7 @@
 GOPATH_BIN      := $(shell GOTOOLCHAIN=go1.25.8 go env GOPATH)/bin
 CAMUNDA_REPO    ?= /Users/amanyadav/camunda/camunda
 CAMUNDA_VERSION ?= main
-VERSIONS        := 8.7 8.8 8.9 main
+VERSIONS        := 8.5 8.6 8.7 8.8 8.9 main
 
 # Map a version label to a git ref
 ref = $(if $(filter main,$(1)),origin/main,origin/stable/$(1))
