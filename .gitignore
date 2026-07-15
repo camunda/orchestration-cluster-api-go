@@ -1,0 +1,22 @@
+# Build output / local artifacts
+/dist/
+*.out
+*.test
+*.exe
+coverage.txt
+
+# Transient upstream clone created by the schema bundler / proto fetch
+external-spec/upstream/
+external-spec/upstream/**/.tmp*
+
+# Node (used only for codegen tooling: openapi-generator-cli, buf, bundler)
+node_modules/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Planning artifacts (not part of the SDK)
+Seizing the Polyglot Moment*

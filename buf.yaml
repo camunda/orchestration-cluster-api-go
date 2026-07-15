@@ -1,0 +1,20 @@
+# buf module configuration for the Zeebe gateway gRPC protocol.
+#
+# The proto is fetched from camunda/camunda (pinned to $SPEC_REF) into
+# external-spec/proto/ by scripts/fetch-proto.sh, then compiled to Go stubs in pb/
+# by `buf generate` (see buf.gen.yaml). Regenerate via `make generate`.
+version: v2
+modules:
+  - path: external-spec/proto
+lint:
+  use:
+    - STANDARD
+  except:
+    # The upstream proto predates several buf STANDARD rules; we do not own it.
+    - PACKAGE_VERSION_SUFFIX
+    - RPC_REQUEST_STANDARD_NAME
+    - RPC_RESPONSE_STANDARD_NAME
+    - SERVICE_SUFFIX
+breaking:
+  use:
+    - FILE

@@ -1,0 +1,18 @@
+# buf code-generation template: compiles the Zeebe gateway proto to Go + gRPC
+# stubs under pb/. Uses buf's remote plugins so no local protoc toolchain is
+# required. Regenerate via `make generate` (or `npx @bufbuild/buf generate`).
+version: v2
+managed:
+  enabled: true
+  override:
+    # Force the generated Go import path regardless of the proto's own
+    # `option go_package` (upstream sets it to "./;pb").
+    - file_option: go_package
+      value: github.com/camunda/orchestration-cluster-api-go/pb
+plugins:
+  - remote: buf.build/protocolbuffers/go
+    out: pb
+    opt: paths=source_relative
+  - remote: buf.build/grpc/go
+    out: pb
+    opt: paths=source_relative

@@ -1,0 +1,22 @@
+# openapi-generator configuration for the generated low-level REST client package.
+#
+# The generated package (client/) is NEVER hand-edited. Regenerate via `make generate`.
+#
+# The Camunda Domain Type System (semantic keys such as JobKey, ProcessInstanceKey)
+# is NOT produced correctly by openapi-generator — it emits generic strings and loses
+# the compile-time distinction between key kinds. The numbered post-processing hooks
+# under scripts/hooks/, orchestrated by scripts/postprocess.py, apply validated named
+# key types and rewrite the affected struct fields. The flat ergonomic facade
+# (facade_generated.go) is emitted by ./cmd/facadegen, which AST-parses this package.
+# See AGENTS.md.
+generatorName: go
+inputSpec: external-spec/bundled/rest-api.bundle.json
+outputDir: client
+additionalProperties:
+  packageName: openapi
+  isGoSubmodule: false
+  withGoMod: false
+  generateInterfaces: false
+  structPrefix: false
+  enumClassPrefix: true
+  useOneOfDiscriminatorLookup: true
