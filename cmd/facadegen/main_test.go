@@ -23,11 +23,11 @@ func TestGenerateFacade(t *testing.T) {
 		`openapi "github.com/camunda/orchestration-cluster-api-go/client"`,
 		// Value-returning op: exposes required params, returns (value, error).
 		"func (c *CamundaClient) GetWidget(ctx context.Context, id openapi.WidgetKey) (*openapi.Widget, error) {",
-		"c.raw.WidgetAPI.GetWidget(ctx, id).Execute()",
-		"return value, c.wrapError(err)",
+		"value, resp, err := c.raw.WidgetAPI.GetWidget(ctx, id).Execute()",
+		"return value, c.wrapError(resp, err)",
 		// No-value op: returns error only.
 		"func (c *CamundaClient) DeleteWidget(ctx context.Context, id openapi.WidgetKey) error {",
-		"return c.wrapError(err)",
+		"return c.wrapError(resp, err)",
 	}
 	for _, w := range want {
 		if !strings.Contains(src, w) {
