@@ -56,12 +56,28 @@ func main() {
 		outPath = os.Args[2]
 	}
 
+	src, count, err := generateFacade(clientDir)
+	if err != nil {
+		fatalf("%v", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(absOrDot(outPath)), 0o755); err != nil && filepath.Dir(outPath) != "." {
+		fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(outPath, []byte(src), 0o644); err != nil {
+		fatalf("writing %s: %v", outPath, err)
+	}
+	fmt.Printf("facadegen: emitted %d operations into %s\n", count, outPath)
+}
+
+// generateFacade AST-parses the client package in clientDir and returns the
+// emitted facade source and the number of operations it covers.
+func generateFacade(clientDir string) (string, int, error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, clientDir, func(fi os.FileInfo) bool { //nolint:staticcheck // ParseDir is adequate for the single generated client package
 		return !strings.HasSuffix(fi.Name(), "_test.go")
 	}, 0)
 	if err != nil {
-		fatalf("parsing %s: %v", clientDir, err)
+		return "", 0, fmt.Errorf("parsing %s: %w", clientDir, err)
 	}
 
 	var files []*ast.File
@@ -71,7 +87,7 @@ func main() {
 		}
 	}
 	if len(files) == 0 {
-		fatalf("no Go files found in %s", clientDir)
+		return "", 0, fmt.Errorf("no Go files found in %s", clientDir)
 	}
 
 	r := &renderer{fset: fset, clientTypes: collectTypeNames(files)}
@@ -102,14 +118,7 @@ func main() {
 		return ops[i].name < ops[j].name
 	})
 
-	src := emit(ops)
-	if err := os.MkdirAll(filepath.Dir(absOrDot(outPath)), 0o755); err != nil && filepath.Dir(outPath) != "." {
-		fatalf("mkdir: %v", err)
-	}
-	if err := os.WriteFile(outPath, []byte(src), 0o644); err != nil {
-		fatalf("writing %s: %v", outPath, err)
-	}
-	fmt.Printf("facadegen: emitted %d operations into %s\n", len(ops), outPath)
+	return emit(ops), len(ops), nil
 }
 
 type methodKey = string
