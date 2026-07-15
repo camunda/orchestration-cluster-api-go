@@ -99,7 +99,7 @@ func (l *Logger) log(lvl Level, msg string, kv ...any) {
 		fmt.Fprintf(&b, " %v=%v", kv[i], kv[i+1])
 	}
 	b.WriteByte('\n')
-	io.WriteString(l.out, b.String())
+	_, _ = io.WriteString(l.out, b.String())
 }
 
 // Errorf logs at error level.

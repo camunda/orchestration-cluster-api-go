@@ -36,7 +36,7 @@ type Options struct {
 
 // New builds the RoundTripper chain described in the package doc.
 func New(o Options) http.RoundTripper {
-	var inner http.RoundTripper = o.Base
+	inner := o.Base
 	if inner == nil {
 		inner = http.DefaultTransport
 	}

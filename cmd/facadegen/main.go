@@ -57,7 +57,7 @@ func main() {
 	}
 
 	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, clientDir, func(fi os.FileInfo) bool {
+	pkgs, err := parser.ParseDir(fset, clientDir, func(fi os.FileInfo) bool { //nolint:staticcheck // ParseDir is adequate for the single generated client package
 		return !strings.HasSuffix(fi.Name(), "_test.go")
 	}, 0)
 	if err != nil {

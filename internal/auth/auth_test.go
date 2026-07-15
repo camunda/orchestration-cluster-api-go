@@ -21,7 +21,7 @@ func tokenServer(t *testing.T, counter *int32) *httptest.Server {
 			t.Errorf("grant_type = %q, want client_credentials", got)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"access_token":"tok-%d","expires_in":3600}`, atomic.LoadInt32(counter))
+		_, _ = fmt.Fprintf(w, `{"access_token":"tok-%d","expires_in":3600}`, atomic.LoadInt32(counter))
 	}))
 }
 

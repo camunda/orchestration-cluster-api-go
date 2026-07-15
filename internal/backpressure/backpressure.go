@@ -329,9 +329,10 @@ func (m *Manager) maybeRecover(now time.Time) {
 
 	// Decay severity if quiet (stepwise: severe -> soft -> healthy).
 	if now.Sub(m.lastEventAt) > decayQuiet {
-		if m.severity == Severe {
+		switch m.severity {
+		case Severe:
 			m.severity = Soft
-		} else if m.severity == Soft {
+		case Soft:
 			m.severity = Healthy
 			m.healthySince = now
 		}

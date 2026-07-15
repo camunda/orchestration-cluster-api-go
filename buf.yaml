@@ -7,14 +7,14 @@ version: v2
 modules:
   - path: external-spec/proto
 lint:
+  # The proto is vendored from upstream Zeebe and we do not control its style
+  # (camelCase fields, unprefixed enum values, etc.), so we only apply MINIMAL
+  # structural rules — and except the directory-match rule, since the file lives
+  # under external-spec/proto/ rather than a package-named directory.
   use:
-    - STANDARD
+    - MINIMAL
   except:
-    # The upstream proto predates several buf STANDARD rules; we do not own it.
-    - PACKAGE_VERSION_SUFFIX
-    - RPC_REQUEST_STANDARD_NAME
-    - RPC_RESPONSE_STANDARD_NAME
-    - SERVICE_SUFFIX
+    - PACKAGE_DIRECTORY_MATCH
 breaking:
   use:
     - FILE

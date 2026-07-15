@@ -1,0 +1,17 @@
+# golangci-lint v2 configuration.
+# Generated code (client/, pb/, facade_generated.go, zz_generated_*.go) carries a
+# "Code generated ... DO NOT EDIT" header and is excluded from linting; only the
+# hand-written SDK surface is checked.
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  # Keep the default (standard) linter set: errcheck, govet, ineffassign,
+  # staticcheck, unused.
+  exclusions:
+    generated: lax
+    paths:
+      - client/
+      - pb/
