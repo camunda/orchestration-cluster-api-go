@@ -58,6 +58,9 @@ jobs:
 
   commitlint:
     name: Commit messages
+    # The commit-range linter is meaningful on pull requests; on direct pushes the
+    # before/after range is degenerate, so scope it to PRs.
+    if: github.event_name == 'pull_request'
     uses: camunda/sdk-infra/.github/workflows/sdk-commitlint.yml@v1
 
   generation-drift:
