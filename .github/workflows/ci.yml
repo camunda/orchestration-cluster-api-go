@@ -73,9 +73,22 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+      # The codegen pipeline needs Node (camunda-schema-bundler, openapi-generator-cli,
+      # buf via npx), Java (openapi-generator is a Java tool), and Python (postprocess hooks).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Regenerate from upstream main and report drift
         run: |
-          ./scripts/generate.sh || { echo "generation failed"; exit 1; }
+          chmod +x scripts/*.sh
+          ./scripts/generate.sh
           if ! git diff --quiet; then
             echo "::warning::Generated output drifts from committed sources"
             git --no-pager diff --stat
