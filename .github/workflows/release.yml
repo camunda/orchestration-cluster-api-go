@@ -1,0 +1,84 @@
+name: Release
+
+# Go modules are consumed directly from a git tag — pkg.go.dev indexes the tag and
+# `go get` resolves it — so there is no package-registry publish step. A release is
+# simply a SemVer tag `vX.Y.Z` plus a GitHub Release carrying the generated notes.
+#
+# Release flow:
+#   1. Make sure `main` is green.
+#   2. Create and push an annotated SemVer tag, e.g. `git tag -a v0.2.0 -m v0.2.0 &&
+#      git push origin v0.2.0`.
+#   The tag push triggers this workflow, which re-runs the build/test gate, verifies
+#   the tag's major agrees with the module path, and publishes a GitHub Release.
+#
+# Versioning policy (see AGENTS.md): the SDK major tracks the Camunda server minor
+# (server 8.9 -> SDK 9.x). During Technical Preview the module stays at v0 (the
+# module path has no `/vN` suffix). Go requires majors >= 2 to carry a matching
+# `/vN` suffix in the module path; the version check below enforces that agreement
+# so a mismatched tag fails fast instead of shipping an unresolvable module.
+#
+# A manual workflow_dispatch run executes the gate only (no tag, no release) as a
+# smoke test.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Tag release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # create the GitHub Release
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify tag major agrees with the module path
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"          # e.g. v0.2.0, v0.2.0-alpha.1, v9.0.0
+          module="$(go list -m)"            # module path declared in go.mod
+          ver="${tag#v}"
+          major="${ver%%.*}"
+          case "$module" in
+            */v[0-9]*) suffix_major="${module##*/v}" ;;
+            *) suffix_major="" ;;
+          esac
+          echo "tag=$tag module=$module major=$major suffix_major=${suffix_major:-<none>}"
+          if [ "$major" -ge 2 ]; then
+            if [ "$suffix_major" != "$major" ]; then
+              echo "::error::Tag $tag has major $major but module path is '$module'. Go requires a matching '/v$major' suffix on the module path before tagging this major."
+              exit 1
+            fi
+          elif [ -n "$suffix_major" ]; then
+            echo "::error::Tag $tag has major $major but module path carries a '/v$suffix_major' suffix; drop the suffix or tag a matching major."
+            exit 1
+          fi
+
+      - name: Build & test gate
+        run: |
+          go build ./...
+          go test -race ./...
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
