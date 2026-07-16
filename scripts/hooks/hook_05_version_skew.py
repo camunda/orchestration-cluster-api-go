@@ -19,10 +19,16 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-# Fields that are required in the spec but not emitted by shipped servers.
+# TEMPORARY: fields that are required in the spec but not yet emitted by shipped
+# servers. Each entry is a stopgap — REMOVE it once the target server version
+# emits the field (or the spec is corrected), so the required-presence check is
+# restored. Confirmed against live clusters; revisit per issue #3's broader audit.
 VERSION_SKEW_OPTIONAL = [
-    # issue #3: required in the spec, never emitted by 8.9 / 8.10 servers.
+    # TEMPORARY (issue #3): never emitted by 8.9 / 8.10 servers.
     "physicalTenantId",
+    # TEMPORARY: not emitted by 8.10.0-alpha3 (ActivatedJobResult); present on 8.10
+    # once the server catches up — drop this entry then. Blocks the job worker.
+    "leaseToken",
 ]
 
 

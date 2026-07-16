@@ -15,7 +15,7 @@ import (
 //
 // The payload is copied verbatim from a live /v2/jobs/activation response, with
 // physicalTenantId absent exactly as the server sends it.
-func TestActivatedJobDecodesWithoutPhysicalTenantId(t *testing.T) {
+func TestActivatedJobDecodesWithMissingVersionSkewFields(t *testing.T) {
 	const realResponse = `{
   "jobs": [
     {
@@ -39,8 +39,7 @@ func TestActivatedJobDecodesWithoutPhysicalTenantId(t *testing.T) {
       "tags": [],
       "rootProcessInstanceKey": "2251799813685417",
       "businessId": null,
-      "priority": 0,
-      "leaseToken": null
+      "priority": 0
     }
   ]
 }`
