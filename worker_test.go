@@ -423,3 +423,55 @@ func TestJobWorkerAcksAfterContextCancel(t *testing.T) {
 		t.Fatal("Run did not return after context cancellation")
 	}
 }
+
+// TestJobWorkerAppliesDefaultTenant verifies that the client's default tenant is
+// sent as the activation tenant filter.
+func TestJobWorkerAppliesDefaultTenant(t *testing.T) {
+	tenants := make(chan []string, 1)
+	var activateCount atomic.Int32
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasSuffix(r.URL.Path, "/jobs/activation") {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		var body struct {
+			TenantIds []string `json:"tenantIds"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		if activateCount.Add(1) == 1 {
+			select {
+			case tenants <- body.TenantIds:
+			default:
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"jobs":[]}`)
+	}))
+	defer srv.Close()
+
+	client, err := camunda.New(camunda.WithRestAddress(srv.URL), camunda.WithLogLevel(camunda.LogOff),
+		camunda.WithDefaultTenantID("acme"))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	worker := client.NewJobWorker("demo-task",
+		func(context.Context, *camunda.Job) (map[string]any, error) { return nil, nil },
+		camunda.WithRequestTimeout(50*time.Millisecond),
+		camunda.WithPollInterval(10*time.Millisecond),
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = worker.Run(ctx) }()
+
+	select {
+	case ids := <-tenants:
+		if len(ids) != 1 || ids[0] != "acme" {
+			t.Errorf("activation tenantIds = %v, want [acme]", ids)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("worker did not activate jobs")
+	}
+}

@@ -84,6 +84,7 @@ type StreamJobWorker struct {
 	reconnectBackoff time.Duration
 	pollInterval     time.Duration
 	pollMaxJobs      int
+	tenantIDs        []string
 
 	// dial is an injectable seam for tests; nil means use client.grpcConn.
 	dial func(ctx context.Context) (*grpc.ClientConn, error)
@@ -138,6 +139,12 @@ func WithStreamPollMaxJobs(n int) StreamWorkerOption {
 	}
 }
 
+// WithStreamTenantIDs restricts job activation to the given tenant ids,
+// overriding the client's default tenant.
+func WithStreamTenantIDs(ids ...string) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.tenantIDs = ids }
+}
+
 // NewStreamJobWorker creates a gRPC streaming worker for jobType. Defaults are
 // seeded from the client's CAMUNDA_WORKER_* configuration and can be overridden
 // with options.
@@ -153,6 +160,7 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 		reconnectBackoff: time.Second,
 		pollInterval:     30 * time.Second,
 		pollMaxJobs:      32,
+		tenantIDs:        defaultTenantIDs(c.cfg.DefaultTenantID),
 	}
 	if w.maxConcurrent <= 0 {
 		w.maxConcurrent = 1
@@ -224,6 +232,9 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	if len(w.fetchVariables) > 0 {
 		req.FetchVariable = w.fetchVariables
 	}
+	if len(w.tenantIDs) > 0 {
+		req.TenantIds = w.tenantIDs
+	}
 
 	stream, err := gw.StreamActivatedJobs(ctx, req)
 	if err != nil {
@@ -291,6 +302,9 @@ func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]openapi.ActivatedJobR
 	}
 	if len(w.fetchVariables) > 0 {
 		req.SetFetchVariable(w.fetchVariables)
+	}
+	if len(w.tenantIDs) > 0 {
+		req.SetTenantIds(w.tenantIDs)
 	}
 	result, resp, err := w.client.raw.JobAPI.ActivateJobs(ctx).JobActivationRequest(*req).Execute()
 	if err != nil {

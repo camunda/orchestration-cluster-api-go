@@ -30,6 +30,9 @@ type fakeGateway struct {
 	fails     chan *pb.FailJobRequest
 	throws    chan *pb.ThrowErrorRequest
 
+	// streamReqs, when non-nil, records each StreamActivatedJobs request.
+	streamReqs chan *pb.StreamActivatedJobsRequest
+
 	// failFirstStream is the number of initial StreamActivatedJobs attempts to
 	// fail (with codes.Unavailable) before serving jobs; streamAttempts counts
 	// how many stream attempts the server has seen.
@@ -37,7 +40,13 @@ type fakeGateway struct {
 	streamAttempts  atomic.Int32
 }
 
-func (f *fakeGateway) StreamActivatedJobs(_ *pb.StreamActivatedJobsRequest, stream grpc.ServerStreamingServer[pb.ActivatedJob]) error {
+func (f *fakeGateway) StreamActivatedJobs(req *pb.StreamActivatedJobsRequest, stream grpc.ServerStreamingServer[pb.ActivatedJob]) error {
+	if f.streamReqs != nil {
+		select {
+		case f.streamReqs <- req:
+		default:
+		}
+	}
 	if f.streamAttempts.Add(1) <= f.failFirstStream {
 		return status.Error(codes.Unavailable, "simulated stream failure")
 	}
@@ -473,5 +482,40 @@ func TestStreamJobWorkerAcksAfterContextCancel(t *testing.T) {
 	case <-runDone:
 	case <-time.After(5 * time.Second):
 		t.Fatal("Run did not return after context cancellation")
+	}
+}
+
+// TestStreamJobWorkerAppliesDefaultTenant verifies that the client's default
+// tenant is sent as the stream's tenant filter.
+func TestStreamJobWorkerAppliesDefaultTenant(t *testing.T) {
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		streamReqs: make(chan *pb.StreamActivatedJobsRequest, 1),
+		completes:  make(chan *pb.CompleteJobRequest, 1),
+		fails:      make(chan *pb.FailJobRequest, 1),
+		throws:     make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithNoAuth(), WithLogLevel(LogOff), WithDefaultTenantID("acme"))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	w := client.NewStreamJobWorker("greet",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+		WithStreamPollInterval(-1))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	req := waitFor(t, fake.streamReqs)
+	if len(req.TenantIds) != 1 || req.TenantIds[0] != "acme" {
+		t.Errorf("stream TenantIds = %v, want [acme]", req.TenantIds)
 	}
 }

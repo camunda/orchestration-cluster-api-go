@@ -23,6 +23,7 @@ type JobWorker struct {
 	requestTimeout time.Duration
 	pollInterval   time.Duration
 	fetchVariables []string
+	tenantIDs      []string
 }
 
 // WorkerOption customizes a JobWorker.
@@ -63,6 +64,12 @@ func WithFetchVariables(vars ...string) WorkerOption {
 	return func(w *JobWorker) { w.fetchVariables = vars }
 }
 
+// WithWorkerTenantIDs restricts job activation to the given tenant ids,
+// overriding the client's default tenant.
+func WithWorkerTenantIDs(ids ...string) WorkerOption {
+	return func(w *JobWorker) { w.tenantIDs = ids }
+}
+
 // NewJobWorker creates a worker for jobType. Defaults are seeded from the
 // client's CAMUNDA_WORKER_* configuration and can be overridden with options.
 func (c *CamundaClient) NewJobWorker(jobType string, handler JobHandler, opts ...WorkerOption) *JobWorker {
@@ -76,6 +83,7 @@ func (c *CamundaClient) NewJobWorker(jobType string, handler JobHandler, opts ..
 		timeout:        time.Duration(wd.TimeoutMs) * time.Millisecond,
 		requestTimeout: time.Duration(wd.RequestTimeoutMs) * time.Millisecond,
 		pollInterval:   time.Second,
+		tenantIDs:      defaultTenantIDs(c.cfg.DefaultTenantID),
 	}
 	if w.maxConcurrent <= 0 {
 		w.maxConcurrent = 1
@@ -146,6 +154,9 @@ func (w *JobWorker) activate(ctx context.Context, maxJobs int) ([]openapi.Activa
 	}
 	if len(w.fetchVariables) > 0 {
 		req.SetFetchVariable(w.fetchVariables)
+	}
+	if len(w.tenantIDs) > 0 {
+		req.SetTenantIds(w.tenantIDs)
 	}
 	result, resp, err := w.client.raw.JobAPI.ActivateJobs(ctx).JobActivationRequest(*req).Execute()
 	if err != nil {
@@ -224,6 +235,15 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 	if err != nil {
 		c.logger.Error("throw job error failed", "job", job.Key(), "error", err)
 	}
+}
+
+// defaultTenantIDs returns a single-element tenant slice for a non-empty default
+// tenant id, or nil.
+func defaultTenantIDs(id string) []string {
+	if id == "" {
+		return nil
+	}
+	return []string{id}
 }
 
 // sleepCtx waits for d or until ctx is cancelled, returning ctx.Err() if cancelled.
