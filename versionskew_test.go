@@ -59,3 +59,38 @@ func TestActivatedJobDecodesWithMissingVersionSkewFields(t *testing.T) {
 		t.Errorf("omitted physicalTenantId should default to empty, got %q", jobs[0].GetPhysicalTenantId())
 	}
 }
+
+// TestDeploymentMetadataDecodesWithOnlyProcessDefinition guards the deployment
+// response defect class: DeploymentMetadataResult declares processDefinition,
+// decisionDefinition, decisionRequirements, form, and resource all required, but
+// a deployment populates only the members matching the deployed resource kinds.
+// A BPMN-only deployment therefore omits every key except processDefinition, and
+// the strict all-required decoder rejected it until hook_05 relaxed the check
+// (scoped to this model). The payload mirrors a real /v2/deployments response
+// item for a single deployed process.
+func TestDeploymentMetadataDecodesWithOnlyProcessDefinition(t *testing.T) {
+	const realItem = `{
+  "processDefinition": {
+    "processDefinitionId": "demo-process",
+    "processDefinitionVersion": 1,
+    "resourceName": "greet.bpmn",
+    "tenantId": "<default>",
+    "processDefinitionKey": "2251799813685249"
+  }
+}`
+
+	var meta openapi.DeploymentMetadataResult
+	if err := json.Unmarshal([]byte(realItem), &meta); err != nil {
+		t.Fatalf("a BPMN-only deployment item must decode despite the other union members being absent: %v", err)
+	}
+	proc := meta.GetProcessDefinition()
+	if got := proc.GetProcessDefinitionId(); got != "demo-process" {
+		t.Errorf("processDefinitionId = %q, want demo-process", got)
+	}
+	if meta.DecisionDefinition.IsSet() {
+		t.Error("decisionDefinition should be unset for a BPMN-only deployment")
+	}
+	if meta.Form.IsSet() {
+		t.Error("form should be unset for a BPMN-only deployment")
+	}
+}
