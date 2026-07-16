@@ -731,7 +731,6 @@ func (o *ActivatedJobResult) UnmarshalJSON(data []byte) (err error) {
 		"rootProcessInstanceKey",
 		"businessId",
 		"priority",
-		"leaseToken",
 	}
 
 	allProperties := make(map[string]interface{})
