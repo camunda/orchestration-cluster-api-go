@@ -36,6 +36,13 @@ VERSION_SKEW_OPTIONAL = [
     # TEMPORARY: not emitted by 8.10.0-alpha3 (ActivatedJobResult); present on 8.10
     # once the server catches up — drop this entry then. Blocks the job worker.
     "leaseToken",
+    # TEMPORARY: required across 8 result schemas (CreateProcessInstanceResult,
+    # ProcessInstanceResult, ActivatedJobResult, JobSearchResult, UserTaskResult,
+    # DecisionInstanceResult, DecisionInstanceGetQueryResult,
+    # CorrelatedMessageSubscriptionResult) but not emitted by 8.9 servers; present
+    # on newer 8.10 builds. Blocks CreateProcessInstance and searches. Drop once
+    # the pinned server emits it.
+    "businessId",
 ]
 
 # Fields relaxed only within a specific model file. DeploymentMetadataResult

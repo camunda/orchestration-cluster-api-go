@@ -94,3 +94,31 @@ func TestDeploymentMetadataDecodesWithOnlyProcessDefinition(t *testing.T) {
 		t.Error("form should be unset for a BPMN-only deployment")
 	}
 }
+
+// TestCreateProcessInstanceResultDecodesWithoutBusinessId guards businessId, a
+// spec-required field that 8.9 servers omit from result payloads (it is present
+// on newer 8.10 builds). Relaxed globally by the version-skew hook across the
+// result schemas that declare it. The payload mirrors a real
+// /v2/process-instances create response with businessId absent.
+func TestCreateProcessInstanceResultDecodesWithoutBusinessId(t *testing.T) {
+	const realResponse = `{
+  "processDefinitionId": "demo-process",
+  "processDefinitionVersion": 1,
+  "tenantId": "<default>",
+  "variables": {"name": "REST"},
+  "processDefinitionKey": "2251799813685249",
+  "processInstanceKey": "2251799813685260",
+  "tags": []
+}`
+
+	var result openapi.CreateProcessInstanceResult
+	if err := json.Unmarshal([]byte(realResponse), &result); err != nil {
+		t.Fatalf("a create-process-instance response must decode despite a missing spec-required businessId: %v", err)
+	}
+	if got := result.GetProcessDefinitionId(); got != "demo-process" {
+		t.Errorf("processDefinitionId = %q, want demo-process", got)
+	}
+	if result.BusinessId.IsSet() {
+		t.Error("omitted businessId should be unset")
+	}
+}
