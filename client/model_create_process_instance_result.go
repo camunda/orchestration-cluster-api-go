@@ -293,7 +293,6 @@ func (o *CreateProcessInstanceResult) UnmarshalJSON(data []byte) (err error) {
 		"processDefinitionKey",
 		"processInstanceKey",
 		"tags",
-		"businessId",
 	}
 
 	allProperties := make(map[string]interface{})

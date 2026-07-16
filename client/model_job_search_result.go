@@ -825,7 +825,6 @@ func (o *JobSearchResult) UnmarshalJSON(data []byte) (err error) {
 		"processDefinitionKey",
 		"processInstanceKey",
 		"rootProcessInstanceKey",
-		"businessId",
 		"retries",
 		"state",
 		"tenantId",

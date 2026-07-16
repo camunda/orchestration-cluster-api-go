@@ -804,7 +804,6 @@ func (o *UserTaskResult) UnmarshalJSON(data []byte) (err error) {
 		"processDefinitionKey",
 		"processInstanceKey",
 		"rootProcessInstanceKey",
-		"businessId",
 		"formKey",
 		"tags",
 	}

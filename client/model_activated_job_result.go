@@ -729,7 +729,6 @@ func (o *ActivatedJobResult) UnmarshalJSON(data []byte) (err error) {
 		"userTask",
 		"tags",
 		"rootProcessInstanceKey",
-		"businessId",
 		"priority",
 	}
 
