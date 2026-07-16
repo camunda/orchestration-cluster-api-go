@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -335,5 +336,142 @@ func TestStreamJobWorkerSidecarPollActivatesAndAcksOverREST(t *testing.T) {
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("sidecar poll did not activate and complete a job over REST")
+	}
+}
+
+// TestStreamJobWorkerBoundsConcurrencyToMaxConcurrent verifies that the gRPC
+// worker's semaphore caps concurrent handlers at maxConcurrent even when the
+// stream pushes many more jobs at once.
+func TestStreamJobWorkerBoundsConcurrencyToMaxConcurrent(t *testing.T) {
+	lis := bufconn.Listen(1024 * 1024)
+	jobs := make([]*pb.ActivatedJob, 6)
+	for i := range jobs {
+		jobs[i] = &pb.ActivatedJob{Key: int64(1000 + i), Type: "greet"}
+	}
+	fake := &fakeGateway{
+		jobs:      jobs,
+		completes: make(chan *pb.CompleteJobRequest, 16),
+		fails:     make(chan *pb.FailJobRequest, 16),
+		throws:    make(chan *pb.ThrowErrorRequest, 16),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	var mu sync.Mutex
+	var live, peak int
+	release := make(chan struct{})
+
+	w := client.NewStreamJobWorker("greet",
+		func(context.Context, *Job) (map[string]any, error) {
+			mu.Lock()
+			live++
+			if live > peak {
+				peak = live
+			}
+			mu.Unlock()
+			<-release
+			mu.Lock()
+			live--
+			mu.Unlock()
+			return nil, nil
+		},
+		WithStreamMaxConcurrentJobs(2), WithStreamPollInterval(-1))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	runDone := make(chan struct{})
+	go func() { _ = w.Run(ctx); close(runDone) }()
+
+	deadline := time.After(5 * time.Second)
+	for {
+		mu.Lock()
+		l := live
+		mu.Unlock()
+		if l >= 2 {
+			break
+		}
+		select {
+		case <-deadline:
+			close(release)
+			cancel()
+			t.Fatal("worker did not reach two concurrent handlers")
+		case <-time.After(5 * time.Millisecond):
+		}
+	}
+	// Give would-be extra handlers time to start if the cap were broken.
+	time.Sleep(150 * time.Millisecond)
+	mu.Lock()
+	p := peak
+	mu.Unlock()
+	if p != 2 {
+		t.Errorf("peak concurrency = %d, want 2 (bounded by maxConcurrent)", p)
+	}
+	close(release)
+	cancel()
+	<-runDone
+}
+
+// TestStreamJobWorkerAcksAfterContextCancel verifies that a streamed job whose
+// handler finishes after the worker's context is cancelled is still completed
+// over gRPC (the ack uses a context detached from Run's lifecycle).
+func TestStreamJobWorkerAcksAfterContextCancel(t *testing.T) {
+	lis := bufconn.Listen(1024 * 1024)
+	started := make(chan struct{})
+	proceed := make(chan struct{})
+	fake := &fakeGateway{
+		jobs:      []*pb.ActivatedJob{{Key: 777, Type: "greet"}},
+		completes: make(chan *pb.CompleteJobRequest, 1),
+		fails:     make(chan *pb.FailJobRequest, 1),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	w := client.NewStreamJobWorker("greet",
+		func(context.Context, *Job) (map[string]any, error) {
+			close(started)
+			<-proceed
+			return map[string]any{"ok": true}, nil
+		},
+		WithStreamPollInterval(-1))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	runDone := make(chan struct{})
+	go func() { _ = w.Run(ctx); close(runDone) }()
+
+	select {
+	case <-started:
+	case <-time.After(5 * time.Second):
+		cancel()
+		t.Fatal("handler never started")
+	}
+
+	cancel()
+	close(proceed)
+
+	comp := waitFor(t, fake.completes)
+	if comp.JobKey != 777 {
+		t.Errorf("complete JobKey = %d, want 777", comp.JobKey)
+	}
+
+	select {
+	case <-runDone:
+	case <-time.After(5 * time.Second):
+		t.Fatal("Run did not return after context cancellation")
 	}
 }
