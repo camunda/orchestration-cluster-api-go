@@ -1,7 +1,13 @@
-# Lightweight Camunda stack for SDK integration testing (mirrors the sdk-infra
-# simple stack). A single Camunda service with an in-memory H2 database, no
+# Lightweight Camunda stack for SDK integration testing. A single Camunda
+# service with an in-memory H2 database (RDBMS secondary storage), no
 # Elasticsearch or Connectors. Authentication is disabled so the SDK connects
 # with WithNoAuth().
+#
+# Configuration uses the Camunda 8.10 unified-configuration property names
+# (camunda.data.secondary-storage.rdbms.*), mirroring the camunda monorepo's own
+# H2 E2E setup. The pre-8.10 camunda.database.* / zeebe.broker.exporters.rdbms.*
+# properties are gone in 8.10 — using them leaves the datasource URL unset and
+# the broker never becomes healthy.
 #
 # Used by the `integration` CI job via camunda/sdk-infra/actions/start-camunda
 # with `docker-dir: docker`. Run locally with:
@@ -12,22 +18,17 @@ services:
     container_name: camunda-engine
     environment:
       SPRING_PROFILES_ACTIVE: 'broker,consolidated-auth'
-      ZEEBE_CLOCK_CONTROLLED: 'true'
-      ZEEBE_LOG_APPENDER: 'Stackdriver'
       CAMUNDA_SECURITY_AUTHENTICATION_UNPROTECTEDAPI: 'true'
       CAMUNDA_SECURITY_AUTHORIZATIONS_ENABLED: 'false'
-      CAMUNDA_DATABASE_URL: 'jdbc:h2:mem:cpt;DB_CLOSE_DELAY=-1;MODE=PostgreSQL'
-      CAMUNDA_DATABASE_TYPE: 'rdbms'
-      CAMUNDA_DATABASE_USERNAME: 'sa'
-      CAMUNDA_DATABASE_PASSWORD: ''
       CAMUNDA_DATA_SECONDARY_STORAGE_TYPE: 'rdbms'
-      ZEEBE_BROKER_EXPORTERS_RDBMS_CLASSNAME: 'io.camunda.exporter.rdbms.RdbmsExporter'
-      ZEEBE_BROKER_EXPORTERS_RDBMS_ARGS_FLUSH_INTERVAL: 'PT0S'
-      ZEEBE_BROKER_EXPORTERS_RDBMS_ARGS_DEFAULT_HISTORY_TTL: 'PT2S'
-      ZEEBE_BROKER_EXPORTERS_RDBMS_ARGS_MIN_HISTORY_CLEANUP_INTERVAL: 'PT2S'
-      ZEEBE_BROKER_EXPORTERS_RDBMS_ARGS_MAX_HISTORY_CLEANUP_INTERVAL: 'PT5S'
-      LOGGING_LEVEL_IO_CAMUNDA_DB_RDBMS: 'INFO'
-      LOGGING_LEVEL_ORG_MYBATIS: 'INFO'
+      CAMUNDA_DATA_SECONDARY_STORAGE_RDBMS_URL: 'jdbc:h2:mem:cpt;DB_CLOSE_DELAY=-1;MODE=PostgreSQL'
+      CAMUNDA_DATA_SECONDARY_STORAGE_RDBMS_USERNAME: 'sa'
+      CAMUNDA_DATA_SECONDARY_STORAGE_RDBMS_PASSWORD: ''
+      CAMUNDA_DATA_SECONDARY_STORAGE_RDBMS_AUTO_DDL: 'true'
+      CAMUNDA_DATA_SECONDARY_STORAGE_RDBMS_FLUSH_INTERVAL: 'PT0S'
+      CAMUNDA_DATA_SECONDARY_STORAGE_RDBMS_HISTORY_DEFAULT_HISTORY_TTL: 'PT60S'
+      CAMUNDA_DATA_SECONDARY_STORAGE_RDBMS_HISTORY_MIN_HISTORY_CLEANUP_INTERVAL: 'PT10S'
+      CAMUNDA_DATA_SECONDARY_STORAGE_RDBMS_HISTORY_MAX_HISTORY_CLEANUP_INTERVAL: 'PT60S'
     ports:
       - '8080:8080'
       - '26500:26500'
