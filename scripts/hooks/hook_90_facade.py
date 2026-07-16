@@ -30,8 +30,9 @@ def run(ctx) -> None:
     if not _has_camunda_client(root):
         print("    skipping facade: root CamundaClient wiring not present yet")
         return
+    metadata_path = str(ctx.get("metadata_path", ""))
     subprocess.run(
-        ["go", "run", "./cmd/facadegen", "client", "facade_generated.go"],
+        ["go", "run", "./cmd/facadegen", "client", "facade_generated.go", metadata_path],
         cwd=str(root),
         check=True,
     )

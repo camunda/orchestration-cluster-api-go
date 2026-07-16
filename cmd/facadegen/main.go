@@ -18,6 +18,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -40,23 +41,35 @@ type param struct {
 }
 
 type operation struct {
-	field   string // APIClient field, e.g. "TopologyAPI"
-	name    string // operation, e.g. "GetTopology"
-	params  []param
-	retType string // qualified value return type, or "" when the op returns no value
+	field       string // APIClient field, e.g. "TopologyAPI"
+	name        string // operation, e.g. "GetTopology"
+	params      []param
+	retType     string // qualified value return type, or "" when the op returns no value
+	bodyType    string // qualified request-body type (e.g. "openapi.JobActivationRequest"), or ""
+	bodyBuilder string // request-body builder method on the ApiXxxRequest, or ""
+}
+
+// bodyInfo describes an operation's JSON request body, derived from spec metadata.
+type bodyInfo struct {
+	builder string // builder method name on ApiXxxRequest (== the body model name)
+	typ     string // qualified Go type, e.g. "openapi.JobActivationRequest"
 }
 
 func main() {
 	clientDir := "client"
 	outPath := "facade_generated.go"
+	metadataPath := ""
 	if len(os.Args) > 1 {
 		clientDir = os.Args[1]
 	}
 	if len(os.Args) > 2 {
 		outPath = os.Args[2]
 	}
+	if len(os.Args) > 3 {
+		metadataPath = os.Args[3]
+	}
 
-	src, count, err := generateFacade(clientDir)
+	src, count, err := generateFacade(clientDir, metadataPath)
 	if err != nil {
 		fatalf("%v", err)
 	}
@@ -70,8 +83,10 @@ func main() {
 }
 
 // generateFacade AST-parses the client package in clientDir and returns the
-// emitted facade source and the number of operations it covers.
-func generateFacade(clientDir string) (string, int, error) {
+// emitted facade source and the number of operations it covers. When
+// metadataPath is non-empty, JSON request bodies are surfaced as typed method
+// parameters (derived from the spec metadata).
+func generateFacade(clientDir, metadataPath string) (string, int, error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, clientDir, func(fi os.FileInfo) bool { //nolint:staticcheck // ParseDir is adequate for the single generated client package
 		return !strings.HasSuffix(fi.Name(), "_test.go")
@@ -93,6 +108,7 @@ func generateFacade(clientDir string) (string, int, error) {
 	r := &renderer{fset: fset, clientTypes: collectTypeNames(files), usedPkgs: map[string]bool{}}
 	fieldByService := collectAPIClientFields(files) // serviceType -> field name
 	constructors, executes := collectServiceMethods(files)
+	bodyByOp := loadBodyInfo(metadataPath, r.clientTypes)
 
 	var ops []operation
 	for key, ctor := range constructors {
@@ -104,12 +120,17 @@ func generateFacade(clientDir string) (string, int, error) {
 		if !ok {
 			continue
 		}
-		ops = append(ops, operation{
+		op := operation{
 			field:   field,
 			name:    ctor.op,
 			params:  r.params(ctor.decl),
 			retType: r.valueReturn(exec.decl),
-		})
+		}
+		if bi, ok := bodyByOp[op.name]; ok {
+			op.bodyType = bi.typ
+			op.bodyBuilder = bi.builder
+		}
+		ops = append(ops, op)
 	}
 	sort.Slice(ops, func(i, j int) bool {
 		if ops[i].field != ops[j].field {
@@ -321,27 +342,82 @@ func emit(ops []operation, extraStd []string) string {
 	b.WriteString("var _ = context.Background\n\n")
 
 	for _, op := range ops {
-		var sig strings.Builder
-		sig.WriteString("ctx context.Context")
-		var call strings.Builder
-		call.WriteString("ctx")
+		sig := "ctx context.Context"
+		call := "ctx"
 		for _, p := range op.params {
-			sig.WriteString(", " + p.name + " " + p.typ)
-			call.WriteString(", " + p.name)
+			sig += ", " + p.name + " " + p.typ
+			call += ", " + p.name
+		}
+		chain := fmt.Sprintf("c.raw.%s.%s(%s)", op.field, op.name, call)
+		if op.bodyBuilder != "" {
+			sig += ", body " + op.bodyType
+			chain += fmt.Sprintf(".%s(body)", op.bodyBuilder)
 		}
 
 		fmt.Fprintf(&b, "// %s calls the %s operation.\n", op.name, op.name)
 		if op.retType != "" {
-			fmt.Fprintf(&b, "func (c *CamundaClient) %s(%s) (%s, error) {\n", op.name, sig.String(), op.retType)
-			fmt.Fprintf(&b, "\tvalue, resp, err := c.raw.%s.%s(%s).Execute()\n", op.field, op.name, call.String())
+			fmt.Fprintf(&b, "func (c *CamundaClient) %s(%s) (%s, error) {\n", op.name, sig, op.retType)
+			fmt.Fprintf(&b, "\tvalue, resp, err := %s.Execute()\n", chain)
 			b.WriteString("\treturn value, c.wrapError(resp, err)\n}\n\n")
 		} else {
-			fmt.Fprintf(&b, "func (c *CamundaClient) %s(%s) error {\n", op.name, sig.String())
-			fmt.Fprintf(&b, "\tresp, err := c.raw.%s.%s(%s).Execute()\n", op.field, op.name, call.String())
+			fmt.Fprintf(&b, "func (c *CamundaClient) %s(%s) error {\n", op.name, sig)
+			fmt.Fprintf(&b, "\tresp, err := %s.Execute()\n", chain)
 			b.WriteString("\treturn c.wrapError(resp, err)\n}\n\n")
 		}
 	}
 	return b.String()
+}
+
+// loadBodyInfo reads the spec metadata and returns, keyed by generated method
+// name (PascalCase operationId), the JSON request body to surface on the facade.
+// Multipart bodies and bodies whose model is not a client type are skipped.
+func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]bodyInfo {
+	if metadataPath == "" {
+		return nil
+	}
+	data, err := os.ReadFile(metadataPath)
+	if err != nil {
+		return nil
+	}
+	var meta struct {
+		Operations []struct {
+			OperationID             string   `json:"operationId"`
+			HasRequestBody          bool     `json:"hasRequestBody"`
+			RequestBodySchemaRef    string   `json:"requestBodySchemaRef"`
+			RequestBodyContentTypes []string `json:"requestBodyContentTypes"`
+		} `json:"operations"`
+	}
+	if json.Unmarshal(data, &meta) != nil {
+		return nil
+	}
+	out := map[string]bodyInfo{}
+	for _, o := range meta.Operations {
+		if !o.HasRequestBody || o.RequestBodySchemaRef == "" || !hasJSONContent(o.RequestBodyContentTypes) {
+			continue
+		}
+		model := o.RequestBodySchemaRef
+		if !clientTypes[model] {
+			continue // e.g. multipart deploy, or a primitive/inline body
+		}
+		out[upperFirst(o.OperationID)] = bodyInfo{builder: model, typ: clientAlias + "." + model}
+	}
+	return out
+}
+
+func hasJSONContent(cts []string) bool {
+	for _, ct := range cts {
+		if strings.Contains(ct, "application/json") {
+			return true
+		}
+	}
+	return false
+}
+
+func upperFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }
 
 func absOrDot(p string) string {

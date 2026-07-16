@@ -38,12 +38,14 @@ def main() -> None:
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parent.parent
+    metadata_path = (root / args.metadata).resolve() if not Path(args.metadata).is_absolute() else Path(args.metadata)
     metadata = json.loads(Path(args.metadata).read_text(encoding="utf-8"))
     ctx = {
         "root": root,
         "client_dir": (root / args.client_dir).resolve(),
         "spec_path": (root / args.spec).resolve() if not Path(args.spec).is_absolute() else Path(args.spec),
         "metadata": metadata,
+        "metadata_path": metadata_path,
     }
 
     hooks_dir = Path(__file__).resolve().parent / "hooks"

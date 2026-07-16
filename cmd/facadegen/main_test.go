@@ -10,7 +10,7 @@ import (
 // qualify client types with the openapi alias, and handle both value-returning
 // and no-value operations.
 func TestGenerateFacade(t *testing.T) {
-	src, count, err := generateFacade("testdata/client")
+	src, count, err := generateFacade("testdata/client", "")
 	if err != nil {
 		t.Fatalf("generateFacade: %v", err)
 	}
