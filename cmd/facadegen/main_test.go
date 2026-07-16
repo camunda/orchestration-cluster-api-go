@@ -21,12 +21,14 @@ func TestGenerateFacade(t *testing.T) {
 	want := []string{
 		"package camunda",
 		`openapi "github.com/camunda/orchestration-cluster-api-go/client"`,
-		// Value-returning op: exposes required params, returns (value, error).
-		"func (c *CamundaClient) GetWidget(ctx context.Context, id openapi.WidgetKey) (*openapi.Widget, error) {",
-		"value, resp, err := c.raw.WidgetAPI.GetWidget(ctx, id).Execute()",
+		// Value-returning op: exposes required params + an opts transform, returns (value, error).
+		"func (c *CamundaClient) GetWidget(ctx context.Context, id openapi.WidgetKey, opts ...func(openapi.ApiGetWidgetRequest) openapi.ApiGetWidgetRequest) (*openapi.Widget, error) {",
+		"req := c.raw.WidgetAPI.GetWidget(ctx, id)",
+		"req = opt(req)",
+		"value, resp, err := req.Execute()",
 		"return value, c.wrapError(resp, err)",
 		// No-value op: returns error only.
-		"func (c *CamundaClient) DeleteWidget(ctx context.Context, id openapi.WidgetKey) error {",
+		"func (c *CamundaClient) DeleteWidget(ctx context.Context, id openapi.WidgetKey, opts ...func(openapi.ApiDeleteWidgetRequest) openapi.ApiDeleteWidgetRequest) error {",
 		"return c.wrapError(resp, err)",
 	}
 	for _, w := range want {

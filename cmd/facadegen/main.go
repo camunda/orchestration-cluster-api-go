@@ -45,6 +45,7 @@ type operation struct {
 	name        string // operation, e.g. "GetTopology"
 	params      []param
 	retType     string // qualified value return type, or "" when the op returns no value
+	reqType     string // qualified request-builder type, e.g. "openapi.ApiGetTopologyRequest"
 	bodyType    string // qualified request-body type (e.g. "openapi.JobActivationRequest"), or ""
 	bodyBuilder string // request-body builder method on the ApiXxxRequest, or ""
 }
@@ -125,6 +126,7 @@ func generateFacade(clientDir, metadataPath string) (string, int, error) {
 			name:    ctor.op,
 			params:  r.params(ctor.decl),
 			retType: r.valueReturn(exec.decl),
+			reqType: r.resultType(ctor.decl),
 		}
 		if bi, ok := bodyByOp[op.name]; ok {
 			op.bodyType = bi.typ
@@ -292,6 +294,15 @@ func (r *renderer) valueReturn(fn *ast.FuncDecl) string {
 	return r.typeString(results[0].Type)
 }
 
+// resultType returns the qualified type of a constructor's single result — the
+// ApiXxxRequest builder type used for the opts transform.
+func (r *renderer) resultType(fn *ast.FuncDecl) string {
+	if fn.Type.Results == nil || len(fn.Type.Results.List) == 0 {
+		return ""
+	}
+	return r.typeString(fn.Type.Results.List[0].Type)
+}
+
 // typeString renders a type expression, qualifying client-package types with the
 // `openapi.` alias.
 func (r *renderer) typeString(expr ast.Expr) string {
@@ -348,20 +359,35 @@ func emit(ops []operation, extraStd []string) string {
 			sig += ", " + p.name + " " + p.typ
 			call += ", " + p.name
 		}
-		chain := fmt.Sprintf("c.raw.%s.%s(%s)", op.field, op.name, call)
 		if op.bodyBuilder != "" {
 			sig += ", body " + op.bodyType
-			chain += fmt.Sprintf(".%s(body)", op.bodyBuilder)
+		}
+		// opts gives type-safe access to the operation's optional request-builder
+		// setters (query params, headers, optional body fields) without dropping to
+		// Raw(): each transform receives and returns the fluent request value.
+		hasOpts := op.reqType != ""
+		if hasOpts {
+			sig += fmt.Sprintf(", opts ...func(%s) %s", op.reqType, op.reqType)
 		}
 
 		fmt.Fprintf(&b, "// %s calls the %s operation.\n", op.name, op.name)
+		retSig := "error"
 		if op.retType != "" {
-			fmt.Fprintf(&b, "func (c *CamundaClient) %s(%s) (%s, error) {\n", op.name, sig, op.retType)
-			fmt.Fprintf(&b, "\tvalue, resp, err := %s.Execute()\n", chain)
+			retSig = fmt.Sprintf("(%s, error)", op.retType)
+		}
+		fmt.Fprintf(&b, "func (c *CamundaClient) %s(%s) %s {\n", op.name, sig, retSig)
+		fmt.Fprintf(&b, "\treq := c.raw.%s.%s(%s)\n", op.field, op.name, call)
+		if op.bodyBuilder != "" {
+			fmt.Fprintf(&b, "\treq = req.%s(body)\n", op.bodyBuilder)
+		}
+		if hasOpts {
+			b.WriteString("\tfor _, opt := range opts {\n\t\treq = opt(req)\n\t}\n")
+		}
+		if op.retType != "" {
+			b.WriteString("\tvalue, resp, err := req.Execute()\n")
 			b.WriteString("\treturn value, c.wrapError(resp, err)\n}\n\n")
 		} else {
-			fmt.Fprintf(&b, "func (c *CamundaClient) %s(%s) error {\n", op.name, sig)
-			fmt.Fprintf(&b, "\tresp, err := %s.Execute()\n", chain)
+			b.WriteString("\tresp, err := req.Execute()\n")
 			b.WriteString("\treturn c.wrapError(resp, err)\n}\n\n")
 		}
 	}
