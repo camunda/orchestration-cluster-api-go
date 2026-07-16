@@ -169,7 +169,9 @@ def run(ctx) -> None:
     parts = [_header(pkg)]
     generated = 0
     skipped = []
-    for key in keys:
+    # Sort by name so the generated output is stable regardless of the order in
+    # which semanticKeys appear in the (re-bundled) spec metadata.
+    for key in sorted(keys, key=lambda k: (k.get("name") or "")):
         name = key.get("name")
         if not name or name == _BASE_TYPE:
             continue

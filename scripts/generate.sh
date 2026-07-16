@@ -47,7 +47,7 @@ python3 scripts/postprocess.py \
   --metadata "$BUNDLED_META"
 
 echo "==> Formatting generated code..."
-gofmt -w client pb facade_generated.go 2>/dev/null || true
+gofmt -w client pb facade_generated.go consistency_generated.go 2>/dev/null || true
 
 echo "==> Verifying the module builds..."
 go build ./...
