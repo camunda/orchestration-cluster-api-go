@@ -720,7 +720,6 @@ func (o *ActivatedJobResult) UnmarshalJSON(data []byte) (err error) {
 		"deadline",
 		"variables",
 		"tenantId",
-		"physicalTenantId",
 		"jobKey",
 		"processInstanceKey",
 		"processDefinitionKey",
