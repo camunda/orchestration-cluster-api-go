@@ -42,16 +42,20 @@ generated code stays pure and regenerable.
   `LEGACY` observes only.
 - **Transient retry** — exponential backoff with full jitter on 429/502/503/504
   and network errors.
-- **Job workers** — a REST activate-jobs worker and a gRPC `StreamActivatedJobs`
-  streaming worker (with a REST sidecar-poll safety net).
+- **Job workers** — a REST activate-jobs worker (`NewJobWorker`) and a gRPC
+  `StreamActivatedJobs` streaming worker (`NewStreamJobWorker`). Both share one
+  `JobHandler` contract: returning variables completes the job, returning a
+  `*BpmnError` throws a BPMN error, and returning any other error fails the job
+  (decrementing its retries). A REST sidecar-poll safety net for the streaming
+  worker is a planned follow-up.
 
 ## Status of the build
 
 This repository is under active construction. The ergonomic runtime
-(configuration, authentication, backpressure, retry, transport chain) is
-implemented and tested. The generated REST client, gRPC stubs, ergonomic facade,
-and job workers are produced/added by the generation pipeline and subsequent
-milestones — see [`AGENTS.md`](./AGENTS.md) and `make help`.
+(configuration, authentication, backpressure, retry, transport chain), the
+generated REST client and gRPC stubs, the ergonomic facade, and both job workers
+(REST and gRPC streaming) are implemented and tested. Remaining work is tracked
+in the milestones — see [`AGENTS.md`](./AGENTS.md) and `make help`.
 
 ## Versioning
 

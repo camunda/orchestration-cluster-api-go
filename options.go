@@ -9,6 +9,12 @@ func WithRestAddress(addr string) Option {
 	return func(c *Config) { c.RestAddress = normalizeRestAddress(addr) }
 }
 
+// WithGrpcAddress sets the Zeebe gRPC gateway address (host:port) used by the
+// gRPC streaming job worker.
+func WithGrpcAddress(addr string) Option {
+	return func(c *Config) { c.GrpcAddress = addr }
+}
+
 // WithOAuth selects the OAuth 2.0 client-credentials strategy with the given
 // client id, secret, and token endpoint URL.
 func WithOAuth(clientID, clientSecret, tokenURL string) Option {

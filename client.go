@@ -120,9 +120,10 @@ func buildAuthTransport(cfg *Config) (*auth.Transport, error) {
 	}
 }
 
-// buildBaseTransport returns a TLS-configured base RoundTripper, or nil (meaning
-// the default transport) when no TLS material is configured.
-func buildBaseTransport(t TLSConfig) (http.RoundTripper, error) {
+// buildTLSConfig builds a *tls.Config from the configured TLS material, or nil
+// when no TLS material is configured. It is shared by the REST base transport
+// and the gRPC streaming worker.
+func buildTLSConfig(t TLSConfig) (*tls.Config, error) {
 	if !t.IsConfigured() {
 		return nil, nil
 	}
@@ -158,7 +159,19 @@ func buildBaseTransport(t TLSConfig) (http.RoundTripper, error) {
 		}
 		tlsConf.RootCAs = pool
 	}
+	return tlsConf, nil
+}
 
+// buildBaseTransport returns a TLS-configured base RoundTripper, or nil (meaning
+// the default transport) when no TLS material is configured.
+func buildBaseTransport(t TLSConfig) (http.RoundTripper, error) {
+	tlsConf, err := buildTLSConfig(t)
+	if err != nil {
+		return nil, err
+	}
+	if tlsConf == nil {
+		return nil, nil
+	}
 	tr, ok := http.DefaultTransport.(*http.Transport)
 	if !ok {
 		return nil, configErrorf("unexpected default transport type")

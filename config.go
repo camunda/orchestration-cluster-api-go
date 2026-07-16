@@ -11,6 +11,7 @@ import (
 // Default configuration values.
 const (
 	defaultRestAddress         = "http://localhost:8080"
+	defaultGrpcAddress         = "localhost:26500"
 	defaultEventualPollDefault = 5 * time.Second
 	defaultRetryMaxAttempts    = 4
 	defaultRetryBaseDelay      = 100 * time.Millisecond
@@ -171,6 +172,7 @@ type WorkerDefaults struct {
 // Config is the resolved SDK configuration.
 type Config struct {
 	RestAddress string
+	GrpcAddress string
 
 	AuthStrategy      AuthStrategy
 	ClientID          string
@@ -232,6 +234,7 @@ func resolveFromEnv(getenv func(string) string, overrides map[string]string) (*C
 
 	cfg := &Config{
 		RestAddress:         normalizeRestAddress(orDefault(get("CAMUNDA_REST_ADDRESS", "ZEEBE_REST_ADDRESS"), defaultRestAddress)),
+		GrpcAddress:         orDefault(get("CAMUNDA_GRPC_ADDRESS", "ZEEBE_GRPC_ADDRESS"), defaultGrpcAddress),
 		ClientID:            get("CAMUNDA_CLIENT_ID", "ZEEBE_CLIENT_ID"),
 		ClientSecret:        get("CAMUNDA_CLIENT_SECRET", "ZEEBE_CLIENT_SECRET"),
 		OAuthURL:            get("CAMUNDA_OAUTH_URL", "ZEEBE_AUTHORIZATION_SERVER_URL"),

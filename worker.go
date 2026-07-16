@@ -2,68 +2,13 @@ package camunda
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	openapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
-
-// Job is an activated job passed to a JobHandler.
-type Job struct {
-	raw openapi.ActivatedJobResult
-}
-
-// Key returns the job key.
-func (j *Job) Key() string { return string(j.raw.GetJobKey()) }
-
-// Type returns the job type.
-func (j *Job) Type() string { return j.raw.GetType() }
-
-// Retries returns the job's remaining retries.
-func (j *Job) Retries() int32 { return j.raw.GetRetries() }
-
-// ProcessInstanceKey returns the key of the owning process instance.
-func (j *Job) ProcessInstanceKey() string { return string(j.raw.GetProcessInstanceKey()) }
-
-// ElementID returns the BPMN element id that created the job.
-func (j *Job) ElementID() string { return j.raw.GetElementId() }
-
-// CustomHeaders returns the job's custom headers.
-func (j *Job) CustomHeaders() map[string]any { return j.raw.GetCustomHeaders() }
-
-// RawVariables returns the job variables as a decoded map.
-func (j *Job) RawVariables() map[string]any { return j.raw.GetVariables() }
-
-// Variables unmarshals the job variables into v (a pointer to a struct or map).
-func (j *Job) Variables(v any) error {
-	b, err := json.Marshal(j.raw.GetVariables())
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(b, v)
-}
-
-// BpmnError, when returned by a JobHandler, makes the worker throw a BPMN error
-// (raising a catch event) instead of failing the job.
-type BpmnError struct {
-	Code      string
-	Message   string
-	Variables map[string]any
-}
-
-func (e *BpmnError) Error() string {
-	return fmt.Sprintf("bpmn error %q: %s", e.Code, e.Message)
-}
-
-// JobHandler processes an activated job:
-//   - returning (variables, nil) completes the job with those variables;
-//   - returning a *BpmnError throws a BPMN error;
-//   - returning any other error fails the job (decrementing its retries).
-type JobHandler func(ctx context.Context, job *Job) (map[string]any, error)
 
 // JobWorker polls for jobs of a given type and dispatches them to a handler with
 // bounded concurrency. Job completion, failure, and BPMN-error operations are
@@ -170,7 +115,7 @@ func (w *JobWorker) Run(ctx context.Context) error {
 		}
 
 		for i := range jobs {
-			job := &Job{raw: jobs[i]}
+			job := newRESTJob(jobs[i])
 			inFlight.Add(1)
 			wg.Add(1)
 			go func() {
@@ -235,7 +180,7 @@ func (w *JobWorker) completeJob(ctx context.Context, job *Job, vars map[string]a
 	if len(vars) > 0 {
 		req.SetVariables(vars)
 	}
-	_, err := w.client.raw.JobAPI.CompleteJob(ctx, openapi.JobKey(job.raw.GetJobKey())).
+	_, err := w.client.raw.JobAPI.CompleteJob(ctx, openapi.JobKey(job.key)).
 		JobCompletionRequest(*req).Execute()
 	if err != nil {
 		w.client.logger.Error("complete job failed", "job", job.Key(), "error", err)
@@ -252,7 +197,7 @@ func (w *JobWorker) failJob(ctx context.Context, job *Job, cause error) {
 	if cause != nil {
 		req.SetErrorMessage(cause.Error())
 	}
-	_, err := w.client.raw.JobAPI.FailJob(ctx, openapi.JobKey(job.raw.GetJobKey())).
+	_, err := w.client.raw.JobAPI.FailJob(ctx, openapi.JobKey(job.key)).
 		JobFailRequest(*req).Execute()
 	if err != nil {
 		w.client.logger.Error("fail job failed", "job", job.Key(), "error", err)
@@ -267,7 +212,7 @@ func (w *JobWorker) throwError(ctx context.Context, job *Job, bpmn *BpmnError) {
 	if len(bpmn.Variables) > 0 {
 		req.SetVariables(bpmn.Variables)
 	}
-	_, err := w.client.raw.JobAPI.ThrowJobError(ctx, openapi.JobKey(job.raw.GetJobKey())).
+	_, err := w.client.raw.JobAPI.ThrowJobError(ctx, openapi.JobKey(job.key)).
 		JobErrorRequest(*req).Execute()
 	if err != nil {
 		w.client.logger.Error("throw job error failed", "job", job.Key(), "error", err)
