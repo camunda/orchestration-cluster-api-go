@@ -52,11 +52,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: bufbuild/buf-action@v1
+      - uses: actions/setup-node@v7
         with:
-          setup_only: true
+          node-version: 20
+      # Install buf via npm (matching scripts/generate.sh's `npx @bufbuild/buf`)
+      # rather than bufbuild/buf-action, whose GitHub-release binary download is a
+      # recurring CI flake point during GitHub incidents and pulls in registry
+      # push/setup surface we don't want for a lint-only job.
       - name: buf lint
-        run: buf lint
+        run: npx --yes @bufbuild/buf lint
 
   commitlint:
     name: Commit messages
