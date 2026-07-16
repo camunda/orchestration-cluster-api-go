@@ -46,8 +46,10 @@ generated code stays pure and regenerable.
   `StreamActivatedJobs` streaming worker (`NewStreamJobWorker`). Both share one
   `JobHandler` contract: returning variables completes the job, returning a
   `*BpmnError` throws a BPMN error, and returning any other error fails the job
-  (decrementing its retries). A REST sidecar-poll safety net for the streaming
-  worker is a planned follow-up.
+  (decrementing its retries). The streaming worker also runs a low-frequency REST
+  sidecar poll (a safety net for jobs re-queued after a timeout or a brief
+  reconnect); poll-activated jobs are acknowledged over REST, streamed jobs over
+  gRPC. Set `WithStreamPollInterval` to tune or disable it.
 
 ## Status of the build
 

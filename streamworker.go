@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	openapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
 	"github.com/camunda/orchestration-cluster-api-go/pb"
 	"google.golang.org/grpc"
@@ -81,6 +82,8 @@ type StreamJobWorker struct {
 	timeout          time.Duration
 	fetchVariables   []string
 	reconnectBackoff time.Duration
+	pollInterval     time.Duration
+	pollMaxJobs      int
 
 	// dial is an injectable seam for tests; nil means use client.grpcConn.
 	dial func(ctx context.Context) (*grpc.ClientConn, error)
@@ -118,6 +121,23 @@ func WithStreamReconnectBackoff(d time.Duration) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.reconnectBackoff = d }
 }
 
+// WithStreamPollInterval sets the interval between REST sidecar-poll cycles. The
+// sidecar poll is a low-frequency safety net that picks up jobs the stream may
+// have missed (e.g. jobs re-queued after a timeout or during a brief reconnect).
+// A value <= 0 disables the sidecar poll entirely (pure gRPC streaming).
+func WithStreamPollInterval(d time.Duration) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.pollInterval = d }
+}
+
+// WithStreamPollMaxJobs caps the number of jobs activated per REST sidecar-poll cycle.
+func WithStreamPollMaxJobs(n int) StreamWorkerOption {
+	return func(w *StreamJobWorker) {
+		if n > 0 {
+			w.pollMaxJobs = n
+		}
+	}
+}
+
 // NewStreamJobWorker creates a gRPC streaming worker for jobType. Defaults are
 // seeded from the client's CAMUNDA_WORKER_* configuration and can be overridden
 // with options.
@@ -131,6 +151,8 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 		maxConcurrent:    wd.MaxConcurrentJobs,
 		timeout:          time.Duration(wd.TimeoutMs) * time.Millisecond,
 		reconnectBackoff: time.Second,
+		pollInterval:     30 * time.Second,
+		pollMaxJobs:      32,
 	}
 	if w.maxConcurrent <= 0 {
 		w.maxConcurrent = 1
@@ -160,6 +182,18 @@ func (w *StreamJobWorker) Run(ctx context.Context) error {
 	gw := pb.NewGatewayClient(conn)
 	sem := make(chan struct{}, w.maxConcurrent)
 	var wg sync.WaitGroup
+
+	// Sidecar poll: a low-frequency REST safety net running alongside the stream,
+	// sharing the same concurrency limit. Poll-activated jobs are acknowledged
+	// over REST (they carry no gRPC lease token); the broker guarantees single
+	// activation, so a job is never delivered by both the stream and the poll.
+	if w.pollInterval > 0 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			w.runSidecarPoll(ctx, sem, &wg)
+		}()
+	}
 
 	for ctx.Err() == nil {
 		streamErr := w.streamOnce(ctx, gw, sem, &wg)
@@ -214,6 +248,55 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 			w.handle(ctx, gw, job)
 		}()
 	}
+}
+
+// runSidecarPoll runs an immediate backfill poll and then a recurring poll every
+// pollInterval until ctx is cancelled. Poll errors are swallowed (the stream is
+// the primary channel); the next cycle retries. Poll-activated jobs are
+// acknowledged over REST.
+func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{}, wg *sync.WaitGroup) {
+	for ctx.Err() == nil {
+		jobs, err := w.pollOnce(ctx)
+		if err != nil && ctx.Err() == nil {
+			w.client.logger.Debug("sidecar poll failed", "type", w.jobType, "error", err)
+		}
+		for i := range jobs {
+			job := newRESTJob(jobs[i])
+			select {
+			case sem <- struct{}{}:
+			case <-ctx.Done():
+				return
+			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				defer func() { <-sem }()
+				vars, herr := w.handler(ctx, job)
+				ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+				defer cancel()
+				w.client.restAck(ackCtx, job, vars, herr)
+			}()
+		}
+		if err := sleepCtx(ctx, w.pollInterval); err != nil {
+			return
+		}
+	}
+}
+
+// pollOnce activates up to pollMaxJobs jobs over REST.
+func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]openapi.ActivatedJobResult, error) {
+	req := openapi.NewJobActivationRequest(w.jobType, w.timeout.Milliseconds(), int32(w.pollMaxJobs))
+	if w.name != "" {
+		req.SetWorker(w.name)
+	}
+	if len(w.fetchVariables) > 0 {
+		req.SetFetchVariable(w.fetchVariables)
+	}
+	result, resp, err := w.client.raw.JobAPI.ActivateJobs(ctx).JobActivationRequest(*req).Execute()
+	if err != nil {
+		return nil, w.client.wrapError(resp, err)
+	}
+	return result.GetJobs(), nil
 }
 
 func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *Job) {

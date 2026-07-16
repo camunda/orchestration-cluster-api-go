@@ -3,7 +3,10 @@ package camunda
 import (
 	"context"
 	"errors"
+	"io"
 	"net"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -100,7 +103,7 @@ func TestStreamJobWorkerDispatchesAndAcksOverGRPC(t *testing.T) {
 		}
 	}
 
-	w := client.NewStreamJobWorker("greet", handler)
+	w := client.NewStreamJobWorker("greet", handler, WithStreamPollInterval(-1))
 	w.dial = func(context.Context) (*grpc.ClientConn, error) {
 		return grpc.NewClient("passthrough:///bufnet",
 			grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
@@ -190,7 +193,7 @@ func TestStreamJobWorkerForwardsLeaseToken(t *testing.T) {
 	}
 
 	w := client.NewStreamJobWorker("greet",
-		func(context.Context, *Job) (map[string]any, error) { return nil, nil })
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil }, WithStreamPollInterval(-1))
 	w.dial = bufDial(lis)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -226,7 +229,7 @@ func TestStreamJobWorkerReconnectsAfterStreamError(t *testing.T) {
 
 	w := client.NewStreamJobWorker("greet",
 		func(context.Context, *Job) (map[string]any, error) { return map[string]any{"ok": true}, nil },
-		WithStreamReconnectBackoff(10*time.Millisecond))
+		WithStreamReconnectBackoff(10*time.Millisecond), WithStreamPollInterval(-1))
 	w.dial = bufDial(lis)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -239,5 +242,98 @@ func TestStreamJobWorkerReconnectsAfterStreamError(t *testing.T) {
 	}
 	if got := fake.streamAttempts.Load(); got < 2 {
 		t.Errorf("streamAttempts = %d, want >= 2 (initial failure + reconnect)", got)
+	}
+}
+
+// sidecarJobResponse is a REST JobActivationResult carrying one job (key 123).
+const sidecarJobResponse = `{
+  "jobs": [
+    {
+      "type": "demo-task",
+      "processDefinitionId": "demo-process",
+      "processDefinitionVersion": 1,
+      "elementId": "task",
+      "customHeaders": {},
+      "worker": "test-worker",
+      "retries": 3,
+      "deadline": 1784256664927,
+      "variables": {},
+      "tenantId": "<default>",
+      "jobKey": "123",
+      "processInstanceKey": "2251799813685417",
+      "processDefinitionKey": "2251799813685416",
+      "elementInstanceKey": "2251799813685423",
+      "kind": "BPMN_ELEMENT",
+      "listenerEventType": "UNSPECIFIED",
+      "userTask": null,
+      "tags": [],
+      "rootProcessInstanceKey": "2251799813685417",
+      "businessId": null,
+      "priority": 0,
+      "leaseToken": null
+    }
+  ]
+}`
+
+// TestStreamJobWorkerSidecarPollActivatesAndAcksOverREST verifies that, while the
+// gRPC stream is idle, the REST sidecar poll activates a job over REST and
+// acknowledges it over REST.
+func TestStreamJobWorkerSidecarPollActivatesAndAcksOverREST(t *testing.T) {
+	var activateCount atomic.Int32
+	completed := make(chan string, 1)
+	rest := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/jobs/activation"):
+			w.Header().Set("Content-Type", "application/json")
+			if activateCount.Add(1) == 1 {
+				_, _ = io.WriteString(w, sidecarJobResponse)
+			} else {
+				_, _ = io.WriteString(w, `{"jobs":[]}`)
+			}
+		case strings.HasSuffix(r.URL.Path, "/completion"):
+			select {
+			case completed <- r.URL.Path:
+			default:
+			}
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer rest.Close()
+
+	// gRPC stream that never delivers a job (blocks until the worker cancels).
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		completes: make(chan *pb.CompleteJobRequest, 1),
+		fails:     make(chan *pb.FailJobRequest, 1),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	w := client.NewStreamJobWorker("demo-task",
+		func(context.Context, *Job) (map[string]any, error) { return map[string]any{"ok": true}, nil },
+		WithStreamPollInterval(10*time.Millisecond))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	select {
+	case path := <-completed:
+		if !strings.HasSuffix(path, "/jobs/123/completion") {
+			t.Errorf("completion path = %q, want .../jobs/123/completion", path)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("sidecar poll did not activate and complete a job over REST")
 	}
 }

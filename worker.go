@@ -163,31 +163,38 @@ func (w *JobWorker) handle(ctx context.Context, job *Job) {
 	ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 	defer cancel()
 
-	if err != nil {
+	w.client.restAck(ackCtx, job, vars, err)
+}
+
+// restAck completes, fails, or throws a BPMN error for a REST-activated job based
+// on the handler outcome. It is used by the REST JobWorker and by the gRPC stream
+// worker's REST sidecar poll (poll-activated jobs are acknowledged over REST).
+func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]any, handlerErr error) {
+	if handlerErr != nil {
 		var bpmn *BpmnError
-		if errors.As(err, &bpmn) {
-			w.throwError(ackCtx, job, bpmn)
+		if errors.As(handlerErr, &bpmn) {
+			c.restThrowError(ctx, job, bpmn)
 		} else {
-			w.failJob(ackCtx, job, err)
+			c.restFailJob(ctx, job, handlerErr)
 		}
 		return
 	}
-	w.completeJob(ackCtx, job, vars)
+	c.restCompleteJob(ctx, job, vars)
 }
 
-func (w *JobWorker) completeJob(ctx context.Context, job *Job, vars map[string]any) {
+func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any) {
 	req := openapi.NewJobCompletionRequest()
 	if len(vars) > 0 {
 		req.SetVariables(vars)
 	}
-	_, err := w.client.raw.JobAPI.CompleteJob(ctx, openapi.JobKey(job.key)).
+	_, err := c.raw.JobAPI.CompleteJob(ctx, openapi.JobKey(job.key)).
 		JobCompletionRequest(*req).Execute()
 	if err != nil {
-		w.client.logger.Error("complete job failed", "job", job.Key(), "error", err)
+		c.logger.Error("complete job failed", "job", job.Key(), "error", err)
 	}
 }
 
-func (w *JobWorker) failJob(ctx context.Context, job *Job, cause error) {
+func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) {
 	req := openapi.NewJobFailRequest()
 	retries := job.Retries() - 1
 	if retries < 0 {
@@ -197,14 +204,14 @@ func (w *JobWorker) failJob(ctx context.Context, job *Job, cause error) {
 	if cause != nil {
 		req.SetErrorMessage(cause.Error())
 	}
-	_, err := w.client.raw.JobAPI.FailJob(ctx, openapi.JobKey(job.key)).
+	_, err := c.raw.JobAPI.FailJob(ctx, openapi.JobKey(job.key)).
 		JobFailRequest(*req).Execute()
 	if err != nil {
-		w.client.logger.Error("fail job failed", "job", job.Key(), "error", err)
+		c.logger.Error("fail job failed", "job", job.Key(), "error", err)
 	}
 }
 
-func (w *JobWorker) throwError(ctx context.Context, job *Job, bpmn *BpmnError) {
+func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *BpmnError) {
 	req := openapi.NewJobErrorRequest(bpmn.Code)
 	if bpmn.Message != "" {
 		req.SetErrorMessage(bpmn.Message)
@@ -212,10 +219,10 @@ func (w *JobWorker) throwError(ctx context.Context, job *Job, bpmn *BpmnError) {
 	if len(bpmn.Variables) > 0 {
 		req.SetVariables(bpmn.Variables)
 	}
-	_, err := w.client.raw.JobAPI.ThrowJobError(ctx, openapi.JobKey(job.key)).
+	_, err := c.raw.JobAPI.ThrowJobError(ctx, openapi.JobKey(job.key)).
 		JobErrorRequest(*req).Execute()
 	if err != nil {
-		w.client.logger.Error("throw job error failed", "job", job.Key(), "error", err)
+		c.logger.Error("throw job error failed", "job", job.Key(), "error", err)
 	}
 }
 
