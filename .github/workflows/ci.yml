@@ -80,12 +80,18 @@ jobs:
       - uses: camunda/sdk-infra/actions/start-camunda@v1
         with:
           stack: simple
-          version: 8.10.0-alpha3
+          docker-dir: docker
       - name: Integration tests
         env:
           CAMUNDA_REST_ADDRESS: http://localhost:8080
           CAMUNDA_GRPC_ADDRESS: localhost:26500
         run: go test -race -tags integration ./test/integration/...
+      - name: Stop Camunda
+        if: always()
+        uses: camunda/sdk-infra/actions/stop-camunda@v1
+        with:
+          docker-dir: docker
+          artifact-name: integration-docker-logs
 
   generation-drift:
     name: Generation drift (non-blocking)
