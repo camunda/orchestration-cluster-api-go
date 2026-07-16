@@ -179,3 +179,55 @@ func TestJobWorkerFailsJobOnHandlerError(t *testing.T) {
 		t.Fatal("job was not failed on handler error")
 	}
 }
+
+func TestJobWorkerThrowsBpmnErrorOnBpmnError(t *testing.T) {
+	thrown := make(chan string, 1)
+	var activateCount atomic.Int32
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/jobs/activation"):
+			w.Header().Set("Content-Type", "application/json")
+			if activateCount.Add(1) == 1 {
+				_, _ = io.WriteString(w, oneJobResponse)
+			} else {
+				_, _ = io.WriteString(w, `{"jobs":[]}`)
+			}
+		case strings.HasSuffix(r.URL.Path, "/error"):
+			select {
+			case thrown <- r.URL.Path:
+			default:
+			}
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+
+	client, err := camunda.New(camunda.WithRestAddress(srv.URL), camunda.WithLogLevel(camunda.LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	worker := client.NewJobWorker("demo-task",
+		func(ctx context.Context, job *camunda.Job) (map[string]any, error) {
+			return nil, &camunda.BpmnError{Code: "BOOM", Message: "nope"}
+		},
+		camunda.WithRequestTimeout(50*time.Millisecond),
+		camunda.WithPollInterval(10*time.Millisecond),
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = worker.Run(ctx) }()
+
+	select {
+	case path := <-thrown:
+		if !strings.HasSuffix(path, "/jobs/123/error") {
+			t.Errorf("error path = %q, want .../jobs/123/error", path)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("BPMN error was not thrown when handler returned a *BpmnError")
+	}
+}

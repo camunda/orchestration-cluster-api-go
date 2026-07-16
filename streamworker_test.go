@@ -5,12 +5,15 @@ import (
 	"errors"
 	"net"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/camunda/orchestration-cluster-api-go/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -22,9 +25,18 @@ type fakeGateway struct {
 	completes chan *pb.CompleteJobRequest
 	fails     chan *pb.FailJobRequest
 	throws    chan *pb.ThrowErrorRequest
+
+	// failFirstStream is the number of initial StreamActivatedJobs attempts to
+	// fail (with codes.Unavailable) before serving jobs; streamAttempts counts
+	// how many stream attempts the server has seen.
+	failFirstStream int32
+	streamAttempts  atomic.Int32
 }
 
 func (f *fakeGateway) StreamActivatedJobs(_ *pb.StreamActivatedJobsRequest, stream grpc.ServerStreamingServer[pb.ActivatedJob]) error {
+	if f.streamAttempts.Add(1) <= f.failFirstStream {
+		return status.Error(codes.Unavailable, "simulated stream failure")
+	}
 	for _, j := range f.jobs {
 		if err := stream.Send(j); err != nil {
 			return err
@@ -141,5 +153,91 @@ func waitFor[T any](t *testing.T, ch chan T) T {
 	case <-time.After(5 * time.Second):
 		t.Fatal("timed out waiting for gRPC ack")
 		panic("unreachable")
+	}
+}
+
+// bufDial returns a dial seam that connects the streaming worker to an in-memory
+// bufconn listener.
+func bufDial(lis *bufconn.Listener) func(context.Context) (*grpc.ClientConn, error) {
+	return func(context.Context) (*grpc.ClientConn, error) {
+		return grpc.NewClient("passthrough:///bufnet",
+			grpc.WithContextDialer(func(ctx context.Context, _ string) (net.Conn, error) {
+				return lis.DialContext(ctx)
+			}),
+			grpc.WithTransportCredentials(insecure.NewCredentials()))
+	}
+}
+
+// TestStreamJobWorkerForwardsLeaseToken verifies that a job's activation lease
+// token is forwarded on the gRPC completion acknowledgement.
+func TestStreamJobWorkerForwardsLeaseToken(t *testing.T) {
+	lis := bufconn.Listen(1024 * 1024)
+	lease := "lease-xyz"
+	fake := &fakeGateway{
+		jobs:      []*pb.ActivatedJob{{Key: 999, Type: "greet", LeaseToken: &lease}},
+		completes: make(chan *pb.CompleteJobRequest, 1),
+		fails:     make(chan *pb.FailJobRequest, 1),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithNoAuth())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	w := client.NewStreamJobWorker("greet",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil })
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	comp := waitFor(t, fake.completes)
+	if comp.LeaseToken == nil || *comp.LeaseToken != lease {
+		t.Errorf("complete LeaseToken = %v, want %q", comp.LeaseToken, lease)
+	}
+}
+
+// TestStreamJobWorkerReconnectsAfterStreamError verifies that the worker reopens
+// the stream after it ends with an error and still delivers subsequent jobs.
+func TestStreamJobWorkerReconnectsAfterStreamError(t *testing.T) {
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		failFirstStream: 1,
+		jobs:            []*pb.ActivatedJob{{Key: 42, Type: "greet"}},
+		completes:       make(chan *pb.CompleteJobRequest, 1),
+		fails:           make(chan *pb.FailJobRequest, 1),
+		throws:          make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithNoAuth())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	w := client.NewStreamJobWorker("greet",
+		func(context.Context, *Job) (map[string]any, error) { return map[string]any{"ok": true}, nil },
+		WithStreamReconnectBackoff(10*time.Millisecond))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	comp := waitFor(t, fake.completes)
+	if comp.JobKey != 42 {
+		t.Errorf("complete JobKey = %d, want 42 (delivered after reconnect)", comp.JobKey)
+	}
+	if got := fake.streamAttempts.Load(); got < 2 {
+		t.Errorf("streamAttempts = %d, want >= 2 (initial failure + reconnect)", got)
 	}
 }
