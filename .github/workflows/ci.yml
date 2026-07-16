@@ -81,6 +81,10 @@ jobs:
         with:
           stack: simple
           docker-dir: docker
+          max-attempts: 120
+      - name: Camunda container logs
+        if: always()
+        run: docker logs camunda-engine --tail 400 || true
       - name: Integration tests
         env:
           CAMUNDA_REST_ADDRESS: http://localhost:8080
