@@ -24,6 +24,8 @@ jobs:
           if [ -n "$out" ]; then echo "gofmt needed on:"; echo "$out"; exit 1; fi
       - name: go vet
         run: go vet ./...
+      - name: go vet (integration build)
+        run: go vet -tags integration ./test/integration/...
       - name: Build
         run: go build ./...
       - name: Test
@@ -62,6 +64,28 @@ jobs:
     # before/after range is degenerate, so scope it to PRs.
     if: github.event_name == 'pull_request'
     uses: camunda/sdk-infra/.github/workflows/sdk-commitlint.yml@v1
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    # Provisional: non-blocking until the stack wiring is confirmed green in CI,
+    # then flip continue-on-error off to make it a required gate.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: camunda/sdk-infra/actions/start-camunda@v1
+        with:
+          stack: simple
+          version: 8.10.0-alpha3
+      - name: Integration tests
+        env:
+          CAMUNDA_REST_ADDRESS: http://localhost:8080
+          CAMUNDA_GRPC_ADDRESS: localhost:26500
+        run: go test -race -tags integration ./test/integration/...
 
   generation-drift:
     name: Generation drift (non-blocking)
