@@ -1165,35 +1165,6 @@ func (k TenantId) String() string { return string(k) }
 // Validate reports whether k satisfies the TenantId constraints.
 func (k TenantId) Validate() error { return specTenantId.validate(string(k)) }
 
-// Username is a Camunda semantic key. Construct it with NewUsername (validated) or
-// MustUsername (panics on invalid input).
-type Username string
-
-var specUsername = keySpec{name: "Username", pattern: regexp.MustCompile(`^[a-zA-Z0-9_~@.+-]+$`), min: 1, max: 256}
-
-// NewUsername validates s against the Username constraints and returns a Username.
-func NewUsername(s string) (Username, error) {
-	if err := specUsername.validate(s); err != nil {
-		return "", err
-	}
-	return Username(s), nil
-}
-
-// MustUsername is like NewUsername but panics if s is invalid.
-func MustUsername(s string) Username {
-	k, err := NewUsername(s)
-	if err != nil {
-		panic(err)
-	}
-	return k
-}
-
-// String returns the underlying string value.
-func (k Username) String() string { return string(k) }
-
-// Validate reports whether k satisfies the Username constraints.
-func (k Username) Validate() error { return specUsername.validate(string(k)) }
-
 // UserTaskKey is a Camunda semantic key. Construct it with NewUserTaskKey (validated) or
 // MustUserTaskKey (panics on invalid input).
 type UserTaskKey string
@@ -1222,6 +1193,35 @@ func (k UserTaskKey) String() string { return string(k) }
 
 // Validate reports whether k satisfies the UserTaskKey constraints.
 func (k UserTaskKey) Validate() error { return specUserTaskKey.validate(string(k)) }
+
+// Username is a Camunda semantic key. Construct it with NewUsername (validated) or
+// MustUsername (panics on invalid input).
+type Username string
+
+var specUsername = keySpec{name: "Username", pattern: regexp.MustCompile(`^[a-zA-Z0-9_~@.+-]+$`), min: 1, max: 256}
+
+// NewUsername validates s against the Username constraints and returns a Username.
+func NewUsername(s string) (Username, error) {
+	if err := specUsername.validate(s); err != nil {
+		return "", err
+	}
+	return Username(s), nil
+}
+
+// MustUsername is like NewUsername but panics if s is invalid.
+func MustUsername(s string) Username {
+	k, err := NewUsername(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k Username) String() string { return string(k) }
+
+// Validate reports whether k satisfies the Username constraints.
+func (k Username) Validate() error { return specUsername.validate(string(k)) }
 
 // VariableKey is a Camunda semantic key. Construct it with NewVariableKey (validated) or
 // MustVariableKey (panics on invalid input).
