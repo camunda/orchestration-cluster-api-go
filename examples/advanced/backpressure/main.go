@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"flag"
 	"fmt"
@@ -24,6 +25,9 @@ type counters struct {
 }
 
 const requiredProtectedCompletions = 100
+
+//go:embed payment-intake.bpmn
+var paymentIntakeModel []byte
 
 func main() {
 	var (
@@ -75,6 +79,17 @@ func run(duration time.Duration, flooders, protectedClients int) error {
 		return err
 	}
 
+	setupCtx, cancelSetup := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancelSetup()
+	if err := exampleutil.Deploy(
+		setupCtx,
+		protectedClient,
+		"payment-intake.bpmn",
+		paymentIntakeModel,
+	); err != nil {
+		return err
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
 	defer cancel()
 
@@ -83,11 +98,11 @@ func run(duration time.Duration, flooders, protectedClients int) error {
 	start := time.Now()
 	runID := start.UTC().Format("20060102T150405.000000000")
 
-	for range flooders {
+	for source := range flooders {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			flood(ctx, pressureClient, &pressure)
+			flood(ctx, pressureClient, source, &pressure)
 		}()
 	}
 	for worker := range protectedClients {
@@ -132,9 +147,22 @@ func run(duration time.Duration, flooders, protectedClients int) error {
 	}
 }
 
-func flood(ctx context.Context, client *camunda.CamundaClient, stats *counters) {
-	request := *openapi.NewSignalBroadcastRequest("go-sdk-backpressure-stress")
-	for ctx.Err() == nil {
+func flood(
+	ctx context.Context,
+	client *camunda.CamundaClient,
+	source int,
+	stats *counters,
+) {
+	request := *openapi.NewSignalBroadcastRequest("inventory-level-changed")
+	for sequence := 0; ctx.Err() == nil; sequence++ {
+		// Simulate a runaway warehouse feed broadcasting high-cardinality stock
+		// updates during a Black Friday sale.
+		request.SetVariables(map[string]any{
+			"sku":            fmt.Sprintf("SKU-%04d", sequence%10_000),
+			"warehouse":      fmt.Sprintf("warehouse-%02d", source%32),
+			"availableUnits": sequence % 250,
+			"feedSequence":   sequence,
+		})
 		_, err := client.BroadcastSignal(ctx, request)
 		record(err, stats)
 	}
@@ -148,10 +176,21 @@ func protect(
 	stats *counters,
 ) {
 	for sequence := 0; ctx.Err() == nil; sequence++ {
-		messageID := fmt.Sprintf("go-sdk-stress-%s-%d-%d", runID, worker, sequence)
-		request := openapi.NewMessagePublicationRequest("go-sdk-protected-traffic")
+		orderID := fmt.Sprintf("order-%s-%d-%d", runID, worker, sequence)
+		paymentID := fmt.Sprintf("payment-%s-%d-%d", runID, worker, sequence)
+		messageID := "payment-provider-event-" + paymentID
+		request := openapi.NewMessagePublicationRequest("payment-received")
 		request.SetMessageId(messageID)
-		request.SetTimeToLive(1_000)
+		request.SetBusinessId(orderID)
+		request.SetTimeToLive((30 * time.Second).Milliseconds())
+		request.SetVariables(map[string]any{
+			"orderId":     orderID,
+			"paymentId":   paymentID,
+			"amountCents": 12_900,
+			"currency":    "EUR",
+			"provider":    "example-pay",
+			"status":      "captured",
+		})
 
 		for attempt := 0; ctx.Err() == nil; attempt++ {
 			_, err := client.PublishMessage(ctx, *request)

@@ -17,11 +17,15 @@ go run ./examples/advanced/message-correlation
 ```
 
 - **backpressure** is an intentionally aggressive stress test. Unprotected
-  `LEGACY` clients flood the broker with signals while a `BALANCED` client sends
-  short-lived, idempotent messages. It succeeds only after observing real
-  429/503/`RESOURCE_EXHAUSTED` responses and protected traffic making progress.
-  Run it only against a disposable local cluster; tune with `-flooders`,
-  `-clients`, and `-duration`.
+  `LEGACY` clients simulate a runaway warehouse feed broadcasting
+  `inventory-level-changed` signals during a Black Friday sale. Meanwhile, a
+  `BALANCED` checkout service publishes business-critical `payment-received`
+  messages with order/payment details, business IDs, and stable provider event
+  IDs. Those messages start the embedded payment-intake BPMN process and record
+  the payment. The test succeeds only after observing real
+  429/503/`RESOURCE_EXHAUSTED` responses and 100 payment events completing
+  afterward. Run it only against a disposable local cluster; tune with
+  `-flooders`, `-clients`, and `-duration`.
 - **order-worker** treats technical failures as retryable job failures and stock
   shortages as modeled BPMN errors. Do not retry business outcomes as if they
   were infrastructure faults.
