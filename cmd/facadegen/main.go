@@ -26,6 +26,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -48,6 +49,7 @@ type operation struct {
 	reqType     string // qualified request-builder type, e.g. "openapi.ApiGetTopologyRequest"
 	bodyType    string // qualified request-body type (e.g. "openapi.JobActivationRequest"), or ""
 	bodyBuilder string // request-body builder method on the ApiXxxRequest, or ""
+	example     string // dedented usage snippet from examples/, injected into the doc comment
 }
 
 // bodyInfo describes an operation's JSON request body, derived from spec metadata.
@@ -60,6 +62,7 @@ func main() {
 	clientDir := "client"
 	outPath := "facade_generated.go"
 	metadataPath := ""
+	examplesDir := ""
 	if len(os.Args) > 1 {
 		clientDir = os.Args[1]
 	}
@@ -69,8 +72,11 @@ func main() {
 	if len(os.Args) > 3 {
 		metadataPath = os.Args[3]
 	}
+	if len(os.Args) > 4 {
+		examplesDir = os.Args[4]
+	}
 
-	src, count, err := generateFacade(clientDir, metadataPath)
+	src, count, err := generateFacade(clientDir, metadataPath, examplesDir)
 	if err != nil {
 		fatalf("%v", err)
 	}
@@ -87,7 +93,7 @@ func main() {
 // emitted facade source and the number of operations it covers. When
 // metadataPath is non-empty, JSON request bodies are surfaced as typed method
 // parameters (derived from the spec metadata).
-func generateFacade(clientDir, metadataPath string) (string, int, error) {
+func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, error) {
 	fset := token.NewFileSet()
 	pkgs, err := parser.ParseDir(fset, clientDir, func(fi os.FileInfo) bool { //nolint:staticcheck // ParseDir is adequate for the single generated client package
 		return !strings.HasSuffix(fi.Name(), "_test.go")
@@ -110,6 +116,7 @@ func generateFacade(clientDir, metadataPath string) (string, int, error) {
 	fieldByService := collectAPIClientFields(files) // serviceType -> field name
 	constructors, executes := collectServiceMethods(files)
 	bodyByOp := loadBodyInfo(metadataPath, r.clientTypes)
+	exampleByOp := loadExamples(examplesDir)
 
 	var ops []operation
 	for key, ctor := range constructors {
@@ -132,6 +139,9 @@ func generateFacade(clientDir, metadataPath string) (string, int, error) {
 			op.bodyType = bi.typ
 			op.bodyBuilder = bi.builder
 		}
+		if ex, ok := exampleByOp[lowerFirst(op.name)]; ok {
+			op.example = ex
+		}
 		ops = append(ops, op)
 	}
 	sort.Slice(ops, func(i, j int) bool {
@@ -150,6 +160,116 @@ func generateFacade(clientDir, metadataPath string) (string, int, error) {
 	}
 	sort.Strings(extraStd)
 	return emit(ops, extraStd), len(ops), nil
+}
+
+// lowerFirst returns s with its first rune lowercased (PascalCase method name ->
+// camelCase operationId, matching operation-map.json keys).
+func lowerFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToLower(s[:1]) + s[1:]
+}
+
+var (
+	_exOpenRe  = regexp.MustCompile(`^\s*// region ([\w.-]+)\s*$`)
+	_exCloseRe = regexp.MustCompile(`^\s*// endregion ([\w.-]+)\s*$`)
+)
+
+// loadExamples reads examples/operation-map.json and returns, per operationId,
+// the dedented code of the region its first entry points at. Returns nil when
+// examplesDir is empty or the map is absent, so generation still works without
+// examples (e.g. the facadegen unit test).
+func loadExamples(examplesDir string) map[string]string {
+	if examplesDir == "" {
+		return nil
+	}
+	data, err := os.ReadFile(filepath.Join(examplesDir, "operation-map.json"))
+	if err != nil {
+		return nil
+	}
+	type entry struct {
+		File   string `json:"file"`
+		Region string `json:"region"`
+	}
+	var opMap map[string][]entry
+	if err := json.Unmarshal(data, &opMap); err != nil {
+		return nil
+	}
+	regionCache := map[string]map[string]string{}
+	regionsFor := func(file string) map[string]string {
+		if r, ok := regionCache[file]; ok {
+			return r
+		}
+		r := parseExampleRegions(filepath.Join(examplesDir, file))
+		regionCache[file] = r
+		return r
+	}
+	out := map[string]string{}
+	for opID, entries := range opMap {
+		if len(entries) == 0 {
+			continue
+		}
+		e := entries[0]
+		if code, ok := regionsFor(e.File)[e.Region]; ok && code != "" {
+			out[opID] = code
+		}
+	}
+	return out
+}
+
+// parseExampleRegions extracts `// region X` ... `// endregion X` blocks from a
+// Go example file, returning region name -> dedented code.
+func parseExampleRegions(path string) map[string]string {
+	regions := map[string]string{}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return regions
+	}
+	var cur string
+	var buf []string
+	for _, ln := range strings.Split(string(data), "\n") {
+		if m := _exOpenRe.FindStringSubmatch(ln); m != nil {
+			cur, buf = m[1], nil
+			continue
+		}
+		if m := _exCloseRe.FindStringSubmatch(ln); m != nil && m[1] == cur {
+			regions[cur] = dedent(buf)
+			cur = ""
+			continue
+		}
+		if cur != "" {
+			buf = append(buf, ln)
+		}
+	}
+	return regions
+}
+
+// dedent removes the smallest common leading-tab indentation from non-empty
+// lines and trims surrounding blank lines.
+func dedent(lines []string) string {
+	minTabs := -1
+	for _, ln := range lines {
+		if strings.TrimSpace(ln) == "" {
+			continue
+		}
+		n := len(ln) - len(strings.TrimLeft(ln, "\t"))
+		if minTabs == -1 || n < minTabs {
+			minTabs = n
+		}
+	}
+	if minTabs < 0 {
+		minTabs = 0
+	}
+	out := make([]string, len(lines))
+	for i, ln := range lines {
+		if strings.TrimSpace(ln) == "" {
+			out[i] = ""
+		} else {
+			out[i] = ln[minTabs:]
+		}
+	}
+	return strings.Trim(strings.Join(out, "\n"), "\n")
 }
 
 type methodKey = string
@@ -371,6 +491,16 @@ func emit(ops []operation, extraStd []string) string {
 		}
 
 		fmt.Fprintf(&b, "// %s calls the %s operation.\n", op.name, op.name)
+		if op.example != "" {
+			b.WriteString("//\n// Example:\n//\n")
+			for _, line := range strings.Split(op.example, "\n") {
+				if line == "" {
+					b.WriteString("//\n")
+				} else {
+					b.WriteString("//\t" + line + "\n")
+				}
+			}
+		}
 		retSig := "error"
 		if op.retType != "" {
 			retSig = fmt.Sprintf("(%s, error)", op.retType)

@@ -32,7 +32,7 @@ def run(ctx) -> None:
         return
     metadata_path = str(ctx.get("metadata_path", ""))
     subprocess.run(
-        ["go", "run", "./cmd/facadegen", "client", "facade_generated.go", metadata_path],
+        ["go", "run", "./cmd/facadegen", "client", "facade_generated.go", metadata_path, "examples"],
         cwd=str(root),
         check=True,
     )
