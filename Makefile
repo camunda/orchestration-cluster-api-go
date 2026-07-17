@@ -1,4 +1,4 @@
-.PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy examples sync-readme sync-readme-check check clean
+.PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy examples sync-readme sync-readme-check coverage check clean
 
 SPEC_REF ?= main
 GO ?= go
@@ -20,6 +20,7 @@ help:
 	@echo "  make tidy          go mod tidy"
 	@echo "  make examples      Build the example programs (README snippet sources)"
 	@echo "  make sync-readme   Inject example snippets into README.md"
+	@echo "  make coverage      Verify all 198 operations have an example (operation-map.json)"
 	@echo "  make check         Full local CI gate"
 	@echo "  make clean         Remove build artifacts"
 
@@ -74,7 +75,10 @@ sync-readme:
 sync-readme-check:
 	python3 scripts/sync-readme-snippets.py --check
 
-check: fmt-check vet build test examples
+coverage:
+	python3 scripts/check-example-coverage.py
+
+check: fmt-check vet build test examples sync-readme-check coverage
 
 clean:
 	rm -rf dist

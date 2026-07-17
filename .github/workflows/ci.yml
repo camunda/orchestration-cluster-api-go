@@ -80,6 +80,8 @@ jobs:
         run: go build ./examples/...
       - name: Check README snippets are in sync
         run: python scripts/sync-readme-snippets.py --check
+      - name: Check example coverage (all 198 operations)
+        run: python scripts/check-example-coverage.py
 
   commitlint:
     name: Commit messages
