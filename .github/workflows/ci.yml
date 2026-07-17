@@ -156,4 +156,8 @@ jobs:
         run: |
           chmod +x scripts/*.sh
           ./scripts/generate.sh
-          git diff --exit-code
+          if ! git diff --quiet; then
+            echo "::warning::Generated output drifts from committed sources"
+            git --no-pager diff
+            exit 1
+          fi
