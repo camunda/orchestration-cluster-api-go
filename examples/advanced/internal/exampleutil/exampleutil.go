@@ -16,8 +16,8 @@ var errProcessActive = errors.New("process instance is still active")
 
 // NewClient targets a local c8run cluster. Production applications should source
 // credentials from a secret store and select OAuth instead of using these defaults.
-func NewClient() (*camunda.CamundaClient, error) {
-	return camunda.New(
+func NewClient(opts ...camunda.Option) (*camunda.CamundaClient, error) {
+	defaults := []camunda.Option{
 		camunda.WithRestAddress(envOr("CAMUNDA_REST_ADDRESS", "http://localhost:8080")),
 		camunda.WithBasicAuth(
 			envOr("CAMUNDA_BASIC_AUTH_USERNAME", "demo"),
@@ -30,7 +30,8 @@ func NewClient() (*camunda.CamundaClient, error) {
 			MaxDelay:    3 * time.Second,
 		}),
 		camunda.WithLogLevel(camunda.LogWarn),
-	)
+	}
+	return camunda.New(append(defaults, opts...)...)
 }
 
 func Deploy(ctx context.Context, client *camunda.CamundaClient, name string, model []byte) error {
