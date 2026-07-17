@@ -1251,3 +1251,55 @@ func (k VariableKey) String() string { return string(k) }
 
 // Validate reports whether k satisfies the VariableKey constraints.
 func (k VariableKey) Validate() error { return specVariableKey.validate(string(k)) }
+
+// ResourceKey is a Camunda semantic key. Construct it with NewResourceKey (validated) or
+// MustResourceKey (panics on invalid input).
+type ResourceKey string
+
+var specResourceKey = keySpec{name: "ResourceKey", pattern: regexp.MustCompile(`^-?[0-9]+$`), min: 1, max: 25}
+
+// NewResourceKey validates s against the ResourceKey constraints and returns a ResourceKey.
+func NewResourceKey(s string) (ResourceKey, error) {
+	if err := specResourceKey.validate(s); err != nil {
+		return "", err
+	}
+	return ResourceKey(s), nil
+}
+
+// MustResourceKey is like NewResourceKey but panics if s is invalid.
+func MustResourceKey(s string) ResourceKey {
+	k, err := NewResourceKey(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k ResourceKey) String() string { return string(k) }
+
+// Validate reports whether k satisfies the ResourceKey constraints.
+func (k ResourceKey) Validate() error { return specResourceKey.validate(string(k)) }
+
+// NullableResourceKey is the generator's Nullable wrapper for ResourceKey (referenced by
+// generated models such as AuditLogResult).
+type NullableResourceKey struct {
+	value *ResourceKey
+	isSet bool
+}
+
+func (v NullableResourceKey) Get() *ResourceKey     { return v.value }
+func (v *NullableResourceKey) Set(val *ResourceKey) { v.value = val; v.isSet = true }
+func (v NullableResourceKey) IsSet() bool           { return v.isSet }
+func (v *NullableResourceKey) Unset()               { v.value = nil; v.isSet = false }
+
+// NewNullableResourceKey returns a set NullableResourceKey wrapping val.
+func NewNullableResourceKey(val *ResourceKey) *NullableResourceKey {
+	return &NullableResourceKey{value: val, isSet: true}
+}
+
+func (v NullableResourceKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableResourceKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
