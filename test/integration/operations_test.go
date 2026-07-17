@@ -50,7 +50,9 @@ func TestEvaluateExpressionEndToEnd(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	req := openapi.NewExpressionEvaluationRequest("2 + 3")
+	// The FEEL `=` prefix marks the value as an expression to evaluate (rather
+	// than a literal string).
+	req := openapi.NewExpressionEvaluationRequest("=2 + 3")
 	result, err := c.EvaluateExpression(ctx, *req)
 	if err != nil {
 		t.Fatalf("EvaluateExpression: %v", err)
