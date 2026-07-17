@@ -1,4 +1,4 @@
-.PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy examples sync-readme sync-readme-check coverage check clean
+.PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy tidy-check examples sync-readme sync-readme-check coverage check clean
 
 SPEC_REF ?= main
 GO ?= go
@@ -18,6 +18,7 @@ help:
 	@echo "  make fmt           gofmt -w ."
 	@echo "  make fmt-check     Fail if gofmt would change any file"
 	@echo "  make tidy          go mod tidy"
+	@echo "  make tidy-check    Fail if go.mod or go.sum is not tidy"
 	@echo "  make examples      Build the example programs (README snippet sources)"
 	@echo "  make sync-readme   Inject example snippets into README.md"
 	@echo "  make coverage      Verify all 198 operations have an example (operation-map.json)"
@@ -62,6 +63,9 @@ fmt-check:
 tidy:
 	$(GO) mod tidy
 
+tidy-check:
+	$(GO) mod tidy -diff
+
 lint: vet
 	@command -v golangci-lint >/dev/null 2>&1 && golangci-lint run || echo "golangci-lint not installed; ran go vet only"
 	npx --yes @bufbuild/buf lint || true
@@ -78,7 +82,7 @@ sync-readme-check:
 coverage:
 	python3 scripts/check-example-coverage.py
 
-check: fmt-check vet build test examples sync-readme-check coverage
+check: fmt-check tidy-check vet build test examples sync-readme-check coverage
 
 clean:
 	rm -rf dist
