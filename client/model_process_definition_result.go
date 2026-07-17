@@ -324,7 +324,6 @@ func (o *ProcessDefinitionResult) UnmarshalJSON(data []byte) (err error) {
 		"tenantId",
 		"processDefinitionKey",
 		"hasStartForm",
-		"isDeleted",
 	}
 
 	allProperties := make(map[string]interface{})
