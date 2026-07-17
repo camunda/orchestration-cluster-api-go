@@ -5,6 +5,9 @@ completed. They target a local `c8run` cluster at `http://localhost:8080` and us
 `demo` / `demo` by default. Override `CAMUNDA_REST_ADDRESS`,
 `CAMUNDA_BASIC_AUTH_USERNAME`, and `CAMUNDA_BASIC_AUTH_PASSWORD` when needed.
 
+Run the commands from the repository root. Keep the leading `./`; without it,
+Go interprets `examples/...` as an import path instead of a relative package:
+
 ```sh
 go run ./examples/advanced/backpressure
 go run ./examples/advanced/order-worker
