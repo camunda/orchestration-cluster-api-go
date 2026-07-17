@@ -15,3 +15,6 @@ linters:
     paths:
       - client/
       - pb/
+      # examples/readme.go holds illustrative, uncalled functions whose bodies are
+      # injected into README.md; the "unused" linter would flag them otherwise.
+      - examples/

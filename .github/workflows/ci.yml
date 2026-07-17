@@ -62,6 +62,25 @@ jobs:
       - name: buf lint
         run: npx --yes @bufbuild/buf lint
 
+  examples:
+    name: Examples & README sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      # The README code blocks are injected from examples/readme.go; building the
+      # examples type-checks them, and --check fails if the README drifted.
+      - name: Build examples
+        run: go build ./examples/...
+      - name: Check README snippets are in sync
+        run: python scripts/sync-readme-snippets.py --check
+
   commitlint:
     name: Commit messages
     # The commit-range linter is meaningful on pull requests; on direct pushes the
