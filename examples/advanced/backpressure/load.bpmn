@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="go-example-load-definitions"
+                  targetNamespace="https://camunda.com/examples/go-sdk">
+  <bpmn:process id="go-example-load" name="Bounded fulfillment load" isExecutable="true">
+    <bpmn:startEvent id="order-received">
+      <bpmn:outgoing>to-fulfill</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="to-fulfill" sourceRef="order-received" targetRef="fulfill-order" />
+    <bpmn:serviceTask id="fulfill-order" name="Fulfill order">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="example-load-work" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>to-fulfill</bpmn:incoming>
+      <bpmn:outgoing>to-complete</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="to-complete" sourceRef="fulfill-order" targetRef="order-completed" />
+    <bpmn:endEvent id="order-completed">
+      <bpmn:incoming>to-complete</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+</bpmn:definitions>

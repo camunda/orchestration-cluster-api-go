@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="go-example-order-definitions"
+                  targetNamespace="https://camunda.com/examples/go-sdk">
+  <bpmn:error id="out-of-stock-error" name="Out of stock" errorCode="OUT_OF_STOCK" />
+  <bpmn:process id="go-example-order" name="Inventory reservation" isExecutable="true">
+    <bpmn:startEvent id="order-received">
+      <bpmn:outgoing>to-reserve</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="to-reserve" sourceRef="order-received" targetRef="reserve-stock" />
+    <bpmn:serviceTask id="reserve-stock" name="Reserve inventory">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="reserve-inventory" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>to-reserve</bpmn:incoming>
+      <bpmn:outgoing>to-confirmed</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="stock-unavailable" name="Stock unavailable" attachedToRef="reserve-stock">
+      <bpmn:outgoing>to-rejected</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="stock-unavailable-definition" errorRef="out-of-stock-error" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="to-confirmed" sourceRef="reserve-stock" targetRef="order-confirmed" />
+    <bpmn:sequenceFlow id="to-rejected" sourceRef="stock-unavailable" targetRef="order-rejected" />
+    <bpmn:endEvent id="order-confirmed" name="Order confirmed">
+      <bpmn:incoming>to-confirmed</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="order-rejected" name="Order rejected">
+      <bpmn:incoming>to-rejected</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+</bpmn:definitions>
