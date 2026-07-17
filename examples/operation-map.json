@@ -1,0 +1,37 @@
+{
+  "getTopology": [
+    {
+      "file": "readme.go",
+      "region": "QuickStart",
+      "label": "Get cluster topology"
+    }
+  ],
+  "createDeployment": [
+    {
+      "file": "readme.go",
+      "region": "DeployAndStart",
+      "label": "Deploy a BPMN process and start an instance"
+    }
+  ],
+  "createProcessInstance": [
+    {
+      "file": "readme.go",
+      "region": "DeployAndStart",
+      "label": "Deploy a BPMN process and start an instance"
+    }
+  ],
+  "getProcessInstance": [
+    {
+      "file": "readme.go",
+      "region": "EventualConsistency",
+      "label": "Read a process instance with eventual-consistency polling"
+    }
+  ],
+  "activateJobs": [
+    {
+      "file": "readme.go",
+      "region": "JobWorker",
+      "label": "Activate and complete jobs with a REST job worker"
+    }
+  ]
+}
