@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
                   xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
                   id="go-example-payment-definitions"
                   targetNamespace="https://camunda.com/examples/go-sdk">
@@ -23,4 +26,28 @@
       <bpmn:incoming>to-paid</bpmn:incoming>
     </bpmn:endEvent>
   </bpmn:process>
+  <bpmndi:BPMNDiagram id="go-example-payment-diagram">
+    <bpmndi:BPMNPlane id="go-example-payment-plane" bpmnElement="go-example-payment">
+      <bpmndi:BPMNShape id="order-created-shape" bpmnElement="order-created">
+        <dc:Bounds x="160" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="wait-for-payment-shape" bpmnElement="wait-for-payment">
+        <dc:Bounds x="270" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="244" y="145" width="88" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="order-paid-shape" bpmnElement="order-paid">
+        <dc:Bounds x="380" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="to-wait-for-payment-edge" bpmnElement="to-wait-for-payment">
+        <di:waypoint x="196" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="to-paid-edge" bpmnElement="to-paid">
+        <di:waypoint x="306" y="120" />
+        <di:waypoint x="380" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </bpmn:definitions>

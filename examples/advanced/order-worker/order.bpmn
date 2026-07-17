@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
                   xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
                   id="go-example-order-definitions"
                   targetNamespace="https://camunda.com/examples/go-sdk">
@@ -29,4 +32,36 @@
       <bpmn:incoming>to-rejected</bpmn:incoming>
     </bpmn:endEvent>
   </bpmn:process>
+  <bpmndi:BPMNDiagram id="go-example-order-diagram">
+    <bpmndi:BPMNPlane id="go-example-order-plane" bpmnElement="go-example-order">
+      <bpmndi:BPMNShape id="order-received-shape" bpmnElement="order-received">
+        <dc:Bounds x="160" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="reserve-stock-shape" bpmnElement="reserve-stock">
+        <dc:Bounds x="250" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="stock-unavailable-shape" bpmnElement="stock-unavailable">
+        <dc:Bounds x="282" y="162" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="order-confirmed-shape" bpmnElement="order-confirmed">
+        <dc:Bounds x="430" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="order-rejected-shape" bpmnElement="order-rejected">
+        <dc:Bounds x="430" y="242" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="to-reserve-edge" bpmnElement="to-reserve">
+        <di:waypoint x="196" y="140" />
+        <di:waypoint x="250" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="to-confirmed-edge" bpmnElement="to-confirmed">
+        <di:waypoint x="350" y="140" />
+        <di:waypoint x="430" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="to-rejected-edge" bpmnElement="to-rejected">
+        <di:waypoint x="300" y="198" />
+        <di:waypoint x="300" y="260" />
+        <di:waypoint x="430" y="260" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
 </bpmn:definitions>
