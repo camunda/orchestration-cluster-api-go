@@ -46,9 +46,13 @@ func run() error {
 	}
 
 	var (
-		mu       sync.Mutex
+		mu sync.Mutex
+		// attempts simulates a flaky dependency deterministically. Production
+		// idempotency and attempt state belong in the downstream system, not memory.
 		attempts = map[string]int{}
 	)
+	// The handler return type is the outcome protocol: variables complete the job,
+	// BpmnError follows a modeled path, and any other error consumes a job retry.
 	worker := client.NewJobWorker("reserve-inventory",
 		func(_ context.Context, job *camunda.Job) (map[string]any, error) {
 			var input order
@@ -83,6 +87,8 @@ func run() error {
 				"reserved":      true,
 			}, nil
 		},
+		// Size this bulkhead from inventory-service capacity. Fetch only the
+		// contract the handler owns, and keep the lock longer than worst-case work.
 		camunda.WithWorkerName("inventory-reservation"),
 		camunda.WithMaxConcurrentJobs(4),
 		camunda.WithFetchVariables("orderId", "sku", "outOfStock", "failFirstIO"),
@@ -93,6 +99,8 @@ func run() error {
 
 	workerCtx, stopWorker := context.WithCancel(ctx)
 	workerDone := make(chan error, 1)
+	// Run blocks. A dedicated goroutine lets this process create test orders while
+	// preserving graceful cancellation and draining below.
 	go func() { workerDone <- worker.Run(workerCtx) }()
 
 	orders := []order{
@@ -116,6 +124,8 @@ func run() error {
 		keys = append(keys, key)
 	}
 
+	// Command acceptance precedes read-side indexing. Polling is intentional here;
+	// a one-shot read would make the example flaky under normal cluster lag.
 	for _, key := range keys {
 		if _, err := exampleutil.WaitForCompletion(ctx, client, key); err != nil {
 			stopWorker()

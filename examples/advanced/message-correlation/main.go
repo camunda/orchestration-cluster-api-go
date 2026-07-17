@@ -36,6 +36,8 @@ func run() error {
 		return err
 	}
 
+	// A run-scoped suffix keeps business IDs and provider event IDs stable within
+	// retries while avoiding collisions when the example is executed repeatedly.
 	runID := time.Now().UTC().Format("20060102T150405.000000000")
 	orderIDs := []string{
 		"payment-2001-" + runID,
@@ -44,6 +46,8 @@ func run() error {
 	}
 	keys := make([]openapi.ProcessInstanceKey, 0, len(orderIDs))
 	for _, orderID := range orderIDs {
+		// Publish immediately after starting the process on purpose. The message TTL
+		// must cover the interval before the subscription becomes available.
 		key, err := exampleutil.StartProcess(ctx, client, processID, orderID,
 			map[string]any{"orderId": orderID, "amount": 49.90})
 		if err != nil {
@@ -66,6 +70,8 @@ func run() error {
 		}
 	}
 
+	// Completion is read from eventually consistent secondary storage, so use the
+	// SDK polling helper rather than assuming immediate visibility.
 	for i, key := range keys {
 		if _, err := exampleutil.WaitForCompletion(ctx, client, key); err != nil {
 			return err
@@ -84,6 +90,8 @@ func publishPayment(
 	request := openapi.NewMessagePublicationRequest("payment-received")
 	request.SetCorrelationKey(orderID)
 	request.SetMessageId(messageID)
+	// TTL defines both the buffering window and duplicate-ID protection window.
+	// Set it from real producer redelivery and process-start timing in production.
 	request.SetTimeToLive((10 * time.Minute).Milliseconds())
 	request.SetVariables(map[string]any{
 		"paymentStatus": "captured",

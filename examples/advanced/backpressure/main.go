@@ -19,6 +19,7 @@ import (
 )
 
 type counters struct {
+	// Atomics keep the hot path lock-free across hundreds of stress goroutines.
 	succeeded    atomic.Uint64
 	backpressure atomic.Uint64
 	failed       atomic.Uint64
@@ -31,6 +32,7 @@ var paymentIntakeModel []byte
 
 func main() {
 	var (
+		// Defaults are intentionally hostile to a single-node local cluster.
 		duration = flag.Duration("duration", 30*time.Second, "maximum stress-test duration")
 		flooders = flag.Int("flooders", 512, "concurrent unprotected pressure generators")
 		clients  = flag.Int("clients", 64, "concurrent protected logical requests")
@@ -81,6 +83,8 @@ func run(duration time.Duration, flooders, protectedClients int) error {
 
 	setupCtx, cancelSetup := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancelSetup()
+	// Protected payment events perform real business work: each accepted message
+	// starts the embedded payment-intake process rather than disappearing unused.
 	if err := exampleutil.Deploy(
 		setupCtx,
 		protectedClient,
@@ -98,6 +102,8 @@ func run(duration time.Duration, flooders, protectedClients int) error {
 	start := time.Now()
 	runID := start.UTC().Format("20060102T150405.000000000")
 
+	// The two goroutine groups are separate bulkheads. Only the pressure group
+	// deliberately bypasses adaptive gating.
 	for source := range flooders {
 		wg.Add(1)
 		go func() {
@@ -181,6 +187,8 @@ func protect(
 		messageID := "payment-provider-event-" + paymentID
 		request := openapi.NewMessagePublicationRequest("payment-received")
 		request.SetMessageId(messageID)
+		// A business ID identifies the workflow; the provider event ID identifies
+		// this delivery. They solve different idempotency problems.
 		request.SetBusinessId(orderID)
 		request.SetTimeToLive((30 * time.Second).Milliseconds())
 		request.SetVariables(map[string]any{
@@ -195,6 +203,8 @@ func protect(
 		for attempt := 0; ctx.Err() == nil; attempt++ {
 			_, err := client.PublishMessage(ctx, *request)
 			if err == nil || isDuplicate(err) {
+				// 409 is success-shaped only because this exact message ID was
+				// already accepted during its TTL; no other client error is ignored.
 				stats.succeeded.Add(1)
 				break
 			}
@@ -231,6 +241,8 @@ func record(err error, stats *counters) {
 }
 
 func isBackpressure(err error) bool {
+	// Count only signals emitted by the cluster. Local queue saturation and generic
+	// network failures must not make this stress test claim it created backpressure.
 	status, ok := camunda.StatusCode(err)
 	if ok && (status == 429 || status == 503) {
 		return true

@@ -25,13 +25,16 @@ go run ./examples/advanced/message-correlation
   the payment. The test succeeds only after observing real
   429/503/`RESOURCE_EXHAUSTED` responses and 100 payment events completing
   afterward. Run it only against a disposable local cluster; tune with
-  `-flooders`, `-clients`, and `-duration`.
+  `-flooders`, `-clients`, and `-duration`. See its
+  [detailed guide](backpressure/README.md).
 - **order-worker** treats technical failures as retryable job failures and stock
   shortages as modeled BPMN errors. Do not retry business outcomes as if they
-  were infrastructure faults.
+  were infrastructure faults. See its
+  [detailed guide](order-worker/README.md).
 - **message-correlation** publishes messages with a useful TTL and a stable
   message ID. This avoids the subscription-open race and makes at-least-once
-  producer redelivery safe during the broker's deduplication window.
+  producer redelivery safe during the broker's deduplication window. See its
+  [detailed guide](message-correlation/README.md).
 
 The embedded credentials are local-development defaults only. Production
 applications should use OAuth credentials sourced from a secret store.
