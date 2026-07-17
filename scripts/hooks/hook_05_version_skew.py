@@ -26,23 +26,29 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-# TEMPORARY: fields that are required in the spec but not yet emitted by shipped
-# servers. Each entry is a stopgap — REMOVE it once the target server version
-# emits the field (or the spec is corrected), so the required-presence check is
-# restored. Confirmed against live clusters; revisit per issue #3's broader audit.
+# TEMPORARY: fields that are required in the bundled spec (which tracks camunda
+# `main`, ahead of released servers) but are not emitted by the integration
+# server we pin (8.10.0-alpha3). Each entry is a stopgap — REMOVE it once the
+# pinned server emits the field (or the spec is corrected), so the
+# required-presence check is restored. Confirmed against the live 8.10.0-alpha3
+# cluster; revisit per issue #3's broader audit.
 VERSION_SKEW_OPTIONAL = [
-    # TEMPORARY (issue #3): never emitted by 8.9 / 8.10 servers.
+    # TEMPORARY (issue #3): not emitted by 8.10.0-alpha3 (ActivatedJobResult).
     "physicalTenantId",
-    # TEMPORARY: not emitted by 8.10.0-alpha3 (ActivatedJobResult); present on 8.10
-    # once the server catches up — drop this entry then. Blocks the job worker.
+    # TEMPORARY: not emitted by 8.10.0-alpha3 (ActivatedJobResult). Blocks the
+    # job worker. Drop when the pinned server emits it.
     "leaseToken",
     # TEMPORARY: required across 8 result schemas (CreateProcessInstanceResult,
     # ProcessInstanceResult, ActivatedJobResult, JobSearchResult, UserTaskResult,
     # DecisionInstanceResult, DecisionInstanceGetQueryResult,
-    # CorrelatedMessageSubscriptionResult) but not emitted by 8.9 servers; present
-    # on newer 8.10 builds. Blocks CreateProcessInstance and searches. Drop once
-    # the pinned server emits it.
+    # CorrelatedMessageSubscriptionResult) but observed absent from release-server
+    # responses during integration testing. Blocks CreateProcessInstance and
+    # searches. Drop when the pinned server emits it.
     "businessId",
+    # TEMPORARY: required on ProcessDefinitionResult but not emitted by
+    # 8.10.0-alpha3. Blocks GetProcessDefinition. Drop when the pinned server
+    # emits it.
+    "isDeleted",
 ]
 
 # Fields relaxed only within a specific model file. DeploymentMetadataResult

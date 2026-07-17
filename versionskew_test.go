@@ -8,8 +8,9 @@ import (
 )
 
 // TestActivatedJobDecodesWithoutPhysicalTenantId is a regression guard for
-// issue #3. Real 8.9/8.10 servers never emit the spec-required physicalTenantId
-// field, so the generated strict decoder must tolerate its absence (relaxed by
+// issue #3. The bundled spec (which tracks camunda `main`) requires
+// physicalTenantId, but the pinned integration server (8.10.0-alpha3) does not
+// emit it, so the generated strict decoder must tolerate its absence (relaxed by
 // the version-skew post-processing hook). Guarding the defect class: a
 // spec-required-but-server-omitted field must not break decoding.
 //
@@ -96,10 +97,11 @@ func TestDeploymentMetadataDecodesWithOnlyProcessDefinition(t *testing.T) {
 }
 
 // TestCreateProcessInstanceResultDecodesWithoutBusinessId guards businessId, a
-// spec-required field that 8.9 servers omit from result payloads (it is present
-// on newer 8.10 builds). Relaxed globally by the version-skew hook across the
-// result schemas that declare it. The payload mirrors a real
-// /v2/process-instances create response with businessId absent.
+// field required in the bundled spec (which tracks camunda `main`) but observed
+// absent from release-server responses during integration testing. Relaxed
+// globally by the version-skew hook across the result schemas that declare it.
+// The payload mirrors a real /v2/process-instances create response with
+// businessId absent.
 func TestCreateProcessInstanceResultDecodesWithoutBusinessId(t *testing.T) {
 	const realResponse = `{
   "processDefinitionId": "demo-process",
@@ -120,5 +122,31 @@ func TestCreateProcessInstanceResultDecodesWithoutBusinessId(t *testing.T) {
 	}
 	if result.BusinessId.IsSet() {
 		t.Error("omitted businessId should be unset")
+	}
+}
+
+// TestProcessDefinitionResultDecodesWithoutIsDeleted guards isDeleted, a field
+// required in the bundled spec (which tracks camunda `main`) but not emitted by
+// the pinned integration server (8.10.0-alpha3) on ProcessDefinitionResult.
+// Relaxed by the version-skew hook. The payload mirrors a real
+// /v2/process-definitions/{key} response with isDeleted absent.
+func TestProcessDefinitionResultDecodesWithoutIsDeleted(t *testing.T) {
+	const realResponse = `{
+  "name": "Demo Process",
+  "resourceName": "greet.bpmn",
+  "version": 1,
+  "versionTag": "",
+  "processDefinitionId": "demo-process",
+  "tenantId": "<default>",
+  "processDefinitionKey": "2251799813685330",
+  "hasStartForm": false
+}`
+
+	var result openapi.ProcessDefinitionResult
+	if err := json.Unmarshal([]byte(realResponse), &result); err != nil {
+		t.Fatalf("a process-definition response must decode despite a missing spec-required isDeleted: %v", err)
+	}
+	if got := result.GetProcessDefinitionId(); got != "demo-process" {
+		t.Errorf("processDefinitionId = %q, want demo-process", got)
 	}
 }
