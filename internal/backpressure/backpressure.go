@@ -25,8 +25,11 @@ import (
 	"time"
 )
 
-// ErrQueueFull is returned by Acquire when the waiter queue is at capacity.
-var ErrQueueFull = errors.New("backpressure: waiter queue full")
+// ErrQueueFull is returned by Acquire when the waiter queue is at capacity. It is
+// re-exported as the public camunda.ErrBackpressureQueueFull, so its message keeps
+// the "camunda:" prefix to stay consistent with the other public SDK sentinels
+// and with the pre-fix user-facing text.
+var ErrQueueFull = errors.New("camunda: backpressure waiter queue full")
 
 // Severity is the backpressure severity level reported by the manager.
 type Severity int
