@@ -4,6 +4,10 @@ on:
   push:
     branches: [main, "stable/**"]
   pull_request:
+  schedule:
+    # Run the complete suite daily against the default branch and current upstream API.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -22,6 +26,8 @@ jobs:
         run: |
           out="$(gofmt -l .)"
           if [ -n "$out" ]; then echo "gofmt needed on:"; echo "$out"; exit 1; fi
+      - name: go mod tidy
+        run: go mod tidy -diff
       - name: go vet
         run: go vet ./...
       - name: go vet (integration build)
@@ -120,9 +126,8 @@ jobs:
           artifact-name: integration-docker-logs
 
   generation-drift:
-    name: Generation drift (non-blocking)
+    name: Generation drift
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v6
@@ -141,11 +146,18 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Regenerate from upstream main and report drift
+      - name: Refresh upstream inputs
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/fetch-proto.sh
+          ./scripts/bundle-spec.sh
+      - name: Regenerate and check for drift
         run: |
           chmod +x scripts/*.sh
           ./scripts/generate.sh
           if ! git diff --quiet; then
             echo "::warning::Generated output drifts from committed sources"
-            git --no-pager diff --stat
+            git --no-pager diff
+            exit 1
           fi
