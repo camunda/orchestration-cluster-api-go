@@ -38,7 +38,7 @@ echo "==> Generating REST client with openapi-generator..."
 npx --yes @openapitools/openapi-generator-cli generate -c openapi-generator-config.yaml
 
 echo "==> Generating gRPC stubs with buf..."
-npx --yes @bufbuild/buf generate
+npx --yes @bufbuild/buf@1.72.0 generate
 
 echo "==> Post-processing: Domain Type System + semantic fields + facade..."
 python3 scripts/postprocess.py \

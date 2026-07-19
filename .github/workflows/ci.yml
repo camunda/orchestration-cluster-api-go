@@ -66,7 +66,7 @@ jobs:
       # recurring CI flake point during GitHub incidents and pulls in registry
       # push/setup surface we don't want for a lint-only job.
       - name: buf lint
-        run: npx --yes @bufbuild/buf lint
+        run: npx --yes @bufbuild/buf@1.72.0 lint
 
   examples:
     name: Examples & README sync

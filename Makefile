@@ -68,7 +68,7 @@ tidy-check:
 
 lint: vet
 	@command -v golangci-lint >/dev/null 2>&1 && golangci-lint run || echo "golangci-lint not installed; ran go vet only"
-	npx --yes @bufbuild/buf lint || true
+	npx --yes @bufbuild/buf@1.72.0 lint || true
 
 examples:
 	$(GO) build ./examples/...
