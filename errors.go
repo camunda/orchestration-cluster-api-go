@@ -8,6 +8,8 @@ package camunda
 import (
 	"errors"
 	"fmt"
+
+	"github.com/camunda/orchestration-cluster-api-go/internal/backpressure"
 )
 
 // Sentinel errors. Use errors.Is to test for them.
@@ -17,8 +19,10 @@ var (
 	// ErrAuth indicates a failure obtaining or refreshing an auth token.
 	ErrAuth = errors.New("camunda: authentication error")
 	// ErrBackpressureQueueFull indicates the client-side backpressure controller
-	// rejected the request because its waiter queue is at capacity.
-	ErrBackpressureQueueFull = errors.New("camunda: backpressure waiter queue full")
+	// rejected the request because its waiter queue is at capacity. It is the same
+	// value the backpressure gate returns, so errors.Is matches it on any request
+	// rejected for this reason (facade, Raw client, or job workers).
+	ErrBackpressureQueueFull = backpressure.ErrQueueFull
 	// ErrEventualConsistencyTimeout indicates an eventual-consistency polling
 	// helper timed out before its predicate was met.
 	ErrEventualConsistencyTimeout = errors.New("camunda: eventual consistency timeout")
