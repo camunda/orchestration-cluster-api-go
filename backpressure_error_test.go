@@ -21,9 +21,11 @@ import (
 // is racy in a unit test; this asserts the error identity that makes the mapping
 // hold on every code path (facade, Raw client, and job workers).
 func TestBackpressureQueueFullMapsToPublicSentinel(t *testing.T) {
-	// The exact value the transport returns must match the public sentinel.
-	if !errors.Is(backpressure.ErrQueueFull, camunda.ErrBackpressureQueueFull) {
-		t.Fatal("backpressure.ErrQueueFull must match camunda.ErrBackpressureQueueFull via errors.Is")
+	// The public sentinel must be the *same value* as the internal error the
+	// transport returns — not merely errors.Is-compatible — so the mapping can't
+	// silently regress to a distinct value with a custom Is(). Compare identity.
+	if backpressure.ErrQueueFull != camunda.ErrBackpressureQueueFull {
+		t.Fatal("camunda.ErrBackpressureQueueFull must be the same value as backpressure.ErrQueueFull")
 	}
 
 	// It must still match after being wrapped as a *url.Error, which is how
