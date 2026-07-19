@@ -2,7 +2,7 @@ package camunda_test
 
 import (
 	"errors"
-	"fmt"
+	"net/url"
 	"testing"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
@@ -26,10 +26,9 @@ func TestBackpressureQueueFullMapsToPublicSentinel(t *testing.T) {
 		t.Fatal("backpressure.ErrQueueFull must match camunda.ErrBackpressureQueueFull via errors.Is")
 	}
 
-	// It must still match after being wrapped the way http.Client.Do wraps a
-	// RoundTrip error (a *url.Error using %w), which is how it reaches callers
-	// through the generated client.
-	wrapped := fmt.Errorf(`Post "https://cluster/v2/process-instances": %w`, backpressure.ErrQueueFull)
+	// It must still match after being wrapped as a *url.Error, which is how
+	// http.Client.Do surfaces a RoundTrip error through the generated client.
+	wrapped := &url.Error{Op: "Post", URL: "https://cluster/v2/process-instances", Err: backpressure.ErrQueueFull}
 	if !errors.Is(wrapped, camunda.ErrBackpressureQueueFull) {
 		t.Fatal("a wrapped queue-full error must still match camunda.ErrBackpressureQueueFull")
 	}
