@@ -85,6 +85,10 @@ fmt.Printf("Camunda 8 %s — %d broker(s), %d partition(s)\n",
 	topology.GetGatewayVersion(), len(topology.GetBrokers()), topology.GetPartitionsCount())
 ```
 
+For production-shaped, runnable workflows, see the
+[advanced examples](examples/advanced/README.md): bounded load with adaptive
+backpressure, resilient job handling, and idempotent message correlation.
+
 ## Configuration
 
 Every setting is resolved from the environment and overridable with functional
