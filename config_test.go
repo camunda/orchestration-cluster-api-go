@@ -76,6 +76,50 @@ func TestZeebeFallbackKeys(t *testing.T) {
 	}
 }
 
+func TestFalconResolution(t *testing.T) {
+	cases := []struct {
+		name        string
+		env         map[string]string
+		opts        []Option
+		wantFalcon  bool
+		wantForce   bool
+		wantEnabled bool
+	}{
+		{name: "default on", wantFalcon: true, wantEnabled: true},
+		{name: "env off", env: map[string]string{"CAMUNDA_FALCON": "false"}},
+		{name: "env off zero", env: map[string]string{"CAMUNDA_FALCON": "0"}},
+		{name: "env explicit on", env: map[string]string{"CAMUNDA_FALCON": "true"}, wantFalcon: true, wantEnabled: true},
+		{
+			name:       "force rest overrides",
+			env:        map[string]string{"CAMUNDA_FORCE_REST": "1"},
+			wantFalcon: true, wantForce: true, wantEnabled: false,
+		},
+		{name: "option disables", opts: []Option{WithFalcon(false)}},
+		{
+			name:       "option force rest",
+			opts:       []Option{WithForceREST(true)},
+			wantFalcon: true, wantForce: true, wantEnabled: false,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg, err := loadConfig(envFrom(tc.env), nil, tc.opts...)
+			if err != nil {
+				t.Fatalf("loadConfig: %v", err)
+			}
+			if cfg.Falcon != tc.wantFalcon {
+				t.Errorf("Falcon = %v, want %v", cfg.Falcon, tc.wantFalcon)
+			}
+			if cfg.ForceREST != tc.wantForce {
+				t.Errorf("ForceREST = %v, want %v", cfg.ForceREST, tc.wantForce)
+			}
+			if got := cfg.FalconEnabled(); got != tc.wantEnabled {
+				t.Errorf("FalconEnabled() = %v, want %v", got, tc.wantEnabled)
+			}
+		})
+	}
+}
+
 func TestOptionsOverrideEnv(t *testing.T) {
 	env := map[string]string{"CAMUNDA_REST_ADDRESS": "http://from-env:8080"}
 	cfg, err := loadConfig(envFrom(env), nil,

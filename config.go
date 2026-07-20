@@ -186,6 +186,13 @@ type Config struct {
 
 	DefaultTenantID string
 
+	// Falcon enables the FALCON (nanobpmn command-stream) transport upgrade when
+	// the gateway advertises it (CAMUNDA_FALCON, default true). ForceREST forces
+	// the pure-REST path even when FALCON is advertised (CAMUNDA_FORCE_REST),
+	// e.g. where WebSockets are blocked. Use FalconEnabled for the resolved state.
+	Falcon    bool
+	ForceREST bool
+
 	BackpressureProfile BackpressureProfile
 	LogLevel            LogLevel
 	EventualPollDefault time.Duration
@@ -278,6 +285,15 @@ func resolveFromEnv(getenv func(string) string, overrides map[string]string) (*C
 		return nil, err
 	}
 	cfg.LogLevel = level
+
+	// FALCON (nanobpmn command-stream) transport toggles. Enabled by default;
+	// disabled by an explicitly falsy CAMUNDA_FALCON or a truthy CAMUNDA_FORCE_REST.
+	if raw := get("CAMUNDA_FALCON"); raw == "" {
+		cfg.Falcon = true
+	} else {
+		cfg.Falcon = !isFalsy(raw)
+	}
+	cfg.ForceREST = isTruthy(get("CAMUNDA_FORCE_REST"))
 
 	if ms, err := parseMillis(get("CAMUNDA_SDK_EVENTUAL_POLL_DEFAULT_MS"), "CAMUNDA_SDK_EVENTUAL_POLL_DEFAULT_MS"); err != nil {
 		return nil, err
@@ -388,6 +404,12 @@ func (c *Config) Validate() error {
 	return nil
 }
 
+// FalconEnabled reports whether the FALCON command-stream transport may be used:
+// it must be enabled (CAMUNDA_FALCON) and not force-disabled (CAMUNDA_FORCE_REST).
+// It only engages when the gateway actually advertises FALCON support; against
+// stock Camunda the SDK stays on REST regardless.
+func (c *Config) FalconEnabled() bool { return c.Falcon && !c.ForceREST }
+
 func inferAuthStrategy(c *Config) AuthStrategy {
 	switch {
 	case c.ClientID != "" && c.ClientSecret != "":
@@ -398,6 +420,19 @@ func inferAuthStrategy(c *Config) AuthStrategy {
 		return AuthNone
 	}
 }
+
+// isFalsy reports whether v is an explicit falsy toggle value.
+func isFalsy(v string) bool {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "", "0", "off", "false", "no":
+		return true
+	default:
+		return false
+	}
+}
+
+// isTruthy reports whether v is a non-empty, non-falsy toggle value.
+func isTruthy(v string) bool { return strings.TrimSpace(v) != "" && !isFalsy(v) }
 
 func normalizeRestAddress(addr string) string {
 	return strings.TrimRight(strings.TrimSpace(addr), "/")
