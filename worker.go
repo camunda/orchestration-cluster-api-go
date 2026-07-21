@@ -168,17 +168,17 @@ func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, j
 	if err != nil {
 		var bpmn *BpmnError
 		if errors.As(err, &bpmn) {
-			sw.ThrowError(job.key, bpmn.Code, bpmn.Message, bpmn.Variables)
+			sw.ThrowError(job.Key(), bpmn.Code, bpmn.Message, bpmn.Variables)
 			return
 		}
 		retries := job.Retries() - 1
 		if retries < 0 {
 			retries = 0
 		}
-		sw.Fail(job.key, retries, err.Error())
+		sw.Fail(job.Key(), retries, err.Error())
 		return
 	}
-	sw.Complete(job.key, vars)
+	sw.Complete(job.Key(), vars)
 }
 
 // runRESTPoll is the REST long-polling worker loop (also the FALCON fallback).

@@ -29,6 +29,10 @@ const (
 	maxFrameBytes = 1 << 24 // 16 MiB
 )
 
+// falconDialTimeout bounds a single connection handshake so a hung TCP/TLS dial
+// (e.g. a blackholed endpoint) can't stall the supervisor and block failover.
+const falconDialTimeout = 10 * time.Second
+
 // errLinkReconnecting / errLinkClosed are returned by SupervisedLink.send while
 // the link has no live socket.
 var (
@@ -234,7 +238,12 @@ func (l *SupervisedLink) supervise(supCtx context.Context, d *Dialer, hooks link
 
 	for supCtx.Err() == nil {
 		url := pickEndpoint(l.endpoints, lastFailed, &seed)
-		c, err := d.dial(supCtx, url)
+		// Bound the handshake so a hung dial can't stall failover. dial only uses the
+		// context for the upgrade; the live connection runs on its own context, so
+		// cancelling here after dial returns is safe.
+		dctx, dcancel := context.WithTimeout(supCtx, falconDialTimeout)
+		c, err := d.dial(dctx, url)
+		dcancel()
 		if err != nil {
 			if !sentReady {
 				ready <- err

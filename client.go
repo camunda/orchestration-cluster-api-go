@@ -35,6 +35,7 @@ type CamundaClient struct {
 	// falconProdOnce builds the shared create producer on first stream create.
 	falconMu        sync.Mutex
 	falconResolved  bool
+	falconProbing   bool
 	falconLastProbe time.Time
 	falconCapsV     *falcon.Caps
 	falconDialer    *falcon.Dialer

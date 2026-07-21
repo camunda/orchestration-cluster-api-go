@@ -32,32 +32,50 @@ func (c *CamundaClient) falconCaps(_ context.Context) *falcon.Caps {
 		return nil
 	}
 	c.falconMu.Lock()
-	defer c.falconMu.Unlock()
 	if c.falconResolved {
-		return c.falconCapsV
+		caps := c.falconCapsV
+		c.falconMu.Unlock()
+		return caps
 	}
-	if !c.falconLastProbe.IsZero() && time.Since(c.falconLastProbe) < falconProbeRetryInterval {
-		return nil // a recent probe failed; stay on REST until the retry window elapses
+	// Another goroutine is already probing, or we're inside the retry backoff after
+	// a transient failure: fall back to REST immediately rather than blocking.
+	if c.falconProbing ||
+		(!c.falconLastProbe.IsZero() && time.Since(c.falconLastProbe) < falconProbeRetryInterval) {
+		c.falconMu.Unlock()
+		return nil
 	}
 	if c.falconDialer == nil {
 		d, err := c.buildFalconDialer()
 		if err != nil {
 			c.logger.Warn("falcon dialer unavailable; using REST", "error", err)
 			c.falconResolved = true // dialer construction failure is definitive
+			c.falconMu.Unlock()
 			return nil
 		}
 		c.falconDialer = d
 	}
+	c.falconProbing = true
 	c.falconLastProbe = time.Now()
+	dialer := c.falconDialer
+	c.falconMu.Unlock()
+
+	// Probe WITHOUT holding the mutex, so concurrent callers fall back to REST
+	// immediately instead of serializing behind a network round-trip. The probe
+	// runs on its own timeout, decoupled from any caller's request context.
 	pctx, cancel := context.WithTimeout(context.Background(), falconDetectTimeout)
-	defer cancel()
-	caps, err := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress), c.falconDialer.HTTPClient)
+	caps, err := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress), dialer.HTTPClient)
+	cancel()
+
+	c.falconMu.Lock()
+	c.falconProbing = false
 	if err != nil {
+		c.falconMu.Unlock()
 		c.logger.Debug("falcon detection failed; will retry", "error", err)
 		return nil // transient: retry after falconProbeRetryInterval
 	}
 	c.falconResolved = true // definitive: nano detected or confirmed stock
 	c.falconCapsV = caps
+	c.falconMu.Unlock()
 	if caps != nil {
 		c.logger.Debug("falcon command stream detected", "endpoints", caps.Endpoints)
 	}
