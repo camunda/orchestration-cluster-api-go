@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+// maxJobCredits caps the delivery-credit window (and therefore the job buffer)
+// requested from the gateway, bounding client-side memory for pushed jobs.
+const maxJobCredits = 4096
+
 // SubscribeArgs configures a command-stream job subscription.
 type SubscribeArgs struct {
 	JobType        string
@@ -30,7 +34,17 @@ type StreamWorker struct {
 // args.JobType, and starts buffering pushed jobs. On failover the subscription is
 // automatically re-sent to the survivor.
 func Subscribe(endpoints []string, d *Dialer, args SubscribeArgs) (*StreamWorker, error) {
-	w := &StreamWorker{jobs: make(chan json.RawMessage, 256), jobType: args.JobType}
+	// The gateway pushes at most JobCredits jobs before awaiting replenishment, so a
+	// buffer of the same size guarantees a push never has to be dropped. Clamp the
+	// window to a sane maximum and size the buffer to match.
+	credits := args.JobCredits
+	if credits < 1 {
+		credits = 1
+	}
+	if credits > maxJobCredits {
+		credits = maxJobCredits
+	}
+	w := &StreamWorker{jobs: make(chan json.RawMessage, credits), jobType: args.JobType}
 
 	onFrame := func(raw []byte) {
 		var f struct {
@@ -43,15 +57,15 @@ func Subscribe(endpoints []string, d *Dialer, args SubscribeArgs) (*StreamWorker
 		select {
 		case w.jobs <- f.Job:
 		default:
-			// Buffer full: drop rather than block the reader. The delivery-credit
-			// window bounds in-flight jobs, so this should not happen in practice.
+			// Unreachable in practice: the buffer is sized to the credit window, so
+			// the gateway cannot have more jobs outstanding than the buffer holds.
 		}
 	}
 
 	sub := map[string]any{
 		"type":       "subscribe",
 		"jobType":    args.JobType,
-		"jobCredits": args.JobCredits,
+		"jobCredits": credits,
 	}
 	if len(args.FetchVariables) > 0 {
 		sub["fetchVariable"] = args.FetchVariables

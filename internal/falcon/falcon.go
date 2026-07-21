@@ -127,9 +127,19 @@ func endpointsFromTopology(v2BaseURL, path string, body topology) []string {
 		if host == "" || host == "0.0.0.0" || host == "::" || host == "[::]" {
 			host = u.Hostname()
 		}
-		add(fmt.Sprintf("%s://%s:%d%s", scheme, host, b.Port, path))
+		add(fmt.Sprintf("%s://%s:%d%s", scheme, bracketHost(host), b.Port, path))
 	}
 	return out
+}
+
+// bracketHost wraps an unbracketed IPv6 literal in square brackets so it is a
+// valid URL authority ("2001:db8::1" -> "[2001:db8::1]"). Names and IPv4 literals
+// (and already-bracketed hosts) are returned unchanged.
+func bracketHost(h string) string {
+	if strings.Contains(h, ":") && !strings.HasPrefix(h, "[") {
+		return "[" + h + "]"
+	}
+	return h
 }
 
 // wsScheme maps an HTTP scheme to the corresponding WebSocket scheme: https → wss

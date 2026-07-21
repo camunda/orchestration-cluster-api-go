@@ -231,6 +231,9 @@ func (p *Producer) Create(ctx context.Context, args CreateArgs) (*CreateOutcome,
 
 	if err := p.link.send(payload); err != nil {
 		p.discard(corr)
+		// The frame never left the client, so return the credit we reserved for it
+		// rather than leaking it until the next Welcome replenishes the window.
+		p.addCredits(1)
 		return nil, err
 	}
 

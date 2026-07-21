@@ -284,3 +284,67 @@ func asRemoteError(err error, target **RemoteError) bool {
 	}
 	return ok
 }
+
+func TestProducerRestoresCreditOnSendFailure(t *testing.T) {
+	// A link with no live writer fails every send. Create must return the credit it
+	// reserved so a transient reconnect can't artificially exhaust the window.
+	p := &Producer{
+		link:      &SupervisedLink{}, // writer nil => send errors
+		creditCh:  make(chan struct{}),
+		credits:   1,
+		pending:   map[uint64]chan ackResult{},
+		awaitPend: map[uint64]chan awaitResult{},
+	}
+	if _, err := p.Create(context.Background(), CreateArgs{ProcessDefinitionID: "p"}); err == nil {
+		t.Fatal("expected a send failure while the link has no writer")
+	}
+	p.mu.Lock()
+	got := p.credits
+	p.mu.Unlock()
+	if got != 1 {
+		t.Fatalf("credit was not restored after a failed send: got %d, want 1", got)
+	}
+}
+
+func TestEndpointsFromTopologyBracketsIPv6(t *testing.T) {
+	body := topology{}
+	body.Brokers = []struct {
+		Host string `json:"host"`
+		Port int    `json:"port"`
+	}{{Host: "2001:db8::1", Port: 8080}}
+
+	eps := endpointsFromTopology("http://gateway:8080/v2", "/falcon", body)
+	if !containsSuffix(eps, "[2001:db8::1]:8080/falcon") {
+		t.Fatalf("IPv6 broker host must be bracketed; got %v", eps)
+	}
+}
+
+func TestSubscribeClampsJobCredits(t *testing.T) {
+	got := make(chan float64, 1)
+	eps, d := startFalconServer(t, func(ctx context.Context, c *websocket.Conn) {
+		sub, err := readJSON(ctx, c)
+		if err != nil {
+			return
+		}
+		if n, ok := sub["jobCredits"].(float64); ok {
+			got <- n
+		}
+		_ = writeJSON(ctx, c, map[string]any{"type": "welcome", "heartbeatMs": 15000})
+		<-ctx.Done()
+	})
+
+	w, err := Subscribe(eps, d, SubscribeArgs{JobType: "x", JobCredits: 10_000})
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	defer w.Close()
+
+	select {
+	case n := <-got:
+		if int64(n) != maxJobCredits {
+			t.Errorf("requested jobCredits = %d, want clamped to %d", int64(n), maxJobCredits)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("did not receive subscribe frame")
+	}
+}
