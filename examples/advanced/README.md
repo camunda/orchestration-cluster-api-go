@@ -14,6 +14,10 @@ go run ./examples/advanced/backpressure
 
 go run ./examples/advanced/order-worker
 go run ./examples/advanced/message-correlation
+go run ./examples/advanced/grpc-stream-worker
+
+# Local c8run uses plaintext gRPC.
+CAMUNDA_GRPC_INSECURE=true go run ./examples/advanced/grpc-low-level
 ```
 
 - **backpressure** is an intentionally aggressive stress test. Unprotected
@@ -35,6 +39,16 @@ go run ./examples/advanced/message-correlation
   message ID. This avoids the subscription-open race and makes at-least-once
   producer redelivery safe during the broker's deduplication window. See its
   [detailed guide](message-correlation/README.md).
+- **grpc-stream-worker** is the recommended high-level gRPC path. It runs a
+  parcel-delivery workflow and demonstrates completion, retryable technical
+  failure, a modeled BPMN error, stream reconnection, the REST safety-net poll,
+  and graceful shutdown. See its
+  [detailed guide](grpc-stream-worker/README.md).
+- **grpc-low-level** calls the generated `pb.GatewayClient` directly for a
+  representative topology RPC. It makes TLS, bearer metadata, deadlines,
+  status handling, and connection ownership explicit. Use this lower-level,
+  less stable escape hatch only when the root SDK does not expose the required
+  RPC. See its [detailed guide](grpc-low-level/README.md).
 
 The embedded credentials are local-development defaults only. Production
 applications should use OAuth credentials sourced from a secret store.
