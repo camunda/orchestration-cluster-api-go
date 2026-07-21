@@ -39,7 +39,7 @@ const (
 // handwrittenOps are operations excluded from generation because the SDK ships a
 // hand-written ergonomic method with the same signature. CreateProcessInstance is
 // hand-written so it can transparently route creates over the FALCON command
-// stream (with a REST fallback) — see create.go.
+// stream (with a REST fallback) — see falcon.go.
 var handwrittenOps = map[string]bool{
 	"CreateProcessInstance": true,
 }

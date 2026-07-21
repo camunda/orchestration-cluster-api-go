@@ -44,7 +44,7 @@ func Subscribe(endpoints []string, d *Dialer, args SubscribeArgs) (*StreamWorker
 	if credits > maxJobCredits {
 		credits = maxJobCredits
 	}
-	w := &StreamWorker{jobs: make(chan json.RawMessage, credits), jobType: args.JobType}
+	w := &StreamWorker{jobs: make(chan json.RawMessage, int(credits)), jobType: args.JobType}
 
 	onFrame := func(raw []byte) {
 		var f struct {
