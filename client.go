@@ -7,11 +7,14 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	openapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
 	"github.com/camunda/orchestration-cluster-api-go/internal/backpressure"
 	"github.com/camunda/orchestration-cluster-api-go/internal/diag"
+	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
 	"github.com/camunda/orchestration-cluster-api-go/internal/retry"
 	"github.com/camunda/orchestration-cluster-api-go/internal/transport"
 )
@@ -25,6 +28,20 @@ type CamundaClient struct {
 	raw    *openapi.APIClient
 	logger *diag.Logger
 	bp     *backpressure.Manager
+
+	// FALCON (nanobpmn command-stream) state, lazily resolved and shared for the
+	// client's lifetime. falconMu guards a probe that caches a definitive result
+	// (nano detected, or confirmed stock) but retries after a transient failure;
+	// falconProdOnce builds the shared create producer on first stream create.
+	falconMu        sync.Mutex
+	falconResolved  bool
+	falconProbing   bool
+	falconLastProbe time.Time
+	falconCapsV     *falcon.Caps
+	falconDialer    *falcon.Dialer
+	falconProdOnce  sync.Once
+	falconProd      *falcon.Producer
+	falconProdErr   error
 }
 
 // New resolves configuration from environment variables and options, then builds

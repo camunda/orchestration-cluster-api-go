@@ -2243,29 +2243,6 @@ func (c *CamundaClient) CancelProcessInstancesBatchOperation(ctx context.Context
 	return value, c.wrapError(resp, err)
 }
 
-// CreateProcessInstance calls the CreateProcessInstance operation.
-//
-// Example:
-//
-//	byID := openapi.NewProcessInstanceCreationInstructionById("order-process")
-//	byID.SetVariables(map[string]any{"orderId": "order-42"})
-//
-//	result, err := client.CreateProcessInstance(ctx,
-//		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
-//	if err != nil {
-//		return err
-//	}
-//	fmt.Printf("started instance %v\n", result.GetProcessInstanceKey())
-func (c *CamundaClient) CreateProcessInstance(ctx context.Context, body openapi.ProcessInstanceCreationInstruction, opts ...func(openapi.ApiCreateProcessInstanceRequest) openapi.ApiCreateProcessInstanceRequest) (*openapi.CreateProcessInstanceResult, error) {
-	req := c.raw.ProcessInstanceAPI.CreateProcessInstance(ctx)
-	req = req.ProcessInstanceCreationInstruction(body)
-	for _, opt := range opts {
-		req = opt(req)
-	}
-	value, resp, err := req.Execute()
-	return value, c.wrapError(resp, err)
-}
-
 // DeleteProcessInstance calls the DeleteProcessInstance operation.
 //
 // Example:

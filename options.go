@@ -75,3 +75,16 @@ func WithRetry(rc RetryConfig) Option {
 func WithDefaultTenantID(id string) Option {
 	return func(c *Config) { c.DefaultTenantID = id }
 }
+
+// WithFalcon enables or disables the FALCON (nanobpmn command-stream) transport
+// upgrade. It is enabled by default and only engages when the gateway advertises
+// FALCON support; against stock Camunda the SDK stays on REST regardless.
+func WithFalcon(enabled bool) Option {
+	return func(c *Config) { c.Falcon = enabled }
+}
+
+// WithForceREST forces the pure-REST path even when the gateway advertises FALCON
+// support (useful where WebSockets are blocked by a proxy).
+func WithForceREST(force bool) Option {
+	return func(c *Config) { c.ForceREST = force }
+}

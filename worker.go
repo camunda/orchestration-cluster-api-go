@@ -2,12 +2,14 @@ package camunda
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
 )
 
 // JobWorker polls for jobs of a given type and dispatches them to a handler with
@@ -97,7 +99,90 @@ func (c *CamundaClient) NewJobWorker(jobType string, handler JobHandler, opts ..
 // Run polls and dispatches jobs until ctx is cancelled, then waits for in-flight
 // handlers to finish and returns ctx.Err(). Run blocks; call it in a goroutine to
 // run alongside other work.
+//
+// When the gateway advertises the FALCON command stream (a nanobpmn gateway) and
+// FALCON is enabled, jobs are pushed over a WebSocket subscription instead of
+// REST long-polling. If the subscription cannot be established (e.g. a proxy
+// blocks WebSockets) the worker transparently falls back to REST polling.
 func (w *JobWorker) Run(ctx context.Context) error {
+	if caps := w.client.falconCaps(ctx); caps != nil {
+		if err := w.runFalcon(ctx, caps); err != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			w.client.logger.Warn("falcon subscribe failed; falling back to REST job polling",
+				"type", w.jobType, "error", err)
+		} else {
+			return ctx.Err()
+		}
+	}
+	return w.runRESTPoll(ctx)
+}
+
+// runFalcon subscribes to the command stream and dispatches pushed jobs. It
+// returns nil once ctx is cancelled (graceful stop) or a non-nil error if the
+// initial subscribe fails, so Run can fall back to REST polling.
+func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
+	sw, err := falcon.Subscribe(caps.Endpoints, w.client.falconDialer, falcon.SubscribeArgs{
+		JobType:        w.jobType,
+		JobCredits:     int64(w.maxConcurrent),
+		FetchVariables: w.fetchVariables,
+		TimeoutMs:      w.timeout.Milliseconds(),
+		Worker:         w.name,
+	})
+	if err != nil {
+		return err
+	}
+	defer sw.Close()
+
+	var wg sync.WaitGroup
+	for ctx.Err() == nil {
+		raw, ok := sw.NextJob(ctx, 500*time.Millisecond)
+		if !ok {
+			continue
+		}
+		var ajr openapi.ActivatedJobResult
+		if err := json.Unmarshal(raw, &ajr); err != nil {
+			// Undecodable push (protocol drift or a gateway bug): log a diagnostic,
+			// replenish the consumed credit, and skip rather than losing the slot
+			// silently. The raw payload is omitted as it may be large or sensitive.
+			w.client.logger.Warn("falcon: skipping undecodable job frame", "type", w.jobType, "error", err)
+			sw.Replenish(1)
+			continue
+		}
+		job := newRESTJob(ajr)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			w.handleFalcon(ctx, sw, job)
+		}()
+	}
+	wg.Wait()
+	return nil
+}
+
+// handleFalcon runs the handler and acknowledges the job over the command stream.
+// Each ack (complete/fail/throw) replenishes one delivery credit.
+func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, job *Job) {
+	vars, err := w.handler(ctx, job)
+	if err != nil {
+		var bpmn *BpmnError
+		if errors.As(err, &bpmn) {
+			sw.ThrowError(job.Key(), bpmn.Code, bpmn.Message, bpmn.Variables)
+			return
+		}
+		retries := job.Retries() - 1
+		if retries < 0 {
+			retries = 0
+		}
+		sw.Fail(job.Key(), retries, err.Error())
+		return
+	}
+	sw.Complete(job.Key(), vars)
+}
+
+// runRESTPoll is the REST long-polling worker loop (also the FALCON fallback).
+func (w *JobWorker) runRESTPoll(ctx context.Context) error {
 	var inFlight atomic.Int32
 	var wg sync.WaitGroup
 

@@ -43,6 +43,9 @@ var ConfigSchema = []ConfigField{
 
 	{Keys: []string{"CAMUNDA_DEFAULT_TENANT_ID", "CAMUNDA_TENANT_ID"}, Description: "Default tenant id applied to operations that accept one."},
 
+	{Keys: []string{"CAMUNDA_FALCON"}, Default: "true", Description: "Enable the FALCON (nanobpmn command-stream) transport upgrade when the gateway advertises it."},
+	{Keys: []string{"CAMUNDA_FORCE_REST"}, Description: "Force the pure-REST path even when the gateway advertises FALCON (e.g. where WebSockets are blocked)."},
+
 	{Keys: []string{"CAMUNDA_MTLS_CERT"}, Secret: true, Description: "Inline client certificate PEM for mutual TLS."},
 	{Keys: []string{"CAMUNDA_MTLS_KEY"}, Secret: true, Description: "Inline client private key PEM for mutual TLS."},
 	{Keys: []string{"CAMUNDA_MTLS_CA"}, Description: "Inline CA certificate PEM for verifying the server."},

@@ -36,6 +36,14 @@ const (
 	clientAlias      = "openapi"
 )
 
+// handwrittenOps are operations excluded from generation because the SDK ships a
+// hand-written ergonomic method with the same signature. CreateProcessInstance is
+// hand-written so it can transparently route creates over the FALCON command
+// stream (with a REST fallback) — see falcon.go.
+var handwrittenOps = map[string]bool{
+	"CreateProcessInstance": true,
+}
+
 type param struct {
 	name string
 	typ  string
@@ -126,6 +134,9 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 		}
 		field, ok := fieldByService[ctor.serviceType]
 		if !ok {
+			continue
+		}
+		if handwrittenOps[ctor.op] {
 			continue
 		}
 		op := operation{

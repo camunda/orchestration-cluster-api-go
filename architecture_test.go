@@ -19,6 +19,7 @@ var leafPackages = map[string]bool{
 	"auth":         true,
 	"retry":        true,
 	"backpressure": true,
+	"falcon":       true,
 }
 
 // composerAllowed maps composer packages to the internal packages they may import.
