@@ -3,6 +3,7 @@ package camunda
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -25,9 +26,10 @@ const falconProbeRetryInterval = 30 * time.Second
 // for stock Camunda or when FALCON is disabled. A definitive result (nano detected
 // or confirmed stock) is cached for the client's lifetime; a transient probe
 // failure is retried on a later call (after falconProbeRetryInterval). The probe
-// runs on its own timeout, decoupled from the caller's (possibly short) request
-// context, so a brief request deadline can't permanently force REST.
-func (c *CamundaClient) falconCaps(_ context.Context) *falcon.Caps {
+// honours the caller's context (bounded by falconDetectTimeout), so a short request
+// deadline can't make it exceed the caller's budget; because a ctx-cancelled probe
+// is treated as transient, a brief first deadline never permanently forces REST.
+func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	if !c.cfg.FalconEnabled() {
 		return nil
 	}
@@ -60,9 +62,10 @@ func (c *CamundaClient) falconCaps(_ context.Context) *falcon.Caps {
 	c.falconMu.Unlock()
 
 	// Probe WITHOUT holding the mutex, so concurrent callers fall back to REST
-	// immediately instead of serializing behind a network round-trip. The probe
-	// runs on its own timeout, decoupled from any caller's request context.
-	pctx, cancel := context.WithTimeout(context.Background(), falconDetectTimeout)
+	// immediately instead of serializing behind a network round-trip. Honour the
+	// caller's context but cap it at falconDetectTimeout; a ctx-cancelled probe is
+	// transient and retried on a later call.
+	pctx, cancel := context.WithTimeout(ctx, falconDetectTimeout)
 	caps, err := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress), dialer.HTTPClient)
 	cancel()
 
@@ -268,20 +271,57 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 		return nil, false, err
 	}
 
+	// Build a REST-equivalent result by overlaying whatever the gateway's
+	// commandResult body carries over request-derived defaults.
+	var rb struct {
+		ProcessDefinitionID      *string        `json:"processDefinitionId"`
+		ProcessDefinitionKey     *string        `json:"processDefinitionKey"`
+		ProcessDefinitionVersion *int32         `json:"processDefinitionVersion"`
+		TenantID                 *string        `json:"tenantId"`
+		Variables                map[string]any `json:"variables"`
+		Tags                     []string       `json:"tags"`
+		BusinessID               *string        `json:"businessId"`
+	}
+	_ = json.Unmarshal(outcome.Body, &rb)
+
 	result := &openapi.CreateProcessInstanceResult{
-		ProcessDefinitionId:  id,
 		ProcessInstanceKey:   openapi.ModelString(outcome.ProcessInstanceKey),
+		ProcessDefinitionId:  id,
 		ProcessDefinitionKey: openapi.ModelString(key),
-		Variables:            outcome.Variables,
 		Tags:                 []string{},
-		TenantId:             c.resolveTenant(tenant),
 		BusinessId:           *openapi.NewNullableString(nil),
 	}
-	if version != nil {
+	if rb.ProcessDefinitionID != nil && *rb.ProcessDefinitionID != "" {
+		result.ProcessDefinitionId = *rb.ProcessDefinitionID
+	}
+	if rb.ProcessDefinitionKey != nil && *rb.ProcessDefinitionKey != "" {
+		result.ProcessDefinitionKey = openapi.ModelString(*rb.ProcessDefinitionKey)
+	}
+	switch {
+	case rb.ProcessDefinitionVersion != nil:
+		result.ProcessDefinitionVersion = *rb.ProcessDefinitionVersion
+	case version != nil:
 		result.ProcessDefinitionVersion = *version
 	}
-	if result.Variables == nil {
+	switch {
+	case rb.TenantID != nil && *rb.TenantID != "":
+		result.TenantId = *rb.TenantID
+	default:
+		result.TenantId = c.resolveTenant(tenant)
+	}
+	switch {
+	case outcome.Variables != nil: // awaitCompletion output variables
+		result.Variables = outcome.Variables
+	case rb.Variables != nil:
+		result.Variables = rb.Variables
+	default:
 		result.Variables = map[string]interface{}{}
+	}
+	if rb.Tags != nil {
+		result.Tags = rb.Tags
+	}
+	if rb.BusinessID != nil {
+		result.BusinessId = *openapi.NewNullableString(rb.BusinessID)
 	}
 	return result, true, nil
 }

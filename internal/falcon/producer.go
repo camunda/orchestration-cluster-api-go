@@ -40,6 +40,9 @@ type CreateOutcome struct {
 	ProcessCompleted   bool
 	// Variables is populated only for awaitCompletion creates.
 	Variables map[string]any
+	// Body is the raw commandResult body the gateway returned, so callers can
+	// build a REST-equivalent result from whatever fields it carries.
+	Body json.RawMessage
 }
 
 type ackResult struct {
@@ -249,7 +252,7 @@ func (p *Producer) Create(ctx context.Context, args CreateArgs) (*CreateOutcome,
 		return nil, &RemoteError{Status: ack.status, Body: bodyString(ack.body)}
 	}
 
-	outcome := &CreateOutcome{}
+	outcome := &CreateOutcome{Body: ack.body}
 	var body struct {
 		ProcessInstanceKey string `json:"processInstanceKey"`
 		ProcessCompleted   bool   `json:"processCompleted"`

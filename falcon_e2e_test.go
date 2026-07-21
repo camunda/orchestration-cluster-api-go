@@ -107,7 +107,14 @@ func TestCreateProcessInstanceRoutesOverFalcon(t *testing.T) {
 			if f["type"] == "createInstance" {
 				wsWriteJSON(ctx, c, map[string]any{
 					"type": "commandResult", "corr": f["corr"], "status": 200,
-					"body": map[string]any{"processInstanceKey": "2251799813685340"},
+					"body": map[string]any{
+						"processInstanceKey":       "2251799813685340",
+						"processDefinitionKey":     "555",
+						"processDefinitionVersion": 3,
+						"tenantId":                 "acme",
+						"tags":                     []string{"go-sdk"},
+						"businessId":               "order-42",
+					},
 				})
 			}
 		}
@@ -125,6 +132,27 @@ func TestCreateProcessInstanceRoutesOverFalcon(t *testing.T) {
 	}
 	if got := string(res.GetProcessInstanceKey()); got != "2251799813685340" {
 		t.Errorf("ProcessInstanceKey = %q, want the stream-created key", got)
+	}
+	// The result must reflect the gateway's commandResult body, not just
+	// request-derived defaults, for REST-equivalent output.
+	if got := string(res.GetProcessDefinitionKey()); got != "555" {
+		t.Errorf("ProcessDefinitionKey = %q, want 555 from the gateway body", got)
+	}
+	if got := res.GetProcessDefinitionVersion(); got != 3 {
+		t.Errorf("ProcessDefinitionVersion = %d, want 3 from the gateway body", got)
+	}
+	if got := res.GetTenantId(); got != "acme" {
+		t.Errorf("TenantId = %q, want acme from the gateway body", got)
+	}
+	if got := res.GetTags(); len(got) != 1 || got[0] != "go-sdk" {
+		t.Errorf("Tags = %v, want [go-sdk] from the gateway body", got)
+	}
+	if got := res.GetBusinessId(); got != "order-42" {
+		t.Errorf("BusinessId = %q, want order-42 from the gateway body", got)
+	}
+	// The definition id was not echoed by the body, so it falls back to the request.
+	if got := res.GetProcessDefinitionId(); got != "order-process" {
+		t.Errorf("ProcessDefinitionId = %q, want the request's order-process", got)
 	}
 }
 
