@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="go-example-parcel-delivery-definitions"
+                  targetNamespace="https://camunda.com/examples/go-sdk">
+  <bpmn:error id="address-rejected-error" name="Address rejected" errorCode="ADDRESS_REJECTED" />
+  <bpmn:process id="go-example-parcel-delivery" name="Parcel delivery" isExecutable="true">
+    <bpmn:startEvent id="parcel-received" name="Parcel received">
+      <bpmn:outgoing>to-dispatch</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="to-dispatch" sourceRef="parcel-received" targetRef="dispatch-parcel" />
+    <bpmn:serviceTask id="dispatch-parcel" name="Dispatch with carrier">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="dispatch-parcel" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>to-dispatch</bpmn:incoming>
+      <bpmn:outgoing>to-dispatched</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="address-rejected" name="Address rejected" attachedToRef="dispatch-parcel">
+      <bpmn:outgoing>to-manual-review</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="address-rejected-definition" errorRef="address-rejected-error" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="to-dispatched" sourceRef="dispatch-parcel" targetRef="parcel-dispatched" />
+    <bpmn:sequenceFlow id="to-manual-review" sourceRef="address-rejected" targetRef="manual-review" />
+    <bpmn:endEvent id="parcel-dispatched" name="Parcel dispatched">
+      <bpmn:incoming>to-dispatched</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="manual-review" name="Manual address review">
+      <bpmn:incoming>to-manual-review</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="go-example-parcel-delivery-diagram">
+    <bpmndi:BPMNPlane id="go-example-parcel-delivery-plane" bpmnElement="go-example-parcel-delivery">
+      <bpmndi:BPMNShape id="parcel-received-shape" bpmnElement="parcel-received">
+        <dc:Bounds x="160" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="142" y="165" width="72" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="dispatch-parcel-shape" bpmnElement="dispatch-parcel">
+        <dc:Bounds x="260" y="100" width="110" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="address-rejected-shape" bpmnElement="address-rejected">
+        <dc:Bounds x="297" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="335" y="180" width="91" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="parcel-dispatched-shape" bpmnElement="parcel-dispatched">
+        <dc:Bounds x="470" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="446" y="165" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="manual-review-shape" bpmnElement="manual-review">
+        <dc:Bounds x="470" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="431" y="285" width="114" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="to-dispatch-edge" bpmnElement="to-dispatch">
+        <di:waypoint x="196" y="140" />
+        <di:waypoint x="260" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="to-dispatched-edge" bpmnElement="to-dispatched">
+        <di:waypoint x="370" y="140" />
+        <di:waypoint x="470" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="to-manual-review-edge" bpmnElement="to-manual-review">
+        <di:waypoint x="315" y="198" />
+        <di:waypoint x="315" y="260" />
+        <di:waypoint x="470" y="260" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
