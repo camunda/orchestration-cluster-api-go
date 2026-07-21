@@ -15,9 +15,9 @@ func TestDetectStockCamundaNotDetected(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	caps, ok := Detect(context.Background(), srv.URL, srv.Client())
-	if ok || caps != nil {
-		t.Fatalf("stock Camunda must not be detected as nanobpmn; got ok=%v caps=%v", ok, caps)
+	caps, err := Detect(context.Background(), srv.URL, srv.Client())
+	if err != nil || caps != nil {
+		t.Fatalf("stock Camunda must be a definitive non-detection; got err=%v caps=%v", err, caps)
 	}
 }
 
@@ -35,9 +35,9 @@ func TestDetectNanobpmnProbesTopologyAndBuildsEndpoints(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	caps, ok := Detect(context.Background(), srv.URL, srv.Client())
-	if !ok || caps == nil {
-		t.Fatalf("nanobpmn gateway must be detected; got ok=%v", ok)
+	caps, err := Detect(context.Background(), srv.URL, srv.Client())
+	if err != nil || caps == nil {
+		t.Fatalf("nanobpmn gateway must be detected; got err=%v caps=%v", err, caps)
 	}
 	if gotPath != "/topology" {
 		t.Errorf("Detect probed %q, want /topology", gotPath)
@@ -70,9 +70,9 @@ func TestDetectDefaultsCommandStreamPath(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	caps, ok := Detect(context.Background(), srv.URL, srv.Client())
-	if !ok || caps == nil {
-		t.Fatalf("nanobpmn gateway must be detected; got ok=%v", ok)
+	caps, err := Detect(context.Background(), srv.URL, srv.Client())
+	if err != nil || caps == nil {
+		t.Fatalf("nanobpmn gateway must be detected; got err=%v caps=%v", err, caps)
 	}
 	if len(caps.Endpoints) != 1 || !strings.HasSuffix(caps.Endpoints[0], DefaultCommandStreamPath) {
 		t.Fatalf("expected a single endpoint on the default path %q, got %v", DefaultCommandStreamPath, caps.Endpoints)
@@ -85,8 +85,11 @@ func TestDetectNon2xxNotDetected(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	if _, ok := Detect(context.Background(), srv.URL, srv.Client()); ok {
-		t.Fatal("a non-2xx topology response must not be detected as nanobpmn")
+	// A non-2xx status is a transient failure: Detect returns an error so the
+	// caller can retry rather than permanently caching "stock".
+	caps, err := Detect(context.Background(), srv.URL, srv.Client())
+	if err == nil || caps != nil {
+		t.Fatalf("a non-2xx topology response must be a retryable error; got err=%v caps=%v", err, caps)
 	}
 }
 
@@ -96,8 +99,10 @@ func TestDetectMalformedBodyNotDetected(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	if _, ok := Detect(context.Background(), srv.URL, srv.Client()); ok {
-		t.Fatal("a malformed topology body must not be detected as nanobpmn")
+	// A 2xx body that isn't a topology is treated as definitive stock (no retry).
+	caps, err := Detect(context.Background(), srv.URL, srv.Client())
+	if err != nil || caps != nil {
+		t.Fatalf("a malformed topology body must be a definitive non-detection; got err=%v caps=%v", err, caps)
 	}
 }
 
@@ -106,8 +111,10 @@ func TestDetectUnreachableNotDetected(t *testing.T) {
 	url := srv.URL
 	srv.Close() // now unreachable
 
-	if _, ok := Detect(context.Background(), url, http.DefaultClient); ok {
-		t.Fatal("an unreachable gateway must not be detected as nanobpmn")
+	// An unreachable gateway is a transient (retryable) failure.
+	caps, err := Detect(context.Background(), url, http.DefaultClient)
+	if err == nil || caps != nil {
+		t.Fatalf("an unreachable gateway must be a retryable error; got err=%v caps=%v", err, caps)
 	}
 }
 

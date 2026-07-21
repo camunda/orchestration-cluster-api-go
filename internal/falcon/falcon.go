@@ -50,34 +50,38 @@ type topology struct {
 // "http://localhost:8080/v2"); Detect appends "/topology". httpClient should be
 // the SDK's configured client so auth and TLS apply.
 //
-// It returns (caps, true) when the gateway is a nanobpmn gateway, or (nil, false)
-// for stock Camunda (no "nano" field), an unreachable or erroring gateway, a
-// non-2xx response, or a malformed body. Every negative case means "fall back to
-// REST", so detection never fails a request.
-func Detect(ctx context.Context, v2BaseURL string, httpClient *http.Client) (*Caps, bool) {
+// It returns (caps, nil) when the gateway is a nanobpmn gateway; (nil, nil) when
+// the gateway was reached but is stock Camunda (no "nano" field, or an
+// unrecognised body); and (nil, err) for a transient failure the caller may
+// retry — a transport error, a cancelled/expired context, or a non-2xx status.
+// In every case other than (caps, nil) the caller falls back to REST, so
+// detection never fails a request.
+func Detect(ctx context.Context, v2BaseURL string, httpClient *http.Client) (*Caps, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
 	base := strings.TrimRight(strings.TrimSpace(v2BaseURL), "/")
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/topology", nil)
 	if err != nil {
-		return nil, false
+		return nil, err
 	}
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return nil, false
+		return nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, false
+		return nil, fmt.Errorf("camunda: falcon topology probe returned status %d", resp.StatusCode)
 	}
 
 	var body topology
 	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		return nil, false
+		// Reached a 2xx endpoint but the body isn't a topology: treat as stock
+		// (definitive) rather than a transient failure, so we don't re-probe forever.
+		return nil, nil
 	}
 	if body.Nano == nil {
-		return nil, false
+		return nil, nil
 	}
 
 	path := body.Nano.FalconPath
@@ -86,9 +90,9 @@ func Detect(ctx context.Context, v2BaseURL string, httpClient *http.Client) (*Ca
 	}
 	eps := endpointsFromTopology(base, path, body)
 	if len(eps) == 0 {
-		return nil, false
+		return nil, nil
 	}
-	return &Caps{Endpoints: eps}, true
+	return &Caps{Endpoints: eps}, nil
 }
 
 // endpointsFromTopology builds the command-stream failover directory from a

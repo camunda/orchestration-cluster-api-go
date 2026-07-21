@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -12,31 +13,55 @@ import (
 	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
 )
 
-// falconDetectTimeout bounds the one-time topology probe.
+// falconDetectTimeout bounds a single topology probe.
 const falconDetectTimeout = 10 * time.Second
 
-// falconCaps probes the gateway once for nanobpmn command-stream support,
-// returning nil for stock Camunda, when FALCON is disabled, or when the probe
-// fails. The result (and the dialer) are cached for the client's lifetime.
-func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
+// falconProbeRetryInterval bounds how often the topology probe is retried after a
+// transient failure (unreachable gateway / non-2xx), so a persistently
+// unreachable gateway is not re-probed on every request.
+const falconProbeRetryInterval = 30 * time.Second
+
+// falconCaps probes the gateway for nanobpmn command-stream support, returning nil
+// for stock Camunda or when FALCON is disabled. A definitive result (nano detected
+// or confirmed stock) is cached for the client's lifetime; a transient probe
+// failure is retried on a later call (after falconProbeRetryInterval). The probe
+// runs on its own timeout, decoupled from the caller's (possibly short) request
+// context, so a brief request deadline can't permanently force REST.
+func (c *CamundaClient) falconCaps(_ context.Context) *falcon.Caps {
 	if !c.cfg.FalconEnabled() {
 		return nil
 	}
-	c.falconOnce.Do(func() {
+	c.falconMu.Lock()
+	defer c.falconMu.Unlock()
+	if c.falconResolved {
+		return c.falconCapsV
+	}
+	if !c.falconLastProbe.IsZero() && time.Since(c.falconLastProbe) < falconProbeRetryInterval {
+		return nil // a recent probe failed; stay on REST until the retry window elapses
+	}
+	if c.falconDialer == nil {
 		d, err := c.buildFalconDialer()
 		if err != nil {
 			c.logger.Warn("falcon dialer unavailable; using REST", "error", err)
-			return
+			c.falconResolved = true // dialer construction failure is definitive
+			return nil
 		}
 		c.falconDialer = d
-		pctx, cancel := context.WithTimeout(ctx, falconDetectTimeout)
-		defer cancel()
-		if caps, ok := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress), d.HTTPClient); ok {
-			c.falconCapsV = caps
-			c.logger.Debug("falcon command stream detected", "endpoints", caps.Endpoints)
-		}
-	})
-	return c.falconCapsV
+	}
+	c.falconLastProbe = time.Now()
+	pctx, cancel := context.WithTimeout(context.Background(), falconDetectTimeout)
+	defer cancel()
+	caps, err := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress), c.falconDialer.HTTPClient)
+	if err != nil {
+		c.logger.Debug("falcon detection failed; will retry", "error", err)
+		return nil // transient: retry after falconProbeRetryInterval
+	}
+	c.falconResolved = true // definitive: nano detected or confirmed stock
+	c.falconCapsV = caps
+	if caps != nil {
+		c.logger.Debug("falcon command stream detected", "endpoints", caps.Endpoints)
+	}
+	return caps
 }
 
 // buildFalconDialer constructs a WebSocket dialer whose HTTP client carries the
@@ -47,7 +72,11 @@ func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
 	if err != nil {
 		return nil, err
 	}
-	base := http.DefaultTransport.(*http.Transport).Clone()
+	tr, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return nil, fmt.Errorf("camunda: cannot build falcon dialer: http.DefaultTransport is not *http.Transport")
+	}
+	base := tr.Clone()
 	if tlsConf != nil {
 		base.TLSClientConfig = tlsConf
 	}
@@ -106,8 +135,9 @@ func (t *falconAuthTransport) RoundTrip(r *http.Request) (*http.Response, error)
 		}
 		r = r.Clone(r.Context())
 		for k, vs := range h {
+			r.Header.Del(k)
 			for _, v := range vs {
-				r.Header.Set(k, v)
+				r.Header.Add(k, v)
 			}
 		}
 	}

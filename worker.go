@@ -142,8 +142,11 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 			continue
 		}
 		var ajr openapi.ActivatedJobResult
-		if json.Unmarshal(raw, &ajr) != nil {
-			// Undecodable push: replenish the consumed credit and skip.
+		if err := json.Unmarshal(raw, &ajr); err != nil {
+			// Undecodable push (protocol drift or a gateway bug): log a diagnostic,
+			// replenish the consumed credit, and skip rather than losing the slot
+			// silently. The raw payload is omitted as it may be large or sensitive.
+			w.client.logger.Warn("falcon: skipping undecodable job frame", "type", w.jobType, "error", err)
 			sw.Replenish(1)
 			continue
 		}
