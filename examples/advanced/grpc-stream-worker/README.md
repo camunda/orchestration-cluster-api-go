@@ -9,8 +9,8 @@ instances, and handles their service jobs with `NewStreamJobWorker`:
 3. a temporary carrier outage fails once, consumes a technical retry, and then
    completes.
 
-The worker activates and acknowledges jobs over gRPC. Its low-frequency REST
-sidecar poll remains enabled as a safety net for jobs re-queued during a stream
+The worker activates and acknowledges streamed jobs over gRPC. A low-frequency REST
+sidecar poll also runs as a safety net for jobs re-queued during a stream
 reconnect. The example uses a short 10-second sidecar interval so that recovery
 is observable during one run; production applications should choose a
 lower-frequency interval from their recovery objective and REST traffic budget.
