@@ -290,6 +290,16 @@ func (l *SupervisedLink) pump(supCtx context.Context, c *conn, hooks linkHooks, 
 			if !ok {
 				return idle // socket closed
 			}
+
+			var bf baseFrame
+			_ = json.Unmarshal(raw, &bf)
+			// Refine the idle timeout from the gateway's advertised heartbeat cadence
+			// BEFORE (re)arming the timer, so a Welcome that widens the cadence doesn't
+			// leave the timer running at the old (shorter) duration and fire a spurious
+			// failover before the first heartbeat arrives.
+			if bf.Type == "welcome" && bf.HeartbeatMs > 0 {
+				idle = linkIdle(bf.HeartbeatMs)
+			}
 			if !timer.Stop() {
 				select {
 				case <-timer.C:
@@ -298,16 +308,9 @@ func (l *SupervisedLink) pump(supCtx context.Context, c *conn, hooks linkHooks, 
 			}
 			timer.Reset(idle)
 
-			var bf baseFrame
-			_ = json.Unmarshal(raw, &bf)
-			switch bf.Type {
-			case "heartbeat":
-				// Liveness only: the recv above already reset the idle timer.
+			if bf.Type == "heartbeat" {
+				// Liveness only: the reset above already refreshed the idle timer.
 				continue
-			case "welcome":
-				if bf.HeartbeatMs > 0 {
-					idle = linkIdle(bf.HeartbeatMs)
-				}
 			}
 			if hooks.onFrame != nil {
 				hooks.onFrame(raw)
