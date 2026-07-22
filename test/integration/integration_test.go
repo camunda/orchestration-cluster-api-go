@@ -75,6 +75,7 @@ func deployModel(ctx context.Context, t *testing.T, c *camunda.CamundaClient, na
 }
 
 func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string) openapi.ProcessInstanceKey {
+	t.Helper()
 	return startProcess(ctx, t, c, "demo-process", name)
 }
 
