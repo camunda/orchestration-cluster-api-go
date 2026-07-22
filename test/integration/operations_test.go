@@ -5,6 +5,7 @@ package integration
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -19,6 +20,18 @@ import (
 // errNotYetIndexed signals that an eventually-consistent search has not yet
 // surfaced its expected results, so Poll should retry.
 var errNotYetIndexed = errors.New("not yet indexed")
+
+func stopIntegrationWorker(stop context.CancelFunc, done <-chan error) error {
+	stop()
+	err := <-done
+	if errors.Is(err, context.Canceled) {
+		return nil
+	}
+	if err == nil {
+		return errors.New("worker exited without a cancellation error")
+	}
+	return fmt.Errorf("worker stopped: %w", err)
+}
 
 // deployGreetResult deploys the greet process and returns its process definition key.
 func deployGreetResult(ctx context.Context, t *testing.T, c *camunda.CamundaClient) openapi.ProcessDefinitionKey {
@@ -209,12 +222,11 @@ func TestBpmnErrorCompletesModeledExceptionPath(t *testing.T) {
 	created, err := c.CreateProcessInstance(ctx,
 		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
 	if err != nil {
-		stopWorker()
-		<-workerDone
-		t.Fatalf("CreateProcessInstance: %v", err)
+		workerErr := stopIntegrationWorker(stopWorker, workerDone)
+		t.Fatalf("CreateProcessInstance: %v", errors.Join(err, workerErr))
 	}
 
-	key := openapi.ProcessInstanceKey(string(created.GetProcessInstanceKey()))
+	key := openapi.MustProcessInstanceKey(string(created.GetProcessInstanceKey()))
 	_, err = camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
 		instance, err := c.GetProcessInstance(ctx, key)
 		if err != nil {
@@ -230,10 +242,9 @@ func TestBpmnErrorCompletesModeledExceptionPath(t *testing.T) {
 			return err == errNotYetIndexed || camunda.IsNotFound(err)
 		}),
 	)
-	stopWorker()
-	<-workerDone
-	if err != nil {
-		t.Fatalf("modeled BPMN error path did not complete: %v", err)
+	workerErr := stopIntegrationWorker(stopWorker, workerDone)
+	if err != nil || workerErr != nil {
+		t.Fatalf("modeled BPMN error path did not complete: %v", errors.Join(err, workerErr))
 	}
 
 	filter := openapi.NewElementInstanceFilter()
