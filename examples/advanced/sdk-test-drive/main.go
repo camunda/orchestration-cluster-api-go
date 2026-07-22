@@ -99,7 +99,9 @@ func run() (runErr error) {
 				Name string `json:"name"`
 			}
 			if err := job.Variables(&input); err != nil {
-				return nil, fmt.Errorf("decode job variables: %w", err)
+				err = fmt.Errorf("decode job variables: %w", err)
+				publishResult(handlerResult{err: err})
+				return nil, err
 			}
 			if input.Name != "Camunda" {
 				err := fmt.Errorf("job name = %q, want Camunda", input.Name)
