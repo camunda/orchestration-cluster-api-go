@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
@@ -13,7 +15,10 @@ import (
 	"github.com/camunda/orchestration-cluster-api-go/examples/advanced/internal/exampleutil"
 )
 
-const processID = "go-sdk-test-drive"
+const (
+	processIDPlaceholder = "go-sdk-test-drive"
+	jobTypePlaceholder   = "sdk-test-drive-greet"
+)
 
 //go:embed test-drive.bpmn
 var processModel []byte
@@ -25,7 +30,7 @@ func main() {
 	}
 }
 
-func run() error {
+func run() (runErr error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancel()
 
@@ -49,12 +54,46 @@ func run() error {
 		return fmt.Errorf("unexpected FEEL result: %v", evaluation.GetResult())
 	}
 
-	if err := exampleutil.Deploy(ctx, client, "test-drive.bpmn", processModel); err != nil {
+	runID := strconv.FormatInt(time.Now().UnixNano(), 10)
+	processID := processIDPlaceholder + "-" + runID
+	jobType := jobTypePlaceholder + "-" + runID
+	model := strings.ReplaceAll(string(processModel), processIDPlaceholder, processID)
+	model = strings.ReplaceAll(model, jobTypePlaceholder, jobType)
+	if err := exampleutil.Deploy(ctx, client, "test-drive-"+runID+".bpmn", []byte(model)); err != nil {
 		return err
 	}
 
-	handled := make(chan string, 1)
-	worker := client.NewJobWorker("sdk-test-drive-greet",
+	key, err := exampleutil.StartProcess(ctx, client, processID, "test-drive-"+runID,
+		map[string]any{"name": "Camunda"})
+	if err != nil {
+		return err
+	}
+	completed := false
+	defer func() {
+		if completed {
+			return
+		}
+		cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cleanupCancel()
+		if err := client.CancelProcessInstance(
+			cleanupCtx, key, *openapi.NewCancelProcessInstanceRequest(),
+		); err != nil {
+			runErr = errors.Join(runErr, fmt.Errorf("cancel incomplete process instance %s: %w", key, err))
+		}
+	}()
+
+	type handlerResult struct {
+		greeting string
+		err      error
+	}
+	handled := make(chan handlerResult, 1)
+	publishResult := func(result handlerResult) {
+		select {
+		case handled <- result:
+		default:
+		}
+	}
+	worker := client.NewJobWorker(jobType,
 		func(_ context.Context, job *camunda.Job) (map[string]any, error) {
 			var input struct {
 				Name string `json:"name"`
@@ -62,11 +101,13 @@ func run() error {
 			if err := job.Variables(&input); err != nil {
 				return nil, fmt.Errorf("decode job variables: %w", err)
 			}
-			greeting := "Hello, " + input.Name + "!"
-			select {
-			case handled <- greeting:
-			default:
+			if input.Name != "Camunda" {
+				err := fmt.Errorf("job name = %q, want Camunda", input.Name)
+				publishResult(handlerResult{err: err})
+				return nil, err
 			}
+			greeting := "Hello, " + input.Name + "!"
+			publishResult(handlerResult{greeting: greeting})
 			return map[string]any{"greeting": greeting}, nil
 		},
 		camunda.WithWorkerName("go-sdk-test-drive"),
@@ -78,21 +119,23 @@ func run() error {
 	)
 
 	workerCtx, stopWorker := context.WithCancel(ctx)
+	defer stopWorker()
 	workerDone := make(chan error, 1)
 	go func() { workerDone <- worker.Run(workerCtx) }()
 
-	runID := time.Now().UTC().Format("20060102T150405.000000000")
-	key, err := exampleutil.StartProcess(ctx, client, processID, "test-drive-"+runID,
-		map[string]any{"name": "Camunda"})
-	if err != nil {
-		stopWorker()
-		<-workerDone
-		return err
-	}
-
 	select {
-	case greeting := <-handled:
-		fmt.Println("worker returned:", greeting)
+	case result := <-handled:
+		if result.err != nil {
+			stopWorker()
+			<-workerDone
+			return result.err
+		}
+		if result.greeting != "Hello, Camunda!" {
+			stopWorker()
+			<-workerDone
+			return fmt.Errorf("worker greeting = %q, want %q", result.greeting, "Hello, Camunda!")
+		}
+		fmt.Println("worker returned:", result.greeting)
 	case workerErr := <-workerDone:
 		if workerErr == nil {
 			return errors.New("worker exited before handling a job")
@@ -107,14 +150,22 @@ func run() error {
 	instance, err := exampleutil.WaitForCompletion(ctx, client, key)
 	stopWorker()
 	workerErr := <-workerDone
-	if err != nil {
-		return err
+	if errors.Is(workerErr, context.Canceled) {
+		workerErr = nil
 	}
-	if workerErr != nil && !errors.Is(workerErr, context.Canceled) {
-		return fmt.Errorf("worker stopped: %w", workerErr)
+	if err != nil || workerErr != nil {
+		return errors.Join(err, wrapWorkerError(workerErr))
 	}
 
+	completed = true
 	fmt.Printf("process instance %s reached %s; SDK test drive passed\n",
 		key, instance.GetState())
 	return nil
+}
+
+func wrapWorkerError(err error) error {
+	if err == nil {
+		return nil
+	}
+	return fmt.Errorf("worker stopped: %w", err)
 }
