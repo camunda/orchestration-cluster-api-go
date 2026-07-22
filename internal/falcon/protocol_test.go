@@ -277,10 +277,13 @@ func TestStreamWorkerReceivesAndCompletes(t *testing.T) {
 
 func TestStreamWorkerFailsAndThrowsErrors(t *testing.T) {
 	frames := make(chan map[string]any, 2)
+	subscribed := make(chan map[string]any, 1)
 	eps, d := startFalconServer(t, func(ctx context.Context, c *websocket.Conn) {
-		if _, err := readJSON(ctx, c); err != nil {
+		subscribe, err := readJSON(ctx, c)
+		if err != nil {
 			return
 		}
+		subscribed <- subscribe
 		_ = writeJSON(ctx, c, map[string]any{"type": "welcome", "heartbeatMs": 15000})
 		for {
 			frame, err := readJSON(ctx, c)
@@ -298,6 +301,15 @@ func TestStreamWorkerFailsAndThrowsErrors(t *testing.T) {
 		t.Fatalf("Subscribe: %v", err)
 	}
 	defer worker.Close()
+
+	select {
+	case subscribe := <-subscribed:
+		if subscribe["type"] != "subscribe" {
+			t.Fatalf("first frame = %v, want subscribe", subscribe)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("gateway did not receive the subscribe frame")
+	}
 
 	worker.Fail("job-1", 2, "temporary failure")
 	worker.ThrowError("job-2", "OUT_OF_STOCK", "inventory unavailable", map[string]any{"sku": "mug"})

@@ -18,13 +18,14 @@ import (
 
 func TestConfigurationOptionsApplyAllValues(t *testing.T) {
 	retryCfg := RetryConfig{MaxAttempts: 7, BaseDelay: 2 * time.Second, MaxDelay: 9 * time.Second}
+	cacheDir := t.TempDir()
 	cfg, err := loadConfig(noEnv, nil,
 		WithRestAddress("http://cluster.example/"),
 		WithGrpcAddress("cluster.example:26500"),
 		WithOAuth("client", "secret", "https://login.example/token"),
 		WithOAuthAudience("audience"),
 		WithOAuthScope("scope"),
-		WithOAuthCacheDir("/tmp/token-cache"),
+		WithOAuthCacheDir(cacheDir),
 		WithBackpressureProfile(ProfileLegacy),
 		WithLogLevel(LogTrace),
 		WithRetry(retryCfg),
@@ -42,7 +43,7 @@ func TestConfigurationOptionsApplyAllValues(t *testing.T) {
 		cfg.OAuthURL != "https://login.example/token" ||
 		cfg.TokenAudience != "audience" ||
 		cfg.OAuthScope != "scope" ||
-		cfg.OAuthCacheDir != "/tmp/token-cache" ||
+		cfg.OAuthCacheDir != cacheDir ||
 		cfg.BackpressureProfile != ProfileLegacy ||
 		cfg.LogLevel != LogTrace ||
 		cfg.DefaultTenantID != "tenant-a" {
