@@ -81,7 +81,7 @@ func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClie
 	if err != nil {
 		t.Fatalf("create process instance: %v", err)
 	}
-	return openapi.ProcessInstanceKey(string(result.GetProcessInstanceKey()))
+	return openapi.MustProcessInstanceKey(string(result.GetProcessInstanceKey()))
 }
 
 func TestTopology(t *testing.T) {

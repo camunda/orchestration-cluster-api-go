@@ -127,7 +127,7 @@ func TestCreateAndReadProcessInstance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProcessInstance: %v", err)
 	}
-	key := openapi.ProcessInstanceKey(string(created.GetProcessInstanceKey()))
+	key := openapi.MustProcessInstanceKey(string(created.GetProcessInstanceKey()))
 
 	// The instance is visible in secondary storage only after export; poll for it.
 	instance, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
