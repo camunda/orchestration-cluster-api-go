@@ -57,8 +57,16 @@ func run() (runErr error) {
 	runID := strconv.FormatInt(time.Now().UnixNano(), 10)
 	processID := processIDPlaceholder + "-" + runID
 	jobType := jobTypePlaceholder + "-" + runID
-	model := strings.ReplaceAll(string(processModel), processIDPlaceholder, processID)
-	model = strings.ReplaceAll(model, jobTypePlaceholder, jobType)
+	model := strings.ReplaceAll(
+		string(processModel),
+		`id="`+processIDPlaceholder+`"`,
+		`id="`+processID+`"`,
+	)
+	model = strings.ReplaceAll(
+		model,
+		`type="`+jobTypePlaceholder+`"`,
+		`type="`+jobType+`"`,
+	)
 	if err := exampleutil.Deploy(ctx, client, "test-drive-"+runID+".bpmn", []byte(model)); err != nil {
 		return err
 	}
