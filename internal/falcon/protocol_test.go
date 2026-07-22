@@ -275,6 +275,67 @@ func TestStreamWorkerReceivesAndCompletes(t *testing.T) {
 	}
 }
 
+func TestStreamWorkerFailsAndThrowsErrors(t *testing.T) {
+	frames := make(chan map[string]any, 2)
+	subscribed := make(chan map[string]any, 1)
+	eps, d := startFalconServer(t, func(ctx context.Context, c *websocket.Conn) {
+		subscribe, err := readJSON(ctx, c)
+		if err != nil {
+			return
+		}
+		subscribed <- subscribe
+		_ = writeJSON(ctx, c, map[string]any{"type": "welcome", "heartbeatMs": 15000})
+		for {
+			frame, err := readJSON(ctx, c)
+			if err != nil {
+				return
+			}
+			if frame["type"] == "failJob" || frame["type"] == "throwError" {
+				frames <- frame
+			}
+		}
+	})
+
+	worker, err := Subscribe(eps, d, SubscribeArgs{JobType: "email", JobCredits: 2})
+	if err != nil {
+		t.Fatalf("Subscribe: %v", err)
+	}
+	defer worker.Close()
+
+	select {
+	case subscribe := <-subscribed:
+		if subscribe["type"] != "subscribe" {
+			t.Fatalf("first frame = %v, want subscribe", subscribe)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("gateway did not receive the subscribe frame")
+	}
+
+	worker.Fail("job-1", 2, "temporary failure")
+	worker.ThrowError("job-2", "OUT_OF_STOCK", "inventory unavailable", map[string]any{"sku": "mug"})
+
+	got := map[string]map[string]any{}
+	for range 2 {
+		select {
+		case frame := <-frames:
+			got[frame["type"].(string)] = frame
+		case <-time.After(2 * time.Second):
+			t.Fatal("gateway did not receive both acknowledgement frames")
+		}
+	}
+	if frame := got["failJob"]; frame["jobKey"] != "job-1" ||
+		frame["retries"] != float64(2) ||
+		frame["errorMessage"] != "temporary failure" {
+		t.Errorf("unexpected failJob frame: %v", frame)
+	}
+	if frame := got["throwError"]; frame["jobKey"] != "job-2" ||
+		frame["errorCode"] != "OUT_OF_STOCK" ||
+		frame["errorMessage"] != "inventory unavailable" ||
+		frame["variables"].(map[string]any)["sku"] != "mug" {
+		t.Errorf("unexpected throwError frame: %v", frame)
+	}
+}
+
 // asRemoteError is a tiny errors.As wrapper kept local to avoid importing errors
 // just for the test's type assertion.
 func asRemoteError(err error, target **RemoteError) bool {
