@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="go-sdk-test-drive-definitions"
+                  targetNamespace="https://camunda.com/examples/go-sdk">
+  <bpmn:process id="go-sdk-test-drive" name="Go SDK test drive" isExecutable="true">
+    <bpmn:startEvent id="start">
+      <bpmn:outgoing>to-greet</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="to-greet" sourceRef="start" targetRef="greet" />
+    <bpmn:serviceTask id="greet" name="Create greeting">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="sdk-test-drive-greet" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>to-greet</bpmn:incoming>
+      <bpmn:outgoing>to-end</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="to-end" sourceRef="greet" targetRef="end" />
+    <bpmn:endEvent id="end">
+      <bpmn:incoming>to-end</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+</bpmn:definitions>
