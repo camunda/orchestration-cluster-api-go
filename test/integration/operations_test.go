@@ -23,14 +23,20 @@ var errNotYetIndexed = errors.New("not yet indexed")
 
 func stopIntegrationWorker(stop context.CancelFunc, done <-chan error) error {
 	stop()
-	err := <-done
-	if errors.Is(err, context.Canceled) {
-		return nil
+	timer := time.NewTimer(35 * time.Second)
+	defer timer.Stop()
+	select {
+	case err := <-done:
+		if errors.Is(err, context.Canceled) {
+			return nil
+		}
+		if err == nil {
+			return errors.New("worker exited without a cancellation error")
+		}
+		return fmt.Errorf("worker stopped: %w", err)
+	case <-timer.C:
+		return errors.New("worker did not stop within 35 seconds")
 	}
-	if err == nil {
-		return errors.New("worker exited without a cancellation error")
-	}
-	return fmt.Errorf("worker stopped: %w", err)
 }
 
 // deployGreetResult deploys the greet process and returns its process definition key.
