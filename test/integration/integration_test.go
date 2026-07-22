@@ -14,6 +14,7 @@ package integration
 import (
 	"context"
 	_ "embed"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -116,19 +117,30 @@ func TestRESTWorkerEndToEnd(t *testing.T) {
 	deployModel(ctx, t, c, "rest-worker.bpmn", []byte(model))
 
 	expectedName := "REST-" + runID
-	handled := make(chan string, 1)
+	type handlerResult struct {
+		greeting string
+		err      error
+	}
+	handled := make(chan handlerResult, 1)
+	publishResult := func(result handlerResult) {
+		select {
+		case handled <- result:
+		default:
+		}
+	}
 	worker := c.NewJobWorker(jobType,
 		func(_ context.Context, job *camunda.Job) (map[string]any, error) {
 			var in struct {
 				Name string `json:"name"`
 			}
-			_ = job.Variables(&in)
+			if err := job.Variables(&in); err != nil {
+				err = fmt.Errorf("decode REST job variables: %w", err)
+				publishResult(handlerResult{err: err})
+				return nil, err
+			}
 			greeting := "Hello, " + in.Name + "!"
 			if in.Name == expectedName {
-				select {
-				case handled <- greeting:
-				default:
-				}
+				publishResult(handlerResult{greeting: greeting})
 			}
 			return map[string]any{"greeting": greeting}, nil
 		},
@@ -144,10 +156,13 @@ func TestRESTWorkerEndToEnd(t *testing.T) {
 	_ = startProcess(ctx, t, c, processID, expectedName)
 
 	select {
-	case greeting := <-handled:
+	case result := <-handled:
+		if result.err != nil {
+			t.Fatalf("REST worker handler: %v", result.err)
+		}
 		expectedGreeting := "Hello, " + expectedName + "!"
-		if greeting != expectedGreeting {
-			t.Errorf("greeting = %q, want %q", greeting, expectedGreeting)
+		if result.greeting != expectedGreeting {
+			t.Errorf("greeting = %q, want %q", result.greeting, expectedGreeting)
 		}
 	case workerErr := <-workerDone:
 		t.Fatalf("REST worker exited before handling its job: %v", workerErr)
@@ -176,19 +191,30 @@ func TestStreamWorkerEndToEnd(t *testing.T) {
 	deployModel(ctx, t, c, "grpc-worker.bpmn", []byte(model))
 
 	expectedName := "gRPC-" + runID
-	handled := make(chan string, 1)
+	type handlerResult struct {
+		greeting string
+		err      error
+	}
+	handled := make(chan handlerResult, 1)
+	publishResult := func(result handlerResult) {
+		select {
+		case handled <- result:
+		default:
+		}
+	}
 	worker := c.NewStreamJobWorker(jobType,
 		func(_ context.Context, job *camunda.Job) (map[string]any, error) {
 			var in struct {
 				Name string `json:"name"`
 			}
-			_ = job.Variables(&in)
+			if err := job.Variables(&in); err != nil {
+				err = fmt.Errorf("decode gRPC stream job variables: %w", err)
+				publishResult(handlerResult{err: err})
+				return nil, err
+			}
 			greeting := "Hello, " + in.Name + "!"
 			if in.Name == expectedName {
-				select {
-				case handled <- greeting:
-				default:
-				}
+				publishResult(handlerResult{greeting: greeting})
 			}
 			return map[string]any{"greeting": greeting}, nil
 		},
@@ -210,10 +236,13 @@ func TestStreamWorkerEndToEnd(t *testing.T) {
 	_ = startProcess(ctx, t, c, processID, expectedName)
 
 	select {
-	case greeting := <-handled:
+	case result := <-handled:
+		if result.err != nil {
+			t.Fatalf("gRPC stream worker handler: %v", result.err)
+		}
 		expectedGreeting := "Hello, " + expectedName + "!"
-		if greeting != expectedGreeting {
-			t.Errorf("greeting = %q, want %q", greeting, expectedGreeting)
+		if result.greeting != expectedGreeting {
+			t.Errorf("greeting = %q, want %q", result.greeting, expectedGreeting)
 		}
 	case workerErr := <-workerDone:
 		t.Fatalf("gRPC stream worker exited before handling its job: %v", workerErr)
