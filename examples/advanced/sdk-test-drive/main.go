@@ -93,6 +93,11 @@ func run() error {
 	select {
 	case greeting := <-handled:
 		fmt.Println("worker returned:", greeting)
+	case workerErr := <-workerDone:
+		if workerErr == nil {
+			return errors.New("worker exited before handling a job")
+		}
+		return fmt.Errorf("worker exited before handling a job: %w", workerErr)
 	case <-ctx.Done():
 		stopWorker()
 		<-workerDone
