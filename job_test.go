@@ -91,3 +91,11 @@ func TestParseJSONObject(t *testing.T) {
 		t.Errorf("parseJSONObject valid = %v, want one entry", m)
 	}
 }
+
+func TestJobVariablesReturnsMarshalError(t *testing.T) {
+	job := &Job{variables: map[string]any{"unsupported": make(chan int)}}
+	var target map[string]any
+	if err := job.Variables(&target); err == nil {
+		t.Fatal("Variables should return an error for unsupported JSON values")
+	}
+}
