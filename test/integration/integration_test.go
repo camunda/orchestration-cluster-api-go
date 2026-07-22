@@ -14,8 +14,10 @@ package integration
 import (
 	"context"
 	_ "embed"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -25,6 +27,9 @@ import (
 
 //go:embed testdata/greet.bpmn
 var greetBPMN []byte
+
+//go:embed testdata/bpmn-error.bpmn
+var bpmnErrorModel []byte
 
 func envOr(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
@@ -50,8 +55,13 @@ func newClient(t *testing.T) *camunda.CamundaClient {
 // deployGreet deploys the greet process (start -> "greet" service task -> end).
 func deployGreet(ctx context.Context, t *testing.T, c *camunda.CamundaClient) {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "greet.bpmn")
-	if err := os.WriteFile(path, greetBPMN, 0o644); err != nil {
+	deployModel(ctx, t, c, "greet.bpmn", greetBPMN)
+}
+
+func deployModel(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string, model []byte) {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), name)
+	if err := os.WriteFile(path, model, 0o644); err != nil {
 		t.Fatalf("write bpmn: %v", err)
 	}
 	f, err := os.Open(path)
@@ -60,18 +70,25 @@ func deployGreet(ctx context.Context, t *testing.T, c *camunda.CamundaClient) {
 	}
 	defer func() { _ = f.Close() }()
 	if _, _, err := c.Raw().ResourceAPI.CreateDeployment(ctx).Resources([]*os.File{f}).Execute(); err != nil {
-		t.Fatalf("deploy: %v", err)
+		t.Fatalf("deploy %s: %v", name, err)
 	}
 }
 
-func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string) {
+func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string) openapi.ProcessInstanceKey {
 	t.Helper()
-	byID := openapi.NewProcessInstanceCreationInstructionById("demo-process")
+	return startProcess(ctx, t, c, "demo-process", name)
+}
+
+func startProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, processID, name string) openapi.ProcessInstanceKey {
+	t.Helper()
+	byID := openapi.NewProcessInstanceCreationInstructionById(processID)
 	byID.SetVariables(map[string]any{"name": name})
 	instr := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
-	if _, err := c.CreateProcessInstance(ctx, instr); err != nil {
+	result, err := c.CreateProcessInstance(ctx, instr)
+	if err != nil {
 		t.Fatalf("create process instance: %v", err)
 	}
+	return openapi.MustProcessInstanceKey(string(result.GetProcessInstanceKey()))
 }
 
 func TestTopology(t *testing.T) {
@@ -93,19 +110,38 @@ func TestRESTWorkerEndToEnd(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	deployGreet(ctx, t, c)
+	runID := time.Now().UTC().Format("20060102T150405.000000000")
+	processID := "integration-rest-worker-" + runID
+	jobType := "greet-rest-" + runID
+	model := strings.ReplaceAll(string(greetBPMN), "demo-process", processID)
+	model = strings.ReplaceAll(model, `type="greet"`, `type="`+jobType+`"`)
+	deployModel(ctx, t, c, "rest-worker.bpmn", []byte(model))
 
-	handled := make(chan string, 1)
-	worker := c.NewJobWorker("greet",
+	expectedName := "REST-" + runID
+	type handlerResult struct {
+		greeting string
+		err      error
+	}
+	handled := make(chan handlerResult, 1)
+	publishResult := func(result handlerResult) {
+		select {
+		case handled <- result:
+		default:
+		}
+	}
+	worker := c.NewJobWorker(jobType,
 		func(_ context.Context, job *camunda.Job) (map[string]any, error) {
 			var in struct {
 				Name string `json:"name"`
 			}
-			_ = job.Variables(&in)
+			if err := job.Variables(&in); err != nil {
+				err = fmt.Errorf("decode REST job variables: %w", err)
+				publishResult(handlerResult{err: err})
+				return nil, err
+			}
 			greeting := "Hello, " + in.Name + "!"
-			select {
-			case handled <- greeting:
-			default:
+			if in.Name == expectedName {
+				publishResult(handlerResult{greeting: greeting})
 			}
 			return map[string]any{"greeting": greeting}, nil
 		},
@@ -115,21 +151,32 @@ func TestRESTWorkerEndToEnd(t *testing.T) {
 
 	wctx, stop := context.WithCancel(ctx)
 	defer stop()
-	done := make(chan struct{})
-	go func() { _ = worker.Run(wctx); close(done) }()
+	workerDone := make(chan error, 1)
+	go func() { workerDone <- worker.Run(wctx) }()
 
-	startGreetProcess(ctx, t, c, "REST")
+	_ = startProcess(ctx, t, c, processID, expectedName)
 
 	select {
-	case greeting := <-handled:
-		if greeting != "Hello, REST!" {
-			t.Errorf("greeting = %q, want %q", greeting, "Hello, REST!")
+	case result := <-handled:
+		if result.err != nil {
+			t.Fatalf("REST worker handler: %v", result.err)
 		}
+		expectedGreeting := "Hello, " + expectedName + "!"
+		if result.greeting != expectedGreeting {
+			t.Errorf("greeting = %q, want %q", result.greeting, expectedGreeting)
+		}
+	case workerErr := <-workerDone:
+		t.Fatalf("REST worker exited before handling its job: %v", workerErr)
 	case <-ctx.Done():
-		t.Fatal("REST worker did not handle the job in time")
+		workerErr := stopIntegrationWorker(stop, workerDone)
+		if workerErr != nil {
+			t.Fatalf("REST worker did not handle the job in time: %v; %v", ctx.Err(), workerErr)
+		}
+		t.Fatalf("REST worker did not handle the job in time: %v", ctx.Err())
 	}
-	stop()
-	<-done
+	if err := stopIntegrationWorker(stop, workerDone); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestStreamWorkerEndToEnd(t *testing.T) {
@@ -137,19 +184,38 @@ func TestStreamWorkerEndToEnd(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	deployGreet(ctx, t, c)
+	runID := time.Now().UTC().Format("20060102T150405.000000000")
+	processID := "integration-grpc-worker-" + runID
+	jobType := "greet-grpc-" + runID
+	model := strings.ReplaceAll(string(greetBPMN), "demo-process", processID)
+	model = strings.ReplaceAll(model, `type="greet"`, `type="`+jobType+`"`)
+	deployModel(ctx, t, c, "grpc-worker.bpmn", []byte(model))
 
-	handled := make(chan string, 1)
-	worker := c.NewStreamJobWorker("greet",
+	expectedName := "gRPC-" + runID
+	type handlerResult struct {
+		greeting string
+		err      error
+	}
+	handled := make(chan handlerResult, 1)
+	publishResult := func(result handlerResult) {
+		select {
+		case handled <- result:
+		default:
+		}
+	}
+	worker := c.NewStreamJobWorker(jobType,
 		func(_ context.Context, job *camunda.Job) (map[string]any, error) {
 			var in struct {
 				Name string `json:"name"`
 			}
-			_ = job.Variables(&in)
+			if err := job.Variables(&in); err != nil {
+				err = fmt.Errorf("decode gRPC stream job variables: %w", err)
+				publishResult(handlerResult{err: err})
+				return nil, err
+			}
 			greeting := "Hello, " + in.Name + "!"
-			select {
-			case handled <- greeting:
-			default:
+			if in.Name == expectedName {
+				publishResult(handlerResult{greeting: greeting})
 			}
 			return map[string]any{"greeting": greeting}, nil
 		},
@@ -159,21 +225,36 @@ func TestStreamWorkerEndToEnd(t *testing.T) {
 
 	wctx, stop := context.WithCancel(ctx)
 	defer stop()
-	done := make(chan struct{})
-	go func() { _ = worker.Run(wctx); close(done) }()
+	workerDone := make(chan error, 1)
+	go func() { workerDone <- worker.Run(wctx) }()
 
 	// Give the stream a moment to register before creating the instance.
-	time.Sleep(time.Second)
-	startGreetProcess(ctx, t, c, "gRPC")
+	select {
+	case workerErr := <-workerDone:
+		t.Fatalf("gRPC stream worker exited during startup: %v", workerErr)
+	case <-time.After(time.Second):
+	}
+	_ = startProcess(ctx, t, c, processID, expectedName)
 
 	select {
-	case greeting := <-handled:
-		if greeting != "Hello, gRPC!" {
-			t.Errorf("greeting = %q, want %q", greeting, "Hello, gRPC!")
+	case result := <-handled:
+		if result.err != nil {
+			t.Fatalf("gRPC stream worker handler: %v", result.err)
 		}
+		expectedGreeting := "Hello, " + expectedName + "!"
+		if result.greeting != expectedGreeting {
+			t.Errorf("greeting = %q, want %q", result.greeting, expectedGreeting)
+		}
+	case workerErr := <-workerDone:
+		t.Fatalf("gRPC stream worker exited before handling its job: %v", workerErr)
 	case <-ctx.Done():
-		t.Fatal("gRPC stream worker did not handle the job in time")
+		workerErr := stopIntegrationWorker(stop, workerDone)
+		if workerErr != nil {
+			t.Fatalf("gRPC stream worker did not handle the job in time: %v; %v", ctx.Err(), workerErr)
+		}
+		t.Fatalf("gRPC stream worker did not handle the job in time: %v", ctx.Err())
 	}
-	stop()
-	<-done
+	if err := stopIntegrationWorker(stop, workerDone); err != nil {
+		t.Fatal(err)
+	}
 }
