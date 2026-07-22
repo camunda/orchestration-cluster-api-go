@@ -63,6 +63,11 @@ func run() (runErr error) {
 		return fmt.Errorf("process id placeholder occurs %d times in embedded BPMN, want 1", count)
 	}
 	model = strings.Replace(model, processIDAttribute, `id="`+processID+`"`, 1)
+	processRefAttribute := `bpmnElement="` + processIDPlaceholder + `"`
+	if count := strings.Count(model, processRefAttribute); count != 1 {
+		return fmt.Errorf("process reference placeholder occurs %d times in embedded BPMN, want 1", count)
+	}
+	model = strings.Replace(model, processRefAttribute, `bpmnElement="`+processID+`"`, 1)
 	jobTypeAttribute := `type="` + jobTypePlaceholder + `"`
 	if count := strings.Count(model, jobTypeAttribute); count != 1 {
 		return fmt.Errorf("job type placeholder occurs %d times in embedded BPMN, want 1", count)
