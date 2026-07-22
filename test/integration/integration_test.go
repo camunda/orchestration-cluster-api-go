@@ -26,6 +26,9 @@ import (
 //go:embed testdata/greet.bpmn
 var greetBPMN []byte
 
+//go:embed testdata/bpmn-error.bpmn
+var bpmnErrorModel []byte
+
 func envOr(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
@@ -50,8 +53,13 @@ func newClient(t *testing.T) *camunda.CamundaClient {
 // deployGreet deploys the greet process (start -> "greet" service task -> end).
 func deployGreet(ctx context.Context, t *testing.T, c *camunda.CamundaClient) {
 	t.Helper()
-	path := filepath.Join(t.TempDir(), "greet.bpmn")
-	if err := os.WriteFile(path, greetBPMN, 0o644); err != nil {
+	deployModel(ctx, t, c, "greet.bpmn", greetBPMN)
+}
+
+func deployModel(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string, model []byte) {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), name)
+	if err := os.WriteFile(path, model, 0o644); err != nil {
 		t.Fatalf("write bpmn: %v", err)
 	}
 	f, err := os.Open(path)
@@ -60,18 +68,20 @@ func deployGreet(ctx context.Context, t *testing.T, c *camunda.CamundaClient) {
 	}
 	defer func() { _ = f.Close() }()
 	if _, _, err := c.Raw().ResourceAPI.CreateDeployment(ctx).Resources([]*os.File{f}).Execute(); err != nil {
-		t.Fatalf("deploy: %v", err)
+		t.Fatalf("deploy %s: %v", name, err)
 	}
 }
 
-func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string) {
+func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string) openapi.ProcessInstanceKey {
 	t.Helper()
 	byID := openapi.NewProcessInstanceCreationInstructionById("demo-process")
 	byID.SetVariables(map[string]any{"name": name})
 	instr := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
-	if _, err := c.CreateProcessInstance(ctx, instr); err != nil {
+	result, err := c.CreateProcessInstance(ctx, instr)
+	if err != nil {
 		t.Fatalf("create process instance: %v", err)
 	}
+	return openapi.ProcessInstanceKey(string(result.GetProcessInstanceKey()))
 }
 
 func TestTopology(t *testing.T) {
@@ -103,9 +113,11 @@ func TestRESTWorkerEndToEnd(t *testing.T) {
 			}
 			_ = job.Variables(&in)
 			greeting := "Hello, " + in.Name + "!"
-			select {
-			case handled <- greeting:
-			default:
+			if in.Name == "REST" {
+				select {
+				case handled <- greeting:
+				default:
+				}
 			}
 			return map[string]any{"greeting": greeting}, nil
 		},
@@ -118,7 +130,7 @@ func TestRESTWorkerEndToEnd(t *testing.T) {
 	done := make(chan struct{})
 	go func() { _ = worker.Run(wctx); close(done) }()
 
-	startGreetProcess(ctx, t, c, "REST")
+	_ = startGreetProcess(ctx, t, c, "REST")
 
 	select {
 	case greeting := <-handled:
@@ -147,9 +159,11 @@ func TestStreamWorkerEndToEnd(t *testing.T) {
 			}
 			_ = job.Variables(&in)
 			greeting := "Hello, " + in.Name + "!"
-			select {
-			case handled <- greeting:
-			default:
+			if in.Name == "gRPC" {
+				select {
+				case handled <- greeting:
+				default:
+				}
 			}
 			return map[string]any{"greeting": greeting}, nil
 		},
@@ -164,7 +178,7 @@ func TestStreamWorkerEndToEnd(t *testing.T) {
 
 	// Give the stream a moment to register before creating the instance.
 	time.Sleep(time.Second)
-	startGreetProcess(ctx, t, c, "gRPC")
+	_ = startGreetProcess(ctx, t, c, "gRPC")
 
 	select {
 	case greeting := <-handled:

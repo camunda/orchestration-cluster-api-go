@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="integration-bpmn-error-definitions"
+                  targetNamespace="https://camunda.com/integration-tests">
+  <bpmn:error id="business-error" errorCode="BUSINESS_ERROR" />
+  <bpmn:process id="integration-bpmn-error" isExecutable="true">
+    <bpmn:startEvent id="start">
+      <bpmn:outgoing>to-work</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="to-work" sourceRef="start" targetRef="work" />
+    <bpmn:serviceTask id="work">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="integration-error-task" retries="3" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>to-work</bpmn:incoming>
+      <bpmn:outgoing>to-success</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="business-error-caught" attachedToRef="work">
+      <bpmn:outgoing>to-caught</bpmn:outgoing>
+      <bpmn:errorEventDefinition errorRef="business-error" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="to-success" sourceRef="work" targetRef="success" />
+    <bpmn:sequenceFlow id="to-caught" sourceRef="business-error-caught" targetRef="caught" />
+    <bpmn:endEvent id="success">
+      <bpmn:incoming>to-success</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="caught">
+      <bpmn:incoming>to-caught</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+</bpmn:definitions>

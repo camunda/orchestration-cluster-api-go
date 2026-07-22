@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -149,7 +150,14 @@ func TestSearchProcessInstancesEndToEnd(t *testing.T) {
 	defer cancel()
 
 	deployGreet(ctx, t, c)
-	startGreetProcess(ctx, t, c, "search")
+	key := startGreetProcess(ctx, t, c, "search")
+	defer func() {
+		cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cleanupCancel()
+		if err := c.CancelProcessInstance(cleanupCtx, key, *openapi.NewCancelProcessInstanceRequest()); err != nil {
+			t.Errorf("cancel search process instance %s: %v", key, err)
+		}
+	}()
 
 	// Search hits secondary storage; poll until at least one instance is indexed.
 	result, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceSearchQueryResult, error) {
@@ -167,5 +175,89 @@ func TestSearchProcessInstancesEndToEnd(t *testing.T) {
 	}
 	if len(result.GetItems()) == 0 {
 		t.Error("expected at least one process instance")
+	}
+}
+
+func TestBpmnErrorCompletesModeledExceptionPath(t *testing.T) {
+	c := newClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	runID := strconv.FormatInt(time.Now().UnixNano(), 10)
+	processID := "integration-bpmn-error-" + runID
+	jobType := "integration-error-task-" + runID
+	model := strings.ReplaceAll(string(bpmnErrorModel), "integration-bpmn-error", processID)
+	model = strings.ReplaceAll(model, "integration-error-task", jobType)
+	deployModel(ctx, t, c, "bpmn-error.bpmn", []byte(model))
+
+	worker := c.NewJobWorker(jobType,
+		func(context.Context, *camunda.Job) (map[string]any, error) {
+			return nil, &camunda.BpmnError{
+				Code:      "BUSINESS_ERROR",
+				Message:   "expected modeled outcome",
+				Variables: map[string]any{"errorHandled": true},
+			}
+		},
+		camunda.WithRequestTimeout(5*time.Second),
+		camunda.WithPollInterval(200*time.Millisecond),
+	)
+	workerCtx, stopWorker := context.WithCancel(ctx)
+	workerDone := make(chan error, 1)
+	go func() { workerDone <- worker.Run(workerCtx) }()
+
+	byID := openapi.NewProcessInstanceCreationInstructionById(processID)
+	created, err := c.CreateProcessInstance(ctx,
+		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
+	if err != nil {
+		stopWorker()
+		<-workerDone
+		t.Fatalf("CreateProcessInstance: %v", err)
+	}
+
+	key := openapi.ProcessInstanceKey(string(created.GetProcessInstanceKey()))
+	_, err = camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
+		instance, err := c.GetProcessInstance(ctx, key)
+		if err != nil {
+			return nil, err
+		}
+		if instance.GetState() != openapi.PROCESSINSTANCESTATEENUM_COMPLETED {
+			return nil, errNotYetIndexed
+		}
+		return instance, nil
+	},
+		camunda.WithPollTimeout(30*time.Second),
+		camunda.WithRetryOn(func(err error) bool {
+			return err == errNotYetIndexed || camunda.IsNotFound(err)
+		}),
+	)
+	stopWorker()
+	<-workerDone
+	if err != nil {
+		t.Fatalf("modeled BPMN error path did not complete: %v", err)
+	}
+
+	filter := openapi.NewElementInstanceFilter()
+	filter.SetProcessInstanceKey(openapi.ModelString(key))
+	query := openapi.NewElementInstanceSearchQuery()
+	query.SetFilter(*filter)
+	_, err = camunda.Poll(ctx, func(ctx context.Context) (*openapi.ElementInstanceSearchQueryResult, error) {
+		result, err := c.SearchElementInstances(ctx, *query)
+		if err != nil {
+			return nil, err
+		}
+		for _, item := range result.GetItems() {
+			if item.GetElementId() == "business-error-caught" {
+				return result, nil
+			}
+		}
+		return nil, errNotYetIndexed
+	},
+		camunda.WithPollTimeout(30*time.Second),
+		camunda.WithRetryOn(func(err error) bool {
+			return err == errNotYetIndexed
+		}),
+	)
+	if err != nil {
+		t.Fatalf("modeled BPMN boundary event was not observed: %v", err)
 	}
 }
