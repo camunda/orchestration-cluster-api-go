@@ -57,16 +57,17 @@ func run() (runErr error) {
 	runID := strconv.FormatInt(time.Now().UnixNano(), 10)
 	processID := processIDPlaceholder + "-" + runID
 	jobType := jobTypePlaceholder + "-" + runID
-	model := strings.ReplaceAll(
-		string(processModel),
-		`id="`+processIDPlaceholder+`"`,
-		`id="`+processID+`"`,
-	)
-	model = strings.ReplaceAll(
-		model,
-		`type="`+jobTypePlaceholder+`"`,
-		`type="`+jobType+`"`,
-	)
+	model := string(processModel)
+	processIDAttribute := `id="` + processIDPlaceholder + `"`
+	if count := strings.Count(model, processIDAttribute); count != 1 {
+		return fmt.Errorf("process id placeholder occurs %d times in embedded BPMN, want 1", count)
+	}
+	model = strings.Replace(model, processIDAttribute, `id="`+processID+`"`, 1)
+	jobTypeAttribute := `type="` + jobTypePlaceholder + `"`
+	if count := strings.Count(model, jobTypeAttribute); count != 1 {
+		return fmt.Errorf("job type placeholder occurs %d times in embedded BPMN, want 1", count)
+	}
+	model = strings.Replace(model, jobTypeAttribute, `type="`+jobType+`"`, 1)
 	if err := exampleutil.Deploy(ctx, client, "test-drive-"+runID+".bpmn", []byte(model)); err != nil {
 		return err
 	}
