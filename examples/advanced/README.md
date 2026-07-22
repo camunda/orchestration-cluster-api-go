@@ -12,6 +12,7 @@ Go interprets `examples/...` as an import path instead of a relative package:
 # Destructive stress test: use only against a disposable local cluster.
 go run ./examples/advanced/backpressure
 
+go run ./examples/advanced/sdk-test-drive
 go run ./examples/advanced/order-worker
 go run ./examples/advanced/message-correlation
 go run ./examples/advanced/grpc-stream-worker
@@ -31,6 +32,10 @@ CAMUNDA_GRPC_INSECURE=true go run ./examples/advanced/grpc-low-level
   afterward. Run it only against a disposable local cluster; tune with
   `-flooders`, `-clients`, and `-duration`. See its
   [detailed guide](backpressure/README.md).
+- **sdk-test-drive** is the quickest end-to-end confidence check. It exercises
+  topology, FEEL evaluation, deployment, process creation, REST job handling,
+  completion, and eventually consistent readback in one run. See its
+  [detailed guide](sdk-test-drive/README.md).
 - **order-worker** treats technical failures as retryable job failures and stock
   shortages as modeled BPMN errors. Do not retry business outcomes as if they
   were infrastructure faults. See its
