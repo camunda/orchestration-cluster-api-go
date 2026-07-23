@@ -11,7 +11,8 @@ import (
 
 func resolveSecretsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ResolveSecrets
-	req := openapi.NewSecretResolveRequest([]string{"MY_API_KEY", "MY_TOKEN"})
+	// References take the form `camunda.secrets.<name>`.
+	req := openapi.NewSecretResolveRequest([]string{"camunda.secrets.MY_API_KEY", "camunda.secrets.MY_TOKEN"})
 
 	result, err := client.ResolveSecrets(ctx, *req)
 	if err != nil {
