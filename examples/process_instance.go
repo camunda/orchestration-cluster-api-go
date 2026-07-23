@@ -247,3 +247,55 @@ func modifyProcessInstancesBatchOperationExample(ctx context.Context, client *ca
 	// endregion ModifyProcessInstancesBatchOperation
 	return nil
 }
+
+func suspendProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region SuspendProcessInstance
+	return client.SuspendProcessInstance(ctx,
+		openapi.MustProcessInstanceKey("2251799813685340"),
+		*openapi.NewSuspendProcessInstanceRequest())
+	// endregion SuspendProcessInstance
+}
+
+func resumeProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region ResumeProcessInstance
+	return client.ResumeProcessInstance(ctx,
+		openapi.MustProcessInstanceKey("2251799813685340"),
+		*openapi.NewResumeProcessInstanceRequest())
+	// endregion ResumeProcessInstance
+}
+
+func assignProcessInstanceBusinessIdExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region AssignProcessInstanceBusinessId
+	return client.AssignProcessInstanceBusinessId(ctx,
+		openapi.MustProcessInstanceKey("2251799813685340"),
+		*openapi.NewProcessInstanceBusinessIdAssignmentInstruction("order-42"))
+	// endregion AssignProcessInstanceBusinessId
+}
+
+func suspendProcessInstancesBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region SuspendProcessInstancesBatchOperation
+	// Suspend every instance matching a filter in a single batch operation.
+	req := openapi.NewProcessInstanceSuspensionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+
+	result, err := client.SuspendProcessInstancesBatchOperation(ctx, *req)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
+	// endregion SuspendProcessInstancesBatchOperation
+	return nil
+}
+
+func resumeProcessInstancesBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region ResumeProcessInstancesBatchOperation
+	// Resume every previously-suspended instance matching a filter.
+	req := openapi.NewProcessInstanceResumptionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+
+	result, err := client.ResumeProcessInstancesBatchOperation(ctx, *req)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
+	// endregion ResumeProcessInstancesBatchOperation
+	return nil
+}
