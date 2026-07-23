@@ -23,6 +23,8 @@ var _ MappedNullable = &UpdateClusterVariableRequest{}
 type UpdateClusterVariableRequest struct {
 	// The new value of the cluster variable. Can be any JSON object or primitive value. Will be serialized as a JSON string in responses.
 	Value map[string]interface{} `json:"value"`
+	// A generic key-value metadata bag attached to the cluster variable. Values must be strings or numbers. Limited to 100 entries and a configurable maximum serialized size (default: 100 entries at max key length of a cluster variable name (256 chars) plus the maximum value length, 8192 characters).
+	Metadata map[string]CreateClusterVariableRequestMetadataValue `json:"metadata,omitempty"`
 }
 
 type _UpdateClusterVariableRequest UpdateClusterVariableRequest
@@ -69,6 +71,38 @@ func (o *UpdateClusterVariableRequest) SetValue(v map[string]interface{}) {
 	o.Value = v
 }
 
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *UpdateClusterVariableRequest) GetMetadata() map[string]CreateClusterVariableRequestMetadataValue {
+	if o == nil || IsNil(o.Metadata) {
+		var ret map[string]CreateClusterVariableRequestMetadataValue
+		return ret
+	}
+	return o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateClusterVariableRequest) GetMetadataOk() (map[string]CreateClusterVariableRequestMetadataValue, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return map[string]CreateClusterVariableRequestMetadataValue{}, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *UpdateClusterVariableRequest) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given map[string]CreateClusterVariableRequestMetadataValue and assigns it to the Metadata field.
+func (o *UpdateClusterVariableRequest) SetMetadata(v map[string]CreateClusterVariableRequestMetadataValue) {
+	o.Metadata = v
+}
+
 func (o UpdateClusterVariableRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -80,6 +114,9 @@ func (o UpdateClusterVariableRequest) MarshalJSON() ([]byte, error) {
 func (o UpdateClusterVariableRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["value"] = o.Value
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	return toSerialize, nil
 }
 

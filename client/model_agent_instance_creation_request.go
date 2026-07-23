@@ -21,7 +21,7 @@ var _ MappedNullable = &AgentInstanceCreationRequest{}
 
 // AgentInstanceCreationRequest Request to create a new agent instance.
 type AgentInstanceCreationRequest struct {
-	// The key of the AHSP or AI Agent Task element instance. The engine uses this key to infer processInstanceKey, elementId, processDefinitionKey, and tenantId.
+	// The key of the AI Agent Sub-process or AI Agent Task element instance. The engine uses this key to infer processInstanceKey, elementId, processDefinitionKey, and tenantId.
 	ElementInstanceKey ModelString `json:"elementInstanceKey"`
 	// Static definition set once at creation.
 	Definition AgentInstanceDefinition `json:"definition"`

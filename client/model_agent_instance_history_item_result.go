@@ -40,8 +40,8 @@ type AgentInstanceHistoryItemResult struct {
 	Content []AgentInstanceMessageContent `json:"content"`
 	// Tool calls for this item. Empty for USER items and ASSISTANT items with no tool dispatches. ASSISTANT items: dispatched tool calls with arguments populated. TOOL_RESULT items: single-entry array referencing the originating tool call (arguments null).
 	ToolCalls []AgentInstanceToolCall `json:"toolCalls"`
-	// Per-call token and latency metrics. Zero-valued when not available.
-	Metrics AgentInstanceHistoryItemMetrics `json:"metrics"`
+	// Per-call token and latency metrics. Null when metrics were not provided at creation time.
+	Metrics NullableAgentInstanceHistoryItemMetrics `json:"metrics"`
 	// The commit status of this history item.
 	CommitStatus AgentInstanceHistoryCommitStatusEnum `json:"commitStatus"`
 	// The connector-side timestamp of when this message was produced.
@@ -54,7 +54,7 @@ type _AgentInstanceHistoryItemResult AgentInstanceHistoryItemResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemResult(historyItemKey ModelString, agentInstanceKey ModelString, elementInstanceKey ModelString, jobKey ModelString, jobLease string, loopIteration NullableInt32, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics AgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time) *AgentInstanceHistoryItemResult {
+func NewAgentInstanceHistoryItemResult(historyItemKey ModelString, agentInstanceKey ModelString, elementInstanceKey ModelString, jobKey ModelString, jobLease string, loopIteration NullableInt32, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time) *AgentInstanceHistoryItemResult {
 	this := AgentInstanceHistoryItemResult{}
 	this.HistoryItemKey = historyItemKey
 	this.AgentInstanceKey = agentInstanceKey
@@ -298,27 +298,29 @@ func (o *AgentInstanceHistoryItemResult) SetToolCalls(v []AgentInstanceToolCall)
 }
 
 // GetMetrics returns the Metrics field value
+// If the value is explicit nil, the zero value for AgentInstanceHistoryItemMetrics will be returned
 func (o *AgentInstanceHistoryItemResult) GetMetrics() AgentInstanceHistoryItemMetrics {
-	if o == nil {
+	if o == nil || o.Metrics.Get() == nil {
 		var ret AgentInstanceHistoryItemMetrics
 		return ret
 	}
 
-	return o.Metrics
+	return *o.Metrics.Get()
 }
 
 // GetMetricsOk returns a tuple with the Metrics field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceHistoryItemResult) GetMetricsOk() (*AgentInstanceHistoryItemMetrics, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Metrics, true
+	return o.Metrics.Get(), o.Metrics.IsSet()
 }
 
 // SetMetrics sets field value
 func (o *AgentInstanceHistoryItemResult) SetMetrics(v AgentInstanceHistoryItemMetrics) {
-	o.Metrics = v
+	o.Metrics.Set(&v)
 }
 
 // GetCommitStatus returns the CommitStatus field value
@@ -388,7 +390,7 @@ func (o AgentInstanceHistoryItemResult) ToMap() (map[string]interface{}, error) 
 	toSerialize["role"] = o.Role
 	toSerialize["content"] = o.Content
 	toSerialize["toolCalls"] = o.ToolCalls
-	toSerialize["metrics"] = o.Metrics
+	toSerialize["metrics"] = o.Metrics.Get()
 	toSerialize["commitStatus"] = o.CommitStatus
 	toSerialize["producedAt"] = o.ProducedAt
 	return toSerialize, nil

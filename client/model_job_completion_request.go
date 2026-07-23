@@ -24,6 +24,8 @@ type JobCompletionRequest struct {
 	Result    *JobResult             `json:"result,omitempty"`
 	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`. For a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). A job that was activated without a lease requires no token.
 	LeaseToken NullableString `json:"leaseToken,omitempty"`
+	// An optional business id to assign to the process instance the job belongs to, as part of completing the job, letting a worker set the identifier from work it just performed. The business id can only be assigned to a root process instance: if the job belongs to a child process instance (one started by a call activity), the completion is rejected. An empty business id is likewise rejected. The assignment is single and irreversible and is only accepted while business id uniqueness is disabled. Only artifacts created after the assignment carry the business id; already-existing ones are not enriched. Completing with a business id that differs from one already assigned rejects the whole completion, leaving the job open; re-sending the identical business id is an idempotent no-op.
+	BusinessId NullableString `json:"businessId,omitempty"`
 }
 
 // NewJobCompletionRequest instantiates a new JobCompletionRequest object
@@ -151,6 +153,49 @@ func (o *JobCompletionRequest) UnsetLeaseToken() {
 	o.LeaseToken.Unset()
 }
 
+// GetBusinessId returns the BusinessId field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *JobCompletionRequest) GetBusinessId() string {
+	if o == nil || IsNil(o.BusinessId.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.BusinessId.Get()
+}
+
+// GetBusinessIdOk returns a tuple with the BusinessId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *JobCompletionRequest) GetBusinessIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.BusinessId.Get(), o.BusinessId.IsSet()
+}
+
+// HasBusinessId returns a boolean if a field has been set.
+func (o *JobCompletionRequest) HasBusinessId() bool {
+	if o != nil && o.BusinessId.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetBusinessId gets a reference to the given NullableString and assigns it to the BusinessId field.
+func (o *JobCompletionRequest) SetBusinessId(v string) {
+	o.BusinessId.Set(&v)
+}
+
+// SetBusinessIdNil sets the value for BusinessId to be an explicit nil
+func (o *JobCompletionRequest) SetBusinessIdNil() {
+	o.BusinessId.Set(nil)
+}
+
+// UnsetBusinessId ensures that no value is present for BusinessId, not even an explicit nil
+func (o *JobCompletionRequest) UnsetBusinessId() {
+	o.BusinessId.Unset()
+}
+
 func (o JobCompletionRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -169,6 +214,9 @@ func (o JobCompletionRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if o.LeaseToken.IsSet() {
 		toSerialize["leaseToken"] = o.LeaseToken.Get()
+	}
+	if o.BusinessId.IsSet() {
+		toSerialize["businessId"] = o.BusinessId.Get()
 	}
 	return toSerialize, nil
 }

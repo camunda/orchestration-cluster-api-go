@@ -27,6 +27,8 @@ type BaseProcessInstanceFilterFields struct {
 	State *ProcessInstanceStateFilterProperty `json:"state,omitempty"`
 	// Whether this process instance has a related incident or not.
 	HasIncident *bool `json:"hasIncident,omitempty"`
+	// The time this process instance most recently entered the SUSPENDED state. This is cleared (null) again once the process instance is resumed.
+	SuspendedDate *DateTimeFilterProperty `json:"suspendedDate,omitempty"`
 	// The tenant id.
 	TenantId *StringFilterProperty `json:"tenantId,omitempty"`
 	// The process instance variables.
@@ -203,6 +205,38 @@ func (o *BaseProcessInstanceFilterFields) HasHasIncident() bool {
 // SetHasIncident gets a reference to the given bool and assigns it to the HasIncident field.
 func (o *BaseProcessInstanceFilterFields) SetHasIncident(v bool) {
 	o.HasIncident = &v
+}
+
+// GetSuspendedDate returns the SuspendedDate field value if set, zero value otherwise.
+func (o *BaseProcessInstanceFilterFields) GetSuspendedDate() DateTimeFilterProperty {
+	if o == nil || IsNil(o.SuspendedDate) {
+		var ret DateTimeFilterProperty
+		return ret
+	}
+	return *o.SuspendedDate
+}
+
+// GetSuspendedDateOk returns a tuple with the SuspendedDate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BaseProcessInstanceFilterFields) GetSuspendedDateOk() (*DateTimeFilterProperty, bool) {
+	if o == nil || IsNil(o.SuspendedDate) {
+		return nil, false
+	}
+	return o.SuspendedDate, true
+}
+
+// HasSuspendedDate returns a boolean if a field has been set.
+func (o *BaseProcessInstanceFilterFields) HasSuspendedDate() bool {
+	if o != nil && !IsNil(o.SuspendedDate) {
+		return true
+	}
+
+	return false
+}
+
+// SetSuspendedDate gets a reference to the given DateTimeFilterProperty and assigns it to the SuspendedDate field.
+func (o *BaseProcessInstanceFilterFields) SetSuspendedDate(v DateTimeFilterProperty) {
+	o.SuspendedDate = &v
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
@@ -709,6 +743,9 @@ func (o BaseProcessInstanceFilterFields) ToMap() (map[string]interface{}, error)
 	}
 	if !IsNil(o.HasIncident) {
 		toSerialize["hasIncident"] = o.HasIncident
+	}
+	if !IsNil(o.SuspendedDate) {
+		toSerialize["suspendedDate"] = o.SuspendedDate
 	}
 	if !IsNil(o.TenantId) {
 		toSerialize["tenantId"] = o.TenantId

@@ -21,12 +21,12 @@ var _ MappedNullable = &AgentInstanceHistoryItemMetrics{}
 
 // AgentInstanceHistoryItemMetrics Per-call token and latency metrics for an ASSISTANT history item.
 type AgentInstanceHistoryItemMetrics struct {
-	// Input tokens consumed by this LLM call.
-	InputTokens int64 `json:"inputTokens"`
-	// Output tokens produced by this LLM call.
-	OutputTokens int64 `json:"outputTokens"`
-	// Wall-clock duration of the LLM call in milliseconds.
-	DurationMs int64 `json:"durationMs"`
+	// Input tokens consumed by this LLM call. Null when not provided.
+	InputTokens NullableInt64 `json:"inputTokens"`
+	// Output tokens produced by this LLM call. Null when not provided.
+	OutputTokens NullableInt64 `json:"outputTokens"`
+	// Wall-clock duration of the LLM call in milliseconds. Null when not provided.
+	DurationMs NullableInt64 `json:"durationMs"`
 }
 
 type _AgentInstanceHistoryItemMetrics AgentInstanceHistoryItemMetrics
@@ -35,7 +35,7 @@ type _AgentInstanceHistoryItemMetrics AgentInstanceHistoryItemMetrics
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemMetrics(inputTokens int64, outputTokens int64, durationMs int64) *AgentInstanceHistoryItemMetrics {
+func NewAgentInstanceHistoryItemMetrics(inputTokens NullableInt64, outputTokens NullableInt64, durationMs NullableInt64) *AgentInstanceHistoryItemMetrics {
 	this := AgentInstanceHistoryItemMetrics{}
 	this.InputTokens = inputTokens
 	this.OutputTokens = outputTokens
@@ -52,75 +52,81 @@ func NewAgentInstanceHistoryItemMetricsWithDefaults() *AgentInstanceHistoryItemM
 }
 
 // GetInputTokens returns the InputTokens field value
+// If the value is explicit nil, the zero value for int64 will be returned
 func (o *AgentInstanceHistoryItemMetrics) GetInputTokens() int64 {
-	if o == nil {
+	if o == nil || o.InputTokens.Get() == nil {
 		var ret int64
 		return ret
 	}
 
-	return o.InputTokens
+	return *o.InputTokens.Get()
 }
 
 // GetInputTokensOk returns a tuple with the InputTokens field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceHistoryItemMetrics) GetInputTokensOk() (*int64, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.InputTokens, true
+	return o.InputTokens.Get(), o.InputTokens.IsSet()
 }
 
 // SetInputTokens sets field value
 func (o *AgentInstanceHistoryItemMetrics) SetInputTokens(v int64) {
-	o.InputTokens = v
+	o.InputTokens.Set(&v)
 }
 
 // GetOutputTokens returns the OutputTokens field value
+// If the value is explicit nil, the zero value for int64 will be returned
 func (o *AgentInstanceHistoryItemMetrics) GetOutputTokens() int64 {
-	if o == nil {
+	if o == nil || o.OutputTokens.Get() == nil {
 		var ret int64
 		return ret
 	}
 
-	return o.OutputTokens
+	return *o.OutputTokens.Get()
 }
 
 // GetOutputTokensOk returns a tuple with the OutputTokens field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceHistoryItemMetrics) GetOutputTokensOk() (*int64, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.OutputTokens, true
+	return o.OutputTokens.Get(), o.OutputTokens.IsSet()
 }
 
 // SetOutputTokens sets field value
 func (o *AgentInstanceHistoryItemMetrics) SetOutputTokens(v int64) {
-	o.OutputTokens = v
+	o.OutputTokens.Set(&v)
 }
 
 // GetDurationMs returns the DurationMs field value
+// If the value is explicit nil, the zero value for int64 will be returned
 func (o *AgentInstanceHistoryItemMetrics) GetDurationMs() int64 {
-	if o == nil {
+	if o == nil || o.DurationMs.Get() == nil {
 		var ret int64
 		return ret
 	}
 
-	return o.DurationMs
+	return *o.DurationMs.Get()
 }
 
 // GetDurationMsOk returns a tuple with the DurationMs field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceHistoryItemMetrics) GetDurationMsOk() (*int64, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.DurationMs, true
+	return o.DurationMs.Get(), o.DurationMs.IsSet()
 }
 
 // SetDurationMs sets field value
 func (o *AgentInstanceHistoryItemMetrics) SetDurationMs(v int64) {
-	o.DurationMs = v
+	o.DurationMs.Set(&v)
 }
 
 func (o AgentInstanceHistoryItemMetrics) MarshalJSON() ([]byte, error) {
@@ -133,9 +139,9 @@ func (o AgentInstanceHistoryItemMetrics) MarshalJSON() ([]byte, error) {
 
 func (o AgentInstanceHistoryItemMetrics) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["inputTokens"] = o.InputTokens
-	toSerialize["outputTokens"] = o.OutputTokens
-	toSerialize["durationMs"] = o.DurationMs
+	toSerialize["inputTokens"] = o.InputTokens.Get()
+	toSerialize["outputTokens"] = o.OutputTokens.Get()
+	toSerialize["durationMs"] = o.DurationMs.Get()
 	return toSerialize, nil
 }
 

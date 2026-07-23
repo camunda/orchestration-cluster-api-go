@@ -25,6 +25,10 @@ type CreateClusterVariableRequest struct {
 	Name string `json:"name" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The value of the cluster variable. Can be any JSON object or primitive value. Will be serialized as a JSON string in responses.
 	Value map[string]interface{} `json:"value"`
+	// A generic key-value metadata bag attached to the cluster variable. Values must be strings or numbers. Limited to 100 entries and a configurable maximum serialized size (default: 100 entries at max key length of a cluster variable name (256 chars) plus the maximum value length, 8192 characters).
+	Metadata map[string]CreateClusterVariableRequestMetadataValue `json:"metadata,omitempty"`
+	// The kind of the cluster variable. Defaults to JSON if not specified.
+	Kind *ClusterVariableKindEnum `json:"kind,omitempty"`
 }
 
 type _CreateClusterVariableRequest CreateClusterVariableRequest
@@ -96,6 +100,70 @@ func (o *CreateClusterVariableRequest) SetValue(v map[string]interface{}) {
 	o.Value = v
 }
 
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *CreateClusterVariableRequest) GetMetadata() map[string]CreateClusterVariableRequestMetadataValue {
+	if o == nil || IsNil(o.Metadata) {
+		var ret map[string]CreateClusterVariableRequestMetadataValue
+		return ret
+	}
+	return o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateClusterVariableRequest) GetMetadataOk() (map[string]CreateClusterVariableRequestMetadataValue, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return map[string]CreateClusterVariableRequestMetadataValue{}, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *CreateClusterVariableRequest) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given map[string]CreateClusterVariableRequestMetadataValue and assigns it to the Metadata field.
+func (o *CreateClusterVariableRequest) SetMetadata(v map[string]CreateClusterVariableRequestMetadataValue) {
+	o.Metadata = v
+}
+
+// GetKind returns the Kind field value if set, zero value otherwise.
+func (o *CreateClusterVariableRequest) GetKind() ClusterVariableKindEnum {
+	if o == nil || IsNil(o.Kind) {
+		var ret ClusterVariableKindEnum
+		return ret
+	}
+	return *o.Kind
+}
+
+// GetKindOk returns a tuple with the Kind field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateClusterVariableRequest) GetKindOk() (*ClusterVariableKindEnum, bool) {
+	if o == nil || IsNil(o.Kind) {
+		return nil, false
+	}
+	return o.Kind, true
+}
+
+// HasKind returns a boolean if a field has been set.
+func (o *CreateClusterVariableRequest) HasKind() bool {
+	if o != nil && !IsNil(o.Kind) {
+		return true
+	}
+
+	return false
+}
+
+// SetKind gets a reference to the given ClusterVariableKindEnum and assigns it to the Kind field.
+func (o *CreateClusterVariableRequest) SetKind(v ClusterVariableKindEnum) {
+	o.Kind = &v
+}
+
 func (o CreateClusterVariableRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -108,6 +176,12 @@ func (o CreateClusterVariableRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
 	toSerialize["value"] = o.Value
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
+	if !IsNil(o.Kind) {
+		toSerialize["kind"] = o.Kind
+	}
 	return toSerialize, nil
 }
 

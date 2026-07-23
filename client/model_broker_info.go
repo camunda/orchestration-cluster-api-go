@@ -21,8 +21,11 @@ var _ MappedNullable = &BrokerInfo{}
 
 // BrokerInfo Provides information on a broker node.
 type BrokerInfo struct {
-	// The unique (within a cluster) node ID for the broker.
+	// The node ID for the broker. The uniqueness of this identifier depends if the cluster is zone-aware or not. - non zone-aware: (default) nodeId is unique across the cluster - zone-aware:  (opt-in) nodeId is unique only within its zone. If you are migrating to a zone aware cluster, you must use `brokerId` instead. This property is deprecated, as it's been replaced by `brokerId`.
+	// Deprecated
 	NodeId int32 `json:"nodeId"`
+	// The unique (within a cluster) broker identifier. When the cluster is not zoned, then it's a string that represents the nodeId (an integer). When the cluster is zoned, instead, it's of the form \"$zoneName_$nodeId\", providing uniqueness even across zones.
+	BrokerId string `json:"brokerId"`
 	// The hostname for reaching the broker.
 	Host string `json:"host"`
 	// The port for reaching the broker.
@@ -39,9 +42,10 @@ type _BrokerInfo BrokerInfo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBrokerInfo(nodeId int32, host string, port int32, partitions []Partition, version string) *BrokerInfo {
+func NewBrokerInfo(nodeId int32, brokerId string, host string, port int32, partitions []Partition, version string) *BrokerInfo {
 	this := BrokerInfo{}
 	this.NodeId = nodeId
+	this.BrokerId = brokerId
 	this.Host = host
 	this.Port = port
 	this.Partitions = partitions
@@ -58,6 +62,7 @@ func NewBrokerInfoWithDefaults() *BrokerInfo {
 }
 
 // GetNodeId returns the NodeId field value
+// Deprecated
 func (o *BrokerInfo) GetNodeId() int32 {
 	if o == nil {
 		var ret int32
@@ -69,6 +74,7 @@ func (o *BrokerInfo) GetNodeId() int32 {
 
 // GetNodeIdOk returns a tuple with the NodeId field value
 // and a boolean to check if the value has been set.
+// Deprecated
 func (o *BrokerInfo) GetNodeIdOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
@@ -77,8 +83,33 @@ func (o *BrokerInfo) GetNodeIdOk() (*int32, bool) {
 }
 
 // SetNodeId sets field value
+// Deprecated
 func (o *BrokerInfo) SetNodeId(v int32) {
 	o.NodeId = v
+}
+
+// GetBrokerId returns the BrokerId field value
+func (o *BrokerInfo) GetBrokerId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.BrokerId
+}
+
+// GetBrokerIdOk returns a tuple with the BrokerId field value
+// and a boolean to check if the value has been set.
+func (o *BrokerInfo) GetBrokerIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.BrokerId, true
+}
+
+// SetBrokerId sets field value
+func (o *BrokerInfo) SetBrokerId(v string) {
+	o.BrokerId = v
 }
 
 // GetHost returns the Host field value
@@ -188,6 +219,7 @@ func (o BrokerInfo) MarshalJSON() ([]byte, error) {
 func (o BrokerInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["nodeId"] = o.NodeId
+	toSerialize["brokerId"] = o.BrokerId
 	toSerialize["host"] = o.Host
 	toSerialize["port"] = o.Port
 	toSerialize["partitions"] = o.Partitions
@@ -201,6 +233,7 @@ func (o *BrokerInfo) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"nodeId",
+		"brokerId",
 		"host",
 		"port",
 		"partitions",

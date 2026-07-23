@@ -65,8 +65,9 @@ Upload a document to the Camunda 8 cluster.
 
 Note that this is currently supported for document stores of type: AWS, Azure, GCP, in-memory (non-production), local (non-production)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiCreateDocumentRequest
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiCreateDocumentRequest
 */
 func (a *DocumentAPIService) CreateDocument(ctx context.Context) ApiCreateDocumentRequest {
 	return ApiCreateDocumentRequest{
@@ -76,8 +77,7 @@ func (a *DocumentAPIService) CreateDocument(ctx context.Context) ApiCreateDocume
 }
 
 // Execute executes the request
-//
-//	@return DocumentReference
+//  @return DocumentReference
 func (a *DocumentAPIService) CreateDocumentExecute(r ApiCreateDocumentRequest) (*DocumentReference, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
@@ -229,9 +229,10 @@ Create a link to a document in the Camunda 8 cluster.
 
 Note that this is currently supported for document stores of type: AWS, Azure, GCP
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param documentId The ID of the document to link.
-	@return ApiCreateDocumentLinkRequest
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param documentId The ID of the document to link.
+ @return ApiCreateDocumentLinkRequest
 */
 func (a *DocumentAPIService) CreateDocumentLink(ctx context.Context, documentId string) ApiCreateDocumentLinkRequest {
 	return ApiCreateDocumentLinkRequest{
@@ -242,8 +243,7 @@ func (a *DocumentAPIService) CreateDocumentLink(ctx context.Context, documentId 
 }
 
 // Execute executes the request
-//
-//	@return DocumentLink
+//  @return DocumentLink
 func (a *DocumentAPIService) CreateDocumentLinkExecute(r ApiCreateDocumentLinkRequest) (*DocumentLink, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
@@ -375,8 +375,9 @@ The client can choose to retry the whole batch or individual documents based on 
 
 Note that this is currently supported for document stores of type: AWS, Azure, GCP, in-memory (non-production), local (non-production)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiCreateDocumentsRequest
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiCreateDocumentsRequest
 */
 func (a *DocumentAPIService) CreateDocuments(ctx context.Context) ApiCreateDocumentsRequest {
 	return ApiCreateDocumentsRequest{
@@ -386,8 +387,7 @@ func (a *DocumentAPIService) CreateDocuments(ctx context.Context) ApiCreateDocum
 }
 
 // Execute executes the request
-//
-//	@return DocumentCreationBatchResponse
+//  @return DocumentCreationBatchResponse
 func (a *DocumentAPIService) CreateDocumentsExecute(r ApiCreateDocumentsRequest) (*DocumentCreationBatchResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
@@ -515,9 +515,10 @@ Delete a document from the Camunda 8 cluster.
 
 Note that this is currently supported for document stores of type: AWS, Azure, GCP, in-memory (non-production), local (non-production)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param documentId The ID of the document to delete.
-	@return ApiDeleteDocumentRequest
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param documentId The ID of the document to delete.
+ @return ApiDeleteDocumentRequest
 */
 func (a *DocumentAPIService) DeleteDocument(ctx context.Context, documentId string) ApiDeleteDocumentRequest {
 	return ApiDeleteDocumentRequest{
@@ -637,9 +638,10 @@ Download a document from the Camunda 8 cluster.
 
 Note that this is currently supported for document stores of type: AWS, Azure, GCP, in-memory (non-production), local (non-production)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param documentId The ID of the document to download.
-	@return ApiGetDocumentRequest
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param documentId The ID of the document to download.
+ @return ApiGetDocumentRequest
 */
 func (a *DocumentAPIService) GetDocument(ctx context.Context, documentId string) ApiGetDocumentRequest {
 	return ApiGetDocumentRequest{
@@ -650,8 +652,7 @@ func (a *DocumentAPIService) GetDocument(ctx context.Context, documentId string)
 }
 
 // Execute executes the request
-//
-//	@return *os.File
+//  @return *os.File
 func (a *DocumentAPIService) GetDocumentExecute(r ApiGetDocumentRequest) (*os.File, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet

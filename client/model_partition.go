@@ -27,6 +27,8 @@ type Partition struct {
 	Role string `json:"role"`
 	// Describes the current health of the partition.
 	Health string `json:"health"`
+	// Describes the current operational state of the partition within the cluster configuration.
+	State string `json:"state"`
 }
 
 type _Partition Partition
@@ -35,11 +37,12 @@ type _Partition Partition
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPartition(partitionId int32, role string, health string) *Partition {
+func NewPartition(partitionId int32, role string, health string, state string) *Partition {
 	this := Partition{}
 	this.PartitionId = partitionId
 	this.Role = role
 	this.Health = health
+	this.State = state
 	return &this
 }
 
@@ -123,6 +126,30 @@ func (o *Partition) SetHealth(v string) {
 	o.Health = v
 }
 
+// GetState returns the State field value
+func (o *Partition) GetState() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.State
+}
+
+// GetStateOk returns a tuple with the State field value
+// and a boolean to check if the value has been set.
+func (o *Partition) GetStateOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.State, true
+}
+
+// SetState sets field value
+func (o *Partition) SetState(v string) {
+	o.State = v
+}
+
 func (o Partition) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -136,6 +163,7 @@ func (o Partition) ToMap() (map[string]interface{}, error) {
 	toSerialize["partitionId"] = o.PartitionId
 	toSerialize["role"] = o.Role
 	toSerialize["health"] = o.Health
+	toSerialize["state"] = o.State
 	return toSerialize, nil
 }
 
@@ -147,6 +175,7 @@ func (o *Partition) UnmarshalJSON(data []byte) (err error) {
 		"partitionId",
 		"role",
 		"health",
+		"state",
 	}
 
 	allProperties := make(map[string]interface{})

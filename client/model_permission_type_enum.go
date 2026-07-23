@@ -50,6 +50,7 @@ const (
 	PERMISSIONTYPEENUM_DELETE_TASK_LISTENER                              PermissionTypeEnum = "DELETE_TASK_LISTENER"
 	PERMISSIONTYPEENUM_EVALUATE                                          PermissionTypeEnum = "EVALUATE"
 	PERMISSIONTYPEENUM_MODIFY_PROCESS_INSTANCE                           PermissionTypeEnum = "MODIFY_PROCESS_INSTANCE"
+	PERMISSIONTYPEENUM_PAUSE                                             PermissionTypeEnum = "PAUSE"
 	PERMISSIONTYPEENUM_READ                                              PermissionTypeEnum = "READ"
 	PERMISSIONTYPEENUM_READ_DECISION_DEFINITION                          PermissionTypeEnum = "READ_DECISION_DEFINITION"
 	PERMISSIONTYPEENUM_READ_DECISION_INSTANCE                            PermissionTypeEnum = "READ_DECISION_INSTANCE"
@@ -59,6 +60,8 @@ const (
 	PERMISSIONTYPEENUM_READ_USAGE_METRIC                                 PermissionTypeEnum = "READ_USAGE_METRIC"
 	PERMISSIONTYPEENUM_READ_USER_TASK                                    PermissionTypeEnum = "READ_USER_TASK"
 	PERMISSIONTYPEENUM_READ_TASK_LISTENER                                PermissionTypeEnum = "READ_TASK_LISTENER"
+	PERMISSIONTYPEENUM_RESTORE                                           PermissionTypeEnum = "RESTORE"
+	PERMISSIONTYPEENUM_REVEAL                                            PermissionTypeEnum = "REVEAL"
 	PERMISSIONTYPEENUM_SUSPEND_PROCESS_INSTANCE                          PermissionTypeEnum = "SUSPEND_PROCESS_INSTANCE"
 	PERMISSIONTYPEENUM_UPDATE                                            PermissionTypeEnum = "UPDATE"
 	PERMISSIONTYPEENUM_UPDATE_PROCESS_INSTANCE                           PermissionTypeEnum = "UPDATE_PROCESS_INSTANCE"
@@ -98,6 +101,7 @@ var AllowedPermissionTypeEnumEnumValues = []PermissionTypeEnum{
 	"DELETE_TASK_LISTENER",
 	"EVALUATE",
 	"MODIFY_PROCESS_INSTANCE",
+	"PAUSE",
 	"READ",
 	"READ_DECISION_DEFINITION",
 	"READ_DECISION_INSTANCE",
@@ -107,6 +111,8 @@ var AllowedPermissionTypeEnumEnumValues = []PermissionTypeEnum{
 	"READ_USAGE_METRIC",
 	"READ_USER_TASK",
 	"READ_TASK_LISTENER",
+	"RESTORE",
+	"REVEAL",
 	"SUSPEND_PROCESS_INSTANCE",
 	"UPDATE",
 	"UPDATE_PROCESS_INSTANCE",
