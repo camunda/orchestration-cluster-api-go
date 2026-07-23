@@ -2204,6 +2204,23 @@ func (c *CamundaClient) SearchProcessDefinitions(ctx context.Context, body opena
 	return value, c.wrapError(resp, err)
 }
 
+// AssignProcessInstanceBusinessId calls the AssignProcessInstanceBusinessId operation.
+//
+// Example:
+//
+//	return client.AssignProcessInstanceBusinessId(ctx,
+//		openapi.MustProcessInstanceKey("2251799813685340"),
+//		*openapi.NewProcessInstanceBusinessIdAssignmentInstruction("order-42"))
+func (c *CamundaClient) AssignProcessInstanceBusinessId(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.ProcessInstanceBusinessIdAssignmentInstruction, opts ...func(openapi.ApiAssignProcessInstanceBusinessIdRequest) openapi.ApiAssignProcessInstanceBusinessIdRequest) error {
+	req := c.raw.ProcessInstanceAPI.AssignProcessInstanceBusinessId(ctx, processInstanceKey)
+	req = req.ProcessInstanceBusinessIdAssignmentInstruction(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
 // CancelProcessInstance calls the CancelProcessInstance operation.
 //
 // Example:
@@ -2501,6 +2518,45 @@ func (c *CamundaClient) ResolveProcessInstanceIncidents(ctx context.Context, pro
 	return value, c.wrapError(resp, err)
 }
 
+// ResumeProcessInstance calls the ResumeProcessInstance operation.
+//
+// Example:
+//
+//	return client.ResumeProcessInstance(ctx,
+//		openapi.MustProcessInstanceKey("2251799813685340"),
+//		*openapi.NewResumeProcessInstanceRequest())
+func (c *CamundaClient) ResumeProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.ResumeProcessInstanceRequest, opts ...func(openapi.ApiResumeProcessInstanceRequest) openapi.ApiResumeProcessInstanceRequest) error {
+	req := c.raw.ProcessInstanceAPI.ResumeProcessInstance(ctx, processInstanceKey)
+	req = req.ResumeProcessInstanceRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
+// ResumeProcessInstancesBatchOperation calls the ResumeProcessInstancesBatchOperation operation.
+//
+// Example:
+//
+//	// Resume every previously-suspended instance matching a filter.
+//	req := openapi.NewProcessInstanceResumptionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+//
+//	result, err := client.ResumeProcessInstancesBatchOperation(ctx, *req)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
+func (c *CamundaClient) ResumeProcessInstancesBatchOperation(ctx context.Context, body openapi.ProcessInstanceResumptionBatchOperationRequest, opts ...func(openapi.ApiResumeProcessInstancesBatchOperationRequest) openapi.ApiResumeProcessInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+	req := c.raw.ProcessInstanceAPI.ResumeProcessInstancesBatchOperation(ctx)
+	req = req.ProcessInstanceResumptionBatchOperationRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // SearchProcessInstanceIncidents calls the SearchProcessInstanceIncidents operation.
 //
 // Example:
@@ -2538,6 +2594,45 @@ func (c *CamundaClient) SearchProcessInstanceIncidents(ctx context.Context, proc
 func (c *CamundaClient) SearchProcessInstances(ctx context.Context, body openapi.ProcessInstanceSearchQuery, opts ...func(openapi.ApiSearchProcessInstancesRequest) openapi.ApiSearchProcessInstancesRequest) (*openapi.ProcessInstanceSearchQueryResult, error) {
 	req := c.raw.ProcessInstanceAPI.SearchProcessInstances(ctx)
 	req = req.ProcessInstanceSearchQuery(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// SuspendProcessInstance calls the SuspendProcessInstance operation.
+//
+// Example:
+//
+//	return client.SuspendProcessInstance(ctx,
+//		openapi.MustProcessInstanceKey("2251799813685340"),
+//		*openapi.NewSuspendProcessInstanceRequest())
+func (c *CamundaClient) SuspendProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.SuspendProcessInstanceRequest, opts ...func(openapi.ApiSuspendProcessInstanceRequest) openapi.ApiSuspendProcessInstanceRequest) error {
+	req := c.raw.ProcessInstanceAPI.SuspendProcessInstance(ctx, processInstanceKey)
+	req = req.SuspendProcessInstanceRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
+// SuspendProcessInstancesBatchOperation calls the SuspendProcessInstancesBatchOperation operation.
+//
+// Example:
+//
+//	// Suspend every instance matching a filter in a single batch operation.
+//	req := openapi.NewProcessInstanceSuspensionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+//
+//	result, err := client.SuspendProcessInstancesBatchOperation(ctx, *req)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
+func (c *CamundaClient) SuspendProcessInstancesBatchOperation(ctx context.Context, body openapi.ProcessInstanceSuspensionBatchOperationRequest, opts ...func(openapi.ApiSuspendProcessInstancesBatchOperationRequest) openapi.ApiSuspendProcessInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+	req := c.raw.ProcessInstanceAPI.SuspendProcessInstancesBatchOperation(ctx)
+	req = req.ProcessInstanceSuspensionBatchOperationRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}
@@ -2977,6 +3072,30 @@ func (c *CamundaClient) UnassignRoleFromUser(ctx context.Context, roleId string,
 func (c *CamundaClient) UpdateRole(ctx context.Context, roleId string, body openapi.RoleUpdateRequest, opts ...func(openapi.ApiUpdateRoleRequest) openapi.ApiUpdateRoleRequest) (*openapi.RoleUpdateResult, error) {
 	req := c.raw.RoleAPI.UpdateRole(ctx, roleId)
 	req = req.RoleUpdateRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// ResolveSecrets calls the ResolveSecrets operation.
+//
+// Example:
+//
+//	// References take the form `camunda.secrets.<name>`.
+//	req := openapi.NewSecretResolveRequest([]string{"camunda.secrets.MY_API_KEY", "camunda.secrets.MY_TOKEN"})
+//
+//	result, err := client.ResolveSecrets(ctx, *req)
+//	if err != nil {
+//		return err
+//	}
+//	for _, secret := range result.GetResolved() {
+//		fmt.Printf("%v = %v\n", secret.GetReference(), secret.GetValue())
+//	}
+func (c *CamundaClient) ResolveSecrets(ctx context.Context, body openapi.SecretResolveRequest, opts ...func(openapi.ApiResolveSecretsRequest) openapi.ApiResolveSecretsRequest) (*openapi.SecretResolveResult, error) {
+	req := c.raw.SecretAPI.ResolveSecrets(ctx)
+	req = req.SecretResolveRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}

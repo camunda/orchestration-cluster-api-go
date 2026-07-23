@@ -37,6 +37,7 @@ const (
 	Gateway_UpdateJobRetries_FullMethodName                = "/gateway_protocol.Gateway/UpdateJobRetries"
 	Gateway_ModifyProcessInstance_FullMethodName           = "/gateway_protocol.Gateway/ModifyProcessInstance"
 	Gateway_MigrateProcessInstance_FullMethodName          = "/gateway_protocol.Gateway/MigrateProcessInstance"
+	Gateway_AssignProcessInstanceBusinessId_FullMethodName = "/gateway_protocol.Gateway/AssignProcessInstanceBusinessId"
 	Gateway_UpdateJobTimeout_FullMethodName                = "/gateway_protocol.Gateway/UpdateJobTimeout"
 	Gateway_UpdateJobPriority_FullMethodName               = "/gateway_protocol.Gateway/UpdateJobPriority"
 	Gateway_DeleteResource_FullMethodName                  = "/gateway_protocol.Gateway/DeleteResource"
@@ -267,6 +268,20 @@ type GatewayClient interface {
 	// - A `sourceElementId` is mapped by multiple mapping instructions.
 	// For example, the engine cannot determine how to migrate a process instance when the instructions are: [A->B, A->C].
 	MigrateProcessInstance(ctx context.Context, in *MigrateProcessInstanceRequest, opts ...grpc.CallOption) (*MigrateProcessInstanceResponse, error)
+	// Assigns a business id to an already running process instance.
+	//
+	// Errors:
+	// NOT_FOUND:
+	// - no process instance exists with the given key, or it is not active
+	//
+	// FAILED_PRECONDITION:
+	// - the process instance already has a different business id assigned
+	// - the process instance is a child instance created by a call activity
+	// - business id uniqueness is enabled for the process definition
+	//
+	// INVALID_ARGUMENT:
+	// - the business id is empty or exceeds the allowed length
+	AssignProcessInstanceBusinessId(ctx context.Context, in *AssignProcessInstanceBusinessIdRequest, opts ...grpc.CallOption) (*AssignProcessInstanceBusinessIdResponse, error)
 	// Updates the deadline of a job using the timeout (in ms) provided. This can be used
 	// for extending or shortening the job deadline.
 	//
@@ -527,6 +542,16 @@ func (c *gatewayClient) MigrateProcessInstance(ctx context.Context, in *MigrateP
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MigrateProcessInstanceResponse)
 	err := c.cc.Invoke(ctx, Gateway_MigrateProcessInstance_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gatewayClient) AssignProcessInstanceBusinessId(ctx context.Context, in *AssignProcessInstanceBusinessIdRequest, opts ...grpc.CallOption) (*AssignProcessInstanceBusinessIdResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AssignProcessInstanceBusinessIdResponse)
+	err := c.cc.Invoke(ctx, Gateway_AssignProcessInstanceBusinessId_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -806,6 +831,20 @@ type GatewayServer interface {
 	// - A `sourceElementId` is mapped by multiple mapping instructions.
 	// For example, the engine cannot determine how to migrate a process instance when the instructions are: [A->B, A->C].
 	MigrateProcessInstance(context.Context, *MigrateProcessInstanceRequest) (*MigrateProcessInstanceResponse, error)
+	// Assigns a business id to an already running process instance.
+	//
+	// Errors:
+	// NOT_FOUND:
+	// - no process instance exists with the given key, or it is not active
+	//
+	// FAILED_PRECONDITION:
+	// - the process instance already has a different business id assigned
+	// - the process instance is a child instance created by a call activity
+	// - business id uniqueness is enabled for the process definition
+	//
+	// INVALID_ARGUMENT:
+	// - the business id is empty or exceeds the allowed length
+	AssignProcessInstanceBusinessId(context.Context, *AssignProcessInstanceBusinessIdRequest) (*AssignProcessInstanceBusinessIdResponse, error)
 	// Updates the deadline of a job using the timeout (in ms) provided. This can be used
 	// for extending or shortening the job deadline.
 	//
@@ -926,6 +965,9 @@ func (UnimplementedGatewayServer) ModifyProcessInstance(context.Context, *Modify
 }
 func (UnimplementedGatewayServer) MigrateProcessInstance(context.Context, *MigrateProcessInstanceRequest) (*MigrateProcessInstanceResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method MigrateProcessInstance not implemented")
+}
+func (UnimplementedGatewayServer) AssignProcessInstanceBusinessId(context.Context, *AssignProcessInstanceBusinessIdRequest) (*AssignProcessInstanceBusinessIdResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AssignProcessInstanceBusinessId not implemented")
 }
 func (UnimplementedGatewayServer) UpdateJobTimeout(context.Context, *UpdateJobTimeoutRequest) (*UpdateJobTimeoutResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateJobTimeout not implemented")
@@ -1273,6 +1315,24 @@ func _Gateway_MigrateProcessInstance_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Gateway_AssignProcessInstanceBusinessId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignProcessInstanceBusinessIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GatewayServer).AssignProcessInstanceBusinessId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Gateway_AssignProcessInstanceBusinessId_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GatewayServer).AssignProcessInstanceBusinessId(ctx, req.(*AssignProcessInstanceBusinessIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Gateway_UpdateJobTimeout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateJobTimeoutRequest)
 	if err := dec(in); err != nil {
@@ -1433,6 +1493,10 @@ var Gateway_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "MigrateProcessInstance",
 			Handler:    _Gateway_MigrateProcessInstance_Handler,
+		},
+		{
+			MethodName: "AssignProcessInstanceBusinessId",
+			Handler:    _Gateway_AssignProcessInstanceBusinessId_Handler,
 		},
 		{
 			MethodName: "UpdateJobTimeout",

@@ -22,12 +22,14 @@ type ResourceTypeEnum string
 const (
 	RESOURCETYPEENUM_AUDIT_LOG                        ResourceTypeEnum = "AUDIT_LOG"
 	RESOURCETYPEENUM_AUTHORIZATION                    ResourceTypeEnum = "AUTHORIZATION"
+	RESOURCETYPEENUM_BACKUP                           ResourceTypeEnum = "BACKUP"
 	RESOURCETYPEENUM_BATCH                            ResourceTypeEnum = "BATCH"
 	RESOURCETYPEENUM_CLUSTER_VARIABLE                 ResourceTypeEnum = "CLUSTER_VARIABLE"
 	RESOURCETYPEENUM_COMPONENT                        ResourceTypeEnum = "COMPONENT"
 	RESOURCETYPEENUM_DECISION_DEFINITION              ResourceTypeEnum = "DECISION_DEFINITION"
 	RESOURCETYPEENUM_DECISION_REQUIREMENTS_DEFINITION ResourceTypeEnum = "DECISION_REQUIREMENTS_DEFINITION"
 	RESOURCETYPEENUM_DOCUMENT                         ResourceTypeEnum = "DOCUMENT"
+	RESOURCETYPEENUM_EXPORTER                         ResourceTypeEnum = "EXPORTER"
 	RESOURCETYPEENUM_EXPRESSION                       ResourceTypeEnum = "EXPRESSION"
 	RESOURCETYPEENUM_GLOBAL_LISTENER                  ResourceTypeEnum = "GLOBAL_LISTENER"
 	RESOURCETYPEENUM_GROUP                            ResourceTypeEnum = "GROUP"
@@ -36,6 +38,7 @@ const (
 	RESOURCETYPEENUM_PROCESS_DEFINITION               ResourceTypeEnum = "PROCESS_DEFINITION"
 	RESOURCETYPEENUM_RESOURCE                         ResourceTypeEnum = "RESOURCE"
 	RESOURCETYPEENUM_ROLE                             ResourceTypeEnum = "ROLE"
+	RESOURCETYPEENUM_SECRET                           ResourceTypeEnum = "SECRET"
 	RESOURCETYPEENUM_SYSTEM                           ResourceTypeEnum = "SYSTEM"
 	RESOURCETYPEENUM_TENANT                           ResourceTypeEnum = "TENANT"
 	RESOURCETYPEENUM_USER                             ResourceTypeEnum = "USER"
@@ -46,12 +49,14 @@ const (
 var AllowedResourceTypeEnumEnumValues = []ResourceTypeEnum{
 	"AUDIT_LOG",
 	"AUTHORIZATION",
+	"BACKUP",
 	"BATCH",
 	"CLUSTER_VARIABLE",
 	"COMPONENT",
 	"DECISION_DEFINITION",
 	"DECISION_REQUIREMENTS_DEFINITION",
 	"DOCUMENT",
+	"EXPORTER",
 	"EXPRESSION",
 	"GLOBAL_LISTENER",
 	"GROUP",
@@ -60,6 +65,7 @@ var AllowedResourceTypeEnumEnumValues = []ResourceTypeEnum{
 	"PROCESS_DEFINITION",
 	"RESOURCE",
 	"ROLE",
+	"SECRET",
 	"SYSTEM",
 	"TENANT",
 	"USER",

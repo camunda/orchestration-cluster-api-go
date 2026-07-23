@@ -29,6 +29,10 @@ type ClusterVariableSearchQueryFilterRequest struct {
 	TenantId *StringFilterProperty `json:"tenantId,omitempty"`
 	// Filter cluster variables by truncation status of their stored values. When true, returns only variables whose stored values are truncated (i.e., the value exceeds the storage size limit and is truncated in storage). When false, returns only variables with non-truncated stored values. This filter is based on the underlying storage characteristic, not the response format.
 	IsTruncated *bool `json:"isTruncated,omitempty"`
+	// Filter by metadata entries. A map of metadata key to an advanced filter on that key's value. Metadata values are strings or numbers.
+	Metadata *map[string]AdvancedMetadataValueFilter `json:"metadata,omitempty"`
+	// The kind filter for cluster variables.
+	Kind *ClusterVariableKindFilterProperty `json:"kind,omitempty"`
 }
 
 // NewClusterVariableSearchQueryFilterRequest instantiates a new ClusterVariableSearchQueryFilterRequest object
@@ -208,6 +212,70 @@ func (o *ClusterVariableSearchQueryFilterRequest) SetIsTruncated(v bool) {
 	o.IsTruncated = &v
 }
 
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *ClusterVariableSearchQueryFilterRequest) GetMetadata() map[string]AdvancedMetadataValueFilter {
+	if o == nil || IsNil(o.Metadata) {
+		var ret map[string]AdvancedMetadataValueFilter
+		return ret
+	}
+	return *o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ClusterVariableSearchQueryFilterRequest) GetMetadataOk() (*map[string]AdvancedMetadataValueFilter, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return nil, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *ClusterVariableSearchQueryFilterRequest) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given map[string]AdvancedMetadataValueFilter and assigns it to the Metadata field.
+func (o *ClusterVariableSearchQueryFilterRequest) SetMetadata(v map[string]AdvancedMetadataValueFilter) {
+	o.Metadata = &v
+}
+
+// GetKind returns the Kind field value if set, zero value otherwise.
+func (o *ClusterVariableSearchQueryFilterRequest) GetKind() ClusterVariableKindFilterProperty {
+	if o == nil || IsNil(o.Kind) {
+		var ret ClusterVariableKindFilterProperty
+		return ret
+	}
+	return *o.Kind
+}
+
+// GetKindOk returns a tuple with the Kind field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ClusterVariableSearchQueryFilterRequest) GetKindOk() (*ClusterVariableKindFilterProperty, bool) {
+	if o == nil || IsNil(o.Kind) {
+		return nil, false
+	}
+	return o.Kind, true
+}
+
+// HasKind returns a boolean if a field has been set.
+func (o *ClusterVariableSearchQueryFilterRequest) HasKind() bool {
+	if o != nil && !IsNil(o.Kind) {
+		return true
+	}
+
+	return false
+}
+
+// SetKind gets a reference to the given ClusterVariableKindFilterProperty and assigns it to the Kind field.
+func (o *ClusterVariableSearchQueryFilterRequest) SetKind(v ClusterVariableKindFilterProperty) {
+	o.Kind = &v
+}
+
 func (o ClusterVariableSearchQueryFilterRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -232,6 +300,12 @@ func (o ClusterVariableSearchQueryFilterRequest) ToMap() (map[string]interface{}
 	}
 	if !IsNil(o.IsTruncated) {
 		toSerialize["isTruncated"] = o.IsTruncated
+	}
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
+	if !IsNil(o.Kind) {
+		toSerialize["kind"] = o.Kind
 	}
 	return toSerialize, nil
 }

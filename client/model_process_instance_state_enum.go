@@ -22,6 +22,7 @@ type ProcessInstanceStateEnum string
 const (
 	PROCESSINSTANCESTATEENUM_ACTIVE     ProcessInstanceStateEnum = "ACTIVE"
 	PROCESSINSTANCESTATEENUM_COMPLETED  ProcessInstanceStateEnum = "COMPLETED"
+	PROCESSINSTANCESTATEENUM_SUSPENDED  ProcessInstanceStateEnum = "SUSPENDED"
 	PROCESSINSTANCESTATEENUM_TERMINATED ProcessInstanceStateEnum = "TERMINATED"
 )
 
@@ -29,6 +30,7 @@ const (
 var AllowedProcessInstanceStateEnumEnumValues = []ProcessInstanceStateEnum{
 	"ACTIVE",
 	"COMPLETED",
+	"SUSPENDED",
 	"TERMINATED",
 }
 

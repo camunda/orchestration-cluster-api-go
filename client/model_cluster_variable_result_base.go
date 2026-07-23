@@ -26,6 +26,9 @@ type ClusterVariableResultBase struct {
 	Scope ClusterVariableScopeEnum `json:"scope"`
 	// Only provided if the cluster variable scope is TENANT. Null for global scope variables.
 	TenantId NullableString `json:"tenantId"`
+	// A generic key-value metadata bag attached to the cluster variable. Values are strings or numbers.
+	Metadata map[string]CreateClusterVariableRequestMetadataValue `json:"metadata"`
+	Kind     ClusterVariableKindEnum                              `json:"kind"`
 }
 
 type _ClusterVariableResultBase ClusterVariableResultBase
@@ -34,11 +37,13 @@ type _ClusterVariableResultBase ClusterVariableResultBase
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterVariableResultBase(name string, scope ClusterVariableScopeEnum, tenantId NullableString) *ClusterVariableResultBase {
+func NewClusterVariableResultBase(name string, scope ClusterVariableScopeEnum, tenantId NullableString, metadata map[string]CreateClusterVariableRequestMetadataValue, kind ClusterVariableKindEnum) *ClusterVariableResultBase {
 	this := ClusterVariableResultBase{}
 	this.Name = name
 	this.Scope = scope
 	this.TenantId = tenantId
+	this.Metadata = metadata
+	this.Kind = kind
 	return &this
 }
 
@@ -124,6 +129,54 @@ func (o *ClusterVariableResultBase) SetTenantId(v string) {
 	o.TenantId.Set(&v)
 }
 
+// GetMetadata returns the Metadata field value
+func (o *ClusterVariableResultBase) GetMetadata() map[string]CreateClusterVariableRequestMetadataValue {
+	if o == nil {
+		var ret map[string]CreateClusterVariableRequestMetadataValue
+		return ret
+	}
+
+	return o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value
+// and a boolean to check if the value has been set.
+func (o *ClusterVariableResultBase) GetMetadataOk() (map[string]CreateClusterVariableRequestMetadataValue, bool) {
+	if o == nil {
+		return map[string]CreateClusterVariableRequestMetadataValue{}, false
+	}
+	return o.Metadata, true
+}
+
+// SetMetadata sets field value
+func (o *ClusterVariableResultBase) SetMetadata(v map[string]CreateClusterVariableRequestMetadataValue) {
+	o.Metadata = v
+}
+
+// GetKind returns the Kind field value
+func (o *ClusterVariableResultBase) GetKind() ClusterVariableKindEnum {
+	if o == nil {
+		var ret ClusterVariableKindEnum
+		return ret
+	}
+
+	return o.Kind
+}
+
+// GetKindOk returns a tuple with the Kind field value
+// and a boolean to check if the value has been set.
+func (o *ClusterVariableResultBase) GetKindOk() (*ClusterVariableKindEnum, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Kind, true
+}
+
+// SetKind sets field value
+func (o *ClusterVariableResultBase) SetKind(v ClusterVariableKindEnum) {
+	o.Kind = v
+}
+
 func (o ClusterVariableResultBase) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -137,6 +190,8 @@ func (o ClusterVariableResultBase) ToMap() (map[string]interface{}, error) {
 	toSerialize["name"] = o.Name
 	toSerialize["scope"] = o.Scope
 	toSerialize["tenantId"] = o.TenantId.Get()
+	toSerialize["metadata"] = o.Metadata
+	toSerialize["kind"] = o.Kind
 	return toSerialize, nil
 }
 
@@ -148,6 +203,8 @@ func (o *ClusterVariableResultBase) UnmarshalJSON(data []byte) (err error) {
 		"name",
 		"scope",
 		"tenantId",
+		"metadata",
+		"kind",
 	}
 
 	allProperties := make(map[string]interface{})

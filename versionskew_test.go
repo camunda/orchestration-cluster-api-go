@@ -150,3 +150,39 @@ func TestProcessDefinitionResultDecodesWithoutIsDeleted(t *testing.T) {
 		t.Errorf("processDefinitionId = %q, want demo-process", got)
 	}
 }
+
+// TestProcessInstanceResultDecodesWithoutSuspendedDate guards suspendedDate, a
+// field added in 8.10 and required on ProcessInstanceResult in the bundled spec
+// (which tracks camunda `main`) but not emitted by the pinned integration server
+// (8.10.0-alpha3). Relaxed by the version-skew hook. The payload mirrors a real
+// /v2/process-instances/{key} response with suspendedDate absent.
+func TestProcessInstanceResultDecodesWithoutSuspendedDate(t *testing.T) {
+	const realResponse = `{
+  "processDefinitionId": "demo-process",
+  "processDefinitionName": "Demo Process",
+  "processDefinitionVersion": 1,
+  "processDefinitionVersionTag": null,
+  "startDate": "2026-07-24T10:00:00.000Z",
+  "endDate": null,
+  "state": "ACTIVE",
+  "hasIncident": false,
+  "tenantId": "<default>",
+  "processInstanceKey": "2251799813685340",
+  "processDefinitionKey": "2251799813685330",
+  "parentProcessInstanceKey": null,
+  "parentElementInstanceKey": null,
+  "rootProcessInstanceKey": null,
+  "tags": []
+}`
+
+	var result openapi.ProcessInstanceResult
+	if err := json.Unmarshal([]byte(realResponse), &result); err != nil {
+		t.Fatalf("a process-instance response must decode despite a missing spec-required suspendedDate: %v", err)
+	}
+	if got := result.GetProcessDefinitionId(); got != "demo-process" {
+		t.Errorf("processDefinitionId = %q, want demo-process", got)
+	}
+	if result.SuspendedDate.IsSet() {
+		t.Error("omitted suspendedDate should be unset")
+	}
+}

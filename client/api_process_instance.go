@@ -22,6 +22,138 @@ import (
 // ProcessInstanceAPIService ProcessInstanceAPI service
 type ProcessInstanceAPIService service
 
+type ApiAssignProcessInstanceBusinessIdRequest struct {
+	ctx                                            context.Context
+	ApiService                                     *ProcessInstanceAPIService
+	processInstanceKey                             ProcessInstanceKey
+	processInstanceBusinessIdAssignmentInstruction *ProcessInstanceBusinessIdAssignmentInstruction
+}
+
+func (r ApiAssignProcessInstanceBusinessIdRequest) ProcessInstanceBusinessIdAssignmentInstruction(processInstanceBusinessIdAssignmentInstruction ProcessInstanceBusinessIdAssignmentInstruction) ApiAssignProcessInstanceBusinessIdRequest {
+	r.processInstanceBusinessIdAssignmentInstruction = &processInstanceBusinessIdAssignmentInstruction
+	return r
+}
+
+func (r ApiAssignProcessInstanceBusinessIdRequest) Execute() (*http.Response, error) {
+	return r.ApiService.AssignProcessInstanceBusinessIdExecute(r)
+}
+
+/*
+AssignProcessInstanceBusinessId Assign business id to process instance
+
+Assigns a business id to an already-running process instance that currently has none.
+
+The assignment is single and irreversible: only artifacts created after the assignment
+(for example future jobs, user tasks, decision instances, and message subscriptions) carry
+the business id, while existing artifacts are not retroactively enriched. Re-sending the
+same business id succeeds as a no-op. This endpoint is only useful while business id
+uniqueness enforcement is disabled; when it is enabled, the request is rejected with a 409
+response.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processInstanceKey The key of the process instance to assign the business id to.
+	@return ApiAssignProcessInstanceBusinessIdRequest
+*/
+func (a *ProcessInstanceAPIService) AssignProcessInstanceBusinessId(ctx context.Context, processInstanceKey ProcessInstanceKey) ApiAssignProcessInstanceBusinessIdRequest {
+	return ApiAssignProcessInstanceBusinessIdRequest{
+		ApiService:         a,
+		ctx:                ctx,
+		processInstanceKey: processInstanceKey,
+	}
+}
+
+// Execute executes the request
+func (a *ProcessInstanceAPIService) AssignProcessInstanceBusinessIdExecute(r ApiAssignProcessInstanceBusinessIdRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessInstanceAPIService.AssignProcessInstanceBusinessId")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process-instances/{processInstanceKey}/business-id-assignment"
+	localVarPath = strings.Replace(localVarPath, "{"+"processInstanceKey"+"}", url.PathEscape(parameterValueToString(r.processInstanceKey, "processInstanceKey")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.processInstanceBusinessIdAssignmentInstruction == nil {
+		return nil, reportError("processInstanceBusinessIdAssignmentInstruction is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.processInstanceBusinessIdAssignmentInstruction
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type ApiCancelProcessInstanceRequest struct {
 	ctx                          context.Context
 	ApiService                   *ProcessInstanceAPIService
@@ -1922,6 +2054,254 @@ func (a *ProcessInstanceAPIService) ResolveProcessInstanceIncidentsExecute(r Api
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiResumeProcessInstanceRequest struct {
+	ctx                          context.Context
+	ApiService                   *ProcessInstanceAPIService
+	processInstanceKey           ProcessInstanceKey
+	resumeProcessInstanceRequest *ResumeProcessInstanceRequest
+}
+
+func (r ApiResumeProcessInstanceRequest) ResumeProcessInstanceRequest(resumeProcessInstanceRequest ResumeProcessInstanceRequest) ApiResumeProcessInstanceRequest {
+	r.resumeProcessInstanceRequest = &resumeProcessInstanceRequest
+	return r
+}
+
+func (r ApiResumeProcessInstanceRequest) Execute() (*http.Response, error) {
+	return r.ApiService.ResumeProcessInstanceExecute(r)
+}
+
+/*
+ResumeProcessInstance Resume process instance
+
+Resumes a suspended process instance, returning it to the ACTIVE state and continuing processing.
+Only process instances in the SUSPENDED state can be resumed.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processInstanceKey The key of the process instance to resume.
+	@return ApiResumeProcessInstanceRequest
+*/
+func (a *ProcessInstanceAPIService) ResumeProcessInstance(ctx context.Context, processInstanceKey ProcessInstanceKey) ApiResumeProcessInstanceRequest {
+	return ApiResumeProcessInstanceRequest{
+		ApiService:         a,
+		ctx:                ctx,
+		processInstanceKey: processInstanceKey,
+	}
+}
+
+// Execute executes the request
+func (a *ProcessInstanceAPIService) ResumeProcessInstanceExecute(r ApiResumeProcessInstanceRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessInstanceAPIService.ResumeProcessInstance")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process-instances/{processInstanceKey}/resumption"
+	localVarPath = strings.Replace(localVarPath, "{"+"processInstanceKey"+"}", url.PathEscape(parameterValueToString(r.processInstanceKey, "processInstanceKey")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.resumeProcessInstanceRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiResumeProcessInstancesBatchOperationRequest struct {
+	ctx                                            context.Context
+	ApiService                                     *ProcessInstanceAPIService
+	processInstanceResumptionBatchOperationRequest *ProcessInstanceResumptionBatchOperationRequest
+}
+
+func (r ApiResumeProcessInstancesBatchOperationRequest) ProcessInstanceResumptionBatchOperationRequest(processInstanceResumptionBatchOperationRequest ProcessInstanceResumptionBatchOperationRequest) ApiResumeProcessInstancesBatchOperationRequest {
+	r.processInstanceResumptionBatchOperationRequest = &processInstanceResumptionBatchOperationRequest
+	return r
+}
+
+func (r ApiResumeProcessInstancesBatchOperationRequest) Execute() (*BatchOperationCreatedResult, *http.Response, error) {
+	return r.ApiService.ResumeProcessInstancesBatchOperationExecute(r)
+}
+
+/*
+ResumeProcessInstancesBatchOperation Resume process instances (batch)
+
+Resumes multiple suspended process instances.
+Since only SUSPENDED root instances can be resumed, any given
+filters for state and parentProcessInstanceKey are ignored and overridden during this batch operation.
+This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiResumeProcessInstancesBatchOperationRequest
+*/
+func (a *ProcessInstanceAPIService) ResumeProcessInstancesBatchOperation(ctx context.Context) ApiResumeProcessInstancesBatchOperationRequest {
+	return ApiResumeProcessInstancesBatchOperationRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return BatchOperationCreatedResult
+func (a *ProcessInstanceAPIService) ResumeProcessInstancesBatchOperationExecute(r ApiResumeProcessInstancesBatchOperationRequest) (*BatchOperationCreatedResult, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *BatchOperationCreatedResult
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessInstanceAPIService.ResumeProcessInstancesBatchOperation")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process-instances/resumption"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.processInstanceResumptionBatchOperationRequest == nil {
+		return localVarReturnValue, nil, reportError("processInstanceResumptionBatchOperationRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.processInstanceResumptionBatchOperationRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiSearchProcessInstanceIncidentsRequest struct {
 	ctx                 context.Context
 	ApiService          *ProcessInstanceAPIService
@@ -2142,6 +2522,254 @@ func (a *ProcessInstanceAPIService) SearchProcessInstancesExecute(r ApiSearchPro
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiSuspendProcessInstanceRequest struct {
+	ctx                           context.Context
+	ApiService                    *ProcessInstanceAPIService
+	processInstanceKey            ProcessInstanceKey
+	suspendProcessInstanceRequest *SuspendProcessInstanceRequest
+}
+
+func (r ApiSuspendProcessInstanceRequest) SuspendProcessInstanceRequest(suspendProcessInstanceRequest SuspendProcessInstanceRequest) ApiSuspendProcessInstanceRequest {
+	r.suspendProcessInstanceRequest = &suspendProcessInstanceRequest
+	return r
+}
+
+func (r ApiSuspendProcessInstanceRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SuspendProcessInstanceExecute(r)
+}
+
+/*
+SuspendProcessInstance Suspend process instance
+
+Suspends a running process instance, pausing further processing until it is resumed.
+Only process instances in the ACTIVE state can be suspended.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processInstanceKey The key of the process instance to suspend.
+	@return ApiSuspendProcessInstanceRequest
+*/
+func (a *ProcessInstanceAPIService) SuspendProcessInstance(ctx context.Context, processInstanceKey ProcessInstanceKey) ApiSuspendProcessInstanceRequest {
+	return ApiSuspendProcessInstanceRequest{
+		ApiService:         a,
+		ctx:                ctx,
+		processInstanceKey: processInstanceKey,
+	}
+}
+
+// Execute executes the request
+func (a *ProcessInstanceAPIService) SuspendProcessInstanceExecute(r ApiSuspendProcessInstanceRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessInstanceAPIService.SuspendProcessInstance")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process-instances/{processInstanceKey}/suspension"
+	localVarPath = strings.Replace(localVarPath, "{"+"processInstanceKey"+"}", url.PathEscape(parameterValueToString(r.processInstanceKey, "processInstanceKey")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.suspendProcessInstanceRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiSuspendProcessInstancesBatchOperationRequest struct {
+	ctx                                            context.Context
+	ApiService                                     *ProcessInstanceAPIService
+	processInstanceSuspensionBatchOperationRequest *ProcessInstanceSuspensionBatchOperationRequest
+}
+
+func (r ApiSuspendProcessInstancesBatchOperationRequest) ProcessInstanceSuspensionBatchOperationRequest(processInstanceSuspensionBatchOperationRequest ProcessInstanceSuspensionBatchOperationRequest) ApiSuspendProcessInstancesBatchOperationRequest {
+	r.processInstanceSuspensionBatchOperationRequest = &processInstanceSuspensionBatchOperationRequest
+	return r
+}
+
+func (r ApiSuspendProcessInstancesBatchOperationRequest) Execute() (*BatchOperationCreatedResult, *http.Response, error) {
+	return r.ApiService.SuspendProcessInstancesBatchOperationExecute(r)
+}
+
+/*
+SuspendProcessInstancesBatchOperation Suspend process instances (batch)
+
+Suspends multiple running process instances.
+Since only ACTIVE root instances can be suspended, any given
+filters for state and parentProcessInstanceKey are ignored and overridden during this batch operation.
+This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSuspendProcessInstancesBatchOperationRequest
+*/
+func (a *ProcessInstanceAPIService) SuspendProcessInstancesBatchOperation(ctx context.Context) ApiSuspendProcessInstancesBatchOperationRequest {
+	return ApiSuspendProcessInstancesBatchOperationRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return BatchOperationCreatedResult
+func (a *ProcessInstanceAPIService) SuspendProcessInstancesBatchOperationExecute(r ApiSuspendProcessInstancesBatchOperationRequest) (*BatchOperationCreatedResult, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *BatchOperationCreatedResult
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessInstanceAPIService.SuspendProcessInstancesBatchOperation")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process-instances/suspension"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.processInstanceSuspensionBatchOperationRequest == nil {
+		return localVarReturnValue, nil, reportError("processInstanceSuspensionBatchOperationRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.processInstanceSuspensionBatchOperationRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

@@ -35,6 +35,8 @@ type ProcessInstanceResult struct {
 	// The completion or termination time of the process instance.
 	EndDate NullableTime             `json:"endDate"`
 	State   ProcessInstanceStateEnum `json:"state"`
+	// The time this process instance most recently entered the `SUSPENDED` state. This is `null` if the process instance is not currently suspended.
+	SuspendedDate NullableTime `json:"suspendedDate"`
 	// Whether this process instance has a related incident or not.
 	HasIncident bool `json:"hasIncident"`
 	// The unique identifier of the tenant.
@@ -61,7 +63,7 @@ type _ProcessInstanceResult ProcessInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceResult(processDefinitionId string, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, hasIncident bool, tenantId string, processInstanceKey ModelString, processDefinitionKey ModelString, parentProcessInstanceKey NullableModelString, parentElementInstanceKey NullableModelString, rootProcessInstanceKey NullableModelString, tags []string, businessId NullableString) *ProcessInstanceResult {
+func NewProcessInstanceResult(processDefinitionId string, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId string, processInstanceKey ModelString, processDefinitionKey ModelString, parentProcessInstanceKey NullableModelString, parentElementInstanceKey NullableModelString, rootProcessInstanceKey NullableModelString, tags []string, businessId NullableString) *ProcessInstanceResult {
 	this := ProcessInstanceResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionName = processDefinitionName
@@ -70,6 +72,7 @@ func NewProcessInstanceResult(processDefinitionId string, processDefinitionName 
 	this.StartDate = startDate
 	this.EndDate = endDate
 	this.State = state
+	this.SuspendedDate = suspendedDate
 	this.HasIncident = hasIncident
 	this.TenantId = tenantId
 	this.ProcessInstanceKey = processInstanceKey
@@ -262,6 +265,32 @@ func (o *ProcessInstanceResult) GetStateOk() (*ProcessInstanceStateEnum, bool) {
 // SetState sets field value
 func (o *ProcessInstanceResult) SetState(v ProcessInstanceStateEnum) {
 	o.State = v
+}
+
+// GetSuspendedDate returns the SuspendedDate field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *ProcessInstanceResult) GetSuspendedDate() time.Time {
+	if o == nil || o.SuspendedDate.Get() == nil {
+		var ret time.Time
+		return ret
+	}
+
+	return *o.SuspendedDate.Get()
+}
+
+// GetSuspendedDateOk returns a tuple with the SuspendedDate field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ProcessInstanceResult) GetSuspendedDateOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SuspendedDate.Get(), o.SuspendedDate.IsSet()
+}
+
+// SetSuspendedDate sets field value
+func (o *ProcessInstanceResult) SetSuspendedDate(v time.Time) {
+	o.SuspendedDate.Set(&v)
 }
 
 // GetHasIncident returns the HasIncident field value
@@ -505,6 +534,7 @@ func (o ProcessInstanceResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["startDate"] = o.StartDate
 	toSerialize["endDate"] = o.EndDate.Get()
 	toSerialize["state"] = o.State
+	toSerialize["suspendedDate"] = o.SuspendedDate.Get()
 	toSerialize["hasIncident"] = o.HasIncident
 	toSerialize["tenantId"] = o.TenantId
 	toSerialize["processInstanceKey"] = o.ProcessInstanceKey

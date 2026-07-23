@@ -832,6 +832,48 @@
       "label": "Modify process instances (batch)"
     }
   ],
+  "suspendProcessInstance": [
+    {
+      "file": "process_instance.go",
+      "region": "SuspendProcessInstance",
+      "label": "Suspend process instance"
+    }
+  ],
+  "resumeProcessInstance": [
+    {
+      "file": "process_instance.go",
+      "region": "ResumeProcessInstance",
+      "label": "Resume process instance"
+    }
+  ],
+  "assignProcessInstanceBusinessId": [
+    {
+      "file": "process_instance.go",
+      "region": "AssignProcessInstanceBusinessId",
+      "label": "Assign business ID"
+    }
+  ],
+  "suspendProcessInstancesBatchOperation": [
+    {
+      "file": "process_instance.go",
+      "region": "SuspendProcessInstancesBatchOperation",
+      "label": "Suspend process instances (batch)"
+    }
+  ],
+  "resumeProcessInstancesBatchOperation": [
+    {
+      "file": "process_instance.go",
+      "region": "ResumeProcessInstancesBatchOperation",
+      "label": "Resume process instances (batch)"
+    }
+  ],
+  "resolveSecrets": [
+    {
+      "file": "secret.go",
+      "region": "ResolveSecrets",
+      "label": "Resolve secrets"
+    }
+  ],
   "searchProcessInstances": [
     {
       "file": "process_instance.go",

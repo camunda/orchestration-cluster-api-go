@@ -108,6 +108,8 @@ type APIClient struct {
 
 	RoleAPI *RoleAPIService
 
+	SecretAPI *SecretAPIService
+
 	SetupAPI *SetupAPIService
 
 	SignalAPI *SignalAPIService
@@ -169,6 +171,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.RecoveryAPI = (*RecoveryAPIService)(&c.common)
 	c.ResourceAPI = (*ResourceAPIService)(&c.common)
 	c.RoleAPI = (*RoleAPIService)(&c.common)
+	c.SecretAPI = (*SecretAPIService)(&c.common)
 	c.SetupAPI = (*SetupAPIService)(&c.common)
 	c.SignalAPI = (*SignalAPIService)(&c.common)
 	c.SystemAPI = (*SystemAPIService)(&c.common)
