@@ -559,7 +559,6 @@ func (o *ProcessInstanceResult) UnmarshalJSON(data []byte) (err error) {
 		"startDate",
 		"endDate",
 		"state",
-		"suspendedDate",
 		"hasIncident",
 		"tenantId",
 		"processInstanceKey",
