@@ -18,47 +18,155 @@ import (
 	"net/url"
 )
 
-// ClusterAPIService ClusterAPI service
-type ClusterAPIService service
+// ExportingAPIService ExportingAPI service
+type ExportingAPIService service
 
-type ApiGetStatusRequest struct {
+type ApiPauseExportingRequest struct {
 	ctx        context.Context
-	ApiService *ClusterAPIService
+	ApiService *ExportingAPIService
+	soft       *bool
 }
 
-func (r ApiGetStatusRequest) Execute() (*http.Response, error) {
-	return r.ApiService.GetStatusExecute(r)
+// If true, soft-pauses exporting instead of a hard pause.
+func (r ApiPauseExportingRequest) Soft(soft bool) ApiPauseExportingRequest {
+	r.soft = &soft
+	return r
+}
+
+func (r ApiPauseExportingRequest) Execute() (*http.Response, error) {
+	return r.ApiService.PauseExportingExecute(r)
 }
 
 /*
-GetStatus Get physical tenant status
+PauseExporting Pause exporting
 
-Checks the health status of the default physical tenant by verifying if there's at least one partition of its group with a healthy leader. This endpoint is scoped to the default physical tenant only: it is available unprefixed and at `/physical-tenants/default/v2/status`, but not for any other physical tenant id (`/physical-tenants/{id}/v2/status` returns 404 for every other id, whether or not a physical tenant with that id exists). If the cluster has only a single physical tenant (the default), this endpoint is equivalent to `/cluster/v2/status`. Use `/cluster/v2/status` for the aggregated status of the whole cluster, or `/physical-tenants/{id}/v2/topology` for the health of a specific physical tenant's partitions.
+Pauses exporting on all partitions of the physical tenant. While paused, exported records
+are not committed, so the log is not compacted for the affected partitions.
+
+With `soft=true`, exporting continues to run but its position is not committed, so the
+state after resuming is identical to a hard pause; use this variant when exporting must
+keep progressing (e.g. to avoid falling behind) while still preventing log compaction,
+such as during a backup.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiGetStatusRequest
+	@return ApiPauseExportingRequest
 */
-func (a *ClusterAPIService) GetStatus(ctx context.Context) ApiGetStatusRequest {
-	return ApiGetStatusRequest{
+func (a *ExportingAPIService) PauseExporting(ctx context.Context) ApiPauseExportingRequest {
+	return ApiPauseExportingRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-func (a *ClusterAPIService) GetStatusExecute(r ApiGetStatusRequest) (*http.Response, error) {
+func (a *ExportingAPIService) PauseExportingExecute(r ApiPauseExportingRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
+		localVarHTTPMethod = http.MethodPost
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClusterAPIService.GetStatus")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ExportingAPIService.PauseExporting")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/status"
+	localVarPath := localBasePath + "/exporting/pause"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.soft != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "soft", r.soft, "form", "")
+	} else {
+		var defaultValue bool = false
+		parameterAddToHeaderOrQuery(localVarQueryParams, "soft", defaultValue, "form", "")
+		r.soft = &defaultValue
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiResumeExportingRequest struct {
+	ctx        context.Context
+	ApiService *ExportingAPIService
+}
+
+func (r ApiResumeExportingRequest) Execute() (*http.Response, error) {
+	return r.ApiService.ResumeExportingExecute(r)
+}
+
+/*
+ResumeExporting Resume exporting
+
+Resumes exporting on all partitions of the physical tenant after a pause or soft pause.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiResumeExportingRequest
+*/
+func (a *ExportingAPIService) ResumeExporting(ctx context.Context) ApiResumeExportingRequest {
+	return ApiResumeExportingRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+func (a *ExportingAPIService) ResumeExportingExecute(r ApiResumeExportingRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ExportingAPIService.ResumeExporting")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/exporting/resume"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -107,104 +215,4 @@ func (a *ClusterAPIService) GetStatusExecute(r ApiGetStatusRequest) (*http.Respo
 	}
 
 	return localVarHTTPResponse, nil
-}
-
-type ApiGetTopologyRequest struct {
-	ctx        context.Context
-	ApiService *ClusterAPIService
-}
-
-func (r ApiGetTopologyRequest) Execute() (*TopologyResponse, *http.Response, error) {
-	return r.ApiService.GetTopologyExecute(r)
-}
-
-/*
-GetTopology Get cluster topology
-
-Obtains the current topology of the cluster the gateway is part of.
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiGetTopologyRequest
-*/
-func (a *ClusterAPIService) GetTopology(ctx context.Context) ApiGetTopologyRequest {
-	return ApiGetTopologyRequest{
-		ApiService: a,
-		ctx:        ctx,
-	}
-}
-
-// Execute executes the request
-//
-//	@return TopologyResponse
-func (a *ClusterAPIService) GetTopologyExecute(r ApiGetTopologyRequest) (*TopologyResponse, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *TopologyResponse
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClusterAPIService.GetTopology")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/topology"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
 }

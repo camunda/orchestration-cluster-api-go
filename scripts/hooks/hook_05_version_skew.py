@@ -45,10 +45,6 @@ VERSION_SKEW_OPTIONAL = [
     # responses during integration testing. Blocks CreateProcessInstance and
     # searches. Drop when the pinned server emits it.
     "businessId",
-    # TEMPORARY: required on ProcessDefinitionResult but not emitted by
-    # 8.10.0-alpha3. Blocks GetProcessDefinition. Drop when the pinned server
-    # emits it.
-    "isDeleted",
     # TEMPORARY: added in 8.10 (addedInVersion) and required on
     # ProcessInstanceResult in the bundled spec (tracks camunda `main`), but not
     # emitted by 8.10.0-alpha3. Blocks CreateProcessInstance/searches/reads.

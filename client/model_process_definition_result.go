@@ -37,8 +37,8 @@ type ProcessDefinitionResult struct {
 	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
 	// Indicates whether the start event of the process has an associated Form Key.
 	HasStartForm bool `json:"hasStartForm"`
-	// Whether this process definition has been deleted but is still retained in secondary storage.
-	IsDeleted bool `json:"isDeleted"`
+	// The state of this process definition.
+	State string `json:"state"`
 }
 
 type _ProcessDefinitionResult ProcessDefinitionResult
@@ -47,7 +47,7 @@ type _ProcessDefinitionResult ProcessDefinitionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessDefinitionResult(name NullableString, resourceName string, version int32, versionTag NullableString, processDefinitionId string, tenantId string, processDefinitionKey ModelString, hasStartForm bool, isDeleted bool) *ProcessDefinitionResult {
+func NewProcessDefinitionResult(name NullableString, resourceName string, version int32, versionTag NullableString, processDefinitionId string, tenantId string, processDefinitionKey ModelString, hasStartForm bool, state string) *ProcessDefinitionResult {
 	this := ProcessDefinitionResult{}
 	this.Name = name
 	this.ResourceName = resourceName
@@ -57,7 +57,7 @@ func NewProcessDefinitionResult(name NullableString, resourceName string, versio
 	this.TenantId = tenantId
 	this.ProcessDefinitionKey = processDefinitionKey
 	this.HasStartForm = hasStartForm
-	this.IsDeleted = isDeleted
+	this.State = state
 	return &this
 }
 
@@ -265,28 +265,28 @@ func (o *ProcessDefinitionResult) SetHasStartForm(v bool) {
 	o.HasStartForm = v
 }
 
-// GetIsDeleted returns the IsDeleted field value
-func (o *ProcessDefinitionResult) GetIsDeleted() bool {
+// GetState returns the State field value
+func (o *ProcessDefinitionResult) GetState() string {
 	if o == nil {
-		var ret bool
+		var ret string
 		return ret
 	}
 
-	return o.IsDeleted
+	return o.State
 }
 
-// GetIsDeletedOk returns a tuple with the IsDeleted field value
+// GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionResult) GetIsDeletedOk() (*bool, bool) {
+func (o *ProcessDefinitionResult) GetStateOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.IsDeleted, true
+	return &o.State, true
 }
 
-// SetIsDeleted sets field value
-func (o *ProcessDefinitionResult) SetIsDeleted(v bool) {
-	o.IsDeleted = v
+// SetState sets field value
+func (o *ProcessDefinitionResult) SetState(v string) {
+	o.State = v
 }
 
 func (o ProcessDefinitionResult) MarshalJSON() ([]byte, error) {
@@ -307,7 +307,7 @@ func (o ProcessDefinitionResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["tenantId"] = o.TenantId
 	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey
 	toSerialize["hasStartForm"] = o.HasStartForm
-	toSerialize["isDeleted"] = o.IsDeleted
+	toSerialize["state"] = o.State
 	return toSerialize, nil
 }
 
@@ -324,6 +324,7 @@ func (o *ProcessDefinitionResult) UnmarshalJSON(data []byte) (err error) {
 		"tenantId",
 		"processDefinitionKey",
 		"hasStartForm",
+		"state",
 	}
 
 	allProperties := make(map[string]interface{})

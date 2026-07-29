@@ -125,12 +125,14 @@ func TestCreateProcessInstanceResultDecodesWithoutBusinessId(t *testing.T) {
 	}
 }
 
-// TestProcessDefinitionResultDecodesWithoutIsDeleted guards isDeleted, a field
-// required in the bundled spec (which tracks camunda `main`) but not emitted by
-// the pinned integration server (8.10.0-alpha3) on ProcessDefinitionResult.
-// Relaxed by the version-skew hook. The payload mirrors a real
-// /v2/process-definitions/{key} response with isDeleted absent.
-func TestProcessDefinitionResultDecodesWithoutIsDeleted(t *testing.T) {
+// TestProcessDefinitionResultDecodesWithState guards the opposite skew
+// direction: upstream `main` replaced ProcessDefinitionResult.isDeleted (bool)
+// with the required state enum (ACTIVE|DELETED), and the strict generated
+// decoder rejects any field the bundled spec does not declare — so a server
+// running ahead of the bundled spec broke GetProcessDefinition outright
+// (`json: unknown field "state"`). The payload mirrors a real
+// /v2/process-definitions/{key} response from an 8.10-SNAPSHOT server.
+func TestProcessDefinitionResultDecodesWithState(t *testing.T) {
 	const realResponse = `{
   "name": "Demo Process",
   "resourceName": "greet.bpmn",
@@ -139,15 +141,19 @@ func TestProcessDefinitionResultDecodesWithoutIsDeleted(t *testing.T) {
   "processDefinitionId": "demo-process",
   "tenantId": "<default>",
   "processDefinitionKey": "2251799813685330",
-  "hasStartForm": false
+  "hasStartForm": false,
+  "state": "ACTIVE"
 }`
 
 	var result openapi.ProcessDefinitionResult
 	if err := json.Unmarshal([]byte(realResponse), &result); err != nil {
-		t.Fatalf("a process-definition response must decode despite a missing spec-required isDeleted: %v", err)
+		t.Fatalf("a process-definition response must decode: %v", err)
 	}
 	if got := result.GetProcessDefinitionId(); got != "demo-process" {
 		t.Errorf("processDefinitionId = %q, want demo-process", got)
+	}
+	if got := result.GetState(); got != "ACTIVE" {
+		t.Errorf("state = %q, want ACTIVE", got)
 	}
 }
 

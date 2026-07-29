@@ -37,8 +37,8 @@ type ProcessDefinitionFilter struct {
 	ProcessDefinitionKey *ModelString `json:"processDefinitionKey,omitempty"`
 	// Indicates whether the start event of the process has an associated Form Key.
 	HasStartForm *bool `json:"hasStartForm,omitempty"`
-	// Filter by whether the process definition has been deleted. When not set, both deleted and non-deleted process definitions are returned. Set to `false` to exclude deleted definitions (recommended for most use cases). Set to `true` to return only deleted definitions that are still retained in secondary storage.
-	IsDeleted *bool `json:"isDeleted,omitempty"`
+	// Filter by the process definition's state. When not set, process definitions in any state are returned. Set to `ACTIVE` to exclude deleted definitions (recommended for most use cases). Set to `DELETED` to return only definitions that have been deleted but are still retained in secondary storage.
+	State *string `json:"state,omitempty"`
 }
 
 // NewProcessDefinitionFilter instantiates a new ProcessDefinitionFilter object
@@ -346,36 +346,36 @@ func (o *ProcessDefinitionFilter) SetHasStartForm(v bool) {
 	o.HasStartForm = &v
 }
 
-// GetIsDeleted returns the IsDeleted field value if set, zero value otherwise.
-func (o *ProcessDefinitionFilter) GetIsDeleted() bool {
-	if o == nil || IsNil(o.IsDeleted) {
-		var ret bool
+// GetState returns the State field value if set, zero value otherwise.
+func (o *ProcessDefinitionFilter) GetState() string {
+	if o == nil || IsNil(o.State) {
+		var ret string
 		return ret
 	}
-	return *o.IsDeleted
+	return *o.State
 }
 
-// GetIsDeletedOk returns a tuple with the IsDeleted field value if set, nil otherwise
+// GetStateOk returns a tuple with the State field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionFilter) GetIsDeletedOk() (*bool, bool) {
-	if o == nil || IsNil(o.IsDeleted) {
+func (o *ProcessDefinitionFilter) GetStateOk() (*string, bool) {
+	if o == nil || IsNil(o.State) {
 		return nil, false
 	}
-	return o.IsDeleted, true
+	return o.State, true
 }
 
-// HasIsDeleted returns a boolean if a field has been set.
-func (o *ProcessDefinitionFilter) HasIsDeleted() bool {
-	if o != nil && !IsNil(o.IsDeleted) {
+// HasState returns a boolean if a field has been set.
+func (o *ProcessDefinitionFilter) HasState() bool {
+	if o != nil && !IsNil(o.State) {
 		return true
 	}
 
 	return false
 }
 
-// SetIsDeleted gets a reference to the given bool and assigns it to the IsDeleted field.
-func (o *ProcessDefinitionFilter) SetIsDeleted(v bool) {
-	o.IsDeleted = &v
+// SetState gets a reference to the given string and assigns it to the State field.
+func (o *ProcessDefinitionFilter) SetState(v string) {
+	o.State = &v
 }
 
 func (o ProcessDefinitionFilter) MarshalJSON() ([]byte, error) {
@@ -415,8 +415,8 @@ func (o ProcessDefinitionFilter) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.HasStartForm) {
 		toSerialize["hasStartForm"] = o.HasStartForm
 	}
-	if !IsNil(o.IsDeleted) {
-		toSerialize["isDeleted"] = o.IsDeleted
+	if !IsNil(o.State) {
+		toSerialize["state"] = o.State
 	}
 	return toSerialize, nil
 }

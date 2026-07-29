@@ -874,6 +874,13 @@
       "label": "Resolve secrets"
     }
   ],
+  "listSecrets": [
+    {
+      "file": "secret.go",
+      "region": "ListSecrets",
+      "label": "List secret references"
+    }
+  ],
   "searchProcessInstances": [
     {
       "file": "process_instance.go",
@@ -1425,6 +1432,69 @@
       "file": "variable.go",
       "region": "GetVariable",
       "label": "Get variable"
+    }
+  ],
+  "takeRuntimeBackup": [
+    {
+      "file": "backup.go",
+      "region": "TakeRuntimeBackup",
+      "label": "Take a runtime backup"
+    }
+  ],
+  "listRuntimeBackups": [
+    {
+      "file": "backup.go",
+      "region": "ListRuntimeBackups",
+      "label": "List runtime backups"
+    }
+  ],
+  "getRuntimeBackup": [
+    {
+      "file": "backup.go",
+      "region": "GetRuntimeBackup",
+      "label": "Get a runtime backup"
+    }
+  ],
+  "deleteRuntimeBackup": [
+    {
+      "file": "backup.go",
+      "region": "DeleteRuntimeBackup",
+      "label": "Delete a runtime backup"
+    }
+  ],
+  "getRuntimeBackupState": [
+    {
+      "file": "backup.go",
+      "region": "GetRuntimeBackupState",
+      "label": "Get runtime backup state"
+    }
+  ],
+  "syncRuntimeBackupState": [
+    {
+      "file": "backup.go",
+      "region": "SyncRuntimeBackupState",
+      "label": "Sync runtime backup state"
+    }
+  ],
+  "deleteRuntimeBackupState": [
+    {
+      "file": "backup.go",
+      "region": "DeleteRuntimeBackupState",
+      "label": "Delete runtime backup state"
+    }
+  ],
+  "pauseExporting": [
+    {
+      "file": "exporting.go",
+      "region": "PauseExporting",
+      "label": "Pause exporting"
+    }
+  ],
+  "resumeExporting": [
+    {
+      "file": "exporting.go",
+      "region": "ResumeExporting",
+      "label": "Resume exporting"
     }
   ]
 }
