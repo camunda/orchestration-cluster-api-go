@@ -329,6 +329,12 @@ func (c *CamundaClient) UpdateAuthorization(ctx context.Context, authorizationKe
 }
 
 // DeleteRuntimeBackup calls the DeleteRuntimeBackup operation.
+//
+// Example:
+//
+//	if err := client.DeleteRuntimeBackup(ctx, 42); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteRuntimeBackupRequest) openapi.ApiDeleteRuntimeBackupRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackup(ctx, backupId)
 	for _, opt := range opts {
@@ -339,6 +345,12 @@ func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64,
 }
 
 // DeleteRuntimeBackupState calls the DeleteRuntimeBackupState operation.
+//
+// Example:
+//
+//	if err := client.DeleteRuntimeBackupState(ctx); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiDeleteRuntimeBackupStateRequest) openapi.ApiDeleteRuntimeBackupStateRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackupState(ctx)
 	for _, opt := range opts {
@@ -349,6 +361,17 @@ func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...fu
 }
 
 // GetRuntimeBackup calls the GetRuntimeBackup operation.
+//
+// Example:
+//
+//	backup, err := client.GetRuntimeBackup(ctx, 42)
+//	if err != nil {
+//		return err
+//	}
+//	// Details cover every partition of the physical tenant.
+//	for _, partition := range backup.GetDetails() {
+//		fmt.Printf("%v\n", partition)
+//	}
 func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetRuntimeBackupRequest) openapi.ApiGetRuntimeBackupRequest) (*openapi.BackupInfo, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackup(ctx, backupId)
 	for _, opt := range opts {
@@ -359,6 +382,16 @@ func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, op
 }
 
 // GetRuntimeBackupState calls the GetRuntimeBackupState operation.
+//
+// Example:
+//
+//	state, err := client.GetRuntimeBackupState(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, checkpoint := range state.GetCheckpointStates() {
+//		fmt.Printf("%v\n", checkpoint)
+//	}
 func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiGetRuntimeBackupStateRequest) openapi.ApiGetRuntimeBackupStateRequest) (*openapi.RuntimeBackupState, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackupState(ctx)
 	for _, opt := range opts {
@@ -369,6 +402,16 @@ func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(
 }
 
 // ListRuntimeBackups calls the ListRuntimeBackups operation.
+//
+// Example:
+//
+//	backups, err := client.ListRuntimeBackups(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, backup := range backups {
+//		fmt.Printf("backup %v is %v\n", backup.GetBackupId(), backup.GetState())
+//	}
 func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(openapi.ApiListRuntimeBackupsRequest) openapi.ApiListRuntimeBackupsRequest) ([]openapi.BackupInfo, error) {
 	req := c.raw.BackupAPI.ListRuntimeBackups(ctx)
 	for _, opt := range opts {
@@ -379,6 +422,17 @@ func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(ope
 }
 
 // SyncRuntimeBackupState calls the SyncRuntimeBackupState operation.
+//
+// Example:
+//
+//	// Re-reads the backup store so the reported state matches what is stored.
+//	state, err := client.SyncRuntimeBackupState(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, backup := range state.GetBackupStates() {
+//		fmt.Printf("%v\n", backup)
+//	}
 func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiSyncRuntimeBackupStateRequest) openapi.ApiSyncRuntimeBackupStateRequest) (*openapi.RuntimeBackupState, error) {
 	req := c.raw.BackupAPI.SyncRuntimeBackupState(ctx)
 	for _, opt := range opts {
@@ -389,6 +443,18 @@ func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func
 }
 
 // TakeRuntimeBackup calls the TakeRuntimeBackup operation.
+//
+// Example:
+//
+//	req := openapi.NewTakeRuntimeBackupRequest()
+//	// Omit the id when continuous backups or a schedule is enabled for the tenant.
+//	req.SetBackupId(42)
+//
+//	result, err := client.TakeRuntimeBackup(ctx, *req)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("%v\n", result)
 func (c *CamundaClient) TakeRuntimeBackup(ctx context.Context, body openapi.TakeRuntimeBackupRequest, opts ...func(openapi.ApiTakeRuntimeBackupRequest) openapi.ApiTakeRuntimeBackupRequest) (*openapi.TakeRuntimeBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeRuntimeBackup(ctx)
 	req = req.TakeRuntimeBackupRequest(body)
@@ -1163,6 +1229,13 @@ func (c *CamundaClient) SearchElementInstances(ctx context.Context, body openapi
 }
 
 // PauseExporting calls the PauseExporting operation.
+//
+// Example:
+//
+//	// While exporting is paused, reads from secondary storage stop advancing.
+//	if err := client.PauseExporting(ctx); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) PauseExporting(ctx context.Context, opts ...func(openapi.ApiPauseExportingRequest) openapi.ApiPauseExportingRequest) error {
 	req := c.raw.ExportingAPI.PauseExporting(ctx)
 	for _, opt := range opts {
@@ -1173,6 +1246,12 @@ func (c *CamundaClient) PauseExporting(ctx context.Context, opts ...func(openapi
 }
 
 // ResumeExporting calls the ResumeExporting operation.
+//
+// Example:
+//
+//	if err := client.ResumeExporting(ctx); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) ResumeExporting(ctx context.Context, opts ...func(openapi.ApiResumeExportingRequest) openapi.ApiResumeExportingRequest) error {
 	req := c.raw.ExportingAPI.ResumeExporting(ctx)
 	for _, opt := range opts {
@@ -3171,6 +3250,17 @@ func (c *CamundaClient) UpdateRole(ctx context.Context, roleId string, body open
 }
 
 // ListSecrets calls the ListSecrets operation.
+//
+// Example:
+//
+//	// Returns only the references the caller is authorized to see — never values.
+//	result, err := client.ListSecrets(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, reference := range result.GetReferences() {
+//		fmt.Printf("%v\n", reference)
+//	}
 func (c *CamundaClient) ListSecrets(ctx context.Context, opts ...func(openapi.ApiListSecretsRequest) openapi.ApiListSecretsRequest) (*openapi.SecretListResult, error) {
 	req := c.raw.SecretAPI.ListSecrets(ctx)
 	for _, opt := range opts {
