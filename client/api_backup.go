@@ -69,7 +69,7 @@ func (a *BackupAPIService) DeleteRuntimeBackupExecute(r ApiDeleteRuntimeBackupRe
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.backupId < 1 {
-		return nil, reportError("backupId must be greater than 1")
+		return nil, reportError("backupId must be greater than or equal to 1")
 	}
 
 	// to determine the Content-Type header
@@ -257,7 +257,7 @@ func (a *BackupAPIService) GetRuntimeBackupExecute(r ApiGetRuntimeBackupRequest)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.backupId < 1 {
-		return localVarReturnValue, nil, reportError("backupId must be greater than 1")
+		return localVarReturnValue, nil, reportError("backupId must be greater than or equal to 1")
 	}
 
 	// to determine the Content-Type header

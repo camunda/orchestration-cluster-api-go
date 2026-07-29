@@ -447,7 +447,9 @@ func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func
 // Example:
 //
 //	req := openapi.NewTakeRuntimeBackupRequest()
-//	// Omit the id when continuous backups or a schedule is enabled for the tenant.
+//	// The id is required here, and must be omitted instead when continuous backups
+//	// or a backup/checkpoint schedule is enabled for the tenant — the server
+//	// generates it in that case.
 //	req.SetBackupId(42)
 //
 //	result, err := client.TakeRuntimeBackup(ctx, *req)
