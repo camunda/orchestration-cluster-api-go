@@ -58,6 +58,8 @@ type APIClient struct {
 
 	AuthorizationAPI *AuthorizationAPIService
 
+	BackupAPI *BackupAPIService
+
 	BatchOperationAPI *BatchOperationAPIService
 
 	ClockAPI *ClockAPIService
@@ -77,6 +79,8 @@ type APIClient struct {
 	DocumentAPI *DocumentAPIService
 
 	ElementInstanceAPI *ElementInstanceAPIService
+
+	ExportingAPI *ExportingAPIService
 
 	ExpressionAPI *ExpressionAPIService
 
@@ -146,6 +150,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.AuditLogAPI = (*AuditLogAPIService)(&c.common)
 	c.AuthenticationAPI = (*AuthenticationAPIService)(&c.common)
 	c.AuthorizationAPI = (*AuthorizationAPIService)(&c.common)
+	c.BackupAPI = (*BackupAPIService)(&c.common)
 	c.BatchOperationAPI = (*BatchOperationAPIService)(&c.common)
 	c.ClockAPI = (*ClockAPIService)(&c.common)
 	c.ClusterAPI = (*ClusterAPIService)(&c.common)
@@ -156,6 +161,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.DecisionRequirementsAPI = (*DecisionRequirementsAPIService)(&c.common)
 	c.DocumentAPI = (*DocumentAPIService)(&c.common)
 	c.ElementInstanceAPI = (*ElementInstanceAPIService)(&c.common)
+	c.ExportingAPI = (*ExportingAPIService)(&c.common)
 	c.ExpressionAPI = (*ExpressionAPIService)(&c.common)
 	c.FormAPI = (*FormAPIService)(&c.common)
 	c.GlobalListenerAPI = (*GlobalListenerAPIService)(&c.common)

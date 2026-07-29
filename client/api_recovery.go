@@ -24,12 +24,12 @@ type RecoveryAPIService service
 type ApiChangeClusterModeRequest struct {
 	ctx        context.Context
 	ApiService *RecoveryAPIService
-	mode       *string
+	mode       *Mode
 	dryRun     *bool
 }
 
 // The target cluster mode.
-func (r ApiChangeClusterModeRequest) Mode(mode string) ApiChangeClusterModeRequest {
+func (r ApiChangeClusterModeRequest) Mode(mode Mode) ApiChangeClusterModeRequest {
 	r.mode = &mode
 	return r
 }

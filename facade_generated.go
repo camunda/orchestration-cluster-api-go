@@ -328,6 +328,77 @@ func (c *CamundaClient) UpdateAuthorization(ctx context.Context, authorizationKe
 	return c.wrapError(resp, err)
 }
 
+// DeleteRuntimeBackup calls the DeleteRuntimeBackup operation.
+func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteRuntimeBackupRequest) openapi.ApiDeleteRuntimeBackupRequest) error {
+	req := c.raw.BackupAPI.DeleteRuntimeBackup(ctx, backupId)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
+// DeleteRuntimeBackupState calls the DeleteRuntimeBackupState operation.
+func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiDeleteRuntimeBackupStateRequest) openapi.ApiDeleteRuntimeBackupStateRequest) error {
+	req := c.raw.BackupAPI.DeleteRuntimeBackupState(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
+// GetRuntimeBackup calls the GetRuntimeBackup operation.
+func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetRuntimeBackupRequest) openapi.ApiGetRuntimeBackupRequest) (*openapi.BackupInfo, error) {
+	req := c.raw.BackupAPI.GetRuntimeBackup(ctx, backupId)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// GetRuntimeBackupState calls the GetRuntimeBackupState operation.
+func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiGetRuntimeBackupStateRequest) openapi.ApiGetRuntimeBackupStateRequest) (*openapi.RuntimeBackupState, error) {
+	req := c.raw.BackupAPI.GetRuntimeBackupState(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// ListRuntimeBackups calls the ListRuntimeBackups operation.
+func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(openapi.ApiListRuntimeBackupsRequest) openapi.ApiListRuntimeBackupsRequest) ([]openapi.BackupInfo, error) {
+	req := c.raw.BackupAPI.ListRuntimeBackups(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// SyncRuntimeBackupState calls the SyncRuntimeBackupState operation.
+func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiSyncRuntimeBackupStateRequest) openapi.ApiSyncRuntimeBackupStateRequest) (*openapi.RuntimeBackupState, error) {
+	req := c.raw.BackupAPI.SyncRuntimeBackupState(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// TakeRuntimeBackup calls the TakeRuntimeBackup operation.
+func (c *CamundaClient) TakeRuntimeBackup(ctx context.Context, body openapi.TakeRuntimeBackupRequest, opts ...func(openapi.ApiTakeRuntimeBackupRequest) openapi.ApiTakeRuntimeBackupRequest) (*openapi.TakeRuntimeBackupResponse, error) {
+	req := c.raw.BackupAPI.TakeRuntimeBackup(ctx)
+	req = req.TakeRuntimeBackupRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // CancelBatchOperation calls the CancelBatchOperation operation.
 //
 // Example:
@@ -1089,6 +1160,26 @@ func (c *CamundaClient) SearchElementInstances(ctx context.Context, body openapi
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
+}
+
+// PauseExporting calls the PauseExporting operation.
+func (c *CamundaClient) PauseExporting(ctx context.Context, opts ...func(openapi.ApiPauseExportingRequest) openapi.ApiPauseExportingRequest) error {
+	req := c.raw.ExportingAPI.PauseExporting(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
+// ResumeExporting calls the ResumeExporting operation.
+func (c *CamundaClient) ResumeExporting(ctx context.Context, opts ...func(openapi.ApiResumeExportingRequest) openapi.ApiResumeExportingRequest) error {
+	req := c.raw.ExportingAPI.ResumeExporting(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
 }
 
 // EvaluateExpression calls the EvaluateExpression operation.
@@ -3072,6 +3163,16 @@ func (c *CamundaClient) UnassignRoleFromUser(ctx context.Context, roleId string,
 func (c *CamundaClient) UpdateRole(ctx context.Context, roleId string, body openapi.RoleUpdateRequest, opts ...func(openapi.ApiUpdateRoleRequest) openapi.ApiUpdateRoleRequest) (*openapi.RoleUpdateResult, error) {
 	req := c.raw.RoleAPI.UpdateRole(ctx, roleId)
 	req = req.RoleUpdateRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// ListSecrets calls the ListSecrets operation.
+func (c *CamundaClient) ListSecrets(ctx context.Context, opts ...func(openapi.ApiListSecretsRequest) openapi.ApiListSecretsRequest) (*openapi.SecretListResult, error) {
+	req := c.raw.SecretAPI.ListSecrets(ctx)
 	for _, opt := range opts {
 		req = opt(req)
 	}

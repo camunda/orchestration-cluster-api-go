@@ -24,3 +24,17 @@ func resolveSecretsExample(ctx context.Context, client *camunda.CamundaClient) e
 	// endregion ResolveSecrets
 	return nil
 }
+
+func listSecretsExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region ListSecrets
+	// Returns only the references the caller is authorized to see — never values.
+	result, err := client.ListSecrets(ctx)
+	if err != nil {
+		return err
+	}
+	for _, reference := range result.GetReferences() {
+		fmt.Printf("%v\n", reference)
+	}
+	// endregion ListSecrets
+	return nil
+}
