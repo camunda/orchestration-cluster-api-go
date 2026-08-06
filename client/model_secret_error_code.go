@@ -15,7 +15,7 @@ import (
 	"fmt"
 )
 
-// SecretErrorCode The typed reason a reference could not be resolved.  - `NOT_FOUND`: no secret exists for the reference. - `ACCESS_DENIED`: the caller lacks `SECRET:REVEAL` on the reference. - `INVALID_REFERENCE`: the reference is malformed.
+// SecretErrorCode The typed reason a reference could not be resolved.  - `NOT_FOUND`: no secret exists for the reference. - `ACCESS_DENIED`: the caller lacks `SECRET:REVEAL` on the reference. - `INVALID_REFERENCE`: the reference is malformed, or the configured store rejected it as   an invalid secret identifier. - `UNREADABLE`: the configured store could not return a value for the reference, for   example because it rejected the cluster's own store credentials or the stored value could   not be read. Whether the secret exists is not implied.
 type SecretErrorCode string
 
 // List of SecretErrorCode
@@ -23,6 +23,7 @@ const (
 	SECRETERRORCODE_NOT_FOUND         SecretErrorCode = "NOT_FOUND"
 	SECRETERRORCODE_ACCESS_DENIED     SecretErrorCode = "ACCESS_DENIED"
 	SECRETERRORCODE_INVALID_REFERENCE SecretErrorCode = "INVALID_REFERENCE"
+	SECRETERRORCODE_UNREADABLE        SecretErrorCode = "UNREADABLE"
 )
 
 // All allowed values of SecretErrorCode enum
@@ -30,6 +31,7 @@ var AllowedSecretErrorCodeEnumValues = []SecretErrorCode{
 	"NOT_FOUND",
 	"ACCESS_DENIED",
 	"INVALID_REFERENCE",
+	"UNREADABLE",
 }
 
 func (v *SecretErrorCode) UnmarshalJSON(src []byte) error {

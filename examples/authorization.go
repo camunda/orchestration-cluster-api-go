@@ -46,6 +46,21 @@ func searchAuthorizationsExample(ctx context.Context, client *camunda.CamundaCli
 	return nil
 }
 
+func searchOwnAuthorizationsExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region SearchOwnAuthorizations
+	// Scoped to the authenticated principal: direct grants plus those inherited
+	// from a group, role, or mapping rule.
+	result, err := client.SearchOwnAuthorizations(ctx, *openapi.NewAuthorizationSearchQuery())
+	if err != nil {
+		return err
+	}
+	for _, a := range result.GetItems() {
+		fmt.Printf("%v\n", a)
+	}
+	// endregion SearchOwnAuthorizations
+	return nil
+}
+
 func getAuthorizationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetAuthorization
 	auth, err := client.GetAuthorization(ctx, openapi.MustAuthorizationKey("2251799813685280"))

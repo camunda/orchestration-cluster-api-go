@@ -3,6 +3,7 @@ package examples
 
 import (
 	"context"
+	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
 )
@@ -23,5 +24,17 @@ func resumeExportingExample(ctx context.Context, client *camunda.CamundaClient) 
 		return err
 	}
 	// endregion ResumeExporting
+	return nil
+}
+
+func getExportingStatusExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetExportingStatus
+	// Aggregated over every replica of the physical tenant.
+	status, err := client.GetExportingStatus(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("exporting status: %s\n", status.GetStatus())
+	// endregion GetExportingStatus
 	return nil
 }

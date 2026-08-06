@@ -218,6 +218,29 @@ func (c *CamundaClient) GetAuthentication(ctx context.Context, opts ...func(open
 	return value, c.wrapError(resp, err)
 }
 
+// SearchOwnAuthorizations calls the SearchOwnAuthorizations operation.
+//
+// Example:
+//
+//	// Scoped to the authenticated principal: direct grants plus those inherited
+//	// from a group, role, or mapping rule.
+//	result, err := client.SearchOwnAuthorizations(ctx, *openapi.NewAuthorizationSearchQuery())
+//	if err != nil {
+//		return err
+//	}
+//	for _, a := range result.GetItems() {
+//		fmt.Printf("%v\n", a)
+//	}
+func (c *CamundaClient) SearchOwnAuthorizations(ctx context.Context, body openapi.AuthorizationSearchQuery, opts ...func(openapi.ApiSearchOwnAuthorizationsRequest) openapi.ApiSearchOwnAuthorizationsRequest) (*openapi.AuthorizationSearchResult, error) {
+	req := c.raw.AuthenticationAPI.SearchOwnAuthorizations(ctx)
+	req = req.AuthorizationSearchQuery(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // CreateAuthorization calls the CreateAuthorization operation.
 //
 // Example:
@@ -599,6 +622,25 @@ func (c *CamundaClient) ResetClock(ctx context.Context, opts ...func(openapi.Api
 	}
 	resp, err := req.Execute()
 	return c.wrapError(resp, err)
+}
+
+// GetClusterStatus calls the GetClusterStatus operation.
+//
+// Example:
+//
+//	// Aggregated over every physical tenant: HEALTHY, DEGRADED, or DOWN.
+//	status, err := client.GetClusterStatus(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("cluster status: %s\n", status.GetStatus())
+func (c *CamundaClient) GetClusterStatus(ctx context.Context, opts ...func(openapi.ApiGetClusterStatusRequest) openapi.ApiGetClusterStatusRequest) (*openapi.ClusterStatusResponse, error) {
+	req := c.raw.ClusterAPI.GetClusterStatus(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
 }
 
 // GetStatus calls the GetStatus operation.
@@ -1223,6 +1265,25 @@ func (c *CamundaClient) SearchElementInstanceWaitStates(ctx context.Context, bod
 func (c *CamundaClient) SearchElementInstances(ctx context.Context, body openapi.ElementInstanceSearchQuery, opts ...func(openapi.ApiSearchElementInstancesRequest) openapi.ApiSearchElementInstancesRequest) (*openapi.ElementInstanceSearchQueryResult, error) {
 	req := c.raw.ElementInstanceAPI.SearchElementInstances(ctx)
 	req = req.ElementInstanceSearchQuery(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// GetExportingStatus calls the GetExportingStatus operation.
+//
+// Example:
+//
+//	// Aggregated over every replica of the physical tenant.
+//	status, err := client.GetExportingStatus(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("exporting status: %s\n", status.GetStatus())
+func (c *CamundaClient) GetExportingStatus(ctx context.Context, opts ...func(openapi.ApiGetExportingStatusRequest) openapi.ApiGetExportingStatusRequest) (*openapi.ExportingStatusResponse, error) {
+	req := c.raw.ExportingAPI.GetExportingStatus(ctx)
 	for _, opt := range opts {
 		req = opt(req)
 	}
@@ -2823,6 +2884,28 @@ func (c *CamundaClient) SuspendProcessInstancesBatchOperation(ctx context.Contex
 //	fmt.Printf("%v\n", result)
 func (c *CamundaClient) ChangeClusterMode(ctx context.Context, opts ...func(openapi.ApiChangeClusterModeRequest) openapi.ApiChangeClusterModeRequest) (*openapi.ClusterModeChangeResponse, error) {
 	req := c.raw.RecoveryAPI.ChangeClusterMode(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// GetRestoreStatus calls the GetRestoreStatus operation.
+//
+// Example:
+//
+//	// Reports the in-flight restore only — 404 once it has finished.
+//	status, err := client.GetRestoreStatus(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("restore %s: %s\n", status.GetChangeId(), status.GetStatus())
+//	for _, broker := range status.GetBrokers() {
+//		fmt.Printf("%v\n", broker)
+//	}
+func (c *CamundaClient) GetRestoreStatus(ctx context.Context, opts ...func(openapi.ApiGetRestoreStatusRequest) openapi.ApiGetRestoreStatusRequest) (*openapi.RestoreStatusResponse, error) {
+	req := c.raw.RecoveryAPI.GetRestoreStatus(ctx)
 	for _, opt := range opts {
 		req = opt(req)
 	}

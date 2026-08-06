@@ -213,7 +213,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The elementInstanceKey does not correspond to an active element instance.\nMore details are provided in the response body.\n",
@@ -297,7 +297,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The agent instance with the given key was not found.\nMore details are provided in the response body.\n",
@@ -372,7 +372,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The agent instance with the given key was not found.\nMore details are provided in the response body.\n",
@@ -443,7 +443,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -524,7 +524,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The agent instance with the given key was not found, or the specified\njobKey does not correspond to an active job.\nMore details are provided in the response body.\n",
@@ -608,7 +608,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The agent instance with the given key was not found.\nMore details are provided in the response body.\n",
@@ -679,7 +679,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "description": "An internal error occurred while processing the request."
@@ -737,7 +737,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The audit log with the given key was not found.",
@@ -786,13 +786,61 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
           }
         },
         "x-added-in-version": "8.8"
+      }
+    },
+    "/authentication/me/authorizations/search": {
+      "post": {
+        "x-eventually-consistent": true,
+        "tags": [
+          "Authentication"
+        ],
+        "operationId": "searchOwnAuthorizations",
+        "x-required-permissions": [],
+        "summary": "Search own authorizations",
+        "description": "Search for the current authenticated principal's own authorization records — including authorizations granted directly to the user or client, as well as those granted via a group, role, or mapping rule the principal belongs to.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorizationSearchQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The authorization search result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorizationSearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/paths/~1clock/put/responses/400"
+          },
+          "401": {
+            "$ref": "#/paths/~1mode/patch/responses/401"
+          },
+          "500": {
+            "$ref": "#/paths/~1clock/put/responses/500"
+          }
+        },
+        "x-added-in-version": "8.10"
       }
     },
     "/authorizations": {
@@ -846,7 +894,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The owner was not found.",
@@ -919,7 +967,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -1046,7 +1094,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The authorization with the given key was not found.",
@@ -1133,8 +1181,8 @@
         "operationId": "takeRuntimeBackup",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
-            "permissionType": "UPDATE"
+            "resourceType": "BACKUP",
+            "permissionType": "CREATE"
           }
         ],
         "security": [
@@ -1175,7 +1223,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "409": {
             "description": "A backup with the same or a higher id already exists.",
@@ -1214,7 +1262,7 @@
         "operationId": "listRuntimeBackups",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
+            "resourceType": "BACKUP",
             "permissionType": "READ"
           }
         ],
@@ -1260,7 +1308,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -1281,7 +1329,7 @@
         "operationId": "getRuntimeBackupState",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
+            "resourceType": "BACKUP",
             "permissionType": "READ"
           }
         ],
@@ -1310,7 +1358,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -1329,8 +1377,8 @@
         "operationId": "deleteRuntimeBackupState",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
-            "permissionType": "UPDATE"
+            "resourceType": "BACKUP",
+            "permissionType": "DELETE"
           }
         ],
         "security": [
@@ -1351,7 +1399,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -1372,8 +1420,8 @@
         "operationId": "syncRuntimeBackupState",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
-            "permissionType": "UPDATE"
+            "resourceType": "BACKUP",
+            "permissionType": "CREATE"
           }
         ],
         "security": [
@@ -1401,7 +1449,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -1432,7 +1480,7 @@
         "operationId": "getRuntimeBackup",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
+            "resourceType": "BACKUP",
             "permissionType": "READ"
           }
         ],
@@ -1472,7 +1520,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "A backup with the given id does not exist.",
@@ -1501,8 +1549,8 @@
         "operationId": "deleteRuntimeBackup",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
-            "permissionType": "UPDATE"
+            "resourceType": "BACKUP",
+            "permissionType": "DELETE"
           }
         ],
         "security": [
@@ -1534,7 +1582,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -1791,7 +1839,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The batch operation was not found.",
@@ -1859,7 +1907,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The batch operation was not found.",
@@ -1930,7 +1978,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The batch operation was not found.",
@@ -2121,7 +2169,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "409": {
             "description": "A cluster variable with this name already exists.",
@@ -2201,7 +2249,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Cluster variable not found",
@@ -2289,7 +2337,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Cluster variable not found",
@@ -2360,7 +2408,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Cluster variable not found",
@@ -2441,7 +2489,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -2536,7 +2584,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The tenant with the given ID was not found.",
@@ -2639,7 +2687,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Cluster variable not found",
@@ -2740,7 +2788,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Cluster variable not found",
@@ -2824,7 +2872,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Cluster variable not found",
@@ -3001,7 +3049,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -3145,7 +3193,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -3206,7 +3254,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The decision definition with the given key was not found. More details are provided in the response body.\n",
@@ -3277,7 +3325,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The decision definition with the given key was not found. More details are provided in the response body.\n",
@@ -3348,7 +3396,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -3409,7 +3457,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The decision instance with the given key was not found. More details are provided in the response body.\n",
@@ -3480,7 +3528,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The decision instance is not found.",
@@ -3568,7 +3616,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -3629,7 +3677,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -3690,7 +3738,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The decision requirements with the given key was not found. More details are provided in the response body.\n",
@@ -3761,7 +3809,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The decision requirements with the given key was not found. More details are provided in the response body.\n",
@@ -4343,7 +4391,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The ad-hoc sub-process instance is not found or the provided key does not identify an ad-hoc sub-process.",
@@ -4417,7 +4465,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -4478,7 +4526,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -4539,7 +4587,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The element instance with the given key was not found.\nMore details are provided in the response body.\n",
@@ -4620,7 +4668,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The element instance with the given key was not found.",
@@ -4703,6 +4751,56 @@
         "x-added-in-version": "8.6"
       }
     },
+    "/exporting": {
+      "get": {
+        "x-eventually-consistent": false,
+        "tags": [
+          "Exporting"
+        ],
+        "operationId": "getExportingStatus",
+        "x-required-permissions": [
+          {
+            "resourceType": "EXPORTER",
+            "permissionType": "PAUSE"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "summary": "Get exporting status",
+        "description": "Returns the exporting status of the physical tenant, aggregated over every replica of\nevery one of its partitions.\n\nBecause pause and resume are applied to all replicas, the status is only a single phase\nif every replica reports that phase; otherwise it is `MIXED`, which means a pause or\nresume is still in flight or was only partially applied. Backup tooling should treat\nonly `PAUSED` and `SOFT_PAUSED` as confirmation that exporting is paused.\n",
+        "responses": {
+          "200": {
+            "description": "The current exporting status of the physical tenant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExportingStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/paths/~1mode/patch/responses/401"
+          },
+          "403": {
+            "$ref": "#/paths/~1mode/patch/responses/403"
+          },
+          "500": {
+            "$ref": "#/paths/~1clock/put/responses/500"
+          },
+          "503": {
+            "$ref": "#/paths/~1clock/put/responses/503"
+          }
+        },
+        "x-added-in-version": "8.10"
+      }
+    },
     "/exporting/pause": {
       "post": {
         "x-eventually-consistent": false,
@@ -4712,8 +4810,8 @@
         "operationId": "pauseExporting",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
-            "permissionType": "UPDATE"
+            "resourceType": "EXPORTER",
+            "permissionType": "PAUSE"
           }
         ],
         "security": [
@@ -4746,7 +4844,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -4767,8 +4865,8 @@
         "operationId": "resumeExporting",
         "x-required-permissions": [
           {
-            "resourceType": "SYSTEM",
-            "permissionType": "UPDATE"
+            "resourceType": "EXPORTER",
+            "permissionType": "PAUSE"
           }
         ],
         "security": [
@@ -4789,7 +4887,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -4856,7 +4954,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -4917,7 +5015,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The form with the given key was not found.",
@@ -4997,7 +5095,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "409": {
             "description": "A global listener with this id already exists.",
@@ -5077,7 +5175,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The global user task listener with the given id was not found.",
@@ -5165,7 +5263,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The global user task listener was not found.",
@@ -5239,7 +5337,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The global user task listener was not found.",
@@ -5312,7 +5410,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -5381,7 +5479,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "409": {
             "description": "Group with this id already exists.",
@@ -5455,7 +5553,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -5522,7 +5620,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group with the given ID was not found.",
@@ -5769,7 +5867,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group with the given ID was not found.",
@@ -5855,7 +5953,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group with the given ID was not found.",
@@ -5949,7 +6047,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group with the given ID was not found, or the client is not assigned to this group.",
@@ -6043,7 +6141,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group with the given ID was not found.",
@@ -6129,7 +6227,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group or mapping rule with the given ID was not found.",
@@ -6223,7 +6321,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group or mapping rule with the given ID was not found, or the mapping rule is not assigned to this group.",
@@ -6317,7 +6415,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group with the given ID was not found.",
@@ -6408,7 +6506,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group with the given ID was not found.",
@@ -6494,7 +6592,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group or user with the given ID or username was not found.",
@@ -6588,7 +6686,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The group or user with the given ID was not found, or the user is not assigned to this group.",
@@ -6662,7 +6760,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -6723,7 +6821,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The incident with the given key was not found.",
@@ -6874,7 +6972,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -6934,7 +7032,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -7056,7 +7154,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -7455,7 +7553,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -7540,7 +7638,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -7601,7 +7699,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -7662,7 +7760,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -7723,7 +7821,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -7784,7 +7882,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -7966,7 +8064,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -8263,7 +8361,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -8320,7 +8418,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found",
@@ -8451,7 +8549,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -8512,7 +8610,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -8573,7 +8671,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -8634,7 +8732,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The process definition with the given key was not found. More details are provided in the response body.\n",
@@ -8708,7 +8806,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found",
@@ -8790,7 +8888,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -8862,7 +8960,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -8933,7 +9031,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The process definition with the given key was not found.\nMore details are provided in the response body.\n",
@@ -9004,7 +9102,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9173,7 +9271,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9248,7 +9346,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9323,7 +9421,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9398,7 +9496,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9473,7 +9571,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9548,7 +9646,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9609,7 +9707,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9684,7 +9782,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -9745,7 +9843,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The process instance with the given key was not found.",
@@ -9900,7 +9998,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The process instance is not found.",
@@ -10045,7 +10143,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The process instance is not found.",
@@ -10210,7 +10308,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The process instance with the given key was not found.",
@@ -10514,7 +10612,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -10576,7 +10674,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -10638,7 +10736,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -10780,7 +10878,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -11126,14 +11224,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "description": "Forbidden. The request is not allowed.",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "409": {
             "description": "Role with this id already exists.",
@@ -11207,7 +11298,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -11274,7 +11365,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role with the given ID was not found.",
@@ -11521,7 +11612,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role with the given ID was not found.",
@@ -11607,7 +11698,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role with the given ID was not found.",
@@ -11701,7 +11792,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role or client with the given ID or username was not found.",
@@ -11795,7 +11886,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role with the given ID was not found.",
@@ -11882,7 +11973,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role or group with the given ID was not found.",
@@ -11976,7 +12067,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role or group with the given ID was not found.",
@@ -12070,7 +12161,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role with the given ID was not found.",
@@ -12156,7 +12247,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role or mapping rule with the given ID was not found.",
@@ -12250,7 +12341,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role or mapping rule with the given ID was not found.",
@@ -12344,7 +12435,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role with the given ID was not found.",
@@ -12430,7 +12521,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role or user with the given ID or username was not found.",
@@ -12524,7 +12615,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The role or user with the given ID or username was not found.",
@@ -12569,7 +12660,7 @@
           }
         ],
         "summary": "Resolve secrets (alpha)",
-        "description": "Resolve a deduplicated batch of `camunda.secrets.*` references for the caller's\nphysical tenant in a single round-trip.\n\nEach reference is authorized and resolved independently. For valid requests, the endpoint\nalways responds with HTTP 200: successfully resolved references are returned in `resolved`,\nwhile references that could not be resolved (for example not found, malformed or over-long,\nor the caller lacks `SECRET:REVEAL` on that reference) are returned in `errors`. A failure of\none reference never fails the others. Only structurally invalid requests are rejected with\nHTTP 400: a missing or non-array `references` field, more than 20 references, or a null entry.\n\nThis endpoint is an alpha feature and may be subject to change in future releases.\n\nPhase 1: the secret backend is mocked. Only a fixed allow-list of references resolves;\nevery other authorized, valid reference returns `NOT_FOUND`.\n",
+        "description": "Resolve a deduplicated batch of `camunda.secrets.*` references for the caller's\nphysical tenant in a single round-trip.\n\nEach reference is authorized and resolved independently. For valid requests, the endpoint\nalways responds with HTTP 200: successfully resolved references are returned in `resolved`,\nwhile references that could not be resolved (for example not found, malformed or over-long,\nor the caller lacks `SECRET:REVEAL` on that reference) are returned in `errors`. A failure of\none reference never fails the others. Only structurally invalid requests are rejected with\nHTTP 400: a missing or non-array `references` field, more than 20 references, or a null entry.\n\nReferences are resolved against the secret stores configured for the caller's physical\ntenant, served from the gateway's secret cache when the value is already cached and read\nfrom the store otherwise.\n\nThis endpoint is an alpha feature and may be subject to change in future releases.\n",
         "requestBody": {
           "required": true,
           "content": {
@@ -12630,7 +12721,7 @@
           }
         ],
         "summary": "List secrets (alpha)",
-        "description": "List the `camunda.secrets.*` references known for the caller's physical tenant.\n\nOnly references the caller holds `SECRET:READ` on are returned. This endpoint never\nreturns secret values, only the reference names.\n\nThis endpoint is an alpha feature and may be subject to change in future releases.\n",
+        "description": "List the `camunda.secrets.*` references known for the caller's physical tenant.\n\nOnly references the caller holds `SECRET:READ` on are returned. This endpoint never\nreturns secret values, only the reference names.\n\nThe references are read from the secret stores configured for the caller's physical tenant.\nSecret names that cannot form a valid `camunda.secrets.<name>` reference (for example names\ncontaining a dot or a dash) are omitted, since they could neither be resolved nor be used in\na BPMN expression.\n\nThis endpoint is an alpha feature and may be subject to change in future releases.\n",
         "requestBody": {
           "required": false,
           "content": {
@@ -12709,7 +12800,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "409": {
             "description": "A user with this username already exists.",
@@ -12808,7 +12899,7 @@
         "x-required-permissions": [],
         "security": [],
         "summary": "Get physical tenant status",
-        "description": "Checks the health status of the default physical tenant by verifying if there's at least one partition of its group with a healthy leader. This endpoint is scoped to the default physical tenant only: it is available unprefixed and at `/physical-tenants/default/v2/status`, but not for any other physical tenant id (`/physical-tenants/{id}/v2/status` returns 404 for every other id, whether or not a physical tenant with that id exists). If the cluster has only a single physical tenant (the default), this endpoint is equivalent to `/cluster/v2/status`. Use `/cluster/v2/status` for the aggregated status of the whole cluster, or `/physical-tenants/{id}/v2/topology` for the health of a specific physical tenant's partitions.",
+        "description": "Checks the health status of the default physical tenant by verifying if there's at least one partition of its group with a healthy leader. This endpoint is scoped to the default physical tenant only: it is available unprefixed and at `/physical-tenants/default/v2/status`, but not for any other physical tenant id (`/physical-tenants/{id}/v2/status` returns 404 for every other id, whether or not a physical tenant with that id exists). On a cluster with only the default physical tenant this endpoint answers the same question as `/cluster/v2/status`, though not with the same response: `/cluster/v2/status` reports its status in a body and so also distinguishes a degraded tenant from a healthy one. Use `/cluster/v2/status` for the aggregated status of the whole cluster, or `/physical-tenants/{id}/v2/topology` for the health of a specific physical tenant's partitions.",
         "responses": {
           "204": {
             "description": "The default physical tenant is UP and has at least one partition with a healthy leader."
@@ -12818,6 +12909,61 @@
           }
         },
         "x-added-in-version": "8.8"
+      }
+    },
+    "/cluster/v2/status": {
+      "servers": [
+        {
+          "url": "{schema}://{host}:{port}",
+          "variables": {
+            "host": {
+              "default": "localhost",
+              "description": "The hostname of the Orchestration Cluster REST Gateway."
+            },
+            "port": {
+              "default": "8080",
+              "description": "The port of the Orchestration Cluster REST API server."
+            },
+            "schema": {
+              "default": "http",
+              "description": "The schema of the Orchestration Cluster REST API server."
+            }
+          }
+        }
+      ],
+      "get": {
+        "x-eventually-consistent": false,
+        "tags": [
+          "Cluster"
+        ],
+        "operationId": "getClusterStatus",
+        "x-required-permissions": [],
+        "security": [],
+        "summary": "Get the status of the whole cluster",
+        "description": "Checks the health status of the whole cluster, aggregated over all physical tenants. Returns `HEALTHY` when every physical tenant is healthy, `DOWN` when no physical tenant can process work, and `DEGRADED` in every other case. No per-tenant detail is reported; use `GET /cluster/v2/topology` for that.",
+        "responses": {
+          "200": {
+            "description": "The cluster can process work; the body reports whether it is fully healthy or degraded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterStatusResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The cluster is DOWN because no physical tenant can process work.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterStatusResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-added-in-version": "8.10"
       }
     },
     "/system/usage-metrics": {
@@ -12936,7 +13082,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -13073,7 +13219,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The resource was not found.",
@@ -13157,7 +13303,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found",
@@ -13237,7 +13383,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Tenant not found.",
@@ -13322,7 +13468,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant was not found.",
@@ -13393,7 +13539,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant was not found.",
@@ -13551,7 +13697,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The tenant was not found.",
@@ -13635,7 +13781,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The tenant does not exist or the client was not assigned to it.",
@@ -13794,7 +13940,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant or group was not found.",
@@ -13878,7 +14024,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant or group was not found.",
@@ -14036,7 +14182,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant or mapping rule was not found.",
@@ -14120,7 +14266,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant or mapping rule was not found.",
@@ -14278,7 +14424,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant or role was not found.",
@@ -14362,7 +14508,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant or role was not found.",
@@ -14520,7 +14666,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant or user was not found.",
@@ -14604,7 +14750,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found. The tenant or user was not found.",
@@ -14672,7 +14818,20 @@
           "Recovery"
         ],
         "operationId": "changeClusterMode",
-        "x-required-permissions": [],
+        "x-required-permissions": [
+          {
+            "anyOf": [
+              {
+                "resourceType": "SYSTEM",
+                "permissionType": "UPDATE"
+              },
+              {
+                "resourceType": "BACKUP",
+                "permissionType": "RESTORE"
+              }
+            ]
+          }
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -14735,6 +14894,16 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden. The request is not allowed.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
           }
@@ -14749,7 +14918,12 @@
           "Recovery"
         ],
         "operationId": "restore",
-        "x-required-permissions": [],
+        "x-required-permissions": [
+          {
+            "resourceType": "BACKUP",
+            "permissionType": "RESTORE"
+          }
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -14787,8 +14961,59 @@
           "401": {
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
+          "403": {
+            "$ref": "#/paths/~1mode/patch/responses/403"
+          },
           "409": {
             "description": "The cluster is not in recovery mode, so the restore cannot be accepted."
+          },
+          "500": {
+            "$ref": "#/paths/~1clock/put/responses/500"
+          }
+        },
+        "x-added-in-version": "8.10"
+      },
+      "get": {
+        "x-eventually-consistent": false,
+        "tags": [
+          "Recovery"
+        ],
+        "operationId": "getRestoreStatus",
+        "x-required-permissions": [
+          {
+            "resourceType": "BACKUP",
+            "permissionType": "RESTORE"
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "basicAuth": []
+          }
+        ],
+        "summary": "Get the status of the restore that is currently in progress",
+        "description": "Returns the status of the restore that is currently in progress, reported per broker and per partition. There is at most one restore in flight at any time. Once the restore has finished this endpoint returns 404; the per-partition detail is not retained after completion.",
+        "responses": {
+          "200": {
+            "description": "The status of the restore that is currently in progress.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestoreStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/paths/~1mode/patch/responses/401"
+          },
+          "403": {
+            "$ref": "#/paths/~1mode/patch/responses/403"
+          },
+          "404": {
+            "description": "No restore is currently in progress."
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -14858,7 +15083,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "409": {
             "description": "A user with this username already exists.",
@@ -14931,7 +15156,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -14998,7 +15223,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The user with the given username was not found.",
@@ -15083,7 +15308,7 @@
             "$ref": "#/paths/~1clock/put/responses/400"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The user was not found.",
@@ -15233,7 +15458,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -15302,7 +15527,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "The user task with the given key was not found.",
@@ -15913,7 +16138,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found",
@@ -16069,7 +16294,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "500": {
             "$ref": "#/paths/~1clock/put/responses/500"
@@ -16130,7 +16355,7 @@
             "$ref": "#/paths/~1mode/patch/responses/401"
           },
           "403": {
-            "$ref": "#/paths/~1roles/post/responses/403"
+            "$ref": "#/paths/~1mode/patch/responses/403"
           },
           "404": {
             "description": "Not found",
@@ -17111,8 +17336,7 @@
             "type": "string"
           },
           "loopIteration": {
-            "description": "The loopIteration this item belongs to. A loopIteration is one pass through the agent\nfeedback loop: one LLM call, its tool dispatches, and their results. Null if not provided\nby the connector.\n",
-            "nullable": true,
+            "description": "The loopIteration this item belongs to. A loopIteration is one pass through the agent\nfeedback loop: one LLM call, its tool dispatches, and their results.\n",
             "allOf": [
               {
                 "$ref": "#/components/schemas/LoopIterationId"
@@ -20812,6 +21036,25 @@
           }
         }
       },
+      "ClusterStatusResponse": {
+        "description": "The aggregated status of the whole cluster.",
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "description": "`HEALTHY` when every physical tenant is healthy, `DOWN` when no physical tenant can process work, `DEGRADED` in every other case.",
+            "type": "string",
+            "example": "HEALTHY",
+            "enum": [
+              "HEALTHY",
+              "DEGRADED",
+              "DOWN"
+            ]
+          }
+        }
+      },
       "Mode": {
         "description": "The operating mode of a cluster's partitions.",
         "type": "string",
@@ -21089,6 +21332,131 @@
               100,
               101
             ]
+          }
+        }
+      },
+      "RestoreStatusResponse": {
+        "description": "The status of the restore that is currently in progress.",
+        "type": "object",
+        "required": [
+          "brokers",
+          "changeId",
+          "startedAt",
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "description": "The overall status of the restore.",
+            "type": "string",
+            "enum": [
+              "IN_PROGRESS",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ],
+            "example": "IN_PROGRESS"
+          },
+          "changeId": {
+            "description": "The ID of the cluster change that performs the restore.",
+            "type": "string",
+            "example": "-2"
+          },
+          "startedAt": {
+            "description": "The time the restore started, as an ISO 8601 timestamp.",
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2024-01-01T10:00:00Z"
+          },
+          "brokers": {
+            "description": "The per-broker restore status.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RestoreBrokerStatus"
+            }
+          }
+        }
+      },
+      "RestoreBrokerStatus": {
+        "description": "The restore status of a single broker.",
+        "type": "object",
+        "required": [
+          "brokerId",
+          "partitions",
+          "partitionsRestored",
+          "partitionsToRestore"
+        ],
+        "properties": {
+          "brokerId": {
+            "description": "The ID of the broker, including its zone if it belongs to one.",
+            "type": "string",
+            "example": "1"
+          },
+          "partitionsRestored": {
+            "description": "The number of the broker's partitions that have been restored so far.",
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "partitionsToRestore": {
+            "description": "The total number of the broker's partitions to restore.",
+            "type": "integer",
+            "format": "int32",
+            "example": 3
+          },
+          "partitions": {
+            "description": "The per-partition restore status for this broker.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RestorePartitionStatus"
+            }
+          }
+        }
+      },
+      "RestorePartitionStatus": {
+        "description": "The restore status of a single partition on a broker.",
+        "type": "object",
+        "required": [
+          "backupIds",
+          "completedAt",
+          "partitionId",
+          "state"
+        ],
+        "properties": {
+          "partitionId": {
+            "description": "The ID of the partition.",
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          },
+          "state": {
+            "description": "The restore state of the partition.",
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "RESTORING",
+              "RESTORED"
+            ],
+            "example": "RESTORING"
+          },
+          "backupIds": {
+            "description": "The IDs of the backups this partition is restored from.",
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "example": [
+              100,
+              101
+            ]
+          },
+          "completedAt": {
+            "description": "The time the partition was restored, as an ISO 8601 timestamp; null unless the partition state is `RESTORED`.",
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "example": "2024-01-01T10:02:00Z"
           }
         }
       },
@@ -24862,6 +25230,37 @@
           "elementId"
         ]
       },
+      "ExportingStatusCode": {
+        "title": "Exporting Status Code",
+        "description": "The exporting status of a physical tenant, aggregated over every replica of every one of\nits partitions:\n- `EXPORTING`: all replicas are exporting and committing their position.\n- `PAUSED`: all replicas are paused, nothing is being exported.\n- `SOFT_PAUSED`: all replicas keep exporting but do not commit their position.\n- `MIXED`: replicas report different phases, so the tenant is in no single phase.\n",
+        "type": "string",
+        "enum": [
+          "EXPORTING",
+          "PAUSED",
+          "SOFT_PAUSED",
+          "MIXED"
+        ],
+        "example": "PAUSED"
+      },
+      "ExportingStatusResponse": {
+        "title": "ExportingStatusResponse",
+        "description": "Response body for the exporting status of a physical tenant.",
+        "type": "object",
+        "properties": {
+          "status": {
+            "description": "The aggregated exporting status of the physical tenant.",
+            "readOnly": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ExportingStatusCode"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
       "ExpressionEvaluationRequest": {
         "type": "object",
         "required": [
@@ -28061,6 +28460,7 @@
             "description": "The field to sort by.",
             "type": "string",
             "enum": [
+              "creationTime",
               "deadline",
               "deniedReason",
               "elementId",
@@ -31775,10 +32175,11 @@
             "type": "boolean"
           },
           "state": {
-            "description": "Filter by the process definition's state.\nWhen not set, process definitions in any state are returned.\nSet to `ACTIVE` to exclude deleted definitions (recommended for most use cases).\nSet to `DELETED` to return only definitions that have been deleted but are still\nretained in secondary storage.\n",
+            "description": "Filter by the process definition's state.\nWhen not set, process definitions in any state are returned.\nSet to `ACTIVE` to exclude draining and deleted definitions (recommended for most use cases).\nSet to `DRAINING` to return only definitions that are being deleted but still have\nactive process instances draining.\nSet to `DELETED` to return only definitions that have been deleted but are still\nretained in secondary storage.\n",
             "type": "string",
             "enum": [
               "ACTIVE",
+              "DRAINING",
               "DELETED"
             ]
           }
@@ -31866,10 +32267,11 @@
             "type": "boolean"
           },
           "state": {
-            "description": "The state of this process definition.",
+            "description": "The state of this process definition.\n`DRAINING` indicates the definition is being deleted but still has active process\ninstances draining before it is removed.\n",
             "type": "string",
             "enum": [
               "ACTIVE",
+              "DRAINING",
               "DELETED"
             ]
           }
@@ -34724,11 +35126,12 @@
       },
       "SecretErrorCode": {
         "type": "string",
-        "description": "The typed reason a reference could not be resolved.\n\n- `NOT_FOUND`: no secret exists for the reference.\n- `ACCESS_DENIED`: the caller lacks `SECRET:REVEAL` on the reference.\n- `INVALID_REFERENCE`: the reference is malformed.\n",
+        "description": "The typed reason a reference could not be resolved.\n\n- `NOT_FOUND`: no secret exists for the reference.\n- `ACCESS_DENIED`: the caller lacks `SECRET:REVEAL` on the reference.\n- `INVALID_REFERENCE`: the reference is malformed, or the configured store rejected it as\n  an invalid secret identifier.\n- `UNREADABLE`: the configured store could not return a value for the reference, for\n  example because it rejected the cluster's own store credentials or the stored value could\n  not be read. Whether the secret exists is not implied.\n",
         "enum": [
           "NOT_FOUND",
           "ACCESS_DENIED",
-          "INVALID_REFERENCE"
+          "INVALID_REFERENCE",
+          "UNREADABLE"
         ]
       },
       "SecretListRequest": {
@@ -34741,7 +35144,7 @@
         "required": [
           "references"
         ],
-        "description": "The secret references the caller is authorized to see.\n\nUnbounded for now: Phase 1's backend is mocked with at most 3 references. Pagination is\nexpected to land here before GA, once a real secret store can return a tenant's full\nenumeration in one response. This is an alpha endpoint, so that is not yet a\nbreaking-contract concern.\n",
+        "description": "The secret references the caller is authorized to see.\n\nUnbounded for now: the response carries the configured stores' full enumeration for the\nphysical tenant. Pagination is expected to land here before GA. This is an alpha endpoint,\nso that is not yet a breaking-contract concern.\n",
         "properties": {
           "references": {
             "type": "array",
