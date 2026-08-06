@@ -76,6 +76,13 @@
       "label": "Search authorizations"
     }
   ],
+  "searchOwnAuthorizations": [
+    {
+      "file": "authorization.go",
+      "region": "SearchOwnAuthorizations",
+      "label": "Search own authorizations"
+    }
+  ],
   "getAuthorization": [
     {
       "file": "authorization.go",
@@ -1301,6 +1308,13 @@
       "label": "Get cluster topology"
     }
   ],
+  "getClusterStatus": [
+    {
+      "file": "cluster.go",
+      "region": "GetClusterStatus",
+      "label": "Get the status of the whole cluster"
+    }
+  ],
   "changeClusterMode": [
     {
       "file": "recovery.go",
@@ -1313,6 +1327,13 @@
       "file": "recovery.go",
       "region": "Restore",
       "label": "Restore from a backup"
+    }
+  ],
+  "getRestoreStatus": [
+    {
+      "file": "recovery.go",
+      "region": "GetRestoreStatus",
+      "label": "Get the status of the in-progress restore"
     }
   ],
   "createUser": [
@@ -1495,6 +1516,13 @@
       "file": "exporting.go",
       "region": "ResumeExporting",
       "label": "Resume exporting"
+    }
+  ],
+  "getExportingStatus": [
+    {
+      "file": "exporting.go",
+      "region": "GetExportingStatus",
+      "label": "Get exporting status"
     }
   ]
 }

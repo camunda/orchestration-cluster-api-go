@@ -30,3 +30,18 @@ func restoreExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// endregion Restore
 	return nil
 }
+
+func getRestoreStatusExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetRestoreStatus
+	// Reports the in-flight restore only — 404 once it has finished.
+	status, err := client.GetRestoreStatus(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("restore %s: %s\n", status.GetChangeId(), status.GetStatus())
+	for _, broker := range status.GetBrokers() {
+		fmt.Printf("%v\n", broker)
+	}
+	// endregion GetRestoreStatus
+	return nil
+}

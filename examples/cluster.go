@@ -30,3 +30,15 @@ func getStatusExample(ctx context.Context, client *camunda.CamundaClient) error 
 	// endregion GetStatus
 	return nil
 }
+
+func getClusterStatusExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetClusterStatus
+	// Aggregated over every physical tenant: HEALTHY, DEGRADED, or DOWN.
+	status, err := client.GetClusterStatus(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("cluster status: %s\n", status.GetStatus())
+	// endregion GetClusterStatus
+	return nil
+}
