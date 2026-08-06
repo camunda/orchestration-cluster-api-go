@@ -79,6 +79,7 @@ var eventuallyConsistentOps = map[string]bool{
 	"searchMappingRulesForRole":                         true,
 	"searchMappingRulesForTenant":                       true,
 	"searchMessageSubscriptions":                        true,
+	"searchOwnAuthorizations":                           true,
 	"searchProcessDefinitionVariableNames":              true,
 	"searchProcessDefinitions":                          true,
 	"searchProcessInstanceIncidents":                    true,

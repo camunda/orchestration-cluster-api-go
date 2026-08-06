@@ -16,60 +16,60 @@ import (
 	"fmt"
 )
 
-// checks if the SecretListResult type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &SecretListResult{}
+// checks if the ExportingStatusResponse type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ExportingStatusResponse{}
 
-// SecretListResult The secret references the caller is authorized to see.  Unbounded for now: the response carries the configured stores' full enumeration for the physical tenant. Pagination is expected to land here before GA. This is an alpha endpoint, so that is not yet a breaking-contract concern.
-type SecretListResult struct {
-	// The secret references, each of the form `camunda.secrets.<name>`.
-	References []string `json:"references"`
+// ExportingStatusResponse Response body for the exporting status of a physical tenant.
+type ExportingStatusResponse struct {
+	// The aggregated exporting status of the physical tenant.
+	Status ExportingStatusCode `json:"status"`
 }
 
-type _SecretListResult SecretListResult
+type _ExportingStatusResponse ExportingStatusResponse
 
-// NewSecretListResult instantiates a new SecretListResult object
+// NewExportingStatusResponse instantiates a new ExportingStatusResponse object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSecretListResult(references []string) *SecretListResult {
-	this := SecretListResult{}
-	this.References = references
+func NewExportingStatusResponse(status ExportingStatusCode) *ExportingStatusResponse {
+	this := ExportingStatusResponse{}
+	this.Status = status
 	return &this
 }
 
-// NewSecretListResultWithDefaults instantiates a new SecretListResult object
+// NewExportingStatusResponseWithDefaults instantiates a new ExportingStatusResponse object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewSecretListResultWithDefaults() *SecretListResult {
-	this := SecretListResult{}
+func NewExportingStatusResponseWithDefaults() *ExportingStatusResponse {
+	this := ExportingStatusResponse{}
 	return &this
 }
 
-// GetReferences returns the References field value
-func (o *SecretListResult) GetReferences() []string {
+// GetStatus returns the Status field value
+func (o *ExportingStatusResponse) GetStatus() ExportingStatusCode {
 	if o == nil {
-		var ret []string
+		var ret ExportingStatusCode
 		return ret
 	}
 
-	return o.References
+	return o.Status
 }
 
-// GetReferencesOk returns a tuple with the References field value
+// GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
-func (o *SecretListResult) GetReferencesOk() ([]string, bool) {
+func (o *ExportingStatusResponse) GetStatusOk() (*ExportingStatusCode, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.References, true
+	return &o.Status, true
 }
 
-// SetReferences sets field value
-func (o *SecretListResult) SetReferences(v []string) {
-	o.References = v
+// SetStatus sets field value
+func (o *ExportingStatusResponse) SetStatus(v ExportingStatusCode) {
+	o.Status = v
 }
 
-func (o SecretListResult) MarshalJSON() ([]byte, error) {
+func (o ExportingStatusResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -77,18 +77,18 @@ func (o SecretListResult) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o SecretListResult) ToMap() (map[string]interface{}, error) {
+func (o ExportingStatusResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["references"] = o.References
+	toSerialize["status"] = o.Status
 	return toSerialize, nil
 }
 
-func (o *SecretListResult) UnmarshalJSON(data []byte) (err error) {
+func (o *ExportingStatusResponse) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"references",
+		"status",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -105,53 +105,53 @@ func (o *SecretListResult) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varSecretListResult := _SecretListResult{}
+	varExportingStatusResponse := _ExportingStatusResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSecretListResult)
+	err = decoder.Decode(&varExportingStatusResponse)
 
 	if err != nil {
 		return err
 	}
 
-	*o = SecretListResult(varSecretListResult)
+	*o = ExportingStatusResponse(varExportingStatusResponse)
 
 	return err
 }
 
-type NullableSecretListResult struct {
-	value *SecretListResult
+type NullableExportingStatusResponse struct {
+	value *ExportingStatusResponse
 	isSet bool
 }
 
-func (v NullableSecretListResult) Get() *SecretListResult {
+func (v NullableExportingStatusResponse) Get() *ExportingStatusResponse {
 	return v.value
 }
 
-func (v *NullableSecretListResult) Set(val *SecretListResult) {
+func (v *NullableExportingStatusResponse) Set(val *ExportingStatusResponse) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableSecretListResult) IsSet() bool {
+func (v NullableExportingStatusResponse) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableSecretListResult) Unset() {
+func (v *NullableExportingStatusResponse) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableSecretListResult(val *SecretListResult) *NullableSecretListResult {
-	return &NullableSecretListResult{value: val, isSet: true}
+func NewNullableExportingStatusResponse(val *ExportingStatusResponse) *NullableExportingStatusResponse {
+	return &NullableExportingStatusResponse{value: val, isSet: true}
 }
 
-func (v NullableSecretListResult) MarshalJSON() ([]byte, error) {
+func (v NullableExportingStatusResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableSecretListResult) UnmarshalJSON(src []byte) error {
+func (v *NullableExportingStatusResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

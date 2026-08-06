@@ -32,8 +32,8 @@ type AgentInstanceHistoryItemResult struct {
 	JobKey ModelString `json:"jobKey"`
 	// The lease token of the activation that produced this item.
 	JobLease string `json:"jobLease"`
-	// The loopIteration this item belongs to. A loopIteration is one pass through the agent feedback loop: one LLM call, its tool dispatches, and their results. Null if not provided by the connector.
-	LoopIteration NullableInt32 `json:"loopIteration"`
+	// The loopIteration this item belongs to. A loopIteration is one pass through the agent feedback loop: one LLM call, its tool dispatches, and their results.
+	LoopIteration int32 `json:"loopIteration"`
 	// The role of this history item in the conversation.
 	Role AgentInstanceHistoryRoleEnum `json:"role"`
 	// The content blocks of this history item.
@@ -54,7 +54,7 @@ type _AgentInstanceHistoryItemResult AgentInstanceHistoryItemResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemResult(historyItemKey ModelString, agentInstanceKey ModelString, elementInstanceKey ModelString, jobKey ModelString, jobLease string, loopIteration NullableInt32, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time) *AgentInstanceHistoryItemResult {
+func NewAgentInstanceHistoryItemResult(historyItemKey ModelString, agentInstanceKey ModelString, elementInstanceKey ModelString, jobKey ModelString, jobLease string, loopIteration int32, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time) *AgentInstanceHistoryItemResult {
 	this := AgentInstanceHistoryItemResult{}
 	this.HistoryItemKey = historyItemKey
 	this.AgentInstanceKey = agentInstanceKey
@@ -200,29 +200,27 @@ func (o *AgentInstanceHistoryItemResult) SetJobLease(v string) {
 }
 
 // GetLoopIteration returns the LoopIteration field value
-// If the value is explicit nil, the zero value for int32 will be returned
 func (o *AgentInstanceHistoryItemResult) GetLoopIteration() int32 {
-	if o == nil || o.LoopIteration.Get() == nil {
+	if o == nil {
 		var ret int32
 		return ret
 	}
 
-	return *o.LoopIteration.Get()
+	return o.LoopIteration
 }
 
 // GetLoopIterationOk returns a tuple with the LoopIteration field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceHistoryItemResult) GetLoopIterationOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.LoopIteration.Get(), o.LoopIteration.IsSet()
+	return &o.LoopIteration, true
 }
 
 // SetLoopIteration sets field value
 func (o *AgentInstanceHistoryItemResult) SetLoopIteration(v int32) {
-	o.LoopIteration.Set(&v)
+	o.LoopIteration = v
 }
 
 // GetRole returns the Role field value
@@ -386,7 +384,7 @@ func (o AgentInstanceHistoryItemResult) ToMap() (map[string]interface{}, error) 
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
 	toSerialize["jobKey"] = o.JobKey
 	toSerialize["jobLease"] = o.JobLease
-	toSerialize["loopIteration"] = o.LoopIteration.Get()
+	toSerialize["loopIteration"] = o.LoopIteration
 	toSerialize["role"] = o.Role
 	toSerialize["content"] = o.Content
 	toSerialize["toolCalls"] = o.ToolCalls

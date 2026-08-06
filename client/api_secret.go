@@ -44,6 +44,11 @@ List the `camunda.secrets.*` references known for the caller's physical tenant.
 Only references the caller holds `SECRET:READ` on are returned. This endpoint never
 returns secret values, only the reference names.
 
+The references are read from the secret stores configured for the caller's physical tenant.
+Secret names that cannot form a valid `camunda.secrets.<name>` reference (for example names
+containing a dot or a dash) are omitted, since they could neither be resolved nor be used in
+a BPMN expression.
+
 This endpoint is an alpha feature and may be subject to change in future releases.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -162,10 +167,11 @@ or the caller lacks `SECRET:REVEAL` on that reference) are returned in `errors`.
 one reference never fails the others. Only structurally invalid requests are rejected with
 HTTP 400: a missing or non-array `references` field, more than 20 references, or a null entry.
 
-This endpoint is an alpha feature and may be subject to change in future releases.
+References are resolved against the secret stores configured for the caller's physical
+tenant, served from the gateway's secret cache when the value is already cached and read
+from the store otherwise.
 
-Phase 1: the secret backend is mocked. Only a fixed allow-list of references resolves;
-every other authorized, valid reference returns `NOT_FOUND`.
+This endpoint is an alpha feature and may be subject to change in future releases.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiResolveSecretsRequest
