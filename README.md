@@ -231,7 +231,7 @@ PEM values take precedence over the corresponding `*_PATH` file locations.
 | `CAMUNDA_MTLS_CERT_PATH` | Path to the client certificate PEM. |
 | `CAMUNDA_MTLS_KEY_PATH` | Path to the client private key PEM. |
 | `CAMUNDA_MTLS_CA_PATH` | Path to the CA certificate PEM. |
-| `CAMUNDA_MTLS_KEY_PASSPHRASE` | Passphrase for an encrypted client private key. |
+| `CAMUNDA_MTLS_KEY_PASSPHRASE` | Recognised but **not supported yet** — setting it fails client construction. Supply an unencrypted client key. |
 
 The same material is applied to both the REST transport and the gRPC streaming
 worker, so a single configuration covers every connection the SDK opens.
@@ -384,6 +384,8 @@ entity is visible or a timeout elapses:
 ```go
 // Reads are eventually consistent: a just-created entity may briefly 404.
 // Poll retries 404s until the entity is visible or the timeout elapses.
+key := openapi.MustProcessInstanceKey("2251799813685249")
+
 instance, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
 	return client.GetProcessInstance(ctx, key)
 }, camunda.WithPollTimeout(10*time.Second))
@@ -434,6 +436,8 @@ Two helpers cover the common classifications without unwrapping by hand:
 
 <!-- snippet-source: examples/readme.go | regions: ErrorClassification -->
 ```go
+key := openapi.MustProcessInstanceKey("2251799813685249")
+
 _, err := client.GetProcessInstance(ctx, key)
 
 // IsNotFound is the idiomatic 404 check — the common case when reading an

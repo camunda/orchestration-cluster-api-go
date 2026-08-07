@@ -142,10 +142,12 @@ func deployAndStart(ctx context.Context, client *camunda.CamundaClient) error {
 	return nil
 }
 
-func eventualConsistency(ctx context.Context, client *camunda.CamundaClient, key openapi.ProcessInstanceKey) error {
+func eventualConsistency(ctx context.Context, client *camunda.CamundaClient) error {
 	// region EventualConsistency
 	// Reads are eventually consistent: a just-created entity may briefly 404.
 	// Poll retries 404s until the entity is visible or the timeout elapses.
+	key := openapi.MustProcessInstanceKey("2251799813685249")
+
 	instance, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
 		return client.GetProcessInstance(ctx, key)
 	}, camunda.WithPollTimeout(10*time.Second))
@@ -187,8 +189,10 @@ func errorHandling(ctx context.Context, client *camunda.CamundaClient) {
 	// endregion ErrorHandling
 }
 
-func errorClassification(ctx context.Context, client *camunda.CamundaClient, key openapi.ProcessInstanceKey) error {
+func errorClassification(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ErrorClassification
+	key := openapi.MustProcessInstanceKey("2251799813685249")
+
 	_, err := client.GetProcessInstance(ctx, key)
 
 	// IsNotFound is the idiomatic 404 check — the common case when reading an

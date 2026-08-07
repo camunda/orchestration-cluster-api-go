@@ -52,7 +52,7 @@ var ConfigSchema = []ConfigField{
 	{Keys: []string{"CAMUNDA_MTLS_CERT_PATH"}, Description: "Path to the client certificate PEM for mutual TLS."},
 	{Keys: []string{"CAMUNDA_MTLS_KEY_PATH"}, Description: "Path to the client private key PEM for mutual TLS."},
 	{Keys: []string{"CAMUNDA_MTLS_CA_PATH"}, Description: "Path to the CA certificate PEM for verifying the server."},
-	{Keys: []string{"CAMUNDA_MTLS_KEY_PASSPHRASE"}, Secret: true, Description: "Passphrase for an encrypted client private key."},
+	{Keys: []string{"CAMUNDA_MTLS_KEY_PASSPHRASE"}, Secret: true, Description: "Passphrase for an encrypted client private key. Not supported yet — setting it fails client construction."},
 
 	{Keys: []string{"CAMUNDA_SDK_BACKPRESSURE_PROFILE"}, Default: "BALANCED", Description: "Adaptive backpressure profile: BALANCED (gates) or LEGACY (observe-only)."},
 	{Keys: []string{"CAMUNDA_SDK_LOG_LEVEL"}, Default: "info", Description: "SDK log level: off/error/warn/info/debug/trace."},
