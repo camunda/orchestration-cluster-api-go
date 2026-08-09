@@ -86,7 +86,7 @@ jobs:
         run: go build ./examples/...
       - name: Check README snippets are in sync
         run: python scripts/sync-readme-snippets.py --check
-      - name: Check example coverage (all 198 operations)
+      - name: Check example coverage
         run: python scripts/check-example-coverage.py
 
   commitlint:
@@ -125,6 +125,13 @@ jobs:
           docker-dir: docker
           artifact-name: integration-docker-logs
 
+  # Regenerates from upstream and reports drift without failing the run: routine upstream
+  # spec churn must not turn the whole workflow red and mask a real regression in the jobs
+  # above. Drift surfaces as a warning plus a patch artifact for a follow-up regen PR.
+  #
+  # Deliberately narrower than the sibling SDKs' job-level `continue-on-error: true`, which
+  # also masks a genuinely broken codegen pipeline. Here only drift is tolerated — if
+  # generate.sh itself fails, this job still fails.
   generation-drift:
     name: Generation drift
     runs-on: ubuntu-latest
@@ -153,11 +160,23 @@ jobs:
           ./scripts/fetch-proto.sh
           ./scripts/bundle-spec.sh
       - name: Regenerate and check for drift
+        id: drift
         run: |
           chmod +x scripts/*.sh
           ./scripts/generate.sh
           if ! git diff --quiet; then
-            echo "::warning::Generated output drifts from committed sources"
-            git --no-pager diff
-            exit 1
+            echo 'drift=true' >> "$GITHUB_OUTPUT"
+            echo '::warning::Generated output drifts from committed sources (reporting only). Re-bundle and commit.'
+            git diff --name-only | sed 's/^/CHANGED: /'
+            git diff > _generation-drift.patch
+          else
+            echo 'drift=false' >> "$GITHUB_OUTPUT"
+            echo 'No generation drift.'
           fi
+
+      - name: Upload drift patch
+        if: steps.drift.outputs.drift == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: generation-drift
+          path: _generation-drift.patch

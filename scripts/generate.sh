@@ -47,7 +47,22 @@ python3 scripts/postprocess.py \
   --metadata "$BUNDLED_META"
 
 echo "==> Formatting generated code..."
-gofmt -w client pb facade_generated.go consistency_generated.go 2>/dev/null || true
+# gofmt is not idempotent over the generated API doc comments: a single pass leaves some
+# files unformatted, which then surfaces as phantom generation drift in CI. Run to a fixed
+# point and fail loudly if it does not converge — never silence this step.
+GOFMT_TARGETS=(client pb facade_generated.go consistency_generated.go)
+unformatted=""
+for attempt in 1 2 3; do
+  gofmt -w "${GOFMT_TARGETS[@]}"
+  unformatted="$(gofmt -l "${GOFMT_TARGETS[@]}")"
+  if [ -z "$unformatted" ]; then
+    break
+  fi
+done
+if [ -n "$unformatted" ]; then
+  printf 'error: gofmt did not converge after %s passes:\n%s\n' "$attempt" "$unformatted" >&2
+  exit 1
+fi
 
 echo "==> Verifying the module builds..."
 go build ./...
