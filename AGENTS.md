@@ -89,6 +89,13 @@ clean, `gofmt` clean, and pass `go test ./...`. Warnings are not suppressed to m
 build pass. Generated packages (`client/`, `pb/`, `facade_generated.go`) are produced
 by the pipeline and not hand-edited.
 
+CI (`.github/workflows/ci.yml`) runs this gate on every push and pull request, plus a
+nightly scheduled run that re-bundles from upstream. The `Generation drift` job is
+report-only: on drift it emits a warning and uploads a `generation-drift` patch artifact
+for a follow-up regen PR, rather than failing the run — routine upstream spec churn must
+not mask a real regression in the other jobs. It does still fail if the codegen pipeline
+itself breaks.
+
 ## Separate generator changes from regenerated output
 
 When a change modifies the generator (hooks, `cmd/facadegen`, configs, scripts) **and**
