@@ -50,6 +50,8 @@ type APIClient struct {
 
 	AdHocSubProcessAPI *AdHocSubProcessAPIService
 
+	AgentDefinitionAPI *AgentDefinitionAPIService
+
 	AgentInstanceAPI *AgentInstanceAPIService
 
 	AuditLogAPI *AuditLogAPIService
@@ -146,6 +148,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 
 	// API Services
 	c.AdHocSubProcessAPI = (*AdHocSubProcessAPIService)(&c.common)
+	c.AgentDefinitionAPI = (*AgentDefinitionAPIService)(&c.common)
 	c.AgentInstanceAPI = (*AgentInstanceAPIService)(&c.common)
 	c.AuditLogAPI = (*AuditLogAPIService)(&c.common)
 	c.AuthenticationAPI = (*AuthenticationAPIService)(&c.common)

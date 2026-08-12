@@ -20,9 +20,10 @@ type AgentInstanceHistoryRoleEnum string
 
 // List of AgentInstanceHistoryRoleEnum
 const (
-	AGENTINSTANCEHISTORYROLEENUM_USER        AgentInstanceHistoryRoleEnum = "USER"
-	AGENTINSTANCEHISTORYROLEENUM_ASSISTANT   AgentInstanceHistoryRoleEnum = "ASSISTANT"
-	AGENTINSTANCEHISTORYROLEENUM_TOOL_RESULT AgentInstanceHistoryRoleEnum = "TOOL_RESULT"
+	AGENTINSTANCEHISTORYROLEENUM_USER          AgentInstanceHistoryRoleEnum = "USER"
+	AGENTINSTANCEHISTORYROLEENUM_ASSISTANT     AgentInstanceHistoryRoleEnum = "ASSISTANT"
+	AGENTINSTANCEHISTORYROLEENUM_TOOL_RESULT   AgentInstanceHistoryRoleEnum = "TOOL_RESULT"
+	AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION AgentInstanceHistoryRoleEnum = "CONFIGURATION"
 )
 
 // All allowed values of AgentInstanceHistoryRoleEnum enum
@@ -30,6 +31,7 @@ var AllowedAgentInstanceHistoryRoleEnumEnumValues = []AgentInstanceHistoryRoleEn
 	"USER",
 	"ASSISTANT",
 	"TOOL_RESULT",
+	"CONFIGURATION",
 }
 
 func (v *AgentInstanceHistoryRoleEnum) UnmarshalJSON(src []byte) error {

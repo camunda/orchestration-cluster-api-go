@@ -39,8 +39,13 @@ func updateAgentInstanceExample(ctx context.Context, client *camunda.CamundaClie
 	// region UpdateAgentInstance
 	req := openapi.NewAgentInstanceUpdateRequest(openapi.ModelString("2251799813685360"))
 
-	return client.UpdateAgentInstance(ctx, openapi.MustAgentInstanceKey("2251799813685370"), *req)
+	result, err := client.UpdateAgentInstance(ctx, openapi.MustAgentInstanceKey("2251799813685370"), *req)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%v\n", result)
 	// endregion UpdateAgentInstance
+	return nil
 }
 
 func searchAgentInstancesExample(ctx context.Context, client *camunda.CamundaClient) error {

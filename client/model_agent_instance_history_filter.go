@@ -27,7 +27,7 @@ type AgentInstanceHistoryFilter struct {
 	ElementInstanceKey *ElementInstanceKeyFilterProperty `json:"elementInstanceKey,omitempty"`
 	// The key of the job activation that produced the history item.
 	JobKey *JobKeyFilterProperty `json:"jobKey,omitempty"`
-	// Filter by loopIteration number. A loopIteration is one pass through the agent feedback loop (one LLM call, its tool dispatches, and their results).
+	// Filter by loop iteration number.
 	LoopIteration *IntegerFilterProperty `json:"loopIteration,omitempty"`
 	// The commit status of the history item. Defaults to COMMITTED only. Include PENDING or DISCARDED explicitly to debug in-flight or failed activations.
 	CommitStatus *AgentInstanceHistoryCommitStatusFilterProperty `json:"commitStatus,omitempty"`

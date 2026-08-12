@@ -5,6 +5,7 @@ package camunda
 // eventuallyConsistentOps maps operationId -> true for operations whose reads
 // are eventually consistent. Generated from spec metadata.
 var eventuallyConsistentOps = map[string]bool{
+	"getAgentDefinition":                                true,
 	"getAgentInstance":                                  true,
 	"getAuditLog":                                       true,
 	"getAuthorization":                                  true,
@@ -51,6 +52,7 @@ var eventuallyConsistentOps = map[string]bool{
 	"getUserTask":                                       true,
 	"getUserTaskForm":                                   true,
 	"getVariable":                                       true,
+	"searchAgentDefinitions":                            true,
 	"searchAgentInstanceHistory":                        true,
 	"searchAgentInstances":                              true,
 	"searchAuditLogs":                                   true,
