@@ -32,6 +32,45 @@ func (c *CamundaClient) ActivateAdHocSubProcessActivities(ctx context.Context, a
 	return c.wrapError(resp, err)
 }
 
+// GetAgentDefinition calls the GetAgentDefinition operation.
+//
+// Example:
+//
+//	definition, err := client.GetAgentDefinition(ctx, openapi.MustAgentDefinitionKey("2251799813691958"))
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("%v\n", definition)
+func (c *CamundaClient) GetAgentDefinition(ctx context.Context, agentDefinitionKey openapi.AgentDefinitionKey, opts ...func(openapi.ApiGetAgentDefinitionRequest) openapi.ApiGetAgentDefinitionRequest) (*openapi.AgentDefinitionResult, error) {
+	req := c.raw.AgentDefinitionAPI.GetAgentDefinition(ctx, agentDefinitionKey)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// SearchAgentDefinitions calls the SearchAgentDefinitions operation.
+//
+// Example:
+//
+//	result, err := client.SearchAgentDefinitions(ctx, *openapi.NewAgentDefinitionSearchQuery())
+//	if err != nil {
+//		return err
+//	}
+//	for _, d := range result.GetItems() {
+//		fmt.Printf("%v\n", d)
+//	}
+func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body openapi.AgentDefinitionSearchQuery, opts ...func(openapi.ApiSearchAgentDefinitionsRequest) openapi.ApiSearchAgentDefinitionsRequest) (*openapi.AgentDefinitionSearchQueryResult, error) {
+	req := c.raw.AgentDefinitionAPI.SearchAgentDefinitions(ctx)
+	req = req.AgentDefinitionSearchQuery(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // CreateAgentInstance calls the CreateAgentInstance operation.
 //
 // Example:
@@ -149,15 +188,19 @@ func (c *CamundaClient) SearchAgentInstances(ctx context.Context, body openapi.A
 //
 //	req := openapi.NewAgentInstanceUpdateRequest(openapi.ModelString("2251799813685360"))
 //
-//	return client.UpdateAgentInstance(ctx, openapi.MustAgentInstanceKey("2251799813685370"), *req)
-func (c *CamundaClient) UpdateAgentInstance(ctx context.Context, agentInstanceKey openapi.AgentInstanceKey, body openapi.AgentInstanceUpdateRequest, opts ...func(openapi.ApiUpdateAgentInstanceRequest) openapi.ApiUpdateAgentInstanceRequest) error {
+//	result, err := client.UpdateAgentInstance(ctx, openapi.MustAgentInstanceKey("2251799813685370"), *req)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("%v\n", result)
+func (c *CamundaClient) UpdateAgentInstance(ctx context.Context, agentInstanceKey openapi.AgentInstanceKey, body openapi.AgentInstanceUpdateRequest, opts ...func(openapi.ApiUpdateAgentInstanceRequest) openapi.ApiUpdateAgentInstanceRequest) (*openapi.AgentInstanceUpdateResult, error) {
 	req := c.raw.AgentInstanceAPI.UpdateAgentInstance(ctx, agentInstanceKey)
 	req = req.AgentInstanceUpdateRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}
-	resp, err := req.Execute()
-	return c.wrapError(resp, err)
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
 }
 
 // GetAuditLog calls the GetAuditLog operation.

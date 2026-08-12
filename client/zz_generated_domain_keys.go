@@ -55,6 +55,35 @@ func (s keySpec) validate(v string) error {
 	return nil
 }
 
+// AgentDefinitionKey is a Camunda semantic key. Construct it with NewAgentDefinitionKey (validated) or
+// MustAgentDefinitionKey (panics on invalid input).
+type AgentDefinitionKey string
+
+var specAgentDefinitionKey = keySpec{name: "AgentDefinitionKey", pattern: regexp.MustCompile(`^-?[0-9]+$`), min: 1, max: 25}
+
+// NewAgentDefinitionKey validates s against the AgentDefinitionKey constraints and returns a AgentDefinitionKey.
+func NewAgentDefinitionKey(s string) (AgentDefinitionKey, error) {
+	if err := specAgentDefinitionKey.validate(s); err != nil {
+		return "", err
+	}
+	return AgentDefinitionKey(s), nil
+}
+
+// MustAgentDefinitionKey is like NewAgentDefinitionKey but panics if s is invalid.
+func MustAgentDefinitionKey(s string) AgentDefinitionKey {
+	k, err := NewAgentDefinitionKey(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k AgentDefinitionKey) String() string { return string(k) }
+
+// Validate reports whether k satisfies the AgentDefinitionKey constraints.
+func (k AgentDefinitionKey) Validate() error { return specAgentDefinitionKey.validate(string(k)) }
+
 // AgentHistoryItemKey is a Camunda semantic key. Construct it with NewAgentHistoryItemKey (validated) or
 // MustAgentHistoryItemKey (panics on invalid input).
 type AgentHistoryItemKey string

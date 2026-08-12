@@ -644,16 +644,18 @@ func (r ApiUpdateAgentInstanceRequest) AgentInstanceUpdateRequest(agentInstanceU
 	return r
 }
 
-func (r ApiUpdateAgentInstanceRequest) Execute() (*http.Response, error) {
+func (r ApiUpdateAgentInstanceRequest) Execute() (*AgentInstanceUpdateResult, *http.Response, error) {
 	return r.ApiService.UpdateAgentInstanceExecute(r)
 }
 
 /*
 UpdateAgentInstance Update agent instance
 
-Updates the mutable fields of an agent instance: status, metric counters, and
-tools. Metric values are treated as deltas and applied immediately to the
-aggregate counters. Tool updates replace the existing tool list.
+Updates the mutable fields of an agent instance (status, metric counters, and
+tools) and appends a batch of history items to its conversation history. Metric
+values are treated as deltas and applied immediately to the aggregate counters.
+Tool updates replace the existing tool list. Each history item created for this
+request is echoed back in the response.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param agentInstanceKey The key of the agent instance to update.
@@ -668,16 +670,19 @@ func (a *AgentInstanceAPIService) UpdateAgentInstance(ctx context.Context, agent
 }
 
 // Execute executes the request
-func (a *AgentInstanceAPIService) UpdateAgentInstanceExecute(r ApiUpdateAgentInstanceRequest) (*http.Response, error) {
+//
+//	@return AgentInstanceUpdateResult
+func (a *AgentInstanceAPIService) UpdateAgentInstanceExecute(r ApiUpdateAgentInstanceRequest) (*AgentInstanceUpdateResult, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPatch
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *AgentInstanceUpdateResult
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AgentInstanceAPIService.UpdateAgentInstance")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/agent-instances/{agentInstanceKey}"
@@ -687,7 +692,7 @@ func (a *AgentInstanceAPIService) UpdateAgentInstanceExecute(r ApiUpdateAgentIns
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.agentInstanceUpdateRequest == nil {
-		return nil, reportError("agentInstanceUpdateRequest is required and must be specified")
+		return localVarReturnValue, nil, reportError("agentInstanceUpdateRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -700,7 +705,7 @@ func (a *AgentInstanceAPIService) UpdateAgentInstanceExecute(r ApiUpdateAgentIns
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/problem+json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -711,19 +716,19 @@ func (a *AgentInstanceAPIService) UpdateAgentInstanceExecute(r ApiUpdateAgentIns
 	localVarPostBody = r.agentInstanceUpdateRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -736,14 +741,23 @@ func (a *AgentInstanceAPIService) UpdateAgentInstanceExecute(r ApiUpdateAgentIns
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
+				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
 			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 			newErr.model = v
-			return localVarHTTPResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }

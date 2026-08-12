@@ -28,17 +28,17 @@ type AgentInstanceHistoryItemRequest struct {
 	JobKey ModelString `json:"jobKey"`
 	// Opaque lease token received from the job activation response.
 	JobLease string `json:"jobLease"`
-	// The loopIteration this item belongs to. A loopIteration is one pass through the agent feedback loop: one LLM call, its tool dispatches, and their results. Omit if not grouping items by loopIteration.
+	// The loop iteration this item belongs to. Omit if not grouping items by loopIteration.
 	LoopIteration NullableInt32 `json:"loopIteration,omitempty"`
 	// The role of this history item in the conversation.
 	Role AgentInstanceHistoryRoleEnum `json:"role"`
 	// The content blocks of this history item.
 	Content []AgentInstanceMessageContent `json:"content"`
-	// Tool calls associated with this history item. For ASSISTANT items: tool calls dispatched by this LLM response, with arguments populated. For TOOL_RESULT items: single-entry array referencing the originating tool call, with arguments null. Omit for USER items.
+	// Tool calls associated with this history item. For ASSISTANT items: tool calls dispatched by this LLM response. For TOOL_RESULT items: single-entry array referencing the originating tool call. Omit for USER items.
 	ToolCalls []AgentInstanceToolCall `json:"toolCalls,omitempty"`
 	// Per-call token and latency metrics. Present on ASSISTANT items only.
 	Metrics NullableAgentInstanceHistoryItemMetrics `json:"metrics,omitempty"`
-	// The connector-side timestamp of when this message was produced.
+	// The agent-side timestamp of when this message was produced.
 	ProducedAt time.Time `json:"producedAt"`
 }
 

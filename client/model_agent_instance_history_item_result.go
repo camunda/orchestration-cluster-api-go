@@ -24,6 +24,8 @@ var _ MappedNullable = &AgentInstanceHistoryItemResult{}
 type AgentInstanceHistoryItemResult struct {
 	// The unique key for this history item. Stable and sortable by creation order.
 	HistoryItemKey ModelString `json:"historyItemKey"`
+	// The client-supplied identifier this item was created with. Empty for items that don't carry one.
+	HistoryItemId string `json:"historyItemId"`
 	// The key of the agent instance this item belongs to.
 	AgentInstanceKey ModelString `json:"agentInstanceKey"`
 	// The key of the AI Agent Task or ad-hoc sub-process element instance under which this item was produced.
@@ -32,20 +34,30 @@ type AgentInstanceHistoryItemResult struct {
 	JobKey ModelString `json:"jobKey"`
 	// The lease token of the activation that produced this item.
 	JobLease string `json:"jobLease"`
-	// The loopIteration this item belongs to. A loopIteration is one pass through the agent feedback loop: one LLM call, its tool dispatches, and their results.
+	// The loop iteration this item belongs to.
 	LoopIteration int32 `json:"loopIteration"`
 	// The role of this history item in the conversation.
 	Role AgentInstanceHistoryRoleEnum `json:"role"`
 	// The content blocks of this history item.
 	Content []AgentInstanceMessageContent `json:"content"`
-	// Tool calls for this item. Empty for USER items and ASSISTANT items with no tool dispatches. ASSISTANT items: dispatched tool calls with arguments populated. TOOL_RESULT items: single-entry array referencing the originating tool call (arguments null).
+	// Tool calls for this item. Empty for USER items and ASSISTANT items with no tool dispatches. ASSISTANT items: dispatched tool calls. TOOL_RESULT items: single-entry array referencing the originating tool call.
 	ToolCalls []AgentInstanceToolCall `json:"toolCalls"`
 	// Per-call token and latency metrics. Null when metrics were not provided at creation time.
 	Metrics NullableAgentInstanceHistoryItemMetrics `json:"metrics"`
 	// The commit status of this history item.
 	CommitStatus AgentInstanceHistoryCommitStatusEnum `json:"commitStatus"`
-	// The connector-side timestamp of when this message was produced.
+	// The agent-side timestamp of when this message was produced.
 	ProducedAt time.Time `json:"producedAt"`
+	// The complete list of tools available to the agent as of this entry. CONFIGURATION items only; empty for other roles.
+	Tools []AgentTool `json:"tools"`
+	// The LLM model identifier as of this entry. CONFIGURATION items only; null for other roles.
+	Model NullableString `json:"model"`
+	// The LLM provider as of this entry. CONFIGURATION items only; null for other roles.
+	Provider NullableString `json:"provider"`
+	// The operational limits as of this entry. CONFIGURATION items only; -1 on any field means \"no limit configured\" for other roles.
+	Limits AgentInstanceLimits `json:"limits"`
+	// The system prompt, as content blocks, as of this entry. CONFIGURATION items only; empty for other roles.
+	SystemPrompt []AgentInstanceMessageContent `json:"systemPrompt"`
 }
 
 type _AgentInstanceHistoryItemResult AgentInstanceHistoryItemResult
@@ -54,9 +66,10 @@ type _AgentInstanceHistoryItemResult AgentInstanceHistoryItemResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemResult(historyItemKey ModelString, agentInstanceKey ModelString, elementInstanceKey ModelString, jobKey ModelString, jobLease string, loopIteration int32, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time) *AgentInstanceHistoryItemResult {
+func NewAgentInstanceHistoryItemResult(historyItemKey ModelString, historyItemId string, agentInstanceKey ModelString, elementInstanceKey ModelString, jobKey ModelString, jobLease string, loopIteration int32, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time, tools []AgentTool, model NullableString, provider NullableString, limits AgentInstanceLimits, systemPrompt []AgentInstanceMessageContent) *AgentInstanceHistoryItemResult {
 	this := AgentInstanceHistoryItemResult{}
 	this.HistoryItemKey = historyItemKey
+	this.HistoryItemId = historyItemId
 	this.AgentInstanceKey = agentInstanceKey
 	this.ElementInstanceKey = elementInstanceKey
 	this.JobKey = jobKey
@@ -68,6 +81,11 @@ func NewAgentInstanceHistoryItemResult(historyItemKey ModelString, agentInstance
 	this.Metrics = metrics
 	this.CommitStatus = commitStatus
 	this.ProducedAt = producedAt
+	this.Tools = tools
+	this.Model = model
+	this.Provider = provider
+	this.Limits = limits
+	this.SystemPrompt = systemPrompt
 	return &this
 }
 
@@ -101,6 +119,30 @@ func (o *AgentInstanceHistoryItemResult) GetHistoryItemKeyOk() (*ModelString, bo
 // SetHistoryItemKey sets field value
 func (o *AgentInstanceHistoryItemResult) SetHistoryItemKey(v ModelString) {
 	o.HistoryItemKey = v
+}
+
+// GetHistoryItemId returns the HistoryItemId field value
+func (o *AgentInstanceHistoryItemResult) GetHistoryItemId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.HistoryItemId
+}
+
+// GetHistoryItemIdOk returns a tuple with the HistoryItemId field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceHistoryItemResult) GetHistoryItemIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.HistoryItemId, true
+}
+
+// SetHistoryItemId sets field value
+func (o *AgentInstanceHistoryItemResult) SetHistoryItemId(v string) {
+	o.HistoryItemId = v
 }
 
 // GetAgentInstanceKey returns the AgentInstanceKey field value
@@ -369,6 +411,130 @@ func (o *AgentInstanceHistoryItemResult) SetProducedAt(v time.Time) {
 	o.ProducedAt = v
 }
 
+// GetTools returns the Tools field value
+func (o *AgentInstanceHistoryItemResult) GetTools() []AgentTool {
+	if o == nil {
+		var ret []AgentTool
+		return ret
+	}
+
+	return o.Tools
+}
+
+// GetToolsOk returns a tuple with the Tools field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceHistoryItemResult) GetToolsOk() ([]AgentTool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Tools, true
+}
+
+// SetTools sets field value
+func (o *AgentInstanceHistoryItemResult) SetTools(v []AgentTool) {
+	o.Tools = v
+}
+
+// GetModel returns the Model field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *AgentInstanceHistoryItemResult) GetModel() string {
+	if o == nil || o.Model.Get() == nil {
+		var ret string
+		return ret
+	}
+
+	return *o.Model.Get()
+}
+
+// GetModelOk returns a tuple with the Model field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AgentInstanceHistoryItemResult) GetModelOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Model.Get(), o.Model.IsSet()
+}
+
+// SetModel sets field value
+func (o *AgentInstanceHistoryItemResult) SetModel(v string) {
+	o.Model.Set(&v)
+}
+
+// GetProvider returns the Provider field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *AgentInstanceHistoryItemResult) GetProvider() string {
+	if o == nil || o.Provider.Get() == nil {
+		var ret string
+		return ret
+	}
+
+	return *o.Provider.Get()
+}
+
+// GetProviderOk returns a tuple with the Provider field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AgentInstanceHistoryItemResult) GetProviderOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Provider.Get(), o.Provider.IsSet()
+}
+
+// SetProvider sets field value
+func (o *AgentInstanceHistoryItemResult) SetProvider(v string) {
+	o.Provider.Set(&v)
+}
+
+// GetLimits returns the Limits field value
+func (o *AgentInstanceHistoryItemResult) GetLimits() AgentInstanceLimits {
+	if o == nil {
+		var ret AgentInstanceLimits
+		return ret
+	}
+
+	return o.Limits
+}
+
+// GetLimitsOk returns a tuple with the Limits field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceHistoryItemResult) GetLimitsOk() (*AgentInstanceLimits, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Limits, true
+}
+
+// SetLimits sets field value
+func (o *AgentInstanceHistoryItemResult) SetLimits(v AgentInstanceLimits) {
+	o.Limits = v
+}
+
+// GetSystemPrompt returns the SystemPrompt field value
+func (o *AgentInstanceHistoryItemResult) GetSystemPrompt() []AgentInstanceMessageContent {
+	if o == nil {
+		var ret []AgentInstanceMessageContent
+		return ret
+	}
+
+	return o.SystemPrompt
+}
+
+// GetSystemPromptOk returns a tuple with the SystemPrompt field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceHistoryItemResult) GetSystemPromptOk() ([]AgentInstanceMessageContent, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SystemPrompt, true
+}
+
+// SetSystemPrompt sets field value
+func (o *AgentInstanceHistoryItemResult) SetSystemPrompt(v []AgentInstanceMessageContent) {
+	o.SystemPrompt = v
+}
+
 func (o AgentInstanceHistoryItemResult) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -380,6 +546,7 @@ func (o AgentInstanceHistoryItemResult) MarshalJSON() ([]byte, error) {
 func (o AgentInstanceHistoryItemResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["historyItemKey"] = o.HistoryItemKey
+	toSerialize["historyItemId"] = o.HistoryItemId
 	toSerialize["agentInstanceKey"] = o.AgentInstanceKey
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
 	toSerialize["jobKey"] = o.JobKey
@@ -391,6 +558,11 @@ func (o AgentInstanceHistoryItemResult) ToMap() (map[string]interface{}, error) 
 	toSerialize["metrics"] = o.Metrics.Get()
 	toSerialize["commitStatus"] = o.CommitStatus
 	toSerialize["producedAt"] = o.ProducedAt
+	toSerialize["tools"] = o.Tools
+	toSerialize["model"] = o.Model.Get()
+	toSerialize["provider"] = o.Provider.Get()
+	toSerialize["limits"] = o.Limits
+	toSerialize["systemPrompt"] = o.SystemPrompt
 	return toSerialize, nil
 }
 
@@ -400,6 +572,7 @@ func (o *AgentInstanceHistoryItemResult) UnmarshalJSON(data []byte) (err error) 
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"historyItemKey",
+		"historyItemId",
 		"agentInstanceKey",
 		"elementInstanceKey",
 		"jobKey",
@@ -411,6 +584,11 @@ func (o *AgentInstanceHistoryItemResult) UnmarshalJSON(data []byte) (err error) 
 		"metrics",
 		"commitStatus",
 		"producedAt",
+		"tools",
+		"model",
+		"provider",
+		"limits",
+		"systemPrompt",
 	}
 
 	allProperties := make(map[string]interface{})

@@ -19,7 +19,7 @@ import (
 // checks if the AgentInstanceToolCall type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &AgentInstanceToolCall{}
 
-// AgentInstanceToolCall A tool call associated with a history item. Used in both ASSISTANT and TOOL_RESULT items. ASSISTANT items carry arguments; TOOL_RESULT items carry arguments as null.
+// AgentInstanceToolCall A tool call associated with a history item. Used in both ASSISTANT and TOOL_RESULT items.
 type AgentInstanceToolCall struct {
 	// The LLM-assigned tool call ID. Correlates ASSISTANT items to their matching TOOL_RESULT items.
 	ToolCallId string `json:"toolCallId"`
@@ -27,7 +27,7 @@ type AgentInstanceToolCall struct {
 	ToolName string `json:"toolName"`
 	// The BPMN element ID handling this tool.
 	ElementId NullableString `json:"elementId"`
-	// The tool call arguments as provided by the LLM. Null on TOOL_RESULT items.
+	// The tool call arguments as provided by the LLM. May be null or populated on any item, including TOOL_RESULT.
 	Arguments map[string]interface{} `json:"arguments"`
 }
 
