@@ -1,0 +1,50 @@
+# Reacts to feedback on an agent-authored pull request: a `/agent fix` comment,
+# a failing CI run, or a review from another bot.
+#
+# The mechanics live in camunda/sdk-infra so all five SDKs share one implementation;
+# this file supplies only what is genuinely repo-specific: the name of the CI
+# workflow to watch, the toolchain to install, and the verification commands.
+
+name: Agent — PR follow-up
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+  workflow_run:
+    # Named here rather than in the shared workflow because each SDK repo calls
+    # its CI workflow something different.
+    workflows: ['CI']
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  followup:
+    permissions:
+      contents: read
+      id-token: write          # mint GitHub OIDC token for Vault JWT auth
+      copilot-requests: write  # Copilot CLI auth via GITHUB_TOKEN (billed to the org)
+      pull-requests: write     # attempt labels and the outcome comment
+      issues: write            # PR comments go through the Issues API
+      actions: read            # read the failing run's log
+    uses: camunda/sdk-infra/.github/workflows/sdk-agent-pr-followup.yml@v1
+    # Explicit rather than `inherit`: the shared workflow needs only Vault auth,
+    # and this job hands the repo to an LLM agent.
+    secrets:
+      VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+      VAULT_JWT_PATH: ${{ secrets.VAULT_JWT_PATH }}
+      VAULT_JWT_ROLE: ${{ secrets.VAULT_JWT_ROLE }}
+      VAULT_JWT_AUDIENCE: ${{ secrets.VAULT_JWT_AUDIENCE }}
+    with:
+      language: go
+      # No spec refresh here, unlike the coverage caller: the branch already carries
+      # whatever bundle that run committed, and re-bundling mid-follow-up would move
+      # the target the CI failure was reported against.
+      verify-commands: |
+        make check
+      extra-instructions: |
+        This runner has Go, Node and Python but no Java, so `make generate` cannot run
+        here. facade_generated.go, client/ and pb/ are generated output — do not
+        hand-edit them; if a fix requires regeneration, say so instead.

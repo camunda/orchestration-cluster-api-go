@@ -1,0 +1,63 @@
+# Resolves the auto-filed "Missing example coverage" issues (label `new-operations`)
+# by running the Copilot CLI in CI and opening a pull request with the result.
+#
+# The mechanics live in camunda/sdk-infra so all five SDKs share one implementation;
+# this file supplies only what is genuinely repo-specific: the toolchain to install
+# and the commands that define "verified" here.
+
+name: Agent — example coverage
+
+on:
+  issues:
+    # `labeled` only: creating an issue with labels fires BOTH `opened` and
+    # `labeled`, which would run the agent twice for every auto-filed issue.
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue-number:
+        description: 'Coverage issue to work on (for re-runs).'
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  implement:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'new-operations')
+    permissions:
+      contents: read           # checkout; the app token does the pushing
+      id-token: write          # mint GitHub OIDC token for Vault JWT auth
+      copilot-requests: write  # Copilot CLI auth via GITHUB_TOKEN (billed to the org)
+      issues: write            # report the outcome back on the issue
+    uses: camunda/sdk-infra/.github/workflows/sdk-agent-example-coverage.yml@v1
+    # Explicit rather than `inherit`: the shared workflow needs only Vault auth,
+    # and this job hands the repo to an LLM agent.
+    secrets:
+      VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+      VAULT_JWT_PATH: ${{ secrets.VAULT_JWT_PATH }}
+      VAULT_JWT_ROLE: ${{ secrets.VAULT_JWT_ROLE }}
+      VAULT_JWT_AUDIENCE: ${{ secrets.VAULT_JWT_AUDIENCE }}
+    with:
+      language: go
+      issue-number: ${{ github.event.issue.number || inputs.issue-number }}
+      # Bundle first: `make coverage` reads spec-metadata.json committed in this repo,
+      # so without a refresh it reports full coverage for operations that only exist
+      # upstream — which is how a run in the Python SDK once closed a real gap as
+      # already covered. `make check` is this repo's own gate (fmt, tidy, vet, build,
+      # test, examples, README sync, coverage).
+      verify-commands: |
+        ./scripts/bundle-spec.sh
+        make check
+      # The refresh above rewrites the bundle.
+      verify-artifacts: |
+        external-spec/bundled/**
+      extra-instructions: |
+        The spec bundle under external-spec/ is a snapshot, not the live upstream spec.
+        Run ./scripts/bundle-spec.sh before you trust any coverage result.
+
+        This runner has Go, Node and Python but no Java, so `make generate` cannot run
+        here. If the refreshed spec exposes an operation that has no method on
+        CamundaClient yet, stop and say so on the issue rather than hand-writing a
+        facade method — facade_generated.go is generated output.
