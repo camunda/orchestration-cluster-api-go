@@ -61,3 +61,6 @@ jobs:
         here. If the refreshed spec exposes an operation that has no method on
         CamundaClient yet, stop and say so on the issue rather than hand-writing a
         facade method — facade_generated.go is generated output.
+
+        `examples/readme.go` is the source of truth for the code blocks in `README.md`;
+        edit the region there and run `make sync-readme` rather than editing `README.md`.
