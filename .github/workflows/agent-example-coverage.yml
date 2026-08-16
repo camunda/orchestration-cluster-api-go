@@ -57,10 +57,10 @@ jobs:
         The spec bundle under external-spec/ is a snapshot, not the live upstream spec.
         Run ./scripts/bundle-spec.sh before you trust any coverage result.
 
-        This runner has Go, Node and Python but no Java, so `make generate` cannot run
-        here. If the refreshed spec exposes an operation that has no method on
-        CamundaClient yet, stop and say so on the issue rather than hand-writing a
-        facade method — facade_generated.go is generated output.
+        If the refreshed spec exposes an operation that has no method on CamundaClient
+        yet, run `make generate` — the runner image ships a JDK, so openapi-generator
+        works here. Never hand-write into facade_generated.go, client/ or pb/: they are
+        generated output and the generation-drift check rejects edits to them.
 
         `examples/readme.go` is the source of truth for the code blocks in `README.md`;
         edit the region there and run `make sync-readme` rather than editing `README.md`.

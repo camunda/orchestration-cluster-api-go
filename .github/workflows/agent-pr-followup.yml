@@ -45,9 +45,9 @@ jobs:
       verify-commands: |
         make check
       extra-instructions: |
-        This runner has Go, Node and Python but no Java, so `make generate` cannot run
-        here. facade_generated.go, client/ and pb/ are generated output — do not
-        hand-edit them; if a fix requires regeneration, say so instead.
+        facade_generated.go, client/ and pb/ are generated output — do not hand-edit
+        them. If a fix needs regeneration, run `make generate`; the runner image ships
+        a JDK, so openapi-generator works here.
 
         `examples/readme.go` is the source of truth for the code blocks in `README.md`;
         edit the region there and run `make sync-readme` rather than editing `README.md`.
