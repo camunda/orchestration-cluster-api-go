@@ -42,3 +42,16 @@ func getClusterStatusExample(ctx context.Context, client *camunda.CamundaClient)
 	// endregion GetClusterStatus
 	return nil
 }
+
+func getClusterTopologyExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetClusterTopology
+	// Returns the topology of all brokers across every physical tenant.
+	topology, err := client.GetClusterTopology(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("cluster %s — %d broker(s), %d physical tenant(s)\n",
+		topology.GetClusterId(), len(topology.GetBrokers()), len(topology.GetPhysicalTenants()))
+	// endregion GetClusterTopology
+	return nil
+}

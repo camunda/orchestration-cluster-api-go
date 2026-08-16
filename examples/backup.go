@@ -97,3 +97,50 @@ func deleteRuntimeBackupStateExample(ctx context.Context, client *camunda.Camund
 	// endregion DeleteRuntimeBackupState
 	return nil
 }
+
+func takeHistoryBackupExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region TakeHistoryBackup
+	result, err := client.TakeHistoryBackup(ctx, *openapi.NewTakeHistoryBackupRequest(42))
+	if err != nil {
+		return err
+	}
+	fmt.Printf("backup %d scheduled %d snapshot(s)\n", result.GetBackupId(), len(result.GetScheduledSnapshots()))
+	// endregion TakeHistoryBackup
+	return nil
+}
+
+func listHistoryBackupsExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region ListHistoryBackups
+	backups, err := client.ListHistoryBackups(ctx)
+	if err != nil {
+		return err
+	}
+	for _, backup := range backups {
+		fmt.Printf("history backup %d is %v\n", backup.GetBackupId(), backup.GetState())
+	}
+	// endregion ListHistoryBackups
+	return nil
+}
+
+func getHistoryBackupExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetHistoryBackup
+	backup, err := client.GetHistoryBackup(ctx, 42)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("history backup %d state=%v\n", backup.GetBackupId(), backup.GetState())
+	for _, snapshot := range backup.GetDetails() {
+		fmt.Printf("  snapshot %v\n", snapshot)
+	}
+	// endregion GetHistoryBackup
+	return nil
+}
+
+func deleteHistoryBackupExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region DeleteHistoryBackup
+	if err := client.DeleteHistoryBackup(ctx, 42); err != nil {
+		return err
+	}
+	// endregion DeleteHistoryBackup
+	return nil
+}
