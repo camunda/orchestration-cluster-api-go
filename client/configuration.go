@@ -135,6 +135,66 @@ func NewConfiguration() *Configuration {
 					},
 				},
 			},
+			"ClusterAPIService.GetClusterTopology": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
+			"RecoveryAPIService.ChangeClusterModeAsClusterAdmin": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
+			"RecoveryAPIService.RestoreAsClusterAdmin": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
 		},
 	}
 	return cfg

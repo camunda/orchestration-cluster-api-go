@@ -21,6 +21,8 @@ var _ MappedNullable = &AgentInstanceFilter{}
 type AgentInstanceFilter struct {
 	// The unique key of the agent instance.
 	AgentInstanceKey *AgentInstanceKeyFilterProperty `json:"agentInstanceKey,omitempty"`
+	// The key of the agent definition this agent instance is an instance of.
+	AgentDefinitionKey *AgentDefinitionKeyFilterProperty `json:"agentDefinitionKey,omitempty"`
 	// The current status of the agent instance.
 	Status *AgentInstanceStatusFilterProperty `json:"status,omitempty"`
 	// The BPMN element ID of the agent task.
@@ -96,6 +98,38 @@ func (o *AgentInstanceFilter) HasAgentInstanceKey() bool {
 // SetAgentInstanceKey gets a reference to the given AgentInstanceKeyFilterProperty and assigns it to the AgentInstanceKey field.
 func (o *AgentInstanceFilter) SetAgentInstanceKey(v AgentInstanceKeyFilterProperty) {
 	o.AgentInstanceKey = &v
+}
+
+// GetAgentDefinitionKey returns the AgentDefinitionKey field value if set, zero value otherwise.
+func (o *AgentInstanceFilter) GetAgentDefinitionKey() AgentDefinitionKeyFilterProperty {
+	if o == nil || IsNil(o.AgentDefinitionKey) {
+		var ret AgentDefinitionKeyFilterProperty
+		return ret
+	}
+	return *o.AgentDefinitionKey
+}
+
+// GetAgentDefinitionKeyOk returns a tuple with the AgentDefinitionKey field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceFilter) GetAgentDefinitionKeyOk() (*AgentDefinitionKeyFilterProperty, bool) {
+	if o == nil || IsNil(o.AgentDefinitionKey) {
+		return nil, false
+	}
+	return o.AgentDefinitionKey, true
+}
+
+// HasAgentDefinitionKey returns a boolean if a field has been set.
+func (o *AgentInstanceFilter) HasAgentDefinitionKey() bool {
+	if o != nil && !IsNil(o.AgentDefinitionKey) {
+		return true
+	}
+
+	return false
+}
+
+// SetAgentDefinitionKey gets a reference to the given AgentDefinitionKeyFilterProperty and assigns it to the AgentDefinitionKey field.
+func (o *AgentInstanceFilter) SetAgentDefinitionKey(v AgentDefinitionKeyFilterProperty) {
+	o.AgentDefinitionKey = &v
 }
 
 // GetStatus returns the Status field value if set, zero value otherwise.
@@ -526,6 +560,9 @@ func (o AgentInstanceFilter) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.AgentInstanceKey) {
 		toSerialize["agentInstanceKey"] = o.AgentInstanceKey
+	}
+	if !IsNil(o.AgentDefinitionKey) {
+		toSerialize["agentDefinitionKey"] = o.AgentDefinitionKey
 	}
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status

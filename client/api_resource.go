@@ -191,10 +191,15 @@ available again, a new deployment of the resource is required.
 
 By default, only the resource itself is deleted from the runtime state. To also delete the
 historic data associated with a resource, set the `deleteHistory` flag in the request body
-to `true`. The historic data is deleted asynchronously via a batch operation. The details of
-the created batch operation are included in the response. Note that history deletion is only
-supported for process resources; for other resource types this flag is ignored and no history
-will be deleted.
+to `true`. History deletion is supported for process definitions and decision requirements
+definitions; for other resource types (forms, generic resources) the flag is ignored and no
+history is deleted.
+
+The two supported types differ in how the history is removed. For a decision requirements
+definition the history is deleted asynchronously via a batch operation whose details are
+returned in the `batchOperation` field of the response. For a process definition the
+definition first drains its running instances and its history is deleted asynchronously once
+the definition is fully removed cluster-wide; no batch operation is returned in the response.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param resourceKey The key of the resource to delete. This can be the key of a process definition, the key of a decision requirements definition or the key of a form definition

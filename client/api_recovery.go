@@ -168,6 +168,156 @@ func (a *RecoveryAPIService) ChangeClusterModeExecute(r ApiChangeClusterModeRequ
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiChangeClusterModeAsClusterAdminRequest struct {
+	ctx              context.Context
+	ApiService       *RecoveryAPIService
+	mode             *Mode
+	physicalTenantId *string
+	dryRun           *bool
+}
+
+// The target cluster mode.
+func (r ApiChangeClusterModeAsClusterAdminRequest) Mode(mode Mode) ApiChangeClusterModeAsClusterAdminRequest {
+	r.mode = &mode
+	return r
+}
+
+// The physical tenant to apply the change to. When omitted, the change is applied to every physical tenant of the cluster.
+func (r ApiChangeClusterModeAsClusterAdminRequest) PhysicalTenantId(physicalTenantId string) ApiChangeClusterModeAsClusterAdminRequest {
+	r.physicalTenantId = &physicalTenantId
+	return r
+}
+
+// If true, the requested change is only validated and the resulting plan is returned, without applying it to the cluster.
+func (r ApiChangeClusterModeAsClusterAdminRequest) DryRun(dryRun bool) ApiChangeClusterModeAsClusterAdminRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+func (r ApiChangeClusterModeAsClusterAdminRequest) Execute() (*ClusterModeChangeResponse, *http.Response, error) {
+	return r.ApiService.ChangeClusterModeAsClusterAdminExecute(r)
+}
+
+/*
+ChangeClusterModeAsClusterAdmin Change the cluster mode of one or every physical tenant
+
+Transitions physical tenants between processing and recovery mode.
+
+If the `physicalTenantId` parameter is not provided, all available physical tenants are transitioned individually.
+
+Requires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiChangeClusterModeAsClusterAdminRequest
+*/
+func (a *RecoveryAPIService) ChangeClusterModeAsClusterAdmin(ctx context.Context) ApiChangeClusterModeAsClusterAdminRequest {
+	return ApiChangeClusterModeAsClusterAdminRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return ClusterModeChangeResponse
+func (a *RecoveryAPIService) ChangeClusterModeAsClusterAdminExecute(r ApiChangeClusterModeAsClusterAdminRequest) (*ClusterModeChangeResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ClusterModeChangeResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RecoveryAPIService.ChangeClusterModeAsClusterAdmin")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/cluster/v2/mode"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.mode == nil {
+		return localVarReturnValue, nil, reportError("mode is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "mode", r.mode, "form", "")
+	if r.physicalTenantId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "physicalTenantId", r.physicalTenantId, "form", "")
+	}
+	if r.dryRun != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dryRun", r.dryRun, "form", "")
+	} else {
+		var defaultValue bool = false
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dryRun", defaultValue, "form", "")
+		r.dryRun = &defaultValue
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiGetRestoreStatusRequest struct {
 	ctx        context.Context
 	ApiService *RecoveryAPIService
@@ -272,6 +422,7 @@ type ApiRestoreRequest struct {
 	ctx            context.Context
 	ApiService     *RecoveryAPIService
 	restoreRequest *RestoreRequest
+	dryRun         *bool
 }
 
 func (r ApiRestoreRequest) RestoreRequest(restoreRequest RestoreRequest) ApiRestoreRequest {
@@ -279,7 +430,13 @@ func (r ApiRestoreRequest) RestoreRequest(restoreRequest RestoreRequest) ApiRest
 	return r
 }
 
-func (r ApiRestoreRequest) Execute() (*ClusterModeChangeResponse, *http.Response, error) {
+// If true, the requested change is only validated and the resulting plan is returned, without applying it to the cluster.
+func (r ApiRestoreRequest) DryRun(dryRun bool) ApiRestoreRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+func (r ApiRestoreRequest) Execute() (*ClusterRestoreResponse, *http.Response, error) {
 	return r.ApiService.RestoreExecute(r)
 }
 
@@ -300,13 +457,13 @@ func (a *RecoveryAPIService) Restore(ctx context.Context) ApiRestoreRequest {
 
 // Execute executes the request
 //
-//	@return ClusterModeChangeResponse
-func (a *RecoveryAPIService) RestoreExecute(r ApiRestoreRequest) (*ClusterModeChangeResponse, *http.Response, error) {
+//	@return ClusterRestoreResponse
+func (a *RecoveryAPIService) RestoreExecute(r ApiRestoreRequest) (*ClusterRestoreResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *ClusterModeChangeResponse
+		localVarReturnValue *ClusterRestoreResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RecoveryAPIService.Restore")
@@ -323,6 +480,13 @@ func (a *RecoveryAPIService) RestoreExecute(r ApiRestoreRequest) (*ClusterModeCh
 		return localVarReturnValue, nil, reportError("restoreRequest is required and must be specified")
 	}
 
+	if r.dryRun != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dryRun", r.dryRun, "form", "")
+	} else {
+		var defaultValue bool = false
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dryRun", defaultValue, "form", "")
+		r.dryRun = &defaultValue
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
 
@@ -363,6 +527,158 @@ func (a *RecoveryAPIService) RestoreExecute(r ApiRestoreRequest) (*ClusterModeCh
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiRestoreAsClusterAdminRequest struct {
+	ctx                   context.Context
+	ApiService            *RecoveryAPIService
+	clusterRestoreRequest *ClusterRestoreRequest
+	physicalTenantId      *string
+	dryRun                *bool
+}
+
+func (r ApiRestoreAsClusterAdminRequest) ClusterRestoreRequest(clusterRestoreRequest ClusterRestoreRequest) ApiRestoreAsClusterAdminRequest {
+	r.clusterRestoreRequest = &clusterRestoreRequest
+	return r
+}
+
+// The physical tenant to apply the change to. When omitted, the change is applied to every physical tenant of the cluster.
+func (r ApiRestoreAsClusterAdminRequest) PhysicalTenantId(physicalTenantId string) ApiRestoreAsClusterAdminRequest {
+	r.physicalTenantId = &physicalTenantId
+	return r
+}
+
+// If true, the requested change is only validated and the resulting plan is returned, without applying it to the cluster.
+func (r ApiRestoreAsClusterAdminRequest) DryRun(dryRun bool) ApiRestoreAsClusterAdminRequest {
+	r.dryRun = &dryRun
+	return r
+}
+
+func (r ApiRestoreAsClusterAdminRequest) Execute() (*ClusterRestoreResponse, *http.Response, error) {
+	return r.ApiService.RestoreAsClusterAdminExecute(r)
+}
+
+/*
+RestoreAsClusterAdmin Restore one or every physical tenant from a backup
+
+Restores physical tenants from backups. The restore is described either by a list of backup IDs or by a time range (`from`/`to`) that selects the backups to restore. Restores are only accepted while the targeted physical tenants are in recovery mode; requests are rejected otherwise. The request is validated and acknowledged, but the restore itself is performed asynchronously.
+
+If the `physicalTenantId` parameter is provided, only that physical tenant is restored and `overrides` must be omitted.
+
+If it is not provided, every physical tenant of the cluster is restored: those named in `overrides` with their own backup selection, all others with the selection at the top level of the request body.
+
+Requires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiRestoreAsClusterAdminRequest
+*/
+func (a *RecoveryAPIService) RestoreAsClusterAdmin(ctx context.Context) ApiRestoreAsClusterAdminRequest {
+	return ApiRestoreAsClusterAdminRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return ClusterRestoreResponse
+func (a *RecoveryAPIService) RestoreAsClusterAdminExecute(r ApiRestoreAsClusterAdminRequest) (*ClusterRestoreResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ClusterRestoreResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RecoveryAPIService.RestoreAsClusterAdmin")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/cluster/v2/restore"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.clusterRestoreRequest == nil {
+		return localVarReturnValue, nil, reportError("clusterRestoreRequest is required and must be specified")
+	}
+
+	if r.physicalTenantId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "physicalTenantId", r.physicalTenantId, "form", "")
+	}
+	if r.dryRun != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dryRun", r.dryRun, "form", "")
+	} else {
+		var defaultValue bool = false
+		parameterAddToHeaderOrQuery(localVarQueryParams, "dryRun", defaultValue, "form", "")
+		r.dryRun = &defaultValue
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.clusterRestoreRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
