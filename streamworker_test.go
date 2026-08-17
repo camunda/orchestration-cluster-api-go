@@ -519,3 +519,53 @@ func TestStreamJobWorkerAppliesDefaultTenant(t *testing.T) {
 		t.Errorf("stream TenantIds = %v, want [acme]", req.TenantIds)
 	}
 }
+
+// TestStreamJobWorkerRequestsLease verifies the stream request opts into leased
+// jobs only when WithStreamJobLease is set. Without the opt-in the engine pushes
+// jobs carrying no lease token, so the fencing tokens the worker forwards on
+// complete, fail, and throw-error are never issued in the first place.
+func TestStreamJobWorkerRequestsLease(t *testing.T) {
+	tests := []struct {
+		name string
+		opts []StreamWorkerOption
+		want bool
+	}{
+		{name: "unleased by default", want: false},
+		{name: "enabled", opts: []StreamWorkerOption{WithStreamJobLease(true)}, want: true},
+		{name: "explicitly disabled", opts: []StreamWorkerOption{WithStreamJobLease(false)}, want: false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			lis := bufconn.Listen(1024 * 1024)
+			fake := &fakeGateway{
+				streamReqs: make(chan *pb.StreamActivatedJobsRequest, 1),
+				completes:  make(chan *pb.CompleteJobRequest, 1),
+				fails:      make(chan *pb.FailJobRequest, 1),
+				throws:     make(chan *pb.ThrowErrorRequest, 1),
+			}
+			srv := grpc.NewServer()
+			pb.RegisterGatewayServer(srv, fake)
+			go func() { _ = srv.Serve(lis) }()
+			defer srv.Stop()
+
+			client, err := New(WithNoAuth(), WithLogLevel(LogOff))
+			if err != nil {
+				t.Fatalf("New: %v", err)
+			}
+
+			w := client.NewStreamJobWorker("greet",
+				func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+				append([]StreamWorkerOption{WithStreamPollInterval(-1)}, tc.opts...)...)
+			w.dial = bufDial(lis)
+
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			go func() { _ = w.Run(ctx) }()
+
+			if got := waitFor(t, fake.streamReqs).GetWithLease(); got != tc.want {
+				t.Errorf("stream WithLease = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}

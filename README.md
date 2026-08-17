@@ -293,6 +293,14 @@ if err := worker.Run(ctx); err != nil {
 }
 ```
 
+Pass `camunda.WithStreamJobLease(true)` to activate streamed jobs with a lease.
+Each job then carries a lease token that the worker sends back when it completes,
+fails, or throws — so if the job timed out and another worker picked it up, the
+stale acknowledgement is rejected instead of racing the newer activation. It is
+off by default (matching the gateway) and needs an engine that supports job
+leases; older gateways ignore it and keep pushing unleased jobs. The REST sidecar
+poll always activates unleased.
+
 ## Deploying and starting processes
 
 The facade exposes request bodies as first-class parameters; the `Raw()` escape
