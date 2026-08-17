@@ -1538,5 +1538,54 @@
       "region": "GetExportingStatus",
       "label": "Get exporting status"
     }
+  ],
+  "takeHistoryBackup": [
+    {
+      "file": "backup.go",
+      "region": "TakeHistoryBackup",
+      "label": "Take a history backup"
+    }
+  ],
+  "listHistoryBackups": [
+    {
+      "file": "backup.go",
+      "region": "ListHistoryBackups",
+      "label": "List history backups"
+    }
+  ],
+  "getHistoryBackup": [
+    {
+      "file": "backup.go",
+      "region": "GetHistoryBackup",
+      "label": "Get a history backup"
+    }
+  ],
+  "deleteHistoryBackup": [
+    {
+      "file": "backup.go",
+      "region": "DeleteHistoryBackup",
+      "label": "Delete a history backup"
+    }
+  ],
+  "changeClusterModeAsClusterAdmin": [
+    {
+      "file": "recovery.go",
+      "region": "ChangeClusterModeAsClusterAdmin",
+      "label": "Change cluster mode as cluster admin"
+    }
+  ],
+  "getClusterTopology": [
+    {
+      "file": "cluster.go",
+      "region": "GetClusterTopology",
+      "label": "Get the topology of the whole cluster"
+    }
+  ],
+  "restoreAsClusterAdmin": [
+    {
+      "file": "recovery.go",
+      "region": "RestoreAsClusterAdmin",
+      "label": "Restore as cluster admin"
+    }
   ]
 }

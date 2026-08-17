@@ -23,8 +23,10 @@ var _ MappedNullable = &AgentInstanceResult{}
 // AgentInstanceResult struct for AgentInstanceResult
 type AgentInstanceResult struct {
 	// The unique key for this agent instance.
-	AgentInstanceKey ModelString             `json:"agentInstanceKey"`
-	Status           AgentInstanceStatusEnum `json:"status"`
+	AgentInstanceKey ModelString `json:"agentInstanceKey"`
+	// The key of the agent definition this agent instance is an instance of.
+	AgentDefinitionKey ModelString             `json:"agentDefinitionKey"`
+	Status             AgentInstanceStatusEnum `json:"status"`
 	// The static definition of the agent, including model, provider, and system prompt.
 	Definition AgentInstanceDefinition `json:"definition"`
 	// Aggregated metrics across all loopIterations of this agent instance.
@@ -65,9 +67,10 @@ type _AgentInstanceResult AgentInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceResult(agentInstanceKey ModelString, status AgentInstanceStatusEnum, definition AgentInstanceDefinition, metrics AgentInstanceMetrics, limits AgentInstanceLimits, tools []AgentTool, elementId string, processInstanceKey ModelString, rootProcessInstanceKey ModelString, processDefinitionKey ModelString, processDefinitionId string, processDefinitionVersion int32, processDefinitionVersionTag NullableString, tenantId string, creationDate time.Time, lastUpdatedDate time.Time, completionDate NullableTime, elementInstanceKeys []string) *AgentInstanceResult {
+func NewAgentInstanceResult(agentInstanceKey ModelString, agentDefinitionKey ModelString, status AgentInstanceStatusEnum, definition AgentInstanceDefinition, metrics AgentInstanceMetrics, limits AgentInstanceLimits, tools []AgentTool, elementId string, processInstanceKey ModelString, rootProcessInstanceKey ModelString, processDefinitionKey ModelString, processDefinitionId string, processDefinitionVersion int32, processDefinitionVersionTag NullableString, tenantId string, creationDate time.Time, lastUpdatedDate time.Time, completionDate NullableTime, elementInstanceKeys []string) *AgentInstanceResult {
 	this := AgentInstanceResult{}
 	this.AgentInstanceKey = agentInstanceKey
+	this.AgentDefinitionKey = agentDefinitionKey
 	this.Status = status
 	this.Definition = definition
 	this.Metrics = metrics
@@ -118,6 +121,30 @@ func (o *AgentInstanceResult) GetAgentInstanceKeyOk() (*ModelString, bool) {
 // SetAgentInstanceKey sets field value
 func (o *AgentInstanceResult) SetAgentInstanceKey(v ModelString) {
 	o.AgentInstanceKey = v
+}
+
+// GetAgentDefinitionKey returns the AgentDefinitionKey field value
+func (o *AgentInstanceResult) GetAgentDefinitionKey() ModelString {
+	if o == nil {
+		var ret ModelString
+		return ret
+	}
+
+	return o.AgentDefinitionKey
+}
+
+// GetAgentDefinitionKeyOk returns a tuple with the AgentDefinitionKey field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceResult) GetAgentDefinitionKeyOk() (*ModelString, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.AgentDefinitionKey, true
+}
+
+// SetAgentDefinitionKey sets field value
+func (o *AgentInstanceResult) SetAgentDefinitionKey(v ModelString) {
+	o.AgentDefinitionKey = v
 }
 
 // GetStatus returns the Status field value
@@ -543,6 +570,7 @@ func (o AgentInstanceResult) MarshalJSON() ([]byte, error) {
 func (o AgentInstanceResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["agentInstanceKey"] = o.AgentInstanceKey
+	toSerialize["agentDefinitionKey"] = o.AgentDefinitionKey
 	toSerialize["status"] = o.Status
 	toSerialize["definition"] = o.Definition
 	toSerialize["metrics"] = o.Metrics
@@ -569,6 +597,7 @@ func (o *AgentInstanceResult) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"agentInstanceKey",
+		"agentDefinitionKey",
 		"status",
 		"definition",
 		"metrics",

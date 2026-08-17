@@ -16,40 +16,40 @@ import (
 	"fmt"
 )
 
-// checks if the ClusterModeChangeResponse type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ClusterModeChangeResponse{}
+// checks if the ClusterRestoreResponse type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ClusterRestoreResponse{}
 
-// ClusterModeChangeResponse The planned changes resulting from a cluster mode transition request.
-type ClusterModeChangeResponse struct {
+// ClusterRestoreResponse The planned changes resulting from a restore request.
+type ClusterRestoreResponse struct {
 	// The ID of the cluster change that was triggered by the request.
 	ChangeId string `json:"changeId"`
-	// The operations that will be applied to complete the change, grouped by the physical tenant they belong to. Groups are transitioned in parallel; the operations within a group are applied in the given order.
-	PlannedChanges []ClusterModeChangePlannedChange `json:"plannedChanges"`
+	// The operations that will be applied to complete the restore, grouped by the physical tenant they belong to. Groups are restored in parallel; the operations within a group are applied in the given order.
+	PlannedChanges []ClusterRestorePlannedChange `json:"plannedChanges"`
 }
 
-type _ClusterModeChangeResponse ClusterModeChangeResponse
+type _ClusterRestoreResponse ClusterRestoreResponse
 
-// NewClusterModeChangeResponse instantiates a new ClusterModeChangeResponse object
+// NewClusterRestoreResponse instantiates a new ClusterRestoreResponse object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterModeChangeResponse(changeId string, plannedChanges []ClusterModeChangePlannedChange) *ClusterModeChangeResponse {
-	this := ClusterModeChangeResponse{}
+func NewClusterRestoreResponse(changeId string, plannedChanges []ClusterRestorePlannedChange) *ClusterRestoreResponse {
+	this := ClusterRestoreResponse{}
 	this.ChangeId = changeId
 	this.PlannedChanges = plannedChanges
 	return &this
 }
 
-// NewClusterModeChangeResponseWithDefaults instantiates a new ClusterModeChangeResponse object
+// NewClusterRestoreResponseWithDefaults instantiates a new ClusterRestoreResponse object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewClusterModeChangeResponseWithDefaults() *ClusterModeChangeResponse {
-	this := ClusterModeChangeResponse{}
+func NewClusterRestoreResponseWithDefaults() *ClusterRestoreResponse {
+	this := ClusterRestoreResponse{}
 	return &this
 }
 
 // GetChangeId returns the ChangeId field value
-func (o *ClusterModeChangeResponse) GetChangeId() string {
+func (o *ClusterRestoreResponse) GetChangeId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -60,7 +60,7 @@ func (o *ClusterModeChangeResponse) GetChangeId() string {
 
 // GetChangeIdOk returns a tuple with the ChangeId field value
 // and a boolean to check if the value has been set.
-func (o *ClusterModeChangeResponse) GetChangeIdOk() (*string, bool) {
+func (o *ClusterRestoreResponse) GetChangeIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,14 +68,14 @@ func (o *ClusterModeChangeResponse) GetChangeIdOk() (*string, bool) {
 }
 
 // SetChangeId sets field value
-func (o *ClusterModeChangeResponse) SetChangeId(v string) {
+func (o *ClusterRestoreResponse) SetChangeId(v string) {
 	o.ChangeId = v
 }
 
 // GetPlannedChanges returns the PlannedChanges field value
-func (o *ClusterModeChangeResponse) GetPlannedChanges() []ClusterModeChangePlannedChange {
+func (o *ClusterRestoreResponse) GetPlannedChanges() []ClusterRestorePlannedChange {
 	if o == nil {
-		var ret []ClusterModeChangePlannedChange
+		var ret []ClusterRestorePlannedChange
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *ClusterModeChangeResponse) GetPlannedChanges() []ClusterModeChangePlann
 
 // GetPlannedChangesOk returns a tuple with the PlannedChanges field value
 // and a boolean to check if the value has been set.
-func (o *ClusterModeChangeResponse) GetPlannedChangesOk() ([]ClusterModeChangePlannedChange, bool) {
+func (o *ClusterRestoreResponse) GetPlannedChangesOk() ([]ClusterRestorePlannedChange, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,11 +92,11 @@ func (o *ClusterModeChangeResponse) GetPlannedChangesOk() ([]ClusterModeChangePl
 }
 
 // SetPlannedChanges sets field value
-func (o *ClusterModeChangeResponse) SetPlannedChanges(v []ClusterModeChangePlannedChange) {
+func (o *ClusterRestoreResponse) SetPlannedChanges(v []ClusterRestorePlannedChange) {
 	o.PlannedChanges = v
 }
 
-func (o ClusterModeChangeResponse) MarshalJSON() ([]byte, error) {
+func (o ClusterRestoreResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -104,14 +104,14 @@ func (o ClusterModeChangeResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o ClusterModeChangeResponse) ToMap() (map[string]interface{}, error) {
+func (o ClusterRestoreResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["changeId"] = o.ChangeId
 	toSerialize["plannedChanges"] = o.PlannedChanges
 	return toSerialize, nil
 }
 
-func (o *ClusterModeChangeResponse) UnmarshalJSON(data []byte) (err error) {
+func (o *ClusterRestoreResponse) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -134,53 +134,53 @@ func (o *ClusterModeChangeResponse) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varClusterModeChangeResponse := _ClusterModeChangeResponse{}
+	varClusterRestoreResponse := _ClusterRestoreResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varClusterModeChangeResponse)
+	err = decoder.Decode(&varClusterRestoreResponse)
 
 	if err != nil {
 		return err
 	}
 
-	*o = ClusterModeChangeResponse(varClusterModeChangeResponse)
+	*o = ClusterRestoreResponse(varClusterRestoreResponse)
 
 	return err
 }
 
-type NullableClusterModeChangeResponse struct {
-	value *ClusterModeChangeResponse
+type NullableClusterRestoreResponse struct {
+	value *ClusterRestoreResponse
 	isSet bool
 }
 
-func (v NullableClusterModeChangeResponse) Get() *ClusterModeChangeResponse {
+func (v NullableClusterRestoreResponse) Get() *ClusterRestoreResponse {
 	return v.value
 }
 
-func (v *NullableClusterModeChangeResponse) Set(val *ClusterModeChangeResponse) {
+func (v *NullableClusterRestoreResponse) Set(val *ClusterRestoreResponse) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableClusterModeChangeResponse) IsSet() bool {
+func (v NullableClusterRestoreResponse) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableClusterModeChangeResponse) Unset() {
+func (v *NullableClusterRestoreResponse) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableClusterModeChangeResponse(val *ClusterModeChangeResponse) *NullableClusterModeChangeResponse {
-	return &NullableClusterModeChangeResponse{value: val, isSet: true}
+func NewNullableClusterRestoreResponse(val *ClusterRestoreResponse) *NullableClusterRestoreResponse {
+	return &NullableClusterRestoreResponse{value: val, isSet: true}
 }
 
-func (v NullableClusterModeChangeResponse) MarshalJSON() ([]byte, error) {
+func (v NullableClusterRestoreResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableClusterModeChangeResponse) UnmarshalJSON(src []byte) error {
+func (v *NullableClusterRestoreResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

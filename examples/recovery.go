@@ -45,3 +45,33 @@ func getRestoreStatusExample(ctx context.Context, client *camunda.CamundaClient)
 	// endregion GetRestoreStatus
 	return nil
 }
+
+func changeClusterModeAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region ChangeClusterModeAsClusterAdmin
+	// Changes the cluster mode as a cluster-level admin (cross-tenant authority).
+	result, err := client.ChangeClusterModeAsClusterAdmin(ctx, func(r openapi.ApiChangeClusterModeAsClusterAdminRequest) openapi.ApiChangeClusterModeAsClusterAdminRequest {
+		return r.Mode(openapi.MODE_RECOVERING)
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("change %s: %d planned operation group(s)\n", result.GetChangeId(), len(result.GetPlannedChanges()))
+	// endregion ChangeClusterModeAsClusterAdmin
+	return nil
+}
+
+func restoreAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region RestoreAsClusterAdmin
+	// Triggers a cluster-level restore (cluster-admin authority), restoring from the given backup IDs.
+	// backupIds are one per partition, so the placeholder slice below must be extended to
+	// match the actual partition count of the target cluster (shown here for a 2-partition cluster).
+	restoreRequest := openapi.NewClusterRestoreRequestWithDefaults()
+	restoreRequest.SetBackupIds([]int64{1, 2})
+	result, err := client.RestoreAsClusterAdmin(ctx, *restoreRequest)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("restore change id: %s\n", result.GetChangeId())
+	// endregion RestoreAsClusterAdmin
+	return nil
+}
