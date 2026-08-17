@@ -384,7 +384,14 @@ type StreamActivatedJobsRequest struct {
 	// a list of identifiers of tenants for which to stream jobs
 	TenantIds []string `protobuf:"bytes,6,rep,name=tenantIds,proto3" json:"tenantIds,omitempty"`
 	// the tenant filtering strategy - determines whether to use provided tenant IDs or assigned tenant IDs
-	TenantFilter  TenantFilter `protobuf:"varint,7,opt,name=tenantFilter,proto3,enum=gateway_protocol.TenantFilter" json:"tenantFilter,omitempty"`
+	TenantFilter TenantFilter `protobuf:"varint,7,opt,name=tenantFilter,proto3,enum=gateway_protocol.TenantFilter" json:"tenantFilter,omitempty"`
+	// whether to stream jobs with a lease; when true, each job pushed on this stream is
+	// assigned a distinct, opaque lease token, returned as ActivatedJob.leaseToken. The lease
+	// fences the complete, fail, and throw-error commands against a superseded activation of
+	// the same job (e.g. after the job timed out or failed and was re-activated by another
+	// worker): a command carrying a stale lease token is rejected rather than racing with the
+	// newer activation. Defaults to false, which pushes jobs without a lease.
+	WithLease     bool `protobuf:"varint,8,opt,name=withLease,proto3" json:"withLease,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -459,6 +466,13 @@ func (x *StreamActivatedJobsRequest) GetTenantFilter() TenantFilter {
 		return x.TenantFilter
 	}
 	return TenantFilter_PROVIDED
+}
+
+func (x *StreamActivatedJobsRequest) GetWithLease() bool {
+	if x != nil {
+		return x.WithLease
+	}
+	return false
 }
 
 type ActivateJobsRequest struct {
@@ -5918,14 +5932,15 @@ var File_gateway_proto protoreflect.FileDescriptor
 
 const file_gateway_proto_rawDesc = "" +
 	"\n" +
-	"\rgateway.proto\x12\x10gateway_protocol\"\xea\x01\n" +
+	"\rgateway.proto\x12\x10gateway_protocol\"\x88\x02\n" +
 	"\x1aStreamActivatedJobsRequest\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\tR\x04type\x12\x16\n" +
 	"\x06worker\x18\x02 \x01(\tR\x06worker\x12\x18\n" +
 	"\atimeout\x18\x03 \x01(\x03R\atimeout\x12$\n" +
 	"\rfetchVariable\x18\x05 \x03(\tR\rfetchVariable\x12\x1c\n" +
 	"\ttenantIds\x18\x06 \x03(\tR\ttenantIds\x12B\n" +
-	"\ftenantFilter\x18\a \x01(\x0e2\x1e.gateway_protocol.TenantFilterR\ftenantFilter\"\xd7\x02\n" +
+	"\ftenantFilter\x18\a \x01(\x0e2\x1e.gateway_protocol.TenantFilterR\ftenantFilter\x12\x1c\n" +
+	"\twithLease\x18\b \x01(\bR\twithLease\"\xd7\x02\n" +
 	"\x13ActivateJobsRequest\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\tR\x04type\x12\x16\n" +
 	"\x06worker\x18\x02 \x01(\tR\x06worker\x12\x18\n" +

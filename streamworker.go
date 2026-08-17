@@ -85,6 +85,7 @@ type StreamJobWorker struct {
 	pollInterval     time.Duration
 	pollMaxJobs      int
 	tenantIDs        []string
+	withLease        bool
 
 	// dial is an injectable seam for tests; nil means use client.grpcConn.
 	dial func(ctx context.Context) (*grpc.ClientConn, error)
@@ -143,6 +144,20 @@ func WithStreamPollMaxJobs(n int) StreamWorkerOption {
 // overriding the client's default tenant.
 func WithStreamTenantIDs(ids ...string) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.tenantIDs = ids }
+}
+
+// WithStreamJobLease requests leased jobs. Each job then carries a distinct
+// lease token, which this worker sends back on complete, fail, and throw-error.
+// The engine rejects a command bearing a stale token, fencing the job against a
+// superseded activation — for example after the job timed out and another worker
+// picked it up.
+//
+// Off by default, matching the gateway's own default. Enabling it requires an
+// engine that supports job leases; older gateways ignore the field and keep
+// pushing unleased jobs. It covers both channels: the gRPC stream and the REST
+// sidecar poll (see WithStreamPollInterval).
+func WithStreamJobLease(enabled bool) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.withLease = enabled }
 }
 
 // NewStreamJobWorker creates a gRPC streaming worker for jobType. Defaults are
@@ -225,9 +240,10 @@ func (w *StreamJobWorker) Run(ctx context.Context) error {
 // (nil on a clean close).
 func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, sem chan struct{}, wg *sync.WaitGroup) error {
 	req := &pb.StreamActivatedJobsRequest{
-		Type:    w.jobType,
-		Worker:  w.name,
-		Timeout: w.timeout.Milliseconds(),
+		Type:      w.jobType,
+		Worker:    w.name,
+		Timeout:   w.timeout.Milliseconds(),
+		WithLease: w.withLease,
 	}
 	if len(w.fetchVariables) > 0 {
 		req.FetchVariable = w.fetchVariables
@@ -305,6 +321,9 @@ func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]openapi.ActivatedJobR
 	}
 	if len(w.tenantIDs) > 0 {
 		req.SetTenantIds(w.tenantIDs)
+	}
+	if w.withLease {
+		req.SetWithLease(true)
 	}
 	result, resp, err := w.client.raw.JobAPI.ActivateJobs(ctx).JobActivationRequest(*req).Execute()
 	if err != nil {

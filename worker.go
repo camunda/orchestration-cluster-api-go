@@ -26,6 +26,7 @@ type JobWorker struct {
 	pollInterval   time.Duration
 	fetchVariables []string
 	tenantIDs      []string
+	withLease      bool
 }
 
 // WorkerOption customizes a JobWorker.
@@ -70,6 +71,19 @@ func WithFetchVariables(vars ...string) WorkerOption {
 // overriding the client's default tenant.
 func WithWorkerTenantIDs(ids ...string) WorkerOption {
 	return func(w *JobWorker) { w.tenantIDs = ids }
+}
+
+// WithJobLease activates jobs with a lease. Each job then carries a lease token,
+// which this worker sends back on complete, fail, and throw-error. The engine
+// rejects a command bearing a stale token, fencing the job against a superseded
+// activation — for example after the job timed out and another worker picked it
+// up.
+//
+// Off by default, matching the engine's own default. Enabling it requires an
+// engine that supports job leases. It has no effect when jobs arrive over the
+// FALCON command stream, which activates them outside the REST activation API.
+func WithJobLease(enabled bool) WorkerOption {
+	return func(w *JobWorker) { w.withLease = enabled }
 }
 
 // NewJobWorker creates a worker for jobType. Defaults are seeded from the
@@ -243,6 +257,9 @@ func (w *JobWorker) activate(ctx context.Context, maxJobs int) ([]openapi.Activa
 	if len(w.tenantIDs) > 0 {
 		req.SetTenantIds(w.tenantIDs)
 	}
+	if w.withLease {
+		req.SetWithLease(true)
+	}
 	result, resp, err := w.client.raw.JobAPI.ActivateJobs(ctx).JobActivationRequest(*req).Execute()
 	if err != nil {
 		return nil, w.client.wrapError(resp, err)
@@ -283,6 +300,9 @@ func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[
 	if len(vars) > 0 {
 		req.SetVariables(vars)
 	}
+	if job.leaseToken != "" {
+		req.SetLeaseToken(job.leaseToken)
+	}
 	_, err := c.raw.JobAPI.CompleteJob(ctx, openapi.JobKey(job.key)).
 		JobCompletionRequest(*req).Execute()
 	if err != nil {
@@ -300,6 +320,9 @@ func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) 
 	if cause != nil {
 		req.SetErrorMessage(cause.Error())
 	}
+	if job.leaseToken != "" {
+		req.SetLeaseToken(job.leaseToken)
+	}
 	_, err := c.raw.JobAPI.FailJob(ctx, openapi.JobKey(job.key)).
 		JobFailRequest(*req).Execute()
 	if err != nil {
@@ -314,6 +337,9 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 	}
 	if len(bpmn.Variables) > 0 {
 		req.SetVariables(bpmn.Variables)
+	}
+	if job.leaseToken != "" {
+		req.SetLeaseToken(job.leaseToken)
 	}
 	_, err := c.raw.JobAPI.ThrowJobError(ctx, openapi.JobKey(job.key)).
 		JobErrorRequest(*req).Execute()

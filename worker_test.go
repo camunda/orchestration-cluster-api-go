@@ -475,3 +475,152 @@ func TestJobWorkerAppliesDefaultTenant(t *testing.T) {
 		t.Fatal("worker did not activate jobs")
 	}
 }
+
+// TestJobWorkerRequestsLease verifies the activation request opts into leased
+// jobs only when WithJobLease is set.
+func TestJobWorkerRequestsLease(t *testing.T) {
+	tests := []struct {
+		name string
+		opts []camunda.WorkerOption
+		want bool
+	}{
+		{name: "unleased by default", want: false},
+		{name: "enabled", opts: []camunda.WorkerOption{camunda.WithJobLease(true)}, want: true},
+		{name: "explicitly disabled", opts: []camunda.WorkerOption{camunda.WithJobLease(false)}, want: false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			leases := make(chan bool, 1)
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if !strings.HasSuffix(r.URL.Path, "/jobs/activation") {
+					w.WriteHeader(http.StatusNotFound)
+					return
+				}
+				var body struct {
+					WithLease bool `json:"withLease"`
+				}
+				_ = json.NewDecoder(r.Body).Decode(&body)
+				select {
+				case leases <- body.WithLease:
+				default:
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, `{"jobs":[]}`)
+			}))
+			defer srv.Close()
+
+			client, err := camunda.New(camunda.WithRestAddress(srv.URL), camunda.WithLogLevel(camunda.LogOff))
+			if err != nil {
+				t.Fatalf("New: %v", err)
+			}
+
+			opts := append([]camunda.WorkerOption{
+				camunda.WithRequestTimeout(50 * time.Millisecond),
+				camunda.WithPollInterval(10 * time.Millisecond),
+			}, tc.opts...)
+			worker := client.NewJobWorker("demo-task",
+				func(context.Context, *camunda.Job) (map[string]any, error) { return nil, nil }, opts...)
+
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			go func() { _ = worker.Run(ctx) }()
+
+			select {
+			case got := <-leases:
+				if got != tc.want {
+					t.Errorf("activation withLease = %v, want %v", got, tc.want)
+				}
+			case <-time.After(5 * time.Second):
+				t.Fatal("worker did not activate jobs")
+			}
+		})
+	}
+}
+
+// TestRESTAckForwardsLeaseToken verifies that a leased job's token is forwarded
+// on every REST acknowledgement, so the engine can fence the command against a
+// superseded activation. All three outcomes are covered: an ack path that drops
+// the token would have its command rejected for a leased job.
+func TestRESTAckForwardsLeaseToken(t *testing.T) {
+	const lease = "lease-abc"
+	leasedJobResponse := strings.Replace(oneJobResponse, `"leaseToken": null`, `"leaseToken": "`+lease+`"`, 1)
+
+	tests := []struct {
+		name    string
+		handler camunda.JobHandler
+		ackPath string
+	}{
+		{
+			name:    "complete",
+			handler: func(context.Context, *camunda.Job) (map[string]any, error) { return nil, nil },
+			ackPath: "/completion",
+		},
+		{
+			name:    "fail",
+			handler: func(context.Context, *camunda.Job) (map[string]any, error) { return nil, fmt.Errorf("boom") },
+			ackPath: "/failure",
+		},
+		{
+			name: "throw BPMN error",
+			handler: func(context.Context, *camunda.Job) (map[string]any, error) {
+				return nil, &camunda.BpmnError{Code: "E1", Message: "nope"}
+			},
+			ackPath: "/error",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var activateCount atomic.Int32
+			tokens := make(chan string, 1)
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch {
+				case strings.HasSuffix(r.URL.Path, "/jobs/activation"):
+					w.Header().Set("Content-Type", "application/json")
+					if activateCount.Add(1) == 1 {
+						_, _ = io.WriteString(w, leasedJobResponse)
+					} else {
+						_, _ = io.WriteString(w, `{"jobs":[]}`)
+					}
+				case strings.HasSuffix(r.URL.Path, tc.ackPath):
+					var body struct {
+						LeaseToken string `json:"leaseToken"`
+					}
+					_ = json.NewDecoder(r.Body).Decode(&body)
+					select {
+					case tokens <- body.LeaseToken:
+					default:
+					}
+					w.WriteHeader(http.StatusNoContent)
+				default:
+					w.WriteHeader(http.StatusNotFound)
+				}
+			}))
+			defer srv.Close()
+
+			client, err := camunda.New(camunda.WithRestAddress(srv.URL), camunda.WithLogLevel(camunda.LogOff))
+			if err != nil {
+				t.Fatalf("New: %v", err)
+			}
+
+			worker := client.NewJobWorker("demo-task", tc.handler,
+				camunda.WithRequestTimeout(50*time.Millisecond),
+				camunda.WithPollInterval(10*time.Millisecond),
+			)
+
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			go func() { _ = worker.Run(ctx) }()
+
+			select {
+			case got := <-tokens:
+				if got != lease {
+					t.Errorf("ack leaseToken = %q, want %q", got, lease)
+				}
+			case <-time.After(5 * time.Second):
+				t.Fatalf("worker did not acknowledge the job at %s", tc.ackPath)
+			}
+		})
+	}
+}
