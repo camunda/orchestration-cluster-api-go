@@ -1578,7 +1578,7 @@
     {
       "file": "cluster.go",
       "region": "GetClusterTopology",
-      "label": "Get cluster topology"
+      "label": "Get the topology of the whole cluster"
     }
   ],
   "restoreAsClusterAdmin": [

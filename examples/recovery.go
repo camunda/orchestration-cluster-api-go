@@ -63,8 +63,10 @@ func changeClusterModeAsClusterAdminExample(ctx context.Context, client *camunda
 func restoreAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region RestoreAsClusterAdmin
 	// Triggers a cluster-level restore (cluster-admin authority), restoring from the given backup IDs.
+	// backupIds are one per partition, so the placeholder slice below must be extended to
+	// match the actual partition count of the target cluster (shown here for a 2-partition cluster).
 	restoreRequest := openapi.NewClusterRestoreRequestWithDefaults()
-	restoreRequest.SetBackupIds([]int64{1})
+	restoreRequest.SetBackupIds([]int64{1, 2})
 	result, err := client.RestoreAsClusterAdmin(ctx, *restoreRequest)
 	if err != nil {
 		return err
