@@ -33,8 +33,6 @@ from pathlib import Path
 # required-presence check is restored. Confirmed against the live 8.10.0-alpha3
 # cluster; revisit per issue #3's broader audit.
 VERSION_SKEW_OPTIONAL = [
-    # TEMPORARY (issue #3): not emitted by 8.10.0-alpha3 (ActivatedJobResult).
-    "physicalTenantId",
     # TEMPORARY: not emitted by 8.10.0-alpha3 (ActivatedJobResult). Blocks the
     # job worker. Drop when the pinned server emits it.
     "leaseToken",
@@ -66,6 +64,14 @@ MODEL_SCOPED_OPTIONAL = {
         "decisionRequirements",
         "form",
         "resource",
+    ],
+    # TEMPORARY (issue #3): physicalTenantId is not emitted by 8.10.0-alpha3 on
+    # ActivatedJobResult. Scoped to this model only (rather than
+    # VERSION_SKEW_OPTIONAL) so it does not also relax the genuinely-required
+    # physicalTenantId field on PhysicalTenantTopology (cluster topology),
+    # which the pinned server does emit.
+    "model_activated_job_result.go": [
+        "physicalTenantId",
     ],
 }
 
