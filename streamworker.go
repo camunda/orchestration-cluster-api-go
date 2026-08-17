@@ -146,17 +146,16 @@ func WithStreamTenantIDs(ids ...string) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.tenantIDs = ids }
 }
 
-// WithStreamJobLease requests leased jobs on the stream. Each streamed job then
-// carries a distinct lease token, which this worker sends back on complete,
-// fail, and throw-error. The engine rejects a command bearing a stale token,
-// fencing the job against a superseded activation — for example after the job
-// timed out and another worker picked it up.
+// WithStreamJobLease requests leased jobs. Each job then carries a distinct
+// lease token, which this worker sends back on complete, fail, and throw-error.
+// The engine rejects a command bearing a stale token, fencing the job against a
+// superseded activation — for example after the job timed out and another worker
+// picked it up.
 //
 // Off by default, matching the gateway's own default. Enabling it requires an
 // engine that supports job leases; older gateways ignore the field and keep
-// pushing unleased jobs. It applies only to the gRPC stream: the REST sidecar
-// poll (see WithStreamPollInterval) always activates jobs unleased, because
-// the REST acknowledgement path does not yet carry the token.
+// pushing unleased jobs. It covers both channels: the gRPC stream and the REST
+// sidecar poll (see WithStreamPollInterval).
 func WithStreamJobLease(enabled bool) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.withLease = enabled }
 }
@@ -322,6 +321,9 @@ func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]openapi.ActivatedJobR
 	}
 	if len(w.tenantIDs) > 0 {
 		req.SetTenantIds(w.tenantIDs)
+	}
+	if w.withLease {
+		req.SetWithLease(true)
 	}
 	result, resp, err := w.client.raw.JobAPI.ActivateJobs(ctx).JobActivationRequest(*req).Execute()
 	if err != nil {

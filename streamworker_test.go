@@ -2,6 +2,7 @@ package camunda
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net"
@@ -567,5 +568,65 @@ func TestStreamJobWorkerRequestsLease(t *testing.T) {
 				t.Errorf("stream WithLease = %v, want %v", got, tc.want)
 			}
 		})
+	}
+}
+
+// TestStreamJobWorkerSidecarPollRequestsLease verifies that WithStreamJobLease
+// also covers the REST sidecar poll. The poll exists to pick up jobs re-queued
+// after a timeout — exactly the case a lease fences — so leaving it unleased
+// would leave the race open on the channel most likely to hit it.
+func TestStreamJobWorkerSidecarPollRequestsLease(t *testing.T) {
+	leases := make(chan bool, 1)
+	rest := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasSuffix(r.URL.Path, "/jobs/activation") {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		var body struct {
+			WithLease bool `json:"withLease"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		select {
+		case leases <- body.WithLease:
+		default:
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"jobs":[]}`)
+	}))
+	defer rest.Close()
+
+	// gRPC stream that never delivers a job, so only the sidecar poll runs.
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		completes: make(chan *pb.CompleteJobRequest, 1),
+		fails:     make(chan *pb.FailJobRequest, 1),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	w := client.NewStreamJobWorker("demo-task",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+		WithStreamPollInterval(10*time.Millisecond), WithStreamJobLease(true))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	select {
+	case got := <-leases:
+		if !got {
+			t.Error("sidecar poll withLease = false, want true")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("sidecar poll did not activate jobs")
 	}
 }
