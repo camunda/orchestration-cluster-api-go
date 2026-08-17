@@ -395,6 +395,12 @@ func (c *CamundaClient) UpdateAuthorization(ctx context.Context, authorizationKe
 }
 
 // DeleteHistoryBackup calls the DeleteHistoryBackup operation.
+//
+// Example:
+//
+//	if err := client.DeleteHistoryBackup(ctx, 42); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) DeleteHistoryBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteHistoryBackupRequest) openapi.ApiDeleteHistoryBackupRequest) error {
 	req := c.raw.BackupAPI.DeleteHistoryBackup(ctx, backupId)
 	for _, opt := range opts {
@@ -437,6 +443,17 @@ func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...fu
 }
 
 // GetHistoryBackup calls the GetHistoryBackup operation.
+//
+// Example:
+//
+//	backup, err := client.GetHistoryBackup(ctx, 42)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("history backup %d state=%v\n", backup.GetBackupId(), backup.GetState())
+//	for _, snapshot := range backup.GetDetails() {
+//		fmt.Printf("  snapshot %v\n", snapshot)
+//	}
 func (c *CamundaClient) GetHistoryBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetHistoryBackupRequest) openapi.ApiGetHistoryBackupRequest) (*openapi.HistoryBackupInfo, error) {
 	req := c.raw.BackupAPI.GetHistoryBackup(ctx, backupId)
 	for _, opt := range opts {
@@ -488,6 +505,16 @@ func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(
 }
 
 // ListHistoryBackups calls the ListHistoryBackups operation.
+//
+// Example:
+//
+//	backups, err := client.ListHistoryBackups(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, backup := range backups {
+//		fmt.Printf("history backup %d is %v\n", backup.GetBackupId(), backup.GetState())
+//	}
 func (c *CamundaClient) ListHistoryBackups(ctx context.Context, opts ...func(openapi.ApiListHistoryBackupsRequest) openapi.ApiListHistoryBackupsRequest) ([]openapi.HistoryBackupInfo, error) {
 	req := c.raw.BackupAPI.ListHistoryBackups(ctx)
 	for _, opt := range opts {
@@ -539,6 +566,14 @@ func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func
 }
 
 // TakeHistoryBackup calls the TakeHistoryBackup operation.
+//
+// Example:
+//
+//	result, err := client.TakeHistoryBackup(ctx, *openapi.NewTakeHistoryBackupRequest(42))
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("backup %d scheduled %d snapshot(s)\n", result.GetBackupId(), len(result.GetScheduledSnapshots()))
 func (c *CamundaClient) TakeHistoryBackup(ctx context.Context, body openapi.TakeHistoryBackupRequest, opts ...func(openapi.ApiTakeHistoryBackupRequest) openapi.ApiTakeHistoryBackupRequest) (*openapi.TakeHistoryBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeHistoryBackup(ctx)
 	req = req.TakeHistoryBackupRequest(body)
@@ -728,6 +763,16 @@ func (c *CamundaClient) GetClusterStatus(ctx context.Context, opts ...func(opena
 }
 
 // GetClusterTopology calls the GetClusterTopology operation.
+//
+// Example:
+//
+//	// Returns the topology of all brokers across every physical tenant.
+//	topology, err := client.GetClusterTopology(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("cluster %s — %d broker(s), %d physical tenant(s)\n",
+//		topology.GetClusterId(), len(topology.GetBrokers()), len(topology.GetPhysicalTenants()))
 func (c *CamundaClient) GetClusterTopology(ctx context.Context, opts ...func(openapi.ApiGetClusterTopologyRequest) openapi.ApiGetClusterTopologyRequest) (*openapi.ClusterTopologyResponse, error) {
 	req := c.raw.ClusterAPI.GetClusterTopology(ctx)
 	for _, opt := range opts {
@@ -2986,6 +3031,17 @@ func (c *CamundaClient) ChangeClusterMode(ctx context.Context, opts ...func(open
 }
 
 // ChangeClusterModeAsClusterAdmin calls the ChangeClusterModeAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Changes the cluster mode as a cluster-level admin (cross-tenant authority).
+//	result, err := client.ChangeClusterModeAsClusterAdmin(ctx, func(r openapi.ApiChangeClusterModeAsClusterAdminRequest) openapi.ApiChangeClusterModeAsClusterAdminRequest {
+//		return r.Mode(openapi.MODE_RECOVERING)
+//	})
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("change %s: %d planned operation group(s)\n", result.GetChangeId(), len(result.GetPlannedChanges()))
 func (c *CamundaClient) ChangeClusterModeAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiChangeClusterModeAsClusterAdminRequest) openapi.ApiChangeClusterModeAsClusterAdminRequest) (*openapi.ClusterModeChangeResponse, error) {
 	req := c.raw.RecoveryAPI.ChangeClusterModeAsClusterAdmin(ctx)
 	for _, opt := range opts {
@@ -3037,6 +3093,17 @@ func (c *CamundaClient) Restore(ctx context.Context, body openapi.RestoreRequest
 }
 
 // RestoreAsClusterAdmin calls the RestoreAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Triggers a cluster-level restore (cluster-admin authority), restoring from the given backup IDs.
+//	restoreRequest := openapi.NewClusterRestoreRequestWithDefaults()
+//	restoreRequest.SetBackupIds([]int64{1})
+//	result, err := client.RestoreAsClusterAdmin(ctx, *restoreRequest)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("restore change id: %s\n", result.GetChangeId())
 func (c *CamundaClient) RestoreAsClusterAdmin(ctx context.Context, body openapi.ClusterRestoreRequest, opts ...func(openapi.ApiRestoreAsClusterAdminRequest) openapi.ApiRestoreAsClusterAdminRequest) (*openapi.ClusterRestoreResponse, error) {
 	req := c.raw.RecoveryAPI.RestoreAsClusterAdmin(ctx)
 	req = req.ClusterRestoreRequest(body)
