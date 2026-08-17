@@ -49,7 +49,9 @@ func getRestoreStatusExample(ctx context.Context, client *camunda.CamundaClient)
 func changeClusterModeAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ChangeClusterModeAsClusterAdmin
 	// Changes the cluster mode as a cluster-level admin (cross-tenant authority).
-	result, err := client.ChangeClusterModeAsClusterAdmin(ctx)
+	result, err := client.ChangeClusterModeAsClusterAdmin(ctx, func(r openapi.ApiChangeClusterModeAsClusterAdminRequest) openapi.ApiChangeClusterModeAsClusterAdminRequest {
+		return r.Mode(openapi.MODE_RECOVERING)
+	})
 	if err != nil {
 		return err
 	}
@@ -60,8 +62,10 @@ func changeClusterModeAsClusterAdminExample(ctx context.Context, client *camunda
 
 func restoreAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region RestoreAsClusterAdmin
-	// Triggers a cluster-level restore (cluster-admin authority).
-	result, err := client.RestoreAsClusterAdmin(ctx, *openapi.NewClusterRestoreRequestWithDefaults())
+	// Triggers a cluster-level restore (cluster-admin authority), restoring from the given backup IDs.
+	restoreRequest := openapi.NewClusterRestoreRequestWithDefaults()
+	restoreRequest.SetBackupIds([]int64{1})
+	result, err := client.RestoreAsClusterAdmin(ctx, *restoreRequest)
 	if err != nil {
 		return err
 	}
