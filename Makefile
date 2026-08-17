@@ -1,4 +1,4 @@
-.PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy tidy-check examples sync-readme sync-readme-check coverage check clean
+.PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy tidy-check examples sync-readme sync-readme-check coverage docs-json docs-md check clean
 
 SPEC_REF ?= main
 GO ?= go
@@ -21,7 +21,9 @@ help:
 	@echo "  make tidy-check    Fail if go.mod or go.sum is not tidy"
 	@echo "  make examples      Build the example programs (README snippet sources)"
 	@echo "  make sync-readme   Inject example snippets into README.md"
-	@echo "  make coverage      Verify all 198 operations have an example (operation-map.json)"
+	@echo "  make coverage      Verify every operation has an example (operation-map.json)"
+	@echo "  make docs-json     Snapshot the exported Go API to docs-json/ (cmd/docgen)"
+	@echo "  make docs-md       Render docs-md/ for docs.camunda.io (README + docs-json)"
 	@echo "  make check         Full local CI gate"
 	@echo "  make clean         Remove build artifacts"
 
@@ -81,6 +83,21 @@ sync-readme-check:
 
 coverage:
 	python3 scripts/check-example-coverage.py
+
+# Snapshot the exported API of the root package and of the generated domain key
+# types. This is the Go analogue of rustdoc JSON in the Rust SDK.
+docs-json:
+	@mkdir -p docs-json
+	$(GO) run ./cmd/docgen -dir . \
+		-import-path github.com/camunda/orchestration-cluster-api-go \
+		-out docs-json/camunda.json
+	$(GO) run ./cmd/docgen -dir ./client -include zz_generated_domain_keys.go \
+		-import-path github.com/camunda/orchestration-cluster-api-go/client \
+		-out docs-json/domain-keys.json
+
+# Render the Docusaurus pages published at docs.camunda.io.
+docs-md: docs-json
+	python3 scripts/generate-docusaurus-md.py --validate-links
 
 check: fmt-check tidy-check vet build test examples sync-readme-check coverage
 
