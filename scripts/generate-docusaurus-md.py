@@ -163,12 +163,27 @@ def _rewrite_docs_links(content: str, depth: int) -> str:
 # the page is copied into camunda-docs. Point them at GitHub instead.
 _REPO_LINK_RE = re.compile(r"\[([^\]]+)\]\((?!https?://|#|mailto:|\.\./)([^)\s]+)\)")
 
+# Directory prefixes under which _rewrite_cross_page_anchors / generate_api_reference
+# emit intra-doc links between generated pages (e.g. "go-sdk/versioning.md#versioning").
+# These are site-relative, not repo-relative, so rewrite_repo_links/validate_generated_links
+# must not treat them as broken repo file references.
+_INTERNAL_DOC_PREFIXES = ("go-sdk/", "api-reference/")
+
+
+def _is_internal_doc_target(target: str) -> bool:
+    """True if `target` (an already-rewritten link) points at a sibling/cross-page
+    generated doc rather than a real repo file."""
+    path = target.split("#", 1)[0]
+    if not path.endswith(".md"):
+        return False
+    return "/" not in path or path.startswith(_INTERNAL_DOC_PREFIXES)
+
 
 def rewrite_repo_links(content: str) -> str:
     def _replace(m: re.Match) -> str:  # type: ignore[type-arg]
         text, target = m.group(1), m.group(2)
-        if target.endswith(".md") and "/" not in target:
-            # Sibling generated page - leave alone.
+        if _is_internal_doc_target(target):
+            # Sibling/cross-page generated page - leave alone.
             return m.group(0)
         return f"[{text}]({GITHUB_BLOB}/{target.lstrip('./')})"
 
@@ -1021,6 +1036,10 @@ def validate_generated_links(output_dir: Path) -> list[str]:
             for m in _RELATIVE_LINK_RE.finditer(line):
                 target = m.group(2).split("#")[0]
                 if not target or target.startswith("../") or "/" not in target:
+                    continue
+                if target.startswith(_INTERNAL_DOC_PREFIXES) and target.endswith(".md"):
+                    # Cross-page link between generated docs (e.g. go-sdk/versioning.md),
+                    # produced by _rewrite_cross_page_anchors / generate_api_reference.
                     continue
                 errors.append(
                     f"  {rel}:{line_no}: repo-relative link [{m.group(1)}]({m.group(2)})"
