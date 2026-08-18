@@ -1,5 +1,9 @@
 # Build output / local artifacts
 /dist/
+
+# Generated documentation artifacts (see `make docs-md`)
+/docs-json/
+/docs-md/
 *.out
 *.test
 *.exe

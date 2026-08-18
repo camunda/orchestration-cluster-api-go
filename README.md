@@ -517,6 +517,8 @@ on the transport rather than facade-level wrappers.
 Full API documentation is published on
 [pkg.go.dev](https://pkg.go.dev/github.com/camunda/orchestration-cluster-api-go).
 
+<!-- docs:cut:start -->
+
 ## Regenerating the client
 
 `client/`, `pb/`, and `facade_generated.go` are generated. Never hand-edit them —
@@ -538,6 +540,23 @@ All README examples are compiled from [`examples/readme.go`](./examples/readme.g
 by `make sync-readme`, so they cannot drift from the real API. Edit the region in
 the Go source, run `make sync-readme`, and commit both files — never edit a fenced
 code block in this README by hand.
+
+## Documentation site
+
+The guide sections of this README and a `go/doc`-derived API reference are
+rendered into Docusaurus markdown for https://docs.camunda.io:
+
+```sh
+make docs-json    # cmd/docgen -> docs-json/*.json
+make docs-md      # docs-json + README -> docs-md/
+```
+
+Content between `<!-- docs:cut:start -->` and `<!-- docs:cut:end -->` markers is
+maintainer-only and is excluded from the published pages. Both output
+directories are generated and gitignored; a scheduled workflow in `camunda-docs`
+runs `make docs-md` and opens the update PR.
+
+<!-- docs:cut:end -->
 
 ## Versioning
 
