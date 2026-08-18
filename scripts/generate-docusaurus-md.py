@@ -1132,6 +1132,7 @@ def generate_api_reference() -> None:
 
     for filename, content in pages:
         path = OUTPUT_DIR / filename
+        content = inject_tech_preview_banner(content)
         path.write_text(_clean_empty_lines(content).rstrip() + "\n", encoding="utf-8")
         print(f"  Wrote {path}")
 
