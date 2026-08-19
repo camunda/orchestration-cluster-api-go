@@ -89,7 +89,7 @@ generated code stays pure and regenerable.
   reconnect); poll-activated jobs are acknowledged over REST, streamed jobs over
   gRPC. Set `WithStreamPollInterval` to tune or disable it.
 - **FALCON command stream** — an opt-in upgrade for
-  [nanobpmn](https://github.com/jwulf/nano-bpm) gateways (an API/behaviour superset
+  [nanobpmn](https://github.com/jwulf/nano-bpm) gateways (an API/behavior superset
   of Camunda 8). The gateway is probed once via `GET /v2/topology`; when it
   advertises the command stream, `CreateProcessInstance` is routed over a
   credit-metered WebSocket (a flood of creates queues on the submission-credit
@@ -231,7 +231,7 @@ PEM values take precedence over the corresponding `*_PATH` file locations.
 | `CAMUNDA_MTLS_CERT_PATH` | Path to the client certificate PEM. |
 | `CAMUNDA_MTLS_KEY_PATH` | Path to the client private key PEM. |
 | `CAMUNDA_MTLS_CA_PATH` | Path to the CA certificate PEM. |
-| `CAMUNDA_MTLS_KEY_PASSPHRASE` | Recognised but **not supported yet** — setting it fails client construction. Supply an unencrypted client key. |
+| `CAMUNDA_MTLS_KEY_PASSPHRASE` | Recognized but **not supported yet** — setting it fails client construction. Supply an unencrypted client key. |
 
 The same material is applied to both the REST transport and the gRPC streaming
 worker, so a single configuration covers every connection the SDK opens.
@@ -357,7 +357,7 @@ client, err := camunda.New(
 
 `BALANCED` is the default and is what you want in production. `LEGACY` keeps the
 controller's observability but never gates, which is useful when comparing
-behaviour against an older SDK or when an external system already governs
+behavior against an older SDK or when an external system already governs
 concurrency.
 
 ## Transient retry
@@ -490,7 +490,7 @@ never written to the log at any level.
 `CamundaClient` exposes one ergonomic method per operation in the OpenAPI
 specification, generated from the same spec as the low-level client so the two
 can never diverge. Each facade method flattens the generated builder into
-first-class parameters and returns the deserialised result.
+first-class parameters and returns the deserialized result.
 
 When you need something the facade deliberately does not model — multipart
 uploads, unusual query-parameter combinations, or the raw `*http.Response` —

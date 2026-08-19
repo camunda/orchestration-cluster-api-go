@@ -1,7 +1,7 @@
 // Package falcon implements detection of the FALCON (nanobpmn command-stream)
 // transport upgrade.
 //
-// A nanobpmn gateway (https://github.com/jwulf/nano-bpm) is an API/behaviour
+// A nanobpmn gateway (https://github.com/jwulf/nano-bpm) is an API/behavior
 // superset of the Camunda 8 Orchestration Cluster. It advertises a persistent
 // command-stream WebSocket by including a "nano" object in its GET /v2/topology
 // response. Stock Camunda has no such field, in which case the SDK stays on its
@@ -52,7 +52,7 @@ type topology struct {
 //
 // It returns (caps, nil) when the gateway is a nanobpmn gateway; (nil, nil) when
 // the gateway was reached but is stock Camunda (no "nano" field, or an
-// unrecognised body); and (nil, err) for a transient failure the caller may
+// unrecognized body); and (nil, err) for a transient failure the caller may
 // retry — a transport error, a canceled/expired context, or a non-2xx status.
 // In every case other than (caps, nil) the caller falls back to REST, so
 // detection never fails a request.
