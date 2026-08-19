@@ -27,6 +27,8 @@ type ExpressionEvaluationResult struct {
 	Result interface{} `json:"result"`
 	// List of warnings generated during expression evaluation
 	Warnings []ExpressionEvaluationWarningItem `json:"warnings"`
+	// The secret references resolved from trusted sources while evaluating the expression: a `camunda.secrets.<name>` reference used directly in the expression, or a reference carried by a `SECRET_REFERENCE`-kind cluster variable the expression read. References appearing only in request-body variables or plain cluster variables are excluded. Callers use this to know which `camunda.secrets.<name>` occurrences in the result they may safely resolve.
+	ReferencedSecrets []ExpressionSecretReferenceItem `json:"referencedSecrets"`
 }
 
 type _ExpressionEvaluationResult ExpressionEvaluationResult
@@ -35,11 +37,12 @@ type _ExpressionEvaluationResult ExpressionEvaluationResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewExpressionEvaluationResult(expression string, result interface{}, warnings []ExpressionEvaluationWarningItem) *ExpressionEvaluationResult {
+func NewExpressionEvaluationResult(expression string, result interface{}, warnings []ExpressionEvaluationWarningItem, referencedSecrets []ExpressionSecretReferenceItem) *ExpressionEvaluationResult {
 	this := ExpressionEvaluationResult{}
 	this.Expression = expression
 	this.Result = result
 	this.Warnings = warnings
+	this.ReferencedSecrets = referencedSecrets
 	return &this
 }
 
@@ -125,6 +128,30 @@ func (o *ExpressionEvaluationResult) SetWarnings(v []ExpressionEvaluationWarning
 	o.Warnings = v
 }
 
+// GetReferencedSecrets returns the ReferencedSecrets field value
+func (o *ExpressionEvaluationResult) GetReferencedSecrets() []ExpressionSecretReferenceItem {
+	if o == nil {
+		var ret []ExpressionSecretReferenceItem
+		return ret
+	}
+
+	return o.ReferencedSecrets
+}
+
+// GetReferencedSecretsOk returns a tuple with the ReferencedSecrets field value
+// and a boolean to check if the value has been set.
+func (o *ExpressionEvaluationResult) GetReferencedSecretsOk() ([]ExpressionSecretReferenceItem, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ReferencedSecrets, true
+}
+
+// SetReferencedSecrets sets field value
+func (o *ExpressionEvaluationResult) SetReferencedSecrets(v []ExpressionSecretReferenceItem) {
+	o.ReferencedSecrets = v
+}
+
 func (o ExpressionEvaluationResult) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -140,6 +167,7 @@ func (o ExpressionEvaluationResult) ToMap() (map[string]interface{}, error) {
 		toSerialize["result"] = o.Result
 	}
 	toSerialize["warnings"] = o.Warnings
+	toSerialize["referencedSecrets"] = o.ReferencedSecrets
 	return toSerialize, nil
 }
 
@@ -151,6 +179,7 @@ func (o *ExpressionEvaluationResult) UnmarshalJSON(data []byte) (err error) {
 		"expression",
 		"result",
 		"warnings",
+		"referencedSecrets",
 	}
 
 	allProperties := make(map[string]interface{})
