@@ -16,6 +16,44 @@ This is a sibling of the [Rust](https://github.com/camunda/orchestration-cluster
 [C#](https://github.com/camunda/orchestration-cluster-api-csharp) SDKs and follows
 the same two-layer architecture.
 
+## Installation
+
+```sh
+go get github.com/camunda/orchestration-cluster-api-go
+```
+
+Requires Go 1.25+. During Technical Preview the module path has no version suffix
+(see [versioning](#versioning)).
+
+## Quick start
+
+Construct a client (configuration comes from `CAMUNDA_*` environment variables)
+and call an ergonomic facade method:
+
+<!-- snippet-source: examples/readme.go | regions: QuickStart -->
+```go
+// Configuration is resolved from CAMUNDA_* environment variables (with ZEEBE_*
+// fallbacks) and validated fail-fast at construction.
+client, err := camunda.New()
+if err != nil {
+	return err
+}
+
+ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+defer cancel()
+
+topology, err := client.GetTopology(ctx)
+if err != nil {
+	return err
+}
+fmt.Printf("Camunda 8 %s — %d broker(s), %d partition(s)\n",
+	topology.GetGatewayVersion(), len(topology.GetBrokers()), topology.GetPartitionsCount())
+```
+
+For production-shaped, runnable workflows, see the
+[advanced examples](examples/advanced/README.md): bounded load with adaptive
+backpressure, resilient job handling, and idempotent message correlation.
+
 ## Architecture
 
 ```
@@ -62,44 +100,6 @@ generated code stays pure and regenerable.
   — the SDK stays on its byte-identical REST path. Enabled by default; disable with
   `CAMUNDA_FALCON=false` / `WithFalcon(false)`, or force pure REST (e.g. behind a
   WebSocket-blocking proxy) with `CAMUNDA_FORCE_REST=1` / `WithForceREST(true)`.
-
-## Installation
-
-```sh
-go get github.com/camunda/orchestration-cluster-api-go
-```
-
-Requires Go 1.25+. During Technical Preview the module path has no version suffix
-(see [versioning](#versioning)).
-
-## Quick start
-
-Construct a client (configuration comes from `CAMUNDA_*` environment variables)
-and call an ergonomic facade method:
-
-<!-- snippet-source: examples/readme.go | regions: QuickStart -->
-```go
-// Configuration is resolved from CAMUNDA_* environment variables (with ZEEBE_*
-// fallbacks) and validated fail-fast at construction.
-client, err := camunda.New()
-if err != nil {
-	return err
-}
-
-ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-defer cancel()
-
-topology, err := client.GetTopology(ctx)
-if err != nil {
-	return err
-}
-fmt.Printf("Camunda 8 %s — %d broker(s), %d partition(s)\n",
-	topology.GetGatewayVersion(), len(topology.GetBrokers()), topology.GetPartitionsCount())
-```
-
-For production-shaped, runnable workflows, see the
-[advanced examples](examples/advanced/README.md): bounded load with adaptive
-backpressure, resilient job handling, and idempotent message correlation.
 
 ## Configuration
 
