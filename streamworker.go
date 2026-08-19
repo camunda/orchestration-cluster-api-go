@@ -186,7 +186,7 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 	return w
 }
 
-// Run opens the job stream and dispatches jobs until ctx is cancelled. The gRPC
+// Run opens the job stream and dispatches jobs until ctx is canceled. The gRPC
 // connection is held for the worker's lifetime and the stream is reopened (after
 // reconnectBackoff) whenever it ends, so in-flight acknowledgements are never cut
 // off by a reconnect. Run blocks; call it in a goroutine to run alongside other
@@ -236,7 +236,7 @@ func (w *StreamJobWorker) Run(ctx context.Context) error {
 }
 
 // streamOnce opens a single StreamActivatedJobs stream and dispatches jobs until
-// the stream ends or ctx is cancelled. It returns the stream's terminating error
+// the stream ends or ctx is canceled. It returns the stream's terminating error
 // (nil on a clean close).
 func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, sem chan struct{}, wg *sync.WaitGroup) error {
 	req := &pb.StreamActivatedJobsRequest{
@@ -278,7 +278,7 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 }
 
 // runSidecarPoll runs an immediate backfill poll and then a recurring poll every
-// pollInterval until ctx is cancelled. Poll errors are swallowed (the stream is
+// pollInterval until ctx is canceled. Poll errors are swallowed (the stream is
 // the primary channel); the next cycle retries. Poll-activated jobs are
 // acknowledged over REST.
 func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{}, wg *sync.WaitGroup) {
@@ -336,7 +336,7 @@ func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *
 	vars, err := w.handler(ctx, job)
 
 	// Acknowledge even while shutting down so a completed handler's result is not
-	// dropped because Run's ctx was cancelled. Bound the ack with its own timeout.
+	// dropped because Run's ctx was canceled. Bound the ack with its own timeout.
 	ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 	defer cancel()
 

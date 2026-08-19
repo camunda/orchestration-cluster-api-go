@@ -110,7 +110,7 @@ func (c *CamundaClient) NewJobWorker(jobType string, handler JobHandler, opts ..
 	return w
 }
 
-// Run polls and dispatches jobs until ctx is cancelled, then waits for in-flight
+// Run polls and dispatches jobs until ctx is canceled, then waits for in-flight
 // handlers to finish and returns ctx.Err(). Run blocks; call it in a goroutine to
 // run alongside other work.
 //
@@ -134,7 +134,7 @@ func (w *JobWorker) Run(ctx context.Context) error {
 }
 
 // runFalcon subscribes to the command stream and dispatches pushed jobs. It
-// returns nil once ctx is cancelled (graceful stop) or a non-nil error if the
+// returns nil once ctx is canceled (graceful stop) or a non-nil error if the
 // initial subscribe fails, so Run can fall back to REST polling.
 func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 	sw, err := falcon.Subscribe(caps.Endpoints, w.client.falconDialer, falcon.SubscribeArgs{
@@ -272,7 +272,7 @@ func (w *JobWorker) handle(ctx context.Context, job *Job) {
 
 	// Acknowledge the job even while the worker is shutting down: a handler that
 	// already did its work must not have its result dropped because Run's ctx was
-	// cancelled. Bound the ack with its own timeout.
+	// canceled. Bound the ack with its own timeout.
 	ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 	defer cancel()
 
@@ -357,7 +357,7 @@ func defaultTenantIDs(id string) []string {
 	return []string{id}
 }
 
-// sleepCtx waits for d or until ctx is cancelled, returning ctx.Err() if cancelled.
+// sleepCtx waits for d or until ctx is canceled, returning ctx.Err() if canceled.
 func sleepCtx(ctx context.Context, d time.Duration) error {
 	if d <= 0 {
 		d = time.Second

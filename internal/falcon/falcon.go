@@ -53,7 +53,7 @@ type topology struct {
 // It returns (caps, nil) when the gateway is a nanobpmn gateway; (nil, nil) when
 // the gateway was reached but is stock Camunda (no "nano" field, or an
 // unrecognised body); and (nil, err) for a transient failure the caller may
-// retry — a transport error, a cancelled/expired context, or a non-2xx status.
+// retry — a transport error, a canceled/expired context, or a non-2xx status.
 // In every case other than (caps, nil) the caller falls back to REST, so
 // detection never fails a request.
 func Detect(ctx context.Context, v2BaseURL string, httpClient *http.Client) (*Caps, error) {

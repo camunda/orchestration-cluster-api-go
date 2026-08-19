@@ -349,7 +349,7 @@ func TestJobWorkerBoundsConcurrencyToMaxConcurrent(t *testing.T) {
 }
 
 // TestJobWorkerAcksAfterContextCancel verifies that a handler that finishes after
-// the worker's context is cancelled still has its completion acknowledged (the
+// the worker's context is canceled still has its completion acknowledged (the
 // ack uses a context detached from Run's lifecycle).
 func TestJobWorkerAcksAfterContextCancel(t *testing.T) {
 	started := make(chan struct{})

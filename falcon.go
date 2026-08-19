@@ -27,7 +27,7 @@ const falconProbeRetryInterval = 30 * time.Second
 // or confirmed stock) is cached for the client's lifetime; a transient probe
 // failure is retried on a later call (after falconProbeRetryInterval). The probe
 // honours the caller's context (bounded by falconDetectTimeout), so a short request
-// deadline can't make it exceed the caller's budget; because a ctx-cancelled probe
+// deadline can't make it exceed the caller's budget; because a ctx-canceled probe
 // is treated as transient, a brief first deadline never permanently forces REST.
 func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	if !c.cfg.FalconEnabled() {
@@ -63,7 +63,7 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 
 	// Probe WITHOUT holding the mutex, so concurrent callers fall back to REST
 	// immediately instead of serializing behind a network round-trip. Honour the
-	// caller's context but cap it at falconDetectTimeout; a ctx-cancelled probe is
+	// caller's context but cap it at falconDetectTimeout; a ctx-canceled probe is
 	// transient and retried on a later call.
 	pctx, cancel := context.WithTimeout(ctx, falconDetectTimeout)
 	caps, err := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress), dialer.HTTPClient)
