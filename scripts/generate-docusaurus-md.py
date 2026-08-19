@@ -824,11 +824,13 @@ def generate_index(counts: dict[str, int]) -> str:
 
 
 def _strip_cut_sections(content: str) -> str:
+    # The markers must own their line: the README also names them inline, inside
+    # code spans, where it documents the convention.
     return re.sub(
-        r"<!-- docs:cut:start -->.*?<!-- docs:cut:end -->\n?",
+        r"^<!-- docs:cut:start -->$.*?^<!-- docs:cut:end -->$\n?",
         "",
         content,
-        flags=re.DOTALL,
+        flags=re.DOTALL | re.MULTILINE,
     )
 
 

@@ -284,7 +284,7 @@ func (l *SupervisedLink) supervise(supCtx context.Context, d *Dialer, hooks link
 	}
 }
 
-// pump reads frames until the socket closes, the supervisor is cancelled, or the
+// pump reads frames until the socket closes, the supervisor is canceled, or the
 // read-idle timeout fires (silent node → failover). It returns the (possibly
 // refined) idle timeout: the gateway advertises its real heartbeat cadence in the
 // Welcome frame, which tightens the derived timeout to 3× it.

@@ -38,8 +38,8 @@ var ConfigSchema = []ConfigField{
 	{Keys: []string{"CAMUNDA_TOKEN_AUDIENCE"}, Description: "OAuth token audience."},
 	{Keys: []string{"CAMUNDA_TOKEN_SCOPE"}, Description: "OAuth token scope."},
 	{Keys: []string{"CAMUNDA_OAUTH_CACHE_DIR"}, Description: "Directory for the on-disk OAuth token cache."},
-	{Keys: []string{"CAMUNDA_BASIC_AUTH_USERNAME"}, Description: "HTTP Basic auth username."},
-	{Keys: []string{"CAMUNDA_BASIC_AUTH_PASSWORD"}, Secret: true, Description: "HTTP Basic auth password."},
+	{Keys: []string{"CAMUNDA_BASIC_AUTH_USERNAME"}, Description: "HTTP Basic authentication username."},
+	{Keys: []string{"CAMUNDA_BASIC_AUTH_PASSWORD"}, Secret: true, Description: "HTTP Basic authentication password."},
 
 	{Keys: []string{"CAMUNDA_DEFAULT_TENANT_ID", "CAMUNDA_TENANT_ID"}, Description: "Default tenant id applied to operations that accept one."},
 

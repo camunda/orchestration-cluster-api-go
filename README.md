@@ -16,53 +16,6 @@ This is a sibling of the [Rust](https://github.com/camunda/orchestration-cluster
 [C#](https://github.com/camunda/orchestration-cluster-api-csharp) SDKs and follows
 the same two-layer architecture.
 
-## Architecture
-
-```
-OpenAPI spec ──▶ openapi-generator ──▶ client/  (generated REST client, never hand-edited)
-gateway.proto ──▶ buf              ──▶ pb/      (generated gRPC stubs, never hand-edited)
-                                          │
-                     ergonomic runtime ───┤  config · auth · backpressure · retry ·
-                     (hand-written)        │  eventual consistency · job workers
-                                          ▼
-                                   CamundaClient  (the facade you use)
-```
-
-Cross-cutting concerns are implemented as a composable `http.RoundTripper` chain
-(`backpressure → retry → auth → base`) injected into the generated client, so the
-generated code stays pure and regenerable.
-
-- **Configuration** — resolved from `CAMUNDA_*` environment variables (with
-  `ZEEBE_*` fallbacks) and overridable via functional options. Validated
-  fail-fast at construction.
-- **Authentication** — OAuth 2.0 client-credentials (with in-memory + on-disk
-  token cache), HTTP Basic, or None.
-- **Adaptive backpressure** — an AIMD concurrency limiter that reacts to broker
-  backpressure (HTTP 429 / 503 / `RESOURCE_EXHAUSTED`). `BALANCED` (default) gates;
-  `LEGACY` observes only.
-- **Transient retry** — exponential backoff with full jitter on 429/502/503/504
-  and network errors.
-- **Job workers** — a REST activate-jobs worker (`NewJobWorker`) and a gRPC
-  `StreamActivatedJobs` streaming worker (`NewStreamJobWorker`). Both share one
-  `JobHandler` contract: returning variables completes the job, returning a
-  `*BpmnError` throws a BPMN error, and returning any other error fails the job
-  (decrementing its retries). The streaming worker also runs a low-frequency REST
-  sidecar poll (a safety net for jobs re-queued after a timeout or a brief
-  reconnect); poll-activated jobs are acknowledged over REST, streamed jobs over
-  gRPC. Set `WithStreamPollInterval` to tune or disable it.
-- **FALCON command stream** — an opt-in upgrade for
-  [nanobpmn](https://github.com/jwulf/nano-bpm) gateways (an API/behaviour superset
-  of Camunda 8). The gateway is probed once via `GET /v2/topology`; when it
-  advertises the command stream, `CreateProcessInstance` is routed over a
-  credit-metered WebSocket (a flood of creates queues on the submission-credit
-  window instead of being shed with 503s) and `NewJobWorker` receives *pushed*
-  jobs over the same stream instead of long-polling. The link fails over across
-  cluster nodes and supports both `ws://` and `wss://` (deriving TLS from the
-  cluster address). Against stock Camunda — or if the stream cannot be established
-  — the SDK stays on its byte-identical REST path. Enabled by default; disable with
-  `CAMUNDA_FALCON=false` / `WithFalcon(false)`, or force pure REST (e.g. behind a
-  WebSocket-blocking proxy) with `CAMUNDA_FORCE_REST=1` / `WithForceREST(true)`.
-
 ## Installation
 
 ```sh
@@ -100,6 +53,53 @@ fmt.Printf("Camunda 8 %s — %d broker(s), %d partition(s)\n",
 For production-shaped, runnable workflows, see the
 [advanced examples](examples/advanced/README.md): bounded load with adaptive
 backpressure, resilient job handling, and idempotent message correlation.
+
+## Architecture
+
+```
+OpenAPI spec ──▶ openapi-generator ──▶ client/  (generated REST client, never hand-edited)
+gateway.proto ──▶ buf              ──▶ pb/      (generated gRPC stubs, never hand-edited)
+                                          │
+                     ergonomic runtime ───┤  config · auth · backpressure · retry ·
+                     (hand-written)        │  eventual consistency · job workers
+                                          ▼
+                                   CamundaClient  (the facade you use)
+```
+
+Cross-cutting concerns are implemented as a composable `http.RoundTripper` chain
+(`backpressure → retry → auth → base`) injected into the generated client, so the
+generated code stays pure and regenerable.
+
+- **Configuration** — resolved from `CAMUNDA_*` environment variables (with
+  `ZEEBE_*` fallbacks) and overridable via functional options. Validated
+  fail-fast at construction.
+- **Authentication** — OAuth 2.0 client-credentials (with in-memory + on-disk
+  token cache), HTTP Basic, or None.
+- **Adaptive backpressure** — an AIMD concurrency limiter that reacts to broker
+  backpressure (HTTP 429 / 503 / `RESOURCE_EXHAUSTED`). `BALANCED` (default) gates;
+  `LEGACY` observes only.
+- **Transient retry** — exponential backoff with full jitter on 429/502/503/504
+  and network errors.
+- **Job workers** — a REST activate-jobs worker (`NewJobWorker`) and a gRPC
+  `StreamActivatedJobs` streaming worker (`NewStreamJobWorker`). Both share one
+  `JobHandler` contract: returning variables completes the job, returning a
+  `*BpmnError` throws a BPMN error, and returning any other error fails the job
+  (decrementing its retries). The streaming worker also runs a low-frequency REST
+  sidecar poll (a safety net for jobs re-queued after a timeout or a brief
+  reconnect); poll-activated jobs are acknowledged over REST, streamed jobs over
+  gRPC. Set `WithStreamPollInterval` to tune or disable it.
+- **FALCON command stream** — an opt-in upgrade for
+  [nanobpmn](https://github.com/jwulf/nano-bpm) gateways (an API/behavior superset
+  of Camunda 8). The gateway is probed once via `GET /v2/topology`; when it
+  advertises the command stream, `CreateProcessInstance` is routed over a
+  credit-metered WebSocket (a flood of creates queues on the submission-credit
+  window instead of being shed with 503s) and `NewJobWorker` receives *pushed*
+  jobs over the same stream instead of long-polling. The link fails over across
+  cluster nodes and supports both `ws://` and `wss://` (deriving TLS from the
+  cluster address). Against stock Camunda — or if the stream cannot be established
+  — the SDK stays on its byte-identical REST path. Enabled by default; disable with
+  `CAMUNDA_FALCON=false` / `WithFalcon(false)`, or force pure REST (e.g. behind a
+  WebSocket-blocking proxy) with `CAMUNDA_FORCE_REST=1` / `WithForceREST(true)`.
 
 ## Configuration
 
@@ -181,8 +181,8 @@ precedence over both.
 | `CAMUNDA_TOKEN_AUDIENCE` | — | OAuth token audience. |
 | `CAMUNDA_TOKEN_SCOPE` | — | OAuth token scope. |
 | `CAMUNDA_OAUTH_CACHE_DIR` | — | Directory for the on-disk OAuth token cache. |
-| `CAMUNDA_BASIC_AUTH_USERNAME` | — | HTTP Basic auth username. |
-| `CAMUNDA_BASIC_AUTH_PASSWORD` | — | HTTP Basic auth password. |
+| `CAMUNDA_BASIC_AUTH_USERNAME` | — | HTTP Basic authentication username. |
+| `CAMUNDA_BASIC_AUTH_PASSWORD` | — | HTTP Basic authentication password. |
 
 ### Reliability
 
@@ -231,7 +231,7 @@ PEM values take precedence over the corresponding `*_PATH` file locations.
 | `CAMUNDA_MTLS_CERT_PATH` | Path to the client certificate PEM. |
 | `CAMUNDA_MTLS_KEY_PATH` | Path to the client private key PEM. |
 | `CAMUNDA_MTLS_CA_PATH` | Path to the CA certificate PEM. |
-| `CAMUNDA_MTLS_KEY_PASSPHRASE` | Recognised but **not supported yet** — setting it fails client construction. Supply an unencrypted client key. |
+| `CAMUNDA_MTLS_KEY_PASSPHRASE` | Recognized but **not supported yet** — setting it fails client construction. Supply an unencrypted client key. |
 
 The same material is applied to both the REST transport and the gRPC streaming
 worker, so a single configuration covers every connection the SDK opens.
@@ -263,7 +263,7 @@ worker := client.NewJobWorker("greet",
 ctx, cancel := context.WithCancel(context.Background())
 defer cancel()
 
-// Run blocks until ctx is cancelled, draining in-flight jobs on shutdown.
+// Run blocks until ctx is canceled, draining in-flight jobs on shutdown.
 if err := worker.Run(ctx); err != nil {
 	fmt.Println("worker stopped:", err)
 }
@@ -357,7 +357,7 @@ client, err := camunda.New(
 
 `BALANCED` is the default and is what you want in production. `LEGACY` keeps the
 controller's observability but never gates, which is useful when comparing
-behaviour against an older SDK or when an external system already governs
+behavior against an older SDK or when an external system already governs
 concurrency.
 
 ## Transient retry
@@ -490,7 +490,7 @@ never written to the log at any level.
 `CamundaClient` exposes one ergonomic method per operation in the OpenAPI
 specification, generated from the same spec as the low-level client so the two
 can never diverge. Each facade method flattens the generated builder into
-first-class parameters and returns the deserialised result.
+first-class parameters and returns the deserialized result.
 
 When you need something the facade deliberately does not model — multipart
 uploads, unusual query-parameter combinations, or the raw `*http.Response` —

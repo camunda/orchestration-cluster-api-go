@@ -429,7 +429,7 @@ func TestStreamJobWorkerBoundsConcurrencyToMaxConcurrent(t *testing.T) {
 }
 
 // TestStreamJobWorkerAcksAfterContextCancel verifies that a streamed job whose
-// handler finishes after the worker's context is cancelled is still completed
+// handler finishes after the worker's context is canceled is still completed
 // over gRPC (the ack uses a context detached from Run's lifecycle).
 func TestStreamJobWorkerAcksAfterContextCancel(t *testing.T) {
 	lis := bufconn.Listen(1024 * 1024)
