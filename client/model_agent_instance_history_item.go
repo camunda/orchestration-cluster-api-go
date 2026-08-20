@@ -36,6 +36,16 @@ type AgentInstanceHistoryItem struct {
 	Metrics NullableAgentInstanceHistoryItemMetrics `json:"metrics,omitempty"`
 	// The agent-side timestamp of when this message was produced.
 	ProducedAt time.Time `json:"producedAt"`
+	// The complete list of tools available to the agent as of this entry. CONFIGURATION items only; omit for other roles. Omit to leave the tool list unchanged; send an empty array to clear it.
+	Tools []AgentTool `json:"tools,omitempty"`
+	// The LLM model identifier as of this entry. CONFIGURATION items only; omit for other roles.
+	Model *string `json:"model,omitempty"`
+	// The LLM provider as of this entry. CONFIGURATION items only; omit for other roles.
+	Provider *string `json:"provider,omitempty"`
+	// The operational limits as of this entry. CONFIGURATION items only; omit for other roles.
+	Limits *AgentInstanceLimits `json:"limits,omitempty"`
+	// The system prompt, as content blocks, as of this entry. CONFIGURATION items only; omit for other roles. Omit to leave the system prompt unchanged; when present, must be non-empty.
+	SystemPrompt []AgentInstanceMessageContent `json:"systemPrompt,omitempty"`
 }
 
 type _AgentInstanceHistoryItem AgentInstanceHistoryItem
@@ -258,6 +268,168 @@ func (o *AgentInstanceHistoryItem) SetProducedAt(v time.Time) {
 	o.ProducedAt = v
 }
 
+// GetTools returns the Tools field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *AgentInstanceHistoryItem) GetTools() []AgentTool {
+	if o == nil {
+		var ret []AgentTool
+		return ret
+	}
+	return o.Tools
+}
+
+// GetToolsOk returns a tuple with the Tools field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AgentInstanceHistoryItem) GetToolsOk() ([]AgentTool, bool) {
+	if o == nil || IsNil(o.Tools) {
+		return nil, false
+	}
+	return o.Tools, true
+}
+
+// HasTools returns a boolean if a field has been set.
+func (o *AgentInstanceHistoryItem) HasTools() bool {
+	if o != nil && !IsNil(o.Tools) {
+		return true
+	}
+
+	return false
+}
+
+// SetTools gets a reference to the given []AgentTool and assigns it to the Tools field.
+func (o *AgentInstanceHistoryItem) SetTools(v []AgentTool) {
+	o.Tools = v
+}
+
+// GetModel returns the Model field value if set, zero value otherwise.
+func (o *AgentInstanceHistoryItem) GetModel() string {
+	if o == nil || IsNil(o.Model) {
+		var ret string
+		return ret
+	}
+	return *o.Model
+}
+
+// GetModelOk returns a tuple with the Model field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceHistoryItem) GetModelOk() (*string, bool) {
+	if o == nil || IsNil(o.Model) {
+		return nil, false
+	}
+	return o.Model, true
+}
+
+// HasModel returns a boolean if a field has been set.
+func (o *AgentInstanceHistoryItem) HasModel() bool {
+	if o != nil && !IsNil(o.Model) {
+		return true
+	}
+
+	return false
+}
+
+// SetModel gets a reference to the given string and assigns it to the Model field.
+func (o *AgentInstanceHistoryItem) SetModel(v string) {
+	o.Model = &v
+}
+
+// GetProvider returns the Provider field value if set, zero value otherwise.
+func (o *AgentInstanceHistoryItem) GetProvider() string {
+	if o == nil || IsNil(o.Provider) {
+		var ret string
+		return ret
+	}
+	return *o.Provider
+}
+
+// GetProviderOk returns a tuple with the Provider field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceHistoryItem) GetProviderOk() (*string, bool) {
+	if o == nil || IsNil(o.Provider) {
+		return nil, false
+	}
+	return o.Provider, true
+}
+
+// HasProvider returns a boolean if a field has been set.
+func (o *AgentInstanceHistoryItem) HasProvider() bool {
+	if o != nil && !IsNil(o.Provider) {
+		return true
+	}
+
+	return false
+}
+
+// SetProvider gets a reference to the given string and assigns it to the Provider field.
+func (o *AgentInstanceHistoryItem) SetProvider(v string) {
+	o.Provider = &v
+}
+
+// GetLimits returns the Limits field value if set, zero value otherwise.
+func (o *AgentInstanceHistoryItem) GetLimits() AgentInstanceLimits {
+	if o == nil || IsNil(o.Limits) {
+		var ret AgentInstanceLimits
+		return ret
+	}
+	return *o.Limits
+}
+
+// GetLimitsOk returns a tuple with the Limits field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceHistoryItem) GetLimitsOk() (*AgentInstanceLimits, bool) {
+	if o == nil || IsNil(o.Limits) {
+		return nil, false
+	}
+	return o.Limits, true
+}
+
+// HasLimits returns a boolean if a field has been set.
+func (o *AgentInstanceHistoryItem) HasLimits() bool {
+	if o != nil && !IsNil(o.Limits) {
+		return true
+	}
+
+	return false
+}
+
+// SetLimits gets a reference to the given AgentInstanceLimits and assigns it to the Limits field.
+func (o *AgentInstanceHistoryItem) SetLimits(v AgentInstanceLimits) {
+	o.Limits = &v
+}
+
+// GetSystemPrompt returns the SystemPrompt field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *AgentInstanceHistoryItem) GetSystemPrompt() []AgentInstanceMessageContent {
+	if o == nil {
+		var ret []AgentInstanceMessageContent
+		return ret
+	}
+	return o.SystemPrompt
+}
+
+// GetSystemPromptOk returns a tuple with the SystemPrompt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AgentInstanceHistoryItem) GetSystemPromptOk() ([]AgentInstanceMessageContent, bool) {
+	if o == nil || IsNil(o.SystemPrompt) {
+		return nil, false
+	}
+	return o.SystemPrompt, true
+}
+
+// HasSystemPrompt returns a boolean if a field has been set.
+func (o *AgentInstanceHistoryItem) HasSystemPrompt() bool {
+	if o != nil && !IsNil(o.SystemPrompt) {
+		return true
+	}
+
+	return false
+}
+
+// SetSystemPrompt gets a reference to the given []AgentInstanceMessageContent and assigns it to the SystemPrompt field.
+func (o *AgentInstanceHistoryItem) SetSystemPrompt(v []AgentInstanceMessageContent) {
+	o.SystemPrompt = v
+}
+
 func (o AgentInstanceHistoryItem) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -279,6 +451,21 @@ func (o AgentInstanceHistoryItem) ToMap() (map[string]interface{}, error) {
 		toSerialize["metrics"] = o.Metrics.Get()
 	}
 	toSerialize["producedAt"] = o.ProducedAt
+	if o.Tools != nil {
+		toSerialize["tools"] = o.Tools
+	}
+	if !IsNil(o.Model) {
+		toSerialize["model"] = o.Model
+	}
+	if !IsNil(o.Provider) {
+		toSerialize["provider"] = o.Provider
+	}
+	if !IsNil(o.Limits) {
+		toSerialize["limits"] = o.Limits
+	}
+	if o.SystemPrompt != nil {
+		toSerialize["systemPrompt"] = o.SystemPrompt
+	}
 	return toSerialize, nil
 }
 
