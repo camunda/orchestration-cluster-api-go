@@ -182,7 +182,7 @@ func (r ApiChangeClusterModeAsClusterAdminRequest) Mode(mode Mode) ApiChangeClus
 	return r
 }
 
-// The physical tenant to apply the change to. When omitted, the change is applied to every physical tenant of the cluster.
+// The physical tenant to apply the change to. When omitted, or when passed with an empty value, the change is applied to every physical tenant of the cluster.
 func (r ApiChangeClusterModeAsClusterAdminRequest) PhysicalTenantId(physicalTenantId string) ApiChangeClusterModeAsClusterAdminRequest {
 	r.physicalTenantId = &physicalTenantId
 	return r
@@ -556,7 +556,7 @@ func (r ApiRestoreAsClusterAdminRequest) ClusterRestoreRequest(clusterRestoreReq
 	return r
 }
 
-// The physical tenant to apply the change to. When omitted, the change is applied to every physical tenant of the cluster.
+// The physical tenant to apply the change to. When omitted, or when passed with an empty value, the change is applied to every physical tenant of the cluster.
 func (r ApiRestoreAsClusterAdminRequest) PhysicalTenantId(physicalTenantId string) ApiRestoreAsClusterAdminRequest {
 	r.physicalTenantId = &physicalTenantId
 	return r

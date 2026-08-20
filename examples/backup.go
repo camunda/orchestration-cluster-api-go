@@ -144,3 +144,51 @@ func deleteHistoryBackupExample(ctx context.Context, client *camunda.CamundaClie
 	// endregion DeleteHistoryBackup
 	return nil
 }
+
+func takeHistoryBackupAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region TakeHistoryBackupAsClusterAdmin
+	// Takes a history backup for every physical tenant in the cluster simultaneously.
+	result, err := client.TakeHistoryBackupAsClusterAdmin(ctx, *openapi.NewTakeHistoryBackupRequest(42))
+	if err != nil {
+		return err
+	}
+	fmt.Printf("cluster history backup %d across %d tenant(s)\n", result.GetBackupId(), len(result.GetPhysicalTenants()))
+	// endregion TakeHistoryBackupAsClusterAdmin
+	return nil
+}
+
+func listHistoryBackupsAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region ListHistoryBackupsAsClusterAdmin
+	// Lists history backups across all physical tenants in the cluster.
+	backups, err := client.ListHistoryBackupsAsClusterAdmin(ctx)
+	if err != nil {
+		return err
+	}
+	for _, backup := range backups {
+		fmt.Printf("cluster history backup %d: %d tenant(s)\n", backup.GetBackupId(), len(backup.GetPhysicalTenants()))
+	}
+	// endregion ListHistoryBackupsAsClusterAdmin
+	return nil
+}
+
+func getHistoryBackupAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetHistoryBackupAsClusterAdmin
+	backup, err := client.GetHistoryBackupAsClusterAdmin(ctx, 42)
+	if err != nil {
+		return err
+	}
+	for _, tenant := range backup.GetPhysicalTenants() {
+		fmt.Printf("tenant %s: state=%v\n", tenant.GetPhysicalTenantId(), tenant.GetState())
+	}
+	// endregion GetHistoryBackupAsClusterAdmin
+	return nil
+}
+
+func deleteHistoryBackupAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region DeleteHistoryBackupAsClusterAdmin
+	if err := client.DeleteHistoryBackupAsClusterAdmin(ctx, 42); err != nil {
+		return err
+	}
+	// endregion DeleteHistoryBackupAsClusterAdmin
+	return nil
+}
