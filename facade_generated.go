@@ -411,6 +411,12 @@ func (c *CamundaClient) DeleteHistoryBackup(ctx context.Context, backupId int64,
 }
 
 // DeleteHistoryBackupAsClusterAdmin calls the DeleteHistoryBackupAsClusterAdmin operation.
+//
+// Example:
+//
+//	if err := client.DeleteHistoryBackupAsClusterAdmin(ctx, 42); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) DeleteHistoryBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteHistoryBackupAsClusterAdminRequest) openapi.ApiDeleteHistoryBackupAsClusterAdminRequest) error {
 	req := c.raw.BackupAPI.DeleteHistoryBackupAsClusterAdmin(ctx, backupId)
 	for _, opt := range opts {
@@ -474,6 +480,16 @@ func (c *CamundaClient) GetHistoryBackup(ctx context.Context, backupId int64, op
 }
 
 // GetHistoryBackupAsClusterAdmin calls the GetHistoryBackupAsClusterAdmin operation.
+//
+// Example:
+//
+//	backup, err := client.GetHistoryBackupAsClusterAdmin(ctx, 42)
+//	if err != nil {
+//		return err
+//	}
+//	for _, tenant := range backup.GetPhysicalTenants() {
+//		fmt.Printf("tenant %s: state=%v\n", tenant.GetPhysicalTenantId(), tenant.GetState())
+//	}
 func (c *CamundaClient) GetHistoryBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetHistoryBackupAsClusterAdminRequest) openapi.ApiGetHistoryBackupAsClusterAdminRequest) (*openapi.ClusterHistoryBackupInfo, error) {
 	req := c.raw.BackupAPI.GetHistoryBackupAsClusterAdmin(ctx, backupId)
 	for _, opt := range opts {
@@ -545,6 +561,17 @@ func (c *CamundaClient) ListHistoryBackups(ctx context.Context, opts ...func(ope
 }
 
 // ListHistoryBackupsAsClusterAdmin calls the ListHistoryBackupsAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Lists history backups across all physical tenants in the cluster.
+//	backups, err := client.ListHistoryBackupsAsClusterAdmin(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, backup := range backups {
+//		fmt.Printf("cluster history backup %d: %d tenant(s)\n", backup.GetBackupId(), len(backup.GetPhysicalTenants()))
+//	}
 func (c *CamundaClient) ListHistoryBackupsAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiListHistoryBackupsAsClusterAdminRequest) openapi.ApiListHistoryBackupsAsClusterAdminRequest) ([]openapi.ClusterHistoryBackupInfo, error) {
 	req := c.raw.BackupAPI.ListHistoryBackupsAsClusterAdmin(ctx)
 	for _, opt := range opts {
@@ -615,6 +642,15 @@ func (c *CamundaClient) TakeHistoryBackup(ctx context.Context, body openapi.Take
 }
 
 // TakeHistoryBackupAsClusterAdmin calls the TakeHistoryBackupAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Takes a history backup for every physical tenant in the cluster simultaneously.
+//	result, err := client.TakeHistoryBackupAsClusterAdmin(ctx, *openapi.NewTakeHistoryBackupRequest(42))
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("cluster history backup %d across %d tenant(s)\n", result.GetBackupId(), len(result.GetPhysicalTenants()))
 func (c *CamundaClient) TakeHistoryBackupAsClusterAdmin(ctx context.Context, body openapi.TakeHistoryBackupRequest, opts ...func(openapi.ApiTakeHistoryBackupAsClusterAdminRequest) openapi.ApiTakeHistoryBackupAsClusterAdminRequest) (*openapi.ClusterTakeHistoryBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeHistoryBackupAsClusterAdmin(ctx)
 	req = req.TakeHistoryBackupRequest(body)
@@ -1455,6 +1491,15 @@ func (c *CamundaClient) SearchElementInstances(ctx context.Context, body openapi
 }
 
 // GetClusterExportingStatus calls the GetClusterExportingStatus operation.
+//
+// Example:
+//
+//	// Retrieves the exporting status aggregated across all physical tenants in the cluster.
+//	status, err := client.GetClusterExportingStatus(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("cluster exporting status: %s\n", status.GetStatus())
 func (c *CamundaClient) GetClusterExportingStatus(ctx context.Context, opts ...func(openapi.ApiGetClusterExportingStatusRequest) openapi.ApiGetClusterExportingStatusRequest) (*openapi.ExportingStatusResponse, error) {
 	req := c.raw.ExportingAPI.GetClusterExportingStatus(ctx)
 	for _, opt := range opts {
@@ -1484,6 +1529,14 @@ func (c *CamundaClient) GetExportingStatus(ctx context.Context, opts ...func(ope
 }
 
 // PauseClusterExporting calls the PauseClusterExporting operation.
+//
+// Example:
+//
+//	// Pauses exporting across all physical tenants in the cluster.
+//	// While paused, reads from secondary storage stop advancing for every tenant.
+//	if err := client.PauseClusterExporting(ctx); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) PauseClusterExporting(ctx context.Context, opts ...func(openapi.ApiPauseClusterExportingRequest) openapi.ApiPauseClusterExportingRequest) error {
 	req := c.raw.ExportingAPI.PauseClusterExporting(ctx)
 	for _, opt := range opts {
@@ -1511,6 +1564,13 @@ func (c *CamundaClient) PauseExporting(ctx context.Context, opts ...func(openapi
 }
 
 // ResumeClusterExporting calls the ResumeClusterExporting operation.
+//
+// Example:
+//
+//	// Resumes exporting across all physical tenants in the cluster.
+//	if err := client.ResumeClusterExporting(ctx); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) ResumeClusterExporting(ctx context.Context, opts ...func(openapi.ApiResumeClusterExportingRequest) openapi.ApiResumeClusterExportingRequest) error {
 	req := c.raw.ExportingAPI.ResumeClusterExporting(ctx)
 	for _, opt := range opts {
@@ -3641,7 +3701,7 @@ func (c *CamundaClient) ResolveSecrets(ctx context.Context, body openapi.SecretR
 // Example:
 //
 //	// One-time setup: create the initial administrator on a fresh cluster.
-//	// Placeholder only — replace with a securely generated password, never a literal like this.
+//	// "admin-password-123" is a placeholder — don't hardcode passwords in production.
 //	result, err := client.CreateAdminUser(ctx, *openapi.NewUserRequest("admin-password-123", "admin"))
 //	if err != nil {
 //		return err
@@ -4045,7 +4105,7 @@ func (c *CamundaClient) UpdateTenant(ctx context.Context, tenantId string, body 
 //
 // Example:
 //
-//	// Placeholder only — replace with a securely generated password, never a literal like this.
+//	// "secure-password-123" is a placeholder — don't hardcode passwords in production.
 //	req := openapi.NewUserRequest("secure-password-123", "alice")
 //	req.SetName("Alice Example")
 //	req.SetEmail("alice@example.com")
