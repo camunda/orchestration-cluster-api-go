@@ -115,6 +115,86 @@ func NewConfiguration() *Configuration {
 			},
 		},
 		OperationServers: map[string]ServerConfigurations{
+			"BackupAPIService.DeleteHistoryBackupAsClusterAdmin": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
+			"BackupAPIService.GetHistoryBackupAsClusterAdmin": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
+			"BackupAPIService.ListHistoryBackupsAsClusterAdmin": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
+			"BackupAPIService.TakeHistoryBackupAsClusterAdmin": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
 			"ClusterAPIService.GetClusterStatus": {
 				{
 					URL:         "{schema}://{host}:{port}",
@@ -136,6 +216,66 @@ func NewConfiguration() *Configuration {
 				},
 			},
 			"ClusterAPIService.GetClusterTopology": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
+			"ExportingAPIService.GetClusterExportingStatus": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
+			"ExportingAPIService.PauseClusterExporting": {
+				{
+					URL:         "{schema}://{host}:{port}",
+					Description: "No description provided",
+					Variables: map[string]ServerVariable{
+						"host": ServerVariable{
+							Description:  "The hostname of the Orchestration Cluster REST Gateway.",
+							DefaultValue: "localhost",
+						},
+						"port": ServerVariable{
+							Description:  "The port of the Orchestration Cluster REST API server.",
+							DefaultValue: "8080",
+						},
+						"schema": ServerVariable{
+							Description:  "The schema of the Orchestration Cluster REST API server.",
+							DefaultValue: "http",
+						},
+					},
+				},
+			},
+			"ExportingAPIService.ResumeClusterExporting": {
 				{
 					URL:         "{schema}://{host}:{port}",
 					Description: "No description provided",

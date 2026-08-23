@@ -1587,5 +1587,54 @@
       "region": "RestoreAsClusterAdmin",
       "label": "Restore as cluster admin"
     }
+  ],
+  "getClusterExportingStatus": [
+    {
+      "file": "exporting.go",
+      "region": "GetClusterExportingStatus",
+      "label": "Get cluster exporting status"
+    }
+  ],
+  "pauseClusterExporting": [
+    {
+      "file": "exporting.go",
+      "region": "PauseClusterExporting",
+      "label": "Pause cluster exporting"
+    }
+  ],
+  "resumeClusterExporting": [
+    {
+      "file": "exporting.go",
+      "region": "ResumeClusterExporting",
+      "label": "Resume cluster exporting"
+    }
+  ],
+  "takeHistoryBackupAsClusterAdmin": [
+    {
+      "file": "backup.go",
+      "region": "TakeHistoryBackupAsClusterAdmin",
+      "label": "Take a cluster history backup"
+    }
+  ],
+  "listHistoryBackupsAsClusterAdmin": [
+    {
+      "file": "backup.go",
+      "region": "ListHistoryBackupsAsClusterAdmin",
+      "label": "List cluster history backups"
+    }
+  ],
+  "getHistoryBackupAsClusterAdmin": [
+    {
+      "file": "backup.go",
+      "region": "GetHistoryBackupAsClusterAdmin",
+      "label": "Get a cluster history backup"
+    }
+  ],
+  "deleteHistoryBackupAsClusterAdmin": [
+    {
+      "file": "backup.go",
+      "region": "DeleteHistoryBackupAsClusterAdmin",
+      "label": "Delete a cluster history backup"
+    }
   ]
 }
