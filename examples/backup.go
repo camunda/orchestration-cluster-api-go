@@ -196,6 +196,9 @@ func deleteHistoryBackupAsClusterAdminExample(ctx context.Context, client *camun
 func takeRuntimeBackupAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region TakeRuntimeBackupAsClusterAdmin
 	// Takes a runtime backup across every physical tenant in the cluster simultaneously.
+	// Pass SetBackupId to use an explicit backup ID; omit it to let the cluster
+	// generate one automatically (generated-id mode). Do not mix modes: sending a
+	// backup ID when the cluster is configured for generated IDs will be rejected.
 	req := openapi.NewTakeRuntimeBackupRequest()
 	req.SetBackupId(42)
 
@@ -251,7 +254,9 @@ func deleteRuntimeBackupStateAsClusterAdminExample(ctx context.Context, client *
 
 func syncRuntimeBackupStateAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SyncRuntimeBackupStateAsClusterAdmin
-	// Re-reads the backup store for all physical tenants so the reported state is current.
+	// Force-writes the current checkpoint/backup metadata to each physical tenant's
+	// backup store and returns the updated state. Use this to repair stale or missing
+	// state entries without triggering a new backup.
 	state, err := client.SyncRuntimeBackupStateAsClusterAdmin(ctx)
 	if err != nil {
 		return err

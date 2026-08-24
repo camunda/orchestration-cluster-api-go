@@ -62,6 +62,8 @@ func getClusterTopologyExample(ctx context.Context, client *camunda.CamundaClien
 func triggerClusterRebalanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region TriggerClusterRebalance
 	// Starts a cluster rebalance, redistributing partition leadership to the preferred nodes.
+	// Requires cluster-admin credentials (a separate cluster-admin security chain) —
+	// calling this with standard Orchestration credentials will fail authorization.
 	req := openapi.NewClusterRebalanceRequest()
 	req.SetReplicationLagThreshold(1024 * 1024) // 1 MiB max lag for leader transfer
 
@@ -76,6 +78,8 @@ func triggerClusterRebalanceExample(ctx context.Context, client *camunda.Camunda
 
 func getClusterRebalanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetClusterRebalance
+	// Requires cluster-admin credentials (a separate cluster-admin security chain) —
+	// calling this with standard Orchestration credentials will fail authorization.
 	balance, err := client.GetClusterRebalance(ctx)
 	if err != nil {
 		return err
@@ -90,6 +94,8 @@ func getClusterRebalanceExample(ctx context.Context, client *camunda.CamundaClie
 
 func cancelClusterRebalanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CancelClusterRebalance
+	// Requires cluster-admin credentials (a separate cluster-admin security chain) —
+	// calling this with standard Orchestration credentials will fail authorization.
 	resp, err := client.CancelClusterRebalance(ctx)
 	if err != nil {
 		return err
