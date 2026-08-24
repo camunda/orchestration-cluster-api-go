@@ -23,6 +23,8 @@ var _ MappedNullable = &AgentInstanceCreationResult{}
 type AgentInstanceCreationResult struct {
 	// The system-generated key for the created agent instance.
 	AgentInstanceKey ModelString `json:"agentInstanceKey"`
+	// One entry per history item submitted in the request, in request order. Empty when no history items were submitted.
+	CreatedHistory []AgentInstanceCreatedHistoryItem `json:"createdHistory"`
 }
 
 type _AgentInstanceCreationResult AgentInstanceCreationResult
@@ -31,9 +33,10 @@ type _AgentInstanceCreationResult AgentInstanceCreationResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceCreationResult(agentInstanceKey ModelString) *AgentInstanceCreationResult {
+func NewAgentInstanceCreationResult(agentInstanceKey ModelString, createdHistory []AgentInstanceCreatedHistoryItem) *AgentInstanceCreationResult {
 	this := AgentInstanceCreationResult{}
 	this.AgentInstanceKey = agentInstanceKey
+	this.CreatedHistory = createdHistory
 	return &this
 }
 
@@ -69,6 +72,30 @@ func (o *AgentInstanceCreationResult) SetAgentInstanceKey(v ModelString) {
 	o.AgentInstanceKey = v
 }
 
+// GetCreatedHistory returns the CreatedHistory field value
+func (o *AgentInstanceCreationResult) GetCreatedHistory() []AgentInstanceCreatedHistoryItem {
+	if o == nil {
+		var ret []AgentInstanceCreatedHistoryItem
+		return ret
+	}
+
+	return o.CreatedHistory
+}
+
+// GetCreatedHistoryOk returns a tuple with the CreatedHistory field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceCreationResult) GetCreatedHistoryOk() ([]AgentInstanceCreatedHistoryItem, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.CreatedHistory, true
+}
+
+// SetCreatedHistory sets field value
+func (o *AgentInstanceCreationResult) SetCreatedHistory(v []AgentInstanceCreatedHistoryItem) {
+	o.CreatedHistory = v
+}
+
 func (o AgentInstanceCreationResult) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -80,6 +107,7 @@ func (o AgentInstanceCreationResult) MarshalJSON() ([]byte, error) {
 func (o AgentInstanceCreationResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["agentInstanceKey"] = o.AgentInstanceKey
+	toSerialize["createdHistory"] = o.CreatedHistory
 	return toSerialize, nil
 }
 
@@ -89,6 +117,7 @@ func (o *AgentInstanceCreationResult) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"agentInstanceKey",
+		"createdHistory",
 	}
 
 	allProperties := make(map[string]interface{})

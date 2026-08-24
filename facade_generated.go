@@ -274,7 +274,7 @@ func (c *CamundaClient) GetAuthentication(ctx context.Context, opts ...func(open
 //	for _, a := range result.GetItems() {
 //		fmt.Printf("%v\n", a)
 //	}
-func (c *CamundaClient) SearchOwnAuthorizations(ctx context.Context, body openapi.AuthorizationSearchQuery, opts ...func(openapi.ApiSearchOwnAuthorizationsRequest) openapi.ApiSearchOwnAuthorizationsRequest) (*openapi.AuthorizationSearchResult, error) {
+func (c *CamundaClient) SearchOwnAuthorizations(ctx context.Context, body openapi.AuthorizationSearchQuery, opts ...func(openapi.ApiSearchOwnAuthorizationsRequest) openapi.ApiSearchOwnAuthorizationsRequest) (*openapi.OwnAuthorizationSearchResult, error) {
 	req := c.raw.AuthenticationAPI.SearchOwnAuthorizations(ctx)
 	req = req.AuthorizationSearchQuery(body)
 	for _, opt := range opts {
@@ -442,6 +442,16 @@ func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64,
 	return c.wrapError(resp, err)
 }
 
+// DeleteRuntimeBackupAsClusterAdmin calls the DeleteRuntimeBackupAsClusterAdmin operation.
+func (c *CamundaClient) DeleteRuntimeBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteRuntimeBackupAsClusterAdminRequest) openapi.ApiDeleteRuntimeBackupAsClusterAdminRequest) error {
+	req := c.raw.BackupAPI.DeleteRuntimeBackupAsClusterAdmin(ctx, backupId)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
 // DeleteRuntimeBackupState calls the DeleteRuntimeBackupState operation.
 //
 // Example:
@@ -451,6 +461,16 @@ func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64,
 //	}
 func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiDeleteRuntimeBackupStateRequest) openapi.ApiDeleteRuntimeBackupStateRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackupState(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
+// DeleteRuntimeBackupStateAsClusterAdmin calls the DeleteRuntimeBackupStateAsClusterAdmin operation.
+func (c *CamundaClient) DeleteRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiDeleteRuntimeBackupStateAsClusterAdminRequest) openapi.ApiDeleteRuntimeBackupStateAsClusterAdminRequest) error {
+	req := c.raw.BackupAPI.DeleteRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
 	}
@@ -520,6 +540,16 @@ func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, op
 	return value, c.wrapError(resp, err)
 }
 
+// GetRuntimeBackupAsClusterAdmin calls the GetRuntimeBackupAsClusterAdmin operation.
+func (c *CamundaClient) GetRuntimeBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetRuntimeBackupAsClusterAdminRequest) openapi.ApiGetRuntimeBackupAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupInfo, error) {
+	req := c.raw.BackupAPI.GetRuntimeBackupAsClusterAdmin(ctx, backupId)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // GetRuntimeBackupState calls the GetRuntimeBackupState operation.
 //
 // Example:
@@ -533,6 +563,16 @@ func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, op
 //	}
 func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiGetRuntimeBackupStateRequest) openapi.ApiGetRuntimeBackupStateRequest) (*openapi.RuntimeBackupState, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackupState(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// GetRuntimeBackupStateAsClusterAdmin calls the GetRuntimeBackupStateAsClusterAdmin operation.
+func (c *CamundaClient) GetRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiGetRuntimeBackupStateAsClusterAdminRequest) openapi.ApiGetRuntimeBackupStateAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupState, error) {
+	req := c.raw.BackupAPI.GetRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
 	}
@@ -601,6 +641,16 @@ func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(ope
 	return value, c.wrapError(resp, err)
 }
 
+// ListRuntimeBackupsAsClusterAdmin calls the ListRuntimeBackupsAsClusterAdmin operation.
+func (c *CamundaClient) ListRuntimeBackupsAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiListRuntimeBackupsAsClusterAdminRequest) openapi.ApiListRuntimeBackupsAsClusterAdminRequest) ([]openapi.ClusterRuntimeBackupInfo, error) {
+	req := c.raw.BackupAPI.ListRuntimeBackupsAsClusterAdmin(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // SyncRuntimeBackupState calls the SyncRuntimeBackupState operation.
 //
 // Example:
@@ -615,6 +665,16 @@ func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(ope
 //	}
 func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiSyncRuntimeBackupStateRequest) openapi.ApiSyncRuntimeBackupStateRequest) (*openapi.RuntimeBackupState, error) {
 	req := c.raw.BackupAPI.SyncRuntimeBackupState(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// SyncRuntimeBackupStateAsClusterAdmin calls the SyncRuntimeBackupStateAsClusterAdmin operation.
+func (c *CamundaClient) SyncRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiSyncRuntimeBackupStateAsClusterAdminRequest) openapi.ApiSyncRuntimeBackupStateAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupState, error) {
+	req := c.raw.BackupAPI.SyncRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
 	}
@@ -678,6 +738,17 @@ func (c *CamundaClient) TakeHistoryBackupAsClusterAdmin(ctx context.Context, bod
 //	fmt.Printf("%v\n", result)
 func (c *CamundaClient) TakeRuntimeBackup(ctx context.Context, body openapi.TakeRuntimeBackupRequest, opts ...func(openapi.ApiTakeRuntimeBackupRequest) openapi.ApiTakeRuntimeBackupRequest) (*openapi.TakeRuntimeBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeRuntimeBackup(ctx)
+	req = req.TakeRuntimeBackupRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// TakeRuntimeBackupAsClusterAdmin calls the TakeRuntimeBackupAsClusterAdmin operation.
+func (c *CamundaClient) TakeRuntimeBackupAsClusterAdmin(ctx context.Context, body openapi.TakeRuntimeBackupRequest, opts ...func(openapi.ApiTakeRuntimeBackupAsClusterAdminRequest) openapi.ApiTakeRuntimeBackupAsClusterAdminRequest) (*openapi.ClusterTakeRuntimeBackupResponse, error) {
+	req := c.raw.BackupAPI.TakeRuntimeBackupAsClusterAdmin(ctx)
 	req = req.TakeRuntimeBackupRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
@@ -820,6 +891,26 @@ func (c *CamundaClient) ResetClock(ctx context.Context, opts ...func(openapi.Api
 	return c.wrapError(resp, err)
 }
 
+// CancelClusterRebalance calls the CancelClusterRebalance operation.
+func (c *CamundaClient) CancelClusterRebalance(ctx context.Context, opts ...func(openapi.ApiCancelClusterRebalanceRequest) openapi.ApiCancelClusterRebalanceRequest) (*openapi.RebalanceCancellationResponse, error) {
+	req := c.raw.ClusterAPI.CancelClusterRebalance(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// GetClusterRebalance calls the GetClusterRebalance operation.
+func (c *CamundaClient) GetClusterRebalance(ctx context.Context, opts ...func(openapi.ApiGetClusterRebalanceRequest) openapi.ApiGetClusterRebalanceRequest) (*openapi.ClusterBalanceResponse, error) {
+	req := c.raw.ClusterAPI.GetClusterRebalance(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // GetClusterStatus calls the GetClusterStatus operation.
 //
 // Example:
@@ -891,6 +982,17 @@ func (c *CamundaClient) GetStatus(ctx context.Context, opts ...func(openapi.ApiG
 //		topology.GetGatewayVersion(), len(topology.GetBrokers()), topology.GetPartitionsCount())
 func (c *CamundaClient) GetTopology(ctx context.Context, opts ...func(openapi.ApiGetTopologyRequest) openapi.ApiGetTopologyRequest) (*openapi.TopologyResponse, error) {
 	req := c.raw.ClusterAPI.GetTopology(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// TriggerClusterRebalance calls the TriggerClusterRebalance operation.
+func (c *CamundaClient) TriggerClusterRebalance(ctx context.Context, body openapi.ClusterRebalanceRequest, opts ...func(openapi.ApiTriggerClusterRebalanceRequest) openapi.ApiTriggerClusterRebalanceRequest) (*openapi.ClusterBalanceResponse, error) {
+	req := c.raw.ClusterAPI.TriggerClusterRebalance(ctx)
+	req = req.ClusterRebalanceRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}

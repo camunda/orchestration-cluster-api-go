@@ -197,9 +197,12 @@ history is deleted.
 
 The two supported types differ in how the history is removed. For a decision requirements
 definition the history is deleted asynchronously via a batch operation whose details are
-returned in the `batchOperation` field of the response. For a process definition the
-definition first drains its running instances and its history is deleted asynchronously once
-the definition is fully removed cluster-wide; no batch operation is returned in the response.
+returned in the `batchOperation` field of the response. For a process definition that still
+exists in the runtime state, the definition first drains its running instances and its
+history is deleted asynchronously once the definition is fully removed cluster-wide; no batch
+operation is returned in the response. If the process definition has already been removed
+from the runtime state and the deletion is later re-triggered with `deleteHistory` set to
+`true`, a batch operation is created immediately and returned in the `batchOperation` field.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param resourceKey The key of the resource to delete. This can be the key of a process definition, the key of a decision requirements definition or the key of a form definition

@@ -132,7 +132,7 @@ func (r ApiSearchOwnAuthorizationsRequest) AuthorizationSearchQuery(authorizatio
 	return r
 }
 
-func (r ApiSearchOwnAuthorizationsRequest) Execute() (*AuthorizationSearchResult, *http.Response, error) {
+func (r ApiSearchOwnAuthorizationsRequest) Execute() (*OwnAuthorizationSearchResult, *http.Response, error) {
 	return r.ApiService.SearchOwnAuthorizationsExecute(r)
 }
 
@@ -153,13 +153,13 @@ func (a *AuthenticationAPIService) SearchOwnAuthorizations(ctx context.Context) 
 
 // Execute executes the request
 //
-//	@return AuthorizationSearchResult
-func (a *AuthenticationAPIService) SearchOwnAuthorizationsExecute(r ApiSearchOwnAuthorizationsRequest) (*AuthorizationSearchResult, *http.Response, error) {
+//	@return OwnAuthorizationSearchResult
+func (a *AuthenticationAPIService) SearchOwnAuthorizationsExecute(r ApiSearchOwnAuthorizationsRequest) (*OwnAuthorizationSearchResult, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *AuthorizationSearchResult
+		localVarReturnValue *OwnAuthorizationSearchResult
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthenticationAPIService.SearchOwnAuthorizations")

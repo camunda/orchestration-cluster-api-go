@@ -16,43 +16,43 @@ import (
 	"fmt"
 )
 
-// checks if the AgentInstanceDefinition type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &AgentInstanceDefinition{}
+// checks if the AgentInstanceDefinitionResult type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &AgentInstanceDefinitionResult{}
 
-// AgentInstanceDefinition The definition of an agent instance, as submitted at creation. The systemPrompt is a plain string here for backwards compatibility with existing create requests; the read side (AgentInstanceDefinitionResult) exposes it as content blocks instead. This write-side string is deprecated and will be removed as part of #58795.
-type AgentInstanceDefinition struct {
+// AgentInstanceDefinitionResult The definition of an agent instance. Set at creation, but can change later via a CONFIGURATION history item.
+type AgentInstanceDefinitionResult struct {
 	// The LLM model identifier (for example, gpt-4o).
 	Model string `json:"model"`
 	// The LLM provider (for example, openai or anthropic).
 	Provider string `json:"provider"`
-	// The system prompt configured for this agent instance.
-	SystemPrompt string `json:"systemPrompt"`
+	// The system prompt configured for this agent instance, as content blocks.
+	SystemPrompt []AgentInstanceMessageContent `json:"systemPrompt"`
 }
 
-type _AgentInstanceDefinition AgentInstanceDefinition
+type _AgentInstanceDefinitionResult AgentInstanceDefinitionResult
 
-// NewAgentInstanceDefinition instantiates a new AgentInstanceDefinition object
+// NewAgentInstanceDefinitionResult instantiates a new AgentInstanceDefinitionResult object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceDefinition(model string, provider string, systemPrompt string) *AgentInstanceDefinition {
-	this := AgentInstanceDefinition{}
+func NewAgentInstanceDefinitionResult(model string, provider string, systemPrompt []AgentInstanceMessageContent) *AgentInstanceDefinitionResult {
+	this := AgentInstanceDefinitionResult{}
 	this.Model = model
 	this.Provider = provider
 	this.SystemPrompt = systemPrompt
 	return &this
 }
 
-// NewAgentInstanceDefinitionWithDefaults instantiates a new AgentInstanceDefinition object
+// NewAgentInstanceDefinitionResultWithDefaults instantiates a new AgentInstanceDefinitionResult object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewAgentInstanceDefinitionWithDefaults() *AgentInstanceDefinition {
-	this := AgentInstanceDefinition{}
+func NewAgentInstanceDefinitionResultWithDefaults() *AgentInstanceDefinitionResult {
+	this := AgentInstanceDefinitionResult{}
 	return &this
 }
 
 // GetModel returns the Model field value
-func (o *AgentInstanceDefinition) GetModel() string {
+func (o *AgentInstanceDefinitionResult) GetModel() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -63,7 +63,7 @@ func (o *AgentInstanceDefinition) GetModel() string {
 
 // GetModelOk returns a tuple with the Model field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceDefinition) GetModelOk() (*string, bool) {
+func (o *AgentInstanceDefinitionResult) GetModelOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,12 +71,12 @@ func (o *AgentInstanceDefinition) GetModelOk() (*string, bool) {
 }
 
 // SetModel sets field value
-func (o *AgentInstanceDefinition) SetModel(v string) {
+func (o *AgentInstanceDefinitionResult) SetModel(v string) {
 	o.Model = v
 }
 
 // GetProvider returns the Provider field value
-func (o *AgentInstanceDefinition) GetProvider() string {
+func (o *AgentInstanceDefinitionResult) GetProvider() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -87,7 +87,7 @@ func (o *AgentInstanceDefinition) GetProvider() string {
 
 // GetProviderOk returns a tuple with the Provider field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceDefinition) GetProviderOk() (*string, bool) {
+func (o *AgentInstanceDefinitionResult) GetProviderOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,14 +95,14 @@ func (o *AgentInstanceDefinition) GetProviderOk() (*string, bool) {
 }
 
 // SetProvider sets field value
-func (o *AgentInstanceDefinition) SetProvider(v string) {
+func (o *AgentInstanceDefinitionResult) SetProvider(v string) {
 	o.Provider = v
 }
 
 // GetSystemPrompt returns the SystemPrompt field value
-func (o *AgentInstanceDefinition) GetSystemPrompt() string {
+func (o *AgentInstanceDefinitionResult) GetSystemPrompt() []AgentInstanceMessageContent {
 	if o == nil {
-		var ret string
+		var ret []AgentInstanceMessageContent
 		return ret
 	}
 
@@ -111,19 +111,19 @@ func (o *AgentInstanceDefinition) GetSystemPrompt() string {
 
 // GetSystemPromptOk returns a tuple with the SystemPrompt field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceDefinition) GetSystemPromptOk() (*string, bool) {
+func (o *AgentInstanceDefinitionResult) GetSystemPromptOk() ([]AgentInstanceMessageContent, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.SystemPrompt, true
+	return o.SystemPrompt, true
 }
 
 // SetSystemPrompt sets field value
-func (o *AgentInstanceDefinition) SetSystemPrompt(v string) {
+func (o *AgentInstanceDefinitionResult) SetSystemPrompt(v []AgentInstanceMessageContent) {
 	o.SystemPrompt = v
 }
 
-func (o AgentInstanceDefinition) MarshalJSON() ([]byte, error) {
+func (o AgentInstanceDefinitionResult) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -131,7 +131,7 @@ func (o AgentInstanceDefinition) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o AgentInstanceDefinition) ToMap() (map[string]interface{}, error) {
+func (o AgentInstanceDefinitionResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["model"] = o.Model
 	toSerialize["provider"] = o.Provider
@@ -139,7 +139,7 @@ func (o AgentInstanceDefinition) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *AgentInstanceDefinition) UnmarshalJSON(data []byte) (err error) {
+func (o *AgentInstanceDefinitionResult) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -163,53 +163,53 @@ func (o *AgentInstanceDefinition) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varAgentInstanceDefinition := _AgentInstanceDefinition{}
+	varAgentInstanceDefinitionResult := _AgentInstanceDefinitionResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varAgentInstanceDefinition)
+	err = decoder.Decode(&varAgentInstanceDefinitionResult)
 
 	if err != nil {
 		return err
 	}
 
-	*o = AgentInstanceDefinition(varAgentInstanceDefinition)
+	*o = AgentInstanceDefinitionResult(varAgentInstanceDefinitionResult)
 
 	return err
 }
 
-type NullableAgentInstanceDefinition struct {
-	value *AgentInstanceDefinition
+type NullableAgentInstanceDefinitionResult struct {
+	value *AgentInstanceDefinitionResult
 	isSet bool
 }
 
-func (v NullableAgentInstanceDefinition) Get() *AgentInstanceDefinition {
+func (v NullableAgentInstanceDefinitionResult) Get() *AgentInstanceDefinitionResult {
 	return v.value
 }
 
-func (v *NullableAgentInstanceDefinition) Set(val *AgentInstanceDefinition) {
+func (v *NullableAgentInstanceDefinitionResult) Set(val *AgentInstanceDefinitionResult) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableAgentInstanceDefinition) IsSet() bool {
+func (v NullableAgentInstanceDefinitionResult) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableAgentInstanceDefinition) Unset() {
+func (v *NullableAgentInstanceDefinitionResult) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableAgentInstanceDefinition(val *AgentInstanceDefinition) *NullableAgentInstanceDefinition {
-	return &NullableAgentInstanceDefinition{value: val, isSet: true}
+func NewNullableAgentInstanceDefinitionResult(val *AgentInstanceDefinitionResult) *NullableAgentInstanceDefinitionResult {
+	return &NullableAgentInstanceDefinitionResult{value: val, isSet: true}
 }
 
-func (v NullableAgentInstanceDefinition) MarshalJSON() ([]byte, error) {
+func (v NullableAgentInstanceDefinitionResult) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableAgentInstanceDefinition) UnmarshalJSON(src []byte) error {
+func (v *NullableAgentInstanceDefinitionResult) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

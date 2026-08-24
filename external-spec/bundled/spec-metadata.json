@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "specHash": "sha256:26f148434b44532d51a65c5cedc96032ac6c39ef3f8733f1b76d51dbe7e9055d",
+  "specHash": "sha256:b4a2f42cc11049ba7a3afb7e2bafd332b5c8160b7a4350814a1a9beac8e1f1d3",
   "semanticKeys": [
     {
       "name": "AgentDefinitionKey",
@@ -3534,7 +3534,7 @@
         "application/json"
       ],
       "requestBodySchemaRef": "AuthorizationSearchQuery",
-      "successResponseSchemaRef": "AuthorizationSearchResult",
+      "successResponseSchemaRef": "OwnAuthorizationSearchResult",
       "successStatus": 200,
       "vendorExtensions": {
         "x-eventually-consistent": true,
@@ -9097,7 +9097,7 @@
         "Resource"
       ],
       "summary": "Delete resource",
-      "description": "Deletes a deployed resource. This can be a process definition, decision requirements\ndefinition, or form definition deployed using the deploy resources endpoint. Specify the\nresource you want to delete in the `resourceKey` parameter.\n\nOnce a resource has been deleted it cannot be recovered. If the resource needs to be\navailable again, a new deployment of the resource is required.\n\nBy default, only the resource itself is deleted from the runtime state. To also delete the\nhistoric data associated with a resource, set the `deleteHistory` flag in the request body\nto `true`. History deletion is supported for process definitions and decision requirements\ndefinitions; for other resource types (forms, generic resources) the flag is ignored and no\nhistory is deleted.\n\nThe two supported types differ in how the history is removed. For a decision requirements\ndefinition the history is deleted asynchronously via a batch operation whose details are\nreturned in the `batchOperation` field of the response. For a process definition the\ndefinition first drains its running instances and its history is deleted asynchronously once\nthe definition is fully removed cluster-wide; no batch operation is returned in the response.",
+      "description": "Deletes a deployed resource. This can be a process definition, decision requirements\ndefinition, or form definition deployed using the deploy resources endpoint. Specify the\nresource you want to delete in the `resourceKey` parameter.\n\nOnce a resource has been deleted it cannot be recovered. If the resource needs to be\navailable again, a new deployment of the resource is required.\n\nBy default, only the resource itself is deleted from the runtime state. To also delete the\nhistoric data associated with a resource, set the `deleteHistory` flag in the request body\nto `true`. History deletion is supported for process definitions and decision requirements\ndefinitions; for other resource types (forms, generic resources) the flag is ignored and no\nhistory is deleted.\n\nThe two supported types differ in how the history is removed. For a decision requirements\ndefinition the history is deleted asynchronously via a batch operation whose details are\nreturned in the `batchOperation` field of the response. For a process definition that still\nexists in the runtime state, the definition first drains its running instances and its\nhistory is deleted asynchronously once the definition is fully removed cluster-wide; no batch\noperation is returned in the response. If the process definition has already been removed\nfrom the runtime state and the deletion is later re-triggered with `deleteHistory` set to\n`true`, a batch operation is created immediately and returned in the `batchOperation` field.",
       "eventuallyConsistent": false,
       "hasRequestBody": true,
       "requestBodyUnion": false,
@@ -11326,6 +11326,238 @@
       }
     },
     {
+      "operationId": "listRuntimeBackupsAsClusterAdmin",
+      "path": "/cluster/v2/backups/runtime",
+      "method": "get",
+      "tags": [
+        "Backup"
+      ],
+      "summary": "List runtime backups across physical tenants",
+      "description": "Lists the runtime backups of every physical tenant of the cluster, or of the one named by `physicalTenantId`, grouped by backup id. Every group reports every targeted tenant, including the ones holding nothing for that id, so a backup only some tenants hold aggregates to `INCOMPLETE` here exactly as it does when looked up directly — the state of a listed group can be trusted to say whether the cluster can be restored from it. A backup id that only some physical tenants hold is a supported outcome rather than a degraded one; tenants that generate their own backup ids never share one, so in that mode each backup forms its own group and the other tenants report `DOES_NOT_EXIST` under it.\n\nThe request is all-or-nothing: a physical tenant whose backups cannot be read fails the whole request rather than silently dropping out of the listing. Narrow the request with `physicalTenantId` to list the backups of the tenants that can still be read.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here. Use `GET /v2/backups/runtime` to act as a single physical tenant.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": false,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [],
+      "queryParams": [
+        {
+          "name": "physicalTenantId",
+          "required": false
+        },
+        {
+          "name": "prefix",
+          "required": false
+        }
+      ],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [],
+      "successStatus": 200,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "takeRuntimeBackupAsClusterAdmin",
+      "path": "/cluster/v2/backups/runtime",
+      "method": "post",
+      "tags": [
+        "Backup"
+      ],
+      "summary": "Take a runtime backup on one or every physical tenant",
+      "description": "Triggers a runtime backup on every physical tenant of the cluster, or on the one named by `physicalTenantId`. A cluster-wide backup is a set of independent per-tenant backups, not an atomic snapshot of the cluster: they are neither coordinated nor rolled back together, and each tenant stores its own, so the same `backupId` can be used for all of them.\n\nEvery targeted physical tenant must be in the same backup-id mode. `backupId` must be omitted when every targeted tenant generates its own ids (because continuous backups and/or a backup or checkpoint schedule is enabled for it), and is required when none of them does. A cluster whose targeted tenants mix the two modes is rejected with 400 and has to be driven one tenant at a time through `POST /v2/backups/runtime`. In generated-id mode each tenant generates its own id, so the response reports an id per physical tenant rather than one for the cluster.\n\nThe trigger is all-or-error, and never silent about a partial trigger: if any targeted tenant cannot be triggered the response carries an error status, but its body still lists every targeted tenant — which ones were triggered, under which `backupId` to monitor or delete them, and why the others failed. Nothing is rolled back, so the backups that were triggered keep running and have to be deleted explicitly. A request rejected before any tenant was triggered answers with a problem detail instead, and nothing is running.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here. Use `POST /v2/backups/runtime` to act as a single physical tenant.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": true,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [],
+      "queryParams": [
+        {
+          "name": "physicalTenantId",
+          "required": false
+        }
+      ],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [
+        "application/json"
+      ],
+      "requestBodySchemaRef": "TakeRuntimeBackupRequest",
+      "successResponseSchemaRef": "ClusterTakeRuntimeBackupResponse",
+      "successStatus": 202,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "getRuntimeBackupStateAsClusterAdmin",
+      "path": "/cluster/v2/backups/runtime/state",
+      "method": "get",
+      "tags": [
+        "Backup"
+      ],
+      "summary": "Get runtime backup state across physical tenants",
+      "description": "Reports the checkpoint and backup state of every partition of every physical tenant of the cluster, or of the one named by `physicalTenantId`, grouped by physical tenant. Checkpoint ids and log positions only mean anything within one physical tenant's partitions, so nothing is aggregated across tenants.\n\nThe request is all-or-nothing: a physical tenant whose state cannot be read fails the whole request rather than contributing an empty section, which an operator making a delete or restore decision could not tell apart from \"nothing to report yet\". Narrow the request with `physicalTenantId` to read the tenants that can still be reached.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here. Use `GET /v2/backups/runtime/state` to act as a single physical tenant.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": false,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [],
+      "queryParams": [
+        {
+          "name": "physicalTenantId",
+          "required": false
+        }
+      ],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [],
+      "successResponseSchemaRef": "ClusterRuntimeBackupState",
+      "successStatus": 200,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "deleteRuntimeBackupStateAsClusterAdmin",
+      "path": "/cluster/v2/backups/runtime/state",
+      "method": "delete",
+      "tags": [
+        "Backup"
+      ],
+      "summary": "Delete runtime backup state across physical tenants",
+      "description": "Resets the runtime backup state of every partition of every physical tenant of the cluster, or of the one named by `physicalTenantId`, clearing all checkpoint info, backup info, checkpoint metadata, and backup ranges. Used when switching backup stores.\n\nThe request is all-or-nothing: a physical tenant whose state cannot be reset fails the whole request, and the resets that already succeeded on other tenants are not undone. Narrow the request with `physicalTenantId` to reset the tenants that can still be reached.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here. Use `DELETE /v2/backups/runtime/state` to act as a single physical tenant.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": false,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [],
+      "queryParams": [
+        {
+          "name": "physicalTenantId",
+          "required": false
+        }
+      ],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [],
+      "successStatus": 204,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "syncRuntimeBackupStateAsClusterAdmin",
+      "path": "/cluster/v2/backups/runtime/state/sync",
+      "method": "post",
+      "tags": [
+        "Backup"
+      ],
+      "summary": "Force-write runtime backup state across physical tenants",
+      "description": "Force-writes the checkpoint and backup metadata of every partition of every physical tenant of the cluster, or of the one named by `physicalTenantId`, to that tenant's backup store, independent of any backup being taken or confirmed, and returns the updated state per physical tenant.\n\nThe request is all-or-nothing: a physical tenant whose metadata cannot be written fails the whole request, and the writes that already succeeded on other tenants are not undone. The operation is idempotent, so retrying the same call is the correct remedy. Narrow the request with `physicalTenantId` to write the tenants that can still be reached.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here. Use `POST /v2/backups/runtime/state/sync` to act as a single physical tenant.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": false,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [],
+      "queryParams": [
+        {
+          "name": "physicalTenantId",
+          "required": false
+        }
+      ],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [],
+      "successResponseSchemaRef": "ClusterRuntimeBackupState",
+      "successStatus": 200,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "getRuntimeBackupAsClusterAdmin",
+      "path": "/cluster/v2/backups/runtime/{backupId}",
+      "method": "get",
+      "tags": [
+        "Backup"
+      ],
+      "summary": "Get a runtime backup across physical tenants",
+      "description": "Reports what every physical tenant of the cluster, or the one named by `physicalTenantId`, holds for the given backup id, plus the state aggregated over all of them. A tenant that was reached and does not hold this backup reports `DOES_NOT_EXIST`, which is a successful observation rather than a failure — so a backup only some tenants hold aggregates to `INCOMPLETE`, the same way a backup only some partitions hold does within one tenant.\n\nThe request is all-or-nothing: a physical tenant whose state cannot be read fails the whole request. Narrow the request with `physicalTenantId` to read the tenants that can still be reached.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here. Use `GET /v2/backups/runtime/{backupId}` to act as a single physical tenant.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": false,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [
+        "backupId"
+      ],
+      "queryParams": [
+        {
+          "name": "physicalTenantId",
+          "required": false
+        }
+      ],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [],
+      "successResponseSchemaRef": "ClusterRuntimeBackupInfo",
+      "successStatus": 200,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "deleteRuntimeBackupAsClusterAdmin",
+      "path": "/cluster/v2/backups/runtime/{backupId}",
+      "method": "delete",
+      "tags": [
+        "Backup"
+      ],
+      "summary": "Delete a runtime backup across physical tenants",
+      "description": "Deletes the runtime backup with the given id from every physical tenant of the cluster, or from the one named by `physicalTenantId`. A tenant that does not hold the backup has already reached the requested end state, so it counts as deleted rather than as a failure — the same as deleting an unknown backup id through the per-physical-tenant endpoint.\n\nThe request is all-or-nothing: a physical tenant the backup cannot be deleted from fails the whole request, and the deletions that already succeeded on other tenants are not undone. Narrow the request with `physicalTenantId` to delete from the tenants that can still be reached.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here. Use `DELETE /v2/backups/runtime/{backupId}` to act as a single physical tenant.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": false,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [
+        "backupId"
+      ],
+      "queryParams": [
+        {
+          "name": "physicalTenantId",
+          "required": false
+        }
+      ],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [],
+      "successStatus": 204,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
       "operationId": "listHistoryBackupsAsClusterAdmin",
       "path": "/cluster/v2/backups/history",
       "method": "get",
@@ -11499,6 +11731,95 @@
       "sourceFile": "cluster-admin.yaml",
       "requestBodyContentTypes": [],
       "successResponseSchemaRef": "ClusterModeChangeResponse",
+      "successStatus": 200,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "getClusterRebalance",
+      "path": "/cluster/v2/rebalance",
+      "method": "get",
+      "tags": [
+        "Cluster"
+      ],
+      "summary": "Report the cluster's current leadership balance",
+      "description": "Reports whether the cluster is currently balanced, the current leadership state of every partition, and what became of the last rebalance to finish. The last completed rebalance is held in memory by the coordinating broker, so none will be reported if the coordinator has moved or restarted since the last rebalance.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": false,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [],
+      "queryParams": [],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [],
+      "successResponseSchemaRef": "ClusterBalanceResponse",
+      "successStatus": 200,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "triggerClusterRebalance",
+      "path": "/cluster/v2/rebalance",
+      "method": "post",
+      "tags": [
+        "Cluster"
+      ],
+      "summary": "Trigger a cluster-wide leadership rebalance",
+      "description": "Transfers leadership of every partition that is not led by its highest-priority replica towards that replica, one partition at a time. Returns as soon as the rebalance has been accepted (poll `GET /cluster/v2/rebalance` to monitor progress).\n\nEach rebalance can specify overrides for the configured rebalance settings (e.g. maximum replication lag to allow). An absent request body means \"use the configured settings\".\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": true,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [],
+      "queryParams": [
+        {
+          "name": "dryRun",
+          "required": false
+        }
+      ],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [
+        "application/json"
+      ],
+      "requestBodySchemaRef": "ClusterRebalanceRequest",
+      "successResponseSchemaRef": "ClusterBalanceResponse",
+      "successStatus": 202,
+      "vendorExtensions": {
+        "x-eventually-consistent": false,
+        "x-required-permissions": [],
+        "x-added-in-version": "8.10"
+      }
+    },
+    {
+      "operationId": "cancelClusterRebalance",
+      "path": "/cluster/v2/rebalance",
+      "method": "delete",
+      "tags": [
+        "Cluster"
+      ],
+      "summary": "Stop the running rebalance",
+      "description": "Asks the running rebalance to stop once the transfer in flight has finished. Partitions already transferred keep their new leaders, and those the rebalance had not yet reached keep their current ones.\n\nCancellation requests are idempotent and always accepted. The `wasRunning` response field can be used to distinguish a cancellation that found a running rebalance from one that did not.\n\nRequires the cluster-admin security chain. Although this operation lists `bearerAuth` / `basicAuth` like the rest of the Orchestration Cluster API, it does not accept an Orchestration Cluster user's credentials — only the separate cluster-admin credentials are valid here.",
+      "eventuallyConsistent": false,
+      "hasRequestBody": false,
+      "requestBodyUnion": false,
+      "bodyOnly": false,
+      "pathParams": [],
+      "queryParams": [],
+      "requestBodyUnionRefs": [],
+      "optionalTenantIdInBody": false,
+      "sourceFile": "cluster-admin.yaml",
+      "requestBodyContentTypes": [],
+      "successResponseSchemaRef": "RebalanceCancellationResponse",
       "successStatus": 200,
       "vendorExtensions": {
         "x-eventually-consistent": false,
@@ -12541,7 +12862,7 @@
   "integrity": {
     "totalSemanticKeys": 42,
     "totalUnions": 68,
-    "totalOperations": 234,
+    "totalOperations": 244,
     "totalEventuallyConsistent": 95,
     "totalDeprecatedEnumSchemas": 2,
     "totalSemanticProviders": 23

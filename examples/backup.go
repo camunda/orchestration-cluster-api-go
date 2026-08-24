@@ -192,3 +192,102 @@ func deleteHistoryBackupAsClusterAdminExample(ctx context.Context, client *camun
 	// endregion DeleteHistoryBackupAsClusterAdmin
 	return nil
 }
+
+func takeRuntimeBackupAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region TakeRuntimeBackupAsClusterAdmin
+	// Takes a runtime backup across every physical tenant in the cluster simultaneously.
+	// Pass SetBackupId to use an explicit backup ID; omit it to let the cluster
+	// generate one automatically (generated-id mode). Do not mix modes: sending a
+	// backup ID when the cluster is configured for generated IDs will be rejected.
+	req := openapi.NewTakeRuntimeBackupRequest()
+	req.SetBackupId(42)
+
+	result, err := client.TakeRuntimeBackupAsClusterAdmin(ctx, *req)
+	if err != nil {
+		return err
+	}
+	for _, tenant := range result.GetPhysicalTenants() {
+		fmt.Printf("%v\n", tenant)
+	}
+	// endregion TakeRuntimeBackupAsClusterAdmin
+	return nil
+}
+
+func listRuntimeBackupsAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region ListRuntimeBackupsAsClusterAdmin
+	// Lists runtime backups across all physical tenants in the cluster.
+	backups, err := client.ListRuntimeBackupsAsClusterAdmin(ctx)
+	if err != nil {
+		return err
+	}
+	for _, backup := range backups {
+		fmt.Printf("cluster runtime backup %d: state=%v, %d tenant(s)\n",
+			backup.GetBackupId(), backup.GetState(), len(backup.GetPhysicalTenants()))
+	}
+	// endregion ListRuntimeBackupsAsClusterAdmin
+	return nil
+}
+
+func getRuntimeBackupStateAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetRuntimeBackupStateAsClusterAdmin
+	// Returns the runtime backup state for every physical tenant in the cluster.
+	state, err := client.GetRuntimeBackupStateAsClusterAdmin(ctx)
+	if err != nil {
+		return err
+	}
+	for _, tenant := range state.GetPhysicalTenants() {
+		fmt.Printf("%v\n", tenant)
+	}
+	// endregion GetRuntimeBackupStateAsClusterAdmin
+	return nil
+}
+
+func deleteRuntimeBackupStateAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region DeleteRuntimeBackupStateAsClusterAdmin
+	// Clears the persisted runtime backup state across all physical tenants.
+	if err := client.DeleteRuntimeBackupStateAsClusterAdmin(ctx); err != nil {
+		return err
+	}
+	// endregion DeleteRuntimeBackupStateAsClusterAdmin
+	return nil
+}
+
+func syncRuntimeBackupStateAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region SyncRuntimeBackupStateAsClusterAdmin
+	// Force-writes the current checkpoint/backup metadata to each physical tenant's
+	// backup store and returns the updated state. Use this to repair stale or missing
+	// state entries without triggering a new backup.
+	state, err := client.SyncRuntimeBackupStateAsClusterAdmin(ctx)
+	if err != nil {
+		return err
+	}
+	for _, tenant := range state.GetPhysicalTenants() {
+		fmt.Printf("%v\n", tenant)
+	}
+	// endregion SyncRuntimeBackupStateAsClusterAdmin
+	return nil
+}
+
+func getRuntimeBackupAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetRuntimeBackupAsClusterAdmin
+	backup, err := client.GetRuntimeBackupAsClusterAdmin(ctx, 42)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("cluster runtime backup %d: state=%v\n", backup.GetBackupId(), backup.GetState())
+	for _, tenant := range backup.GetPhysicalTenants() {
+		fmt.Printf("  tenant %v\n", tenant)
+	}
+	// endregion GetRuntimeBackupAsClusterAdmin
+	return nil
+}
+
+func deleteRuntimeBackupAsClusterAdminExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region DeleteRuntimeBackupAsClusterAdmin
+	// Deletes the runtime backup with the given id from all physical tenants.
+	if err := client.DeleteRuntimeBackupAsClusterAdmin(ctx, 42); err != nil {
+		return err
+	}
+	// endregion DeleteRuntimeBackupAsClusterAdmin
+	return nil
+}
