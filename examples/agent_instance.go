@@ -13,7 +13,8 @@ import (
 func createAgentInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateAgentInstance
 	definition := openapi.NewAgentInstanceDefinition("gpt-4o", "openai", "You are a helpful assistant.")
-	req := openapi.NewAgentInstanceCreationRequest(openapi.ModelString("2251799813685360"), *definition)
+	req := openapi.NewAgentInstanceCreationRequest(openapi.ModelString("2251799813685360"))
+	req.SetDefinition(*definition)
 
 	result, err := client.CreateAgentInstance(ctx, *req)
 	if err != nil {
