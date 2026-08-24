@@ -27,8 +27,8 @@ type AgentInstanceResult struct {
 	// The key of the agent definition this agent instance is an instance of.
 	AgentDefinitionKey ModelString             `json:"agentDefinitionKey"`
 	Status             AgentInstanceStatusEnum `json:"status"`
-	// The static definition of the agent, including model, provider, and system prompt.
-	Definition AgentInstanceDefinition `json:"definition"`
+	// The definition of the agent, including model, provider, and system prompt. Set at creation, but can change later via a CONFIGURATION history item.
+	Definition AgentInstanceDefinitionResult `json:"definition"`
 	// Aggregated metrics across all loopIterations of this agent instance.
 	Metrics AgentInstanceMetrics `json:"metrics"`
 	// The configured limits for this agent instance, set once at creation.
@@ -67,7 +67,7 @@ type _AgentInstanceResult AgentInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceResult(agentInstanceKey ModelString, agentDefinitionKey ModelString, status AgentInstanceStatusEnum, definition AgentInstanceDefinition, metrics AgentInstanceMetrics, limits AgentInstanceLimits, tools []AgentTool, elementId string, processInstanceKey ModelString, rootProcessInstanceKey ModelString, processDefinitionKey ModelString, processDefinitionId string, processDefinitionVersion int32, processDefinitionVersionTag NullableString, tenantId string, creationDate time.Time, lastUpdatedDate time.Time, completionDate NullableTime, elementInstanceKeys []string) *AgentInstanceResult {
+func NewAgentInstanceResult(agentInstanceKey ModelString, agentDefinitionKey ModelString, status AgentInstanceStatusEnum, definition AgentInstanceDefinitionResult, metrics AgentInstanceMetrics, limits AgentInstanceLimits, tools []AgentTool, elementId string, processInstanceKey ModelString, rootProcessInstanceKey ModelString, processDefinitionKey ModelString, processDefinitionId string, processDefinitionVersion int32, processDefinitionVersionTag NullableString, tenantId string, creationDate time.Time, lastUpdatedDate time.Time, completionDate NullableTime, elementInstanceKeys []string) *AgentInstanceResult {
 	this := AgentInstanceResult{}
 	this.AgentInstanceKey = agentInstanceKey
 	this.AgentDefinitionKey = agentDefinitionKey
@@ -172,9 +172,9 @@ func (o *AgentInstanceResult) SetStatus(v AgentInstanceStatusEnum) {
 }
 
 // GetDefinition returns the Definition field value
-func (o *AgentInstanceResult) GetDefinition() AgentInstanceDefinition {
+func (o *AgentInstanceResult) GetDefinition() AgentInstanceDefinitionResult {
 	if o == nil {
-		var ret AgentInstanceDefinition
+		var ret AgentInstanceDefinitionResult
 		return ret
 	}
 
@@ -183,7 +183,7 @@ func (o *AgentInstanceResult) GetDefinition() AgentInstanceDefinition {
 
 // GetDefinitionOk returns a tuple with the Definition field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetDefinitionOk() (*AgentInstanceDefinition, bool) {
+func (o *AgentInstanceResult) GetDefinitionOk() (*AgentInstanceDefinitionResult, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -191,7 +191,7 @@ func (o *AgentInstanceResult) GetDefinitionOk() (*AgentInstanceDefinition, bool)
 }
 
 // SetDefinition sets field value
-func (o *AgentInstanceResult) SetDefinition(v AgentInstanceDefinition) {
+func (o *AgentInstanceResult) SetDefinition(v AgentInstanceDefinitionResult) {
 	o.Definition = v
 }
 
