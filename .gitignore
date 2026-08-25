@@ -13,6 +13,9 @@ coverage.txt
 external-spec/upstream/
 external-spec/upstream/**/.tmp*
 
+# Side-effect report written by check-example-coverage.py on every run
+external-spec/missing-examples.json
+
 # Node (used only for codegen tooling: openapi-generator-cli, buf, bundler)
 node_modules/
 
