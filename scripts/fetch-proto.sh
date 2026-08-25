@@ -21,7 +21,10 @@ mkdir -p external-spec/proto
 
 echo "==> Fetching gateway.proto (ref: ${SPEC_REF})..."
 echo "    $RAW_URL"
-curl -fsSL "$RAW_URL" -o "$DEST"
+# A read that dies mid-response is raw.githubusercontent.com having a bad moment,
+# not a wrong ref, so it must not fail the build on the first attempt.
+curl -fsSL --retry 5 --retry-all-errors --retry-delay 3 \
+  --connect-timeout 10 --max-time 60 "$RAW_URL" -o "$DEST"
 
 # Sanity check: the file must contain the streaming RPC we depend on.
 if ! grep -q "StreamActivatedJobs" "$DEST"; then
