@@ -7,9 +7,61 @@ version: "2"
 run:
   timeout: 5m
 
+issues:
+  # Report every occurrence. The defaults (max-issues-per-linter: 50,
+  # max-same-issues: 3) truncate repeated findings, which would hide most of a
+  # forbidigo ban behind the first few hits.
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  # Report every issue on a line, not just the first. Otherwise a forbidigo finding
+  # can be hidden behind another linter's finding on the same line.
+  uniq-by-line: false
+
 linters:
-  # Keep the default (standard) linter set: errcheck, govet, ineffassign,
-  # staticcheck, unused.
+  # Default (standard) set: errcheck, govet, ineffassign, staticcheck, unused.
+  enable:
+    # Ambient time must not re-enter the runtime: cadence resolves through the
+    # injected Clock, or a test clock controls nothing and the seam rots silently.
+    - forbidigo
+    # Catches a doc comment that no longer matches the declaration beneath it,
+    # which is how three constructor comments ended up documenting an interface.
+    - revive
+
+  settings:
+    forbidigo:
+      # Match qualified names rather than bare identifiers, so a local variable
+      # named `now` is not mistaken for `time.Now`.
+      analyze-types: true
+      forbid:
+        - pattern: ^time\.Sleep$
+          msg: use Clock.Sleep so an injected clock controls the wait
+        - pattern: ^time\.Now$
+          msg: use Clock.Now so an injected clock controls the reading
+        - pattern: ^time\.Since$
+          msg: measure with Clock.Now, so elapsed time follows the injected clock
+        - pattern: ^time\.After$
+          msg: use Clock.After so an injected clock controls the wait
+        - pattern: ^time\.Tick$
+          msg: 'periodic: loop over Clock.Sleep and stop when it returns an error. Clock.After is one-shot and would wait only once'
+        - pattern: ^time\.NewTicker$
+          msg: 'periodic: loop over Clock.Sleep and stop when it returns an error. Clock.After is one-shot and would wait only once'
+        # Not in the issue's list, and the most important entry: every wait this
+        # contract replaced was a NewTimer, so leaving it out would leave the
+        # actual reintroduction path open.
+        - pattern: ^time\.NewTimer$
+          msg: use Clock.Sleep or Clock.After so an injected clock controls the wait
+        - pattern: ^time\.AfterFunc$
+          msg: 'run the callback yourself: go func() { if clock.Sleep(ctx, d) == nil { f() } }() -- skipping it when the wait was cancelled'
+
+    revive:
+      rules:
+        # Only the doc-comment form: a comment that no longer names the declaration
+        # beneath it. The stuttering check is off because it objects to the
+        # long-established CamundaClient name, which is not up for renaming here.
+        - name: exported
+          arguments:
+            - disableStutteringCheck
+
   exclusions:
     generated: lax
     paths:
@@ -18,3 +70,13 @@ linters:
       # examples/readme.go holds illustrative, uncalled functions whose bodies are
       # injected into README.md; the "unused" linter would flag them otherwise.
       - examples/
+    rules:
+      # The legitimate uses carry a per-line //nolint:forbidigo rather than being
+      # excluded by path, so a *new* ambient-time call in those same files is still
+      # caught. Only tests are excluded wholesale.
+      #
+      # Tests: the issue scopes this ban to runtime and handler code. Test doubles
+      # legitimately wrap the time package, and test timeouts are safety nets
+      # rather than cadence.
+      - path: _test\.go$
+        linters: [forbidigo]

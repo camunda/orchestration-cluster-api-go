@@ -232,7 +232,8 @@ func (l *SupervisedLink) close() {
 
 func (l *SupervisedLink) supervise(supCtx context.Context, d *Dialer, hooks linkHooks, ready chan<- error) {
 	idle := linkIdle(defaultHeartbeatMs)
-	seed := uint64(time.Now().UnixNano()) | 1
+	seed := uint64(time.Now().UnixNano()) | 1 //nolint:forbidigo // seeds reconnect jitter; no cadence depends on it
+
 	lastFailed := ""
 	sentReady := false
 
@@ -253,7 +254,8 @@ func (l *SupervisedLink) supervise(supCtx context.Context, d *Dialer, hooks link
 			select {
 			case <-supCtx.Done():
 				return
-			case <-time.After(250 * time.Millisecond):
+			case <-time.After(250 * time.Millisecond): //nolint:forbidigo // falcon is deliberately still on real time; see #40
+
 			}
 			continue
 		}
@@ -289,7 +291,8 @@ func (l *SupervisedLink) supervise(supCtx context.Context, d *Dialer, hooks link
 // refined) idle timeout: the gateway advertises its real heartbeat cadence in the
 // Welcome frame, which tightens the derived timeout to 3× it.
 func (l *SupervisedLink) pump(supCtx context.Context, c *conn, hooks linkHooks, idle time.Duration) time.Duration {
-	timer := time.NewTimer(idle)
+	timer := time.NewTimer(idle) //nolint:forbidigo // an I/O bound, not cadence: engine time would misfire it
+
 	defer timer.Stop()
 	for {
 		select {

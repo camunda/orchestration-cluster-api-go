@@ -104,8 +104,8 @@ func parseJSONObject(s string) map[string]any {
 	return m
 }
 
-// BpmnError, when returned by a JobHandler, makes the worker throw a BPMN error
-// (raising a catch event) instead of failing the job.
+// BpmnError is an error that, when returned by a JobHandler, makes the worker throw
+// a BPMN error (raising a catch event) instead of failing the job.
 type BpmnError struct {
 	Code      string
 	Message   string

@@ -35,7 +35,7 @@ type Clock interface {
 type LiveClock struct{}
 
 // Now reports the current system time.
-func (LiveClock) Now() time.Time { return time.Now() }
+func (LiveClock) Now() time.Time { return time.Now() } //nolint:forbidigo // the adapter onto real time
 
 // Sleep waits for d or until ctx is canceled.
 func (LiveClock) Sleep(ctx context.Context, d time.Duration) error {
@@ -47,7 +47,7 @@ func (LiveClock) Sleep(ctx context.Context, d time.Duration) error {
 	if d <= 0 {
 		return nil
 	}
-	t := time.NewTimer(d)
+	t := time.NewTimer(d) //nolint:forbidigo // the adapter onto real time
 	defer t.Stop()
 	select {
 	case <-ctx.Done():
@@ -58,4 +58,4 @@ func (LiveClock) Sleep(ctx context.Context, d time.Duration) error {
 }
 
 // After returns a channel that receives once d has elapsed.
-func (LiveClock) After(d time.Duration) <-chan time.Time { return time.After(d) }
+func (LiveClock) After(d time.Duration) <-chan time.Time { return time.After(d) } //nolint:forbidigo // the adapter onto real time

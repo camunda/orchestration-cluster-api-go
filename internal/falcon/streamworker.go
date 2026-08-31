@@ -94,7 +94,7 @@ func Subscribe(endpoints []string, d *Dialer, args SubscribeArgs) (*StreamWorker
 // NextJob waits up to wait for the next pushed job, returning (job, false) if none
 // arrives in time.
 func (w *StreamWorker) NextJob(ctx context.Context, wait time.Duration) (json.RawMessage, bool) {
-	timer := time.NewTimer(wait)
+	timer := time.NewTimer(wait) //nolint:forbidigo // an I/O bound, not cadence: engine time would misfire it
 	defer timer.Stop()
 	select {
 	case job := <-w.jobs:
