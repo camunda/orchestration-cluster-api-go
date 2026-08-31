@@ -202,3 +202,46 @@ func TestConfigHasNoUnexportedFields(t *testing.T) {
 		}
 	}
 }
+
+// EngineClock is only useful if downstream code can name it, satisfy Clock with it,
+// and implement ClockController itself. An unexported half is what made the Rust
+// SDK's equivalent unusable until it was re-exported.
+type stubController struct{ pins int }
+
+func (s *stubController) PinAt(context.Context, time.Time) error { s.pins++; return nil }
+func (s *stubController) ResetToLive(context.Context) error      { return nil }
+
+func TestEngineClockIsUsableFromOutsideThePackage(t *testing.T) {
+	ctrl := &stubController{}
+	var clock camunda.Clock = camunda.NewEngineClock(ctrl)
+
+	if err := clock.Sleep(context.Background(), 30*time.Second); err != nil {
+		t.Fatalf("Sleep: %v", err)
+	}
+	if ctrl.pins != 1 {
+		t.Fatalf("%d pins, want 1", ctrl.pins)
+	}
+
+	// And it satisfies the injection point, which is why it exists.
+	client, err := camunda.New(
+		camunda.WithRestAddress("http://localhost:8080"),
+		camunda.WithNoAuth(),
+		camunda.WithClock(clock),
+	)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if client.Clock() != clock {
+		t.Fatal("the client is not using the engine clock")
+	}
+}
+
+// A CamundaClient is itself a ClockController, so a control client can drive the
+// engine clock for a second client under test.
+func TestCamundaClientSatisfiesClockController(t *testing.T) {
+	control, err := camunda.New(camunda.WithRestAddress("http://localhost:8080"), camunda.WithNoAuth())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	var _ camunda.ClockController = control
+}
