@@ -146,16 +146,22 @@ func (c *EngineClock) Sleep(ctx context.Context, d time.Duration) error {
 	return c.PinTo(ctx, c.Now().Add(d))
 }
 
-// After advances the engine clock by d and returns a channel already carrying the new
-// instant. It cannot report an error, so a failed pin is surfaced on the channel as
-// the unadvanced reading; prefer Sleep, which reports it.
+// After returns immediately with a channel that receives once the engine clock has
+// been advanced by d. The advance runs in the background, so After stays usable in a
+// select rather than blocking the caller for an engine round-trip.
+//
+// A failed pin panics in that goroutine, which crashes the program. After has no way
+// to report an error, and reporting a time the engine never moved to would be worse.
+// Prefer [EngineClock.Sleep], which returns the error.
 func (c *EngineClock) After(d time.Duration) <-chan time.Time {
+	// Buffered so the goroutine cannot leak when nobody receives -- a select that
+	// picks another case abandons this channel.
 	ch := make(chan time.Time, 1)
-	if err := c.Sleep(context.Background(), d); err != nil {
-		// Nothing to return the error on; make the failure visible rather than
-		// silently reporting a time the engine never moved to.
-		panic(fmt.Sprintf("EngineClock.After: could not advance the engine clock by %s: %v", d, err))
-	}
-	ch <- c.Now()
+	go func() {
+		if err := c.Sleep(context.Background(), d); err != nil {
+			panic(fmt.Sprintf("EngineClock.After: could not advance the engine clock by %s: %v", d, err))
+		}
+		ch <- c.Now()
+	}()
 	return ch
 }

@@ -20,6 +20,8 @@ type fakeEngine struct {
 	// slow burns real time inside the request, so a pin can outlast the advance it
 	// asks for.
 	slow bool
+	// block, when non-nil, holds every pin until the test closes it.
+	block chan struct{}
 }
 
 var errRefused = errors.New("engine refused")
@@ -30,6 +32,9 @@ func (e *fakeEngine) PinAt(_ context.Context, t time.Time) error {
 	}
 	if e.slow {
 		time.Sleep(20 * time.Millisecond) //nolint:forbidigo // deliberately outlasts the advance
+	}
+	if e.block != nil {
+		<-e.block
 	}
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -209,5 +214,38 @@ func TestAWaitNeverMovesTheClockBackwards(t *testing.T) {
 			t.Fatalf("clock went backwards: %v < %v", now, before)
 		}
 		before = clock.Now()
+	}
+}
+
+// After must not block on the engine round-trip: it exists to be used in a select,
+// and a select evaluates it before any case can be chosen.
+func TestAfterDoesNotBlockOnTheEngine(t *testing.T) {
+	engine := &fakeEngine{block: make(chan struct{})}
+	clock := camunda.NewEngineClock(engine)
+
+	ch := clock.After(time.Second)
+
+	// The pin is still held open, so reaching here at all is the assertion: a
+	// synchronous After would not have returned yet.
+	if pins, _ := engine.recorded(); len(pins) != 0 {
+		t.Fatalf("the pin completed before After returned: %v", pins)
+	}
+	select {
+	case <-ch:
+		t.Fatal("the channel fired before the engine accepted the pin")
+	default:
+	}
+
+	close(engine.block)
+	select {
+	case got := <-ch:
+		if pins, _ := engine.recorded(); len(pins) != 1 {
+			t.Fatalf("%d pins, want 1", len(pins))
+		}
+		if !got.Equal(clock.Now()) {
+			t.Fatalf("channel carried %v, want the advanced reading %v", got, clock.Now())
+		}
+	case <-time.After(5 * time.Second): //nolint:forbidigo // test-only safety net
+		t.Fatal("the channel never fired after the pin landed")
 	}
 }
