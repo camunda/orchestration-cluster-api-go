@@ -126,7 +126,6 @@ const (
 	Legacy
 )
 
-// New creates a Manager for the given profile.
 // Clock is the part of the SDK clock this package needs. Declared here rather than
 // imported so backpressure stays a leaf package (see architecture_test.go); the
 // injected clock satisfies it structurally.

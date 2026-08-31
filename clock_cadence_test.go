@@ -56,9 +56,20 @@ func (c *countingClock) Sleep(ctx context.Context, d time.Duration) error {
 	return nil
 }
 
+// After honours the same contract as Sleep: d elapses on this clock before the
+// channel receives. Returning the *current* time without advancing would let a
+// caller pacing on After spin, since its deadline would never arrive.
 func (c *countingClock) After(d time.Duration) <-chan time.Time {
 	ch := make(chan time.Time, 1)
-	ch <- c.Now()
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if len(c.sleeps) < maxRecordedSleeps {
+		c.sleeps = append(c.sleeps, d)
+	}
+	c.t = c.t.Add(d)
+	// Always fires: unlike Sleep there is no error to report, and a channel that
+	// never receives would deadlock the caller instead of failing the test.
+	ch <- c.t
 	return ch
 }
 

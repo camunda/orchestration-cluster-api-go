@@ -71,7 +71,6 @@ type TokenSource struct {
 	refreshAfter time.Time
 }
 
-// NewTokenSource creates a TokenSource for the given config.
 // Clock is the part of the SDK clock this package needs. Declared here rather than
 // imported so auth stays a leaf package (see architecture_test.go); the injected
 // clock satisfies it structurally.

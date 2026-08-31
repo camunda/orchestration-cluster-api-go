@@ -75,8 +75,6 @@ type Logger struct {
 	clock Clock
 }
 
-// New returns a Logger at the given level writing to out. If out is nil,
-// os.Stderr is used.
 // Clock is the part of the SDK clock this package needs. Declared here rather than
 // imported so diag stays a leaf package (see architecture_test.go); the injected
 // clock satisfies it structurally.
@@ -84,8 +82,9 @@ type Clock interface {
 	Now() time.Time
 }
 
-// New builds a logger. clock must not be nil; the client resolves one before
-// constructing any collaborator.
+// New returns a Logger at the given level writing to out. If out is nil, os.Stderr
+// is used. clock must not be nil; the client resolves one before constructing any
+// collaborator.
 func New(level Level, out io.Writer, clock Clock) *Logger {
 	if out == nil {
 		out = os.Stderr
