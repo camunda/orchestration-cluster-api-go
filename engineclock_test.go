@@ -3,6 +3,9 @@ package camunda_test
 import (
 	"context"
 	"errors"
+	"os"
+	"os/exec"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -247,5 +250,28 @@ func TestAfterDoesNotBlockOnTheEngine(t *testing.T) {
 		}
 	case <-time.After(5 * time.Second): //nolint:forbidigo // test-only safety net
 		t.Fatal("the channel never fired after the pin landed")
+	}
+}
+
+// A refused pin is fatal and names its cause. The panic is on After's own goroutine,
+// so it cannot be recovered by the caller -- asserting that requires watching a child
+// process die, not a deferred recover.
+func TestAfterPanicIsFatalAndNamesTheCause(t *testing.T) {
+	if os.Getenv("CAMUNDA_TEST_AFTER_PANIC") == "1" {
+		<-camunda.NewEngineClock(&fakeEngine{refuse: true}).After(time.Second)
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=TestAfterPanicIsFatalAndNamesTheCause", "-test.timeout=30s")
+	cmd.Env = append(os.Environ(), "CAMUNDA_TEST_AFTER_PANIC=1")
+	out, err := cmd.CombinedOutput()
+
+	if err == nil {
+		t.Fatal("the child process survived a refused pin; After should be fatal")
+	}
+	for _, want := range []string{"EngineClock.After", errRefused.Error()} {
+		if !strings.Contains(string(out), want) {
+			t.Fatalf("crash output does not mention %q:\n%s", want, out)
+		}
 	}
 }

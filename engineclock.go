@@ -150,16 +150,21 @@ func (c *EngineClock) Sleep(ctx context.Context, d time.Duration) error {
 // been advanced by d. The advance runs in the background, so After stays usable in a
 // select rather than blocking the caller for an engine round-trip.
 //
-// A failed pin panics in that goroutine, which crashes the program. After has no way
-// to report an error, and reporting a time the engine never moved to would be worse.
-// Prefer [EngineClock.Sleep], which returns the error.
+// A failed pin panics in that goroutine. Because the panic is not on the caller's
+// goroutine it cannot be recovered, and terminates the program: After has no way to
+// report an error, and reporting a time the engine never moved to would be worse. The
+// panic value is an error wrapping the cause so the crash names it.
+//
+// Use [EngineClock.Sleep] wherever failure needs handling; it returns the error.
 func (c *EngineClock) After(d time.Duration) <-chan time.Time {
 	// Buffered so the goroutine cannot leak when nobody receives -- a select that
 	// picks another case abandons this channel.
 	ch := make(chan time.Time, 1)
 	go func() {
 		if err := c.Sleep(context.Background(), d); err != nil {
-			panic(fmt.Sprintf("EngineClock.After: could not advance the engine clock by %s: %v", d, err))
+			// An error value, not a string: a caller recovering for diagnostics can
+			// then match the cause with errors.Is or errors.As.
+			panic(fmt.Errorf("camunda: EngineClock.After could not advance the engine clock by %s: %w", d, err))
 		}
 		ch <- c.Now()
 	}()
