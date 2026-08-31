@@ -64,7 +64,7 @@ func (c *CamundaClient) grpcConn() (*grpc.ClientConn, error) {
 			Audience:     c.cfg.TokenAudience,
 			Scope:        c.cfg.OAuthScope,
 			CacheDir:     c.cfg.OAuthCacheDir,
-		})
+		}, c.clock)
 		opts = append(opts, grpc.WithPerRPCCredentials(&oauthPerRPC{ts: ts, secure: secure}))
 	}
 	return grpc.NewClient(c.cfg.GrpcAddress, opts...)
@@ -226,7 +226,7 @@ func (w *StreamJobWorker) Run(ctx context.Context) error {
 		if streamErr != nil {
 			w.client.logger.Warn("job stream ended; reconnecting", "type", w.jobType, "error", streamErr)
 		}
-		if err := sleepCtx(ctx, w.reconnectBackoff); err != nil {
+		if err := sleepCtx(ctx, w.client.clock, w.reconnectBackoff); err != nil {
 			break
 		}
 	}
@@ -304,7 +304,7 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 				w.client.restAck(ackCtx, job, vars, herr)
 			}()
 		}
-		if err := sleepCtx(ctx, w.pollInterval); err != nil {
+		if err := sleepCtx(ctx, w.client.clock, w.pollInterval); err != nil {
 			return
 		}
 	}

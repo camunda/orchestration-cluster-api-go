@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -30,7 +31,7 @@ func TestTokenSourceCachesInMemory(t *testing.T) {
 	srv := tokenServer(t, &calls)
 	defer srv.Close()
 
-	ts := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec"})
+	ts := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec"}, &settableClock{t: time.Unix(1_000_000, 0)})
 	for i := 0; i < 3; i++ {
 		tok, err := ts.Token(context.Background())
 		if err != nil {
@@ -51,14 +52,14 @@ func TestTokenSourceRefreshesAfterExpiry(t *testing.T) {
 	defer srv.Close()
 
 	current := time.Unix(1_000_000, 0)
-	ts := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec"})
-	ts.cfg.now = func() time.Time { return current }
+	clk := &settableClock{t: current}
+	ts := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec"}, clk)
 
 	if _, err := ts.Token(context.Background()); err != nil {
 		t.Fatalf("first Token: %v", err)
 	}
 	// Advance beyond the refresh window (3600s * 0.9 = 3240s).
-	current = current.Add(4000 * time.Second)
+	clk.set(current.Add(4000 * time.Second))
 	tok, err := ts.Token(context.Background())
 	if err != nil {
 		t.Fatalf("second Token: %v", err)
@@ -77,12 +78,12 @@ func TestTokenSourceDiskCacheSharedAcrossInstances(t *testing.T) {
 	defer srv.Close()
 	dir := t.TempDir()
 
-	first := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec", CacheDir: dir})
+	first := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec", CacheDir: dir}, &settableClock{t: time.Unix(1_000_000, 0)})
 	if _, err := first.Token(context.Background()); err != nil {
 		t.Fatalf("first instance Token: %v", err)
 	}
 	// A fresh instance (simulating a process restart) should reuse the disk token.
-	second := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec", CacheDir: dir})
+	second := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec", CacheDir: dir}, &settableClock{t: time.Unix(1_000_000, 0)})
 	tok, err := second.Token(context.Background())
 	if err != nil {
 		t.Fatalf("second instance Token: %v", err)
@@ -133,7 +134,7 @@ func TestTransportOAuthBearer(t *testing.T) {
 	var calls int32
 	srv := tokenServer(t, &calls)
 	defer srv.Close()
-	ts := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec"})
+	ts := NewTokenSource(OAuthConfig{TokenURL: srv.URL, ClientID: "id", ClientSecret: "sec"}, &settableClock{t: time.Unix(1_000_000, 0)})
 
 	cap := &captureRT{}
 	tr := &Transport{Base: cap, Strategy: OAuth, TokenSource: ts}
@@ -144,4 +145,22 @@ func TestTransportOAuthBearer(t *testing.T) {
 	if got := cap.last.Header.Get("Authorization"); got != "Bearer tok-1" {
 		t.Errorf("expected bearer token header, got %q", got)
 	}
+}
+
+// settableClock lets a test move token expiry forward without waiting.
+type settableClock struct {
+	mu sync.Mutex
+	t  time.Time
+}
+
+func (c *settableClock) Now() time.Time {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.t
+}
+
+func (c *settableClock) set(t time.Time) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.t = t
 }

@@ -18,10 +18,22 @@ type pollConfig struct {
 	timeout  time.Duration
 	interval time.Duration
 	retry    func(error) bool
+	clock    Clock
 }
 
 // PollOption customizes Poll.
 type PollOption func(*pollConfig)
+
+// WithPollClock resolves the poll interval and timeout through clock. Poll is a
+// package-level function with no client to inherit one from, so pass the client's
+// clock (CamundaClient.Clock) to keep a test on a single timeline.
+func WithPollClock(clock Clock) PollOption {
+	return func(c *pollConfig) {
+		if clock != nil {
+			c.clock = clock
+		}
+	}
+}
 
 // WithPollTimeout sets the overall polling deadline.
 func WithPollTimeout(d time.Duration) PollOption {
@@ -72,13 +84,18 @@ func IsNotFound(err error) bool {
 //	    return client.GetProcessInstance(ctx, key)
 //	})
 func Poll[T any](ctx context.Context, fn func(context.Context) (T, error), opts ...PollOption) (T, error) {
-	cfg := pollConfig{timeout: defaultPollTimeout, interval: defaultPollInterval, retry: IsNotFound}
+	cfg := pollConfig{
+		timeout:  defaultPollTimeout,
+		interval: defaultPollInterval,
+		retry:    IsNotFound,
+		clock:    LiveClock{},
+	}
 	for _, o := range opts {
 		o(&cfg)
 	}
 
 	var zero T
-	deadline := time.Now().Add(cfg.timeout)
+	deadline := cfg.clock.Now().Add(cfg.timeout)
 	for {
 		res, err := fn(ctx)
 		if err == nil {
@@ -87,10 +104,10 @@ func Poll[T any](ctx context.Context, fn func(context.Context) (T, error), opts 
 		if !cfg.retry(err) {
 			return zero, err
 		}
-		if !time.Now().Before(deadline) {
+		if !cfg.clock.Now().Before(deadline) {
 			return zero, fmt.Errorf("%w after %s: %v", ErrEventualConsistencyTimeout, cfg.timeout, err)
 		}
-		if serr := sleepCtx(ctx, cfg.interval); serr != nil {
+		if serr := sleepCtx(ctx, cfg.clock, cfg.interval); serr != nil {
 			return zero, serr
 		}
 	}

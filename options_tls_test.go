@@ -169,7 +169,7 @@ func TestOAuthPerRPCMetadata(t *testing.T) {
 			TokenURL:     tokenServer.URL,
 			ClientID:     "client",
 			ClientSecret: "secret",
-		}),
+		}, LiveClock{}),
 		secure: true,
 	}
 	md, err := creds.GetRequestMetadata(context.Background())
