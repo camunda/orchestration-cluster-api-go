@@ -83,6 +83,13 @@ func WithFalcon(enabled bool) Option {
 	return func(c *Config) { c.Falcon = enabled }
 }
 
+// WithClock sets the clock the client resolves cadence through: retry backoff, the
+// backpressure gate, token refresh, worker polling and consistency polling. Defaults
+// to [LiveClock].
+func WithClock(c Clock) Option {
+	return func(cfg *Config) { cfg.clock = c }
+}
+
 // WithForceREST forces the pure-REST path even when the gateway advertises FALCON
 // support (useful where WebSockets are blocked by a proxy).
 func WithForceREST(force bool) Option {

@@ -200,6 +200,10 @@ type Config struct {
 	Retry          RetryConfig
 	TLS            TLSConfig
 	WorkerDefaults WorkerDefaults
+
+	// clock is the injected clock, or nil for real time. Unexported: Config is
+	// otherwise plain configuration data, and this is behaviour.
+	clock Clock
 }
 
 // LoadConfig resolves configuration from environment variables, applies opts
