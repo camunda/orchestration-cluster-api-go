@@ -141,3 +141,34 @@ func TestLiveClockAfterFires(t *testing.T) {
 		t.Fatal("After never fired")
 	}
 }
+
+// A nil pointer stored in a non-nil interface passes an `!= nil` check, so the
+// defaulting logic would keep it and the first method call would panic -- inside the
+// runtime, long after New returned and far from the WithClock call that caused it.
+func TestWithClockRejectsATypedNilClock(t *testing.T) {
+	var typedNil *recordingClock // nil pointer, but a non-nil Clock once boxed
+
+	_, err := camunda.New(
+		camunda.WithRestAddress("http://localhost:8080"),
+		camunda.WithNoAuth(),
+		camunda.WithClock(typedNil),
+	)
+	if !errors.Is(err, camunda.ErrConfig) {
+		t.Fatalf("New with a typed-nil clock returned %v, want a config error", err)
+	}
+}
+
+// Demonstrates why the check above exists: the value New now rejects does panic when
+// used. If this ever stops panicking the guard is merely belt-and-braces, not load
+// bearing, and the reasoning above should be revisited.
+func TestATypedNilClockPanicsWhenUsed(t *testing.T) {
+	var typedNil *recordingClock
+	var clock camunda.Clock = typedNil
+
+	defer func() {
+		if recover() == nil {
+			t.Fatal("expected a nil-pointer panic from the typed-nil clock")
+		}
+	}()
+	_ = clock.Sleep(context.Background(), time.Millisecond)
+}

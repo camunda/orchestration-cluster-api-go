@@ -3,6 +3,7 @@ package camunda
 import (
 	"net/url"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -369,9 +370,26 @@ func resolveWorkerDefaults(get func(...string) string) (WorkerDefaults, error) {
 	return wd, nil
 }
 
+// isNilInterfaceValue reports whether v holds a nil pointer, map, slice, channel or
+// func. Such a value is not equal to nil as an interface, but using it panics.
+func isNilInterfaceValue(v any) bool {
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Pointer, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func, reflect.UnsafePointer:
+		return rv.IsNil()
+	default:
+		return false
+	}
+}
+
 // Validate performs fail-fast validation, returning an actionable error (wrapping
 // ErrConfig) when the configuration cannot support the selected strategy.
 func (c *Config) Validate() error {
+	// A nil pointer inside a non-nil interface passes an `!= nil` check but panics on
+	// the first method call, far from WithClock and long after New returned.
+	if c.clock != nil && isNilInterfaceValue(c.clock) {
+		return configErrorf("WithClock was given a nil %T", c.clock)
+	}
 	u, err := url.Parse(c.RestAddress)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
 		return configErrorf("CAMUNDA_REST_ADDRESS %q is not a valid http(s) URL", c.RestAddress)

@@ -5,11 +5,15 @@ import (
 	"time"
 )
 
-// Clock is time and waiting as the SDK runtime sees them.
+// Clock is time and waiting, as an injectable dependency.
 //
-// Every wait and every elapsed-time measurement in the runtime resolves through a
-// Clock rather than calling the time package directly, so a test can control cadence
-// instead of waiting for it. Inject one with [WithClock]; the default is [LiveClock].
+// It exists so that runtime cadence can be resolved through a clock a test controls
+// rather than by calling the time package directly. Inject one with [WithClock]; the
+// default is [LiveClock].
+//
+// Runtime call sites are being migrated onto it (see camunda/orchestration-cluster-api-go#40);
+// until that lands, an injected clock is stored and reachable via CamundaClient.Clock
+// but does not yet drive retry, backpressure, worker or consistency cadence.
 //
 // Implementations must be safe for concurrent use.
 type Clock interface {
@@ -26,8 +30,8 @@ type Clock interface {
 	After(d time.Duration) <-chan time.Time
 }
 
-// LiveClock is real time, backed by the time package. It is the clock used when
-// none is injected.
+// LiveClock is real time, backed by the time package. It is the clock used when none
+// is injected.
 type LiveClock struct{}
 
 // Now reports the current system time.
