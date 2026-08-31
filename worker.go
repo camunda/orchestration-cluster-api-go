@@ -164,7 +164,7 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 			sw.Replenish(1)
 			continue
 		}
-		job := newRESTJob(ajr)
+		job := newRESTJob(ajr, w.client.clock)
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -222,7 +222,7 @@ func (w *JobWorker) runRESTPoll(ctx context.Context) error {
 		}
 
 		for i := range jobs {
-			job := newRESTJob(jobs[i])
+			job := newRESTJob(jobs[i], w.client.clock)
 			inFlight.Add(1)
 			wg.Add(1)
 			go func() {

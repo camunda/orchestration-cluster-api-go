@@ -21,6 +21,7 @@ type Job struct {
 	customHeaders      map[string]any
 	variables          map[string]any
 	leaseToken         string
+	clock              Clock
 }
 
 // Key returns the job key.
@@ -47,6 +48,10 @@ func (j *Job) RawVariables() map[string]any { return j.variables }
 // LeaseToken returns the activation lease token, or "" if the job was not leased.
 func (j *Job) LeaseToken() string { return j.leaseToken }
 
+// Clock returns the worker's clock. A handler that needs to wait should use this
+// rather than time.Sleep, so an injected clock controls it.
+func (j *Job) Clock() Clock { return j.clock }
+
 // Variables unmarshals the job variables into v (a pointer to a struct or map).
 func (j *Job) Variables(v any) error {
 	b, err := json.Marshal(j.variables)
@@ -56,8 +61,9 @@ func (j *Job) Variables(v any) error {
 	return json.Unmarshal(b, v)
 }
 
-// newRESTJob builds a Job from a REST activate-jobs result.
-func newRESTJob(aj openapi.ActivatedJobResult) *Job {
+// newRESTJob builds a Job from a REST activate-jobs result. clock is positional so
+// the compiler rejects a delivery path that forgets to pass the worker's clock.
+func newRESTJob(aj openapi.ActivatedJobResult, clock Clock) *Job {
 	return &Job{
 		key:                string(aj.GetJobKey()),
 		jobType:            aj.GetType(),
@@ -67,12 +73,13 @@ func newRESTJob(aj openapi.ActivatedJobResult) *Job {
 		customHeaders:      aj.GetCustomHeaders(),
 		variables:          aj.GetVariables(),
 		leaseToken:         aj.GetLeaseToken(),
+		clock:              clock,
 	}
 }
 
 // newGRPCJob builds a Job from a gRPC-streamed ActivatedJob. The gRPC message
 // carries variables and custom headers as JSON strings, which are decoded here.
-func newGRPCJob(aj *pb.ActivatedJob) *Job {
+func newGRPCJob(aj *pb.ActivatedJob, clock Clock) *Job {
 	return &Job{
 		key:                strconv.FormatInt(aj.GetKey(), 10),
 		jobType:            aj.GetType(),
@@ -82,6 +89,7 @@ func newGRPCJob(aj *pb.ActivatedJob) *Job {
 		customHeaders:      parseJSONObject(aj.GetCustomHeaders()),
 		variables:          parseJSONObject(aj.GetVariables()),
 		leaseToken:         aj.GetLeaseToken(),
+		clock:              clock,
 	}
 }
 
