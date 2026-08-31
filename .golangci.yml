@@ -42,16 +42,16 @@ linters:
         - pattern: ^time\.After$
           msg: use Clock.After so an injected clock controls the wait
         - pattern: ^time\.Tick$
-          msg: use Clock.After so an injected clock controls the cadence
+          msg: 'periodic: loop over Clock.Sleep. Clock.After is one-shot and would wait only once'
         - pattern: ^time\.NewTicker$
-          msg: use Clock.After so an injected clock controls the cadence
+          msg: 'periodic: loop over Clock.Sleep. Clock.After is one-shot and would wait only once'
         # Not in the issue's list, and the most important entry: every wait this
         # contract replaced was a NewTimer, so leaving it out would leave the
         # actual reintroduction path open.
         - pattern: ^time\.NewTimer$
           msg: use Clock.Sleep or Clock.After so an injected clock controls the wait
         - pattern: ^time\.AfterFunc$
-          msg: use Clock.After so an injected clock controls the wait
+          msg: 'run the callback yourself: go func() { clock.Sleep(ctx, d); f() }()'
 
     revive:
       rules:
