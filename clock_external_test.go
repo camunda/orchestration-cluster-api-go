@@ -10,6 +10,7 @@ package camunda_test
 import (
 	"context"
 	"errors"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -171,4 +172,33 @@ func TestATypedNilClockPanicsWhenUsed(t *testing.T) {
 		}
 	}()
 	_ = clock.Sleep(context.Background(), time.Millisecond)
+}
+
+// An untyped nil is an unambiguous "no clock", so it selects the default rather than
+// erroring. This is the documented contract and the counterpart to the typed-nil case
+// above: that one claims to be a usable clock and is rejected.
+func TestWithClockNilSelectsTheDefault(t *testing.T) {
+	client, err := camunda.New(
+		camunda.WithRestAddress("http://localhost:8080"),
+		camunda.WithNoAuth(),
+		camunda.WithClock(nil),
+	)
+	if err != nil {
+		t.Fatalf("New with a nil clock: %v", err)
+	}
+	if _, ok := client.Clock().(camunda.LiveClock); !ok {
+		t.Fatalf("clock is %T, want camunda.LiveClock", client.Clock())
+	}
+}
+
+// An unexported field in an exported struct makes unkeyed composite literals of that
+// struct illegal outside the package. Config is public configuration data, so keep it
+// free of them rather than rediscovering the break downstream.
+func TestConfigHasNoUnexportedFields(t *testing.T) {
+	ty := reflect.TypeOf(camunda.Config{})
+	for i := range ty.NumField() {
+		if f := ty.Field(i); !f.IsExported() {
+			t.Errorf("Config.%s is unexported; that breaks unkeyed literals for downstream users", f.Name)
+		}
+	}
 }

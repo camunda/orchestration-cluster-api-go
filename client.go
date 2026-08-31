@@ -79,7 +79,7 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	oc.Servers = openapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress)}}
 
 	// Resolve the clock once, so every collaborator shares one timeline.
-	clk := cfg.clock
+	clk := cfg.Clock
 	if clk == nil {
 		clk = LiveClock{}
 	}

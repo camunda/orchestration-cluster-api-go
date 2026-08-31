@@ -202,9 +202,8 @@ type Config struct {
 	TLS            TLSConfig
 	WorkerDefaults WorkerDefaults
 
-	// clock is the injected clock, or nil for real time. Unexported: Config is
-	// otherwise plain configuration data, and this is behaviour.
-	clock Clock
+	// Clock resolves runtime cadence. Nil selects [LiveClock].
+	Clock Clock
 }
 
 // LoadConfig resolves configuration from environment variables, applies opts
@@ -370,9 +369,13 @@ func resolveWorkerDefaults(get func(...string) string) (WorkerDefaults, error) {
 	return wd, nil
 }
 
-// isNilInterfaceValue reports whether v holds a nil pointer, map, slice, channel or
-// func. Such a value is not equal to nil as an interface, but using it panics.
-func isNilInterfaceValue(v any) bool {
+// isNilUnderlyingValue reports whether v holds a nil pointer, map, slice, channel or
+// func. Such a value is not equal to nil as an interface, so it passes a nil check
+// while having no usable underlying value. The pointer case is the one that bites --
+// it is how nearly every Go type satisfies an interface, and the first method call
+// touching a field panics. The others are included because none of them can be a
+// working Clock, not because every use of them panics.
+func isNilUnderlyingValue(v any) bool {
 	rv := reflect.ValueOf(v)
 	switch rv.Kind() {
 	case reflect.Pointer, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func, reflect.UnsafePointer:
@@ -387,8 +390,8 @@ func isNilInterfaceValue(v any) bool {
 func (c *Config) Validate() error {
 	// A nil pointer inside a non-nil interface passes an `!= nil` check but panics on
 	// the first method call, far from WithClock and long after New returned.
-	if c.clock != nil && isNilInterfaceValue(c.clock) {
-		return configErrorf("WithClock was given a nil %T", c.clock)
+	if c.Clock != nil && isNilUnderlyingValue(c.Clock) {
+		return configErrorf("WithClock was given a nil %T", c.Clock)
 	}
 	u, err := url.Parse(c.RestAddress)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {

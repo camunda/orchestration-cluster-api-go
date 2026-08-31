@@ -91,10 +91,12 @@ func WithFalcon(enabled bool) Option {
 // reachable via CamundaClient.Clock, but retry backoff, the backpressure gate, token
 // refresh, worker polling and consistency polling still use real time.
 //
-// The clock must be non-nil, including not a nil pointer inside a non-nil interface;
-// [New] reports a configuration error otherwise.
+// A nil Clock selects the default. A *typed* nil -- a nil pointer boxed in a non-nil
+// interface, such as (*myClock)(nil) -- is rejected by [New] with a configuration
+// error instead: unlike an untyped nil it claims to be a usable clock, and would
+// panic on first use deep inside the runtime.
 func WithClock(c Clock) Option {
-	return func(cfg *Config) { cfg.clock = c }
+	return func(cfg *Config) { cfg.Clock = c }
 }
 
 // WithForceREST forces the pure-REST path even when the gateway advertises FALCON
