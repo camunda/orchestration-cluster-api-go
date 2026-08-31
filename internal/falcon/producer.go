@@ -266,7 +266,8 @@ func (p *Producer) Create(ctx context.Context, args CreateArgs) (*CreateOutcome,
 		if args.RequestTimeoutMs > 0 {
 			budget = time.Duration(args.RequestTimeoutMs) * time.Millisecond
 		}
-		timer := time.NewTimer(budget)
+		timer := time.NewTimer(budget) //nolint:forbidigo // an I/O bound, not cadence: engine time would misfire it
+
 		defer timer.Stop()
 		select {
 		case res, ok := <-awaitCh:
@@ -292,7 +293,8 @@ func (p *Producer) Create(ctx context.Context, args CreateArgs) (*CreateOutcome,
 }
 
 func (p *Producer) awaitAck(ctx context.Context, ackCh chan ackResult) (ackResult, error) {
-	timer := time.NewTimer(createAckTimeout)
+	timer := time.NewTimer(createAckTimeout) //nolint:forbidigo // an I/O bound, not cadence: engine time would misfire it
+
 	defer timer.Stop()
 	select {
 	case ack, ok := <-ackCh:
