@@ -293,3 +293,36 @@ func rawEscapeHatch(ctx context.Context, client *camunda.CamundaClient) error {
 	// endregion RawEscapeHatch
 	return nil
 }
+
+func handlerWait(client *camunda.CamundaClient) {
+	// region HandlerWait
+	worker := client.NewJobWorker("payment", func(ctx context.Context, job *camunda.Job) (map[string]any, error) {
+		// Short coordination only -- a business wait belongs in the process as a
+		// BPMN timer event.
+		if err := job.Clock().Sleep(ctx, 500*time.Millisecond); err != nil {
+			return nil, err
+		}
+		return map[string]any{"paid": true}, nil
+	})
+	// endregion HandlerWait
+	_ = worker
+}
+
+func engineClock(addr string) error {
+	// region EngineClock
+	// The control client issues the pin requests and keeps real time itself.
+	control, err := camunda.New(camunda.WithRestAddress(addr))
+	if err != nil {
+		return err
+	}
+	clock := camunda.NewEngineClock(control)
+
+	// Anything this client waits on now advances the engine instead of real time.
+	client, err := camunda.New(camunda.WithRestAddress(addr), camunda.WithClock(clock))
+	if err != nil {
+		return err
+	}
+	// endregion EngineClock
+	_ = client
+	return nil
+}

@@ -562,7 +562,15 @@ WORKER_TYPES = [
     "Job",
     "JobHandler",
 ]
-RUNTIME_TYPES = ["APIError", "BpmnError", "PollOption"]
+RUNTIME_TYPES = [
+    "APIError",
+    "BpmnError",
+    "PollOption",
+    "Clock",
+    "ClockController",
+    "LiveClock",
+    "EngineClock",
+]
 
 # Types declared alongside the domain keys that are serialization plumbing, not
 # identifiers. Everything else in domain-keys.json is published as a key, so a

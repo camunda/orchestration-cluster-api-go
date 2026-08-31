@@ -99,7 +99,7 @@ docs-json:
 docs-md: docs-json
 	python3 scripts/generate-docusaurus-md.py --validate-links
 
-check: fmt-check tidy-check vet build test examples sync-readme-check coverage
+check: fmt-check tidy-check vet build test examples sync-readme-check docs-md coverage
 
 clean:
 	rm -rf dist

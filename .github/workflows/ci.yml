@@ -88,6 +88,10 @@ jobs:
         run: python scripts/sync-readme-snippets.py --check
       - name: Check example coverage
         run: python scripts/check-example-coverage.py
+      # The generator fails on an exported type that is not assigned to a reference
+      # page. Nothing ran it, so five merged PRs left it broken unnoticed.
+      - name: Check every exported type is documented
+        run: make docs-md
 
   commitlint:
     name: Commit messages
