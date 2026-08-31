@@ -262,7 +262,7 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 		if err != nil {
 			return err
 		}
-		job := newGRPCJob(aj)
+		job := newGRPCJob(aj, w.client.clock)
 		select {
 		case sem <- struct{}{}:
 		case <-ctx.Done():
@@ -288,7 +288,7 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 			w.client.logger.Debug("sidecar poll failed", "type", w.jobType, "error", err)
 		}
 		for i := range jobs {
-			job := newRESTJob(jobs[i])
+			job := newRESTJob(jobs[i], w.client.clock)
 			select {
 			case sem <- struct{}{}:
 			case <-ctx.Done():

@@ -21,7 +21,7 @@ func TestNewGRPCJobDecodesFields(t *testing.T) {
 		Variables:          `{"amount":42,"name":"x"}`,
 		LeaseToken:         &lease,
 	}
-	j := newGRPCJob(aj)
+	j := newGRPCJob(aj, LiveClock{})
 
 	if j.Key() != "123" {
 		t.Errorf("Key() = %q, want 123", j.Key())
@@ -61,7 +61,7 @@ func TestNewGRPCJobDecodesFields(t *testing.T) {
 // variables/custom-header JSON strings yields usable empty maps rather than nil
 // (which would make Variables/CustomHeaders access fragile).
 func TestNewGRPCJobHandlesEmptyJSONStrings(t *testing.T) {
-	j := newGRPCJob(&pb.ActivatedJob{Key: 1, Type: "demo"})
+	j := newGRPCJob(&pb.ActivatedJob{Key: 1, Type: "demo"}, LiveClock{})
 
 	if j.RawVariables() == nil || len(j.RawVariables()) != 0 {
 		t.Errorf("RawVariables() = %v, want empty non-nil map", j.RawVariables())
