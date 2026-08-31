@@ -203,7 +203,7 @@ func (w *JobWorker) runRESTPoll(ctx context.Context) error {
 	for ctx.Err() == nil {
 		free := w.maxConcurrent - int(inFlight.Load())
 		if free <= 0 {
-			if err := sleepCtx(ctx, w.pollInterval); err != nil {
+			if err := sleepCtx(ctx, w.client.clock, w.pollInterval); err != nil {
 				break
 			}
 			continue
@@ -215,7 +215,7 @@ func (w *JobWorker) runRESTPoll(ctx context.Context) error {
 				break
 			}
 			w.client.logger.Warn("activate jobs failed", "type", w.jobType, "error", err)
-			if err := sleepCtx(ctx, w.pollInterval); err != nil {
+			if err := sleepCtx(ctx, w.client.clock, w.pollInterval); err != nil {
 				break
 			}
 			continue
@@ -233,7 +233,7 @@ func (w *JobWorker) runRESTPoll(ctx context.Context) error {
 		}
 
 		if len(jobs) == 0 {
-			if err := sleepCtx(ctx, w.pollInterval); err != nil {
+			if err := sleepCtx(ctx, w.client.clock, w.pollInterval); err != nil {
 				break
 			}
 		}
@@ -357,17 +357,13 @@ func defaultTenantIDs(id string) []string {
 	return []string{id}
 }
 
-// sleepCtx waits for d or until ctx is canceled, returning ctx.Err() if canceled.
-func sleepCtx(ctx context.Context, d time.Duration) error {
+// sleepCtx waits for d on clock, or until ctx is canceled.
+//
+// A non-positive d becomes one second. Clock.Sleep returns immediately in that case,
+// so without this an unset poll interval would spin the poll loop rather than pace it.
+func sleepCtx(ctx context.Context, clock Clock, d time.Duration) error {
 	if d <= 0 {
 		d = time.Second
 	}
-	t := time.NewTimer(d)
-	defer t.Stop()
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-t.C:
-		return nil
-	}
+	return clock.Sleep(ctx, d)
 }

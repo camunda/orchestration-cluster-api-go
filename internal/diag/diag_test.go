@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestParseLevel(t *testing.T) {
@@ -35,7 +36,7 @@ func TestParseLevel(t *testing.T) {
 
 func TestLoggerRespectsLevel(t *testing.T) {
 	var buf bytes.Buffer
-	l := New(LevelWarn, &buf)
+	l := New(LevelWarn, &buf, fixedClock{})
 	l.Debug("should-not-appear")
 	l.Info("also-not")
 	l.Warn("appears", "k", "v")
@@ -54,7 +55,7 @@ func TestLoggerRespectsLevel(t *testing.T) {
 
 func TestLoggerOffSuppressesEverything(t *testing.T) {
 	var buf bytes.Buffer
-	l := New(LevelOff, &buf)
+	l := New(LevelOff, &buf, fixedClock{})
 	l.Error("nope")
 	if buf.Len() != 0 {
 		t.Errorf("LevelOff should suppress all output, got %q", buf.String())
@@ -94,3 +95,8 @@ func TestEnvironmentSnapshotRedactsSecrets(t *testing.T) {
 		t.Errorf("key path is a location not a secret, got %q", snap["CAMUNDA_MTLS_KEY_PATH"])
 	}
 }
+
+// fixedClock pins log timestamps so output is comparable.
+type fixedClock struct{}
+
+func (fixedClock) Now() time.Time { return time.Unix(1_000_000, 0).UTC() }

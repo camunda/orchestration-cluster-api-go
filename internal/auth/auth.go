@@ -47,8 +47,6 @@ type OAuthConfig struct {
 	CacheDir string
 	// HTTPClient is used to fetch tokens. If nil, a client with a 30s timeout is used.
 	HTTPClient *http.Client
-
-	now func() time.Time // test hook
 }
 
 type tokenResponse struct {
@@ -65,7 +63,8 @@ type diskToken struct {
 // concurrent use; a mutex serializes refreshes so concurrent callers share a
 // single in-flight fetch (single-flight).
 type TokenSource struct {
-	cfg OAuthConfig
+	cfg   OAuthConfig
+	clock Clock
 
 	mu           sync.Mutex
 	token        string
@@ -73,14 +72,21 @@ type TokenSource struct {
 }
 
 // NewTokenSource creates a TokenSource for the given config.
-func NewTokenSource(cfg OAuthConfig) *TokenSource {
+// Clock is the part of the SDK clock this package needs. Declared here rather than
+// imported so auth stays a leaf package (see architecture_test.go); the injected
+// clock satisfies it structurally.
+type Clock interface {
+	Now() time.Time
+}
+
+// NewTokenSource builds a token source. clock is positional rather than a field on
+// OAuthConfig so the compiler rejects a caller that forgets it; token expiry is
+// resolved through it.
+func NewTokenSource(cfg OAuthConfig, clock Clock) *TokenSource {
 	if cfg.HTTPClient == nil {
 		cfg.HTTPClient = &http.Client{Timeout: 30 * time.Second}
 	}
-	if cfg.now == nil {
-		cfg.now = time.Now
-	}
-	return &TokenSource{cfg: cfg}
+	return &TokenSource{cfg: cfg, clock: clock}
 }
 
 func (ts *TokenSource) cachePath() string {
@@ -93,7 +99,7 @@ func (ts *TokenSource) Token(ctx context.Context) (string, error) {
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
 
-	now := ts.cfg.now()
+	now := ts.clock.Now()
 	if ts.token != "" && now.Before(ts.refreshAfter) {
 		return ts.token, nil
 	}

@@ -26,6 +26,7 @@ type Options struct {
 	Auth *auth.Transport
 	// Retry is the transient-error retry policy.
 	Retry retry.Config
+
 	// Backpressure is the adaptive backpressure manager. If nil, no gating layer
 	// is inserted.
 	Backpressure *backpressure.Manager
@@ -35,7 +36,9 @@ type Options struct {
 }
 
 // New builds the RoundTripper chain described in the package doc.
-func New(o Options) http.RoundTripper {
+// New builds the RoundTripper chain. clock is positional so a caller cannot silently
+// omit it and leave retry backoff on real time.
+func New(o Options, clock retry.Clock) http.RoundTripper {
 	inner := o.Base
 	if inner == nil {
 		inner = http.DefaultTransport
@@ -44,7 +47,7 @@ func New(o Options) http.RoundTripper {
 		o.Auth.Base = inner
 		inner = o.Auth
 	}
-	inner = &retry.Transport{Base: inner, Cfg: o.Retry}
+	inner = &retry.Transport{Base: inner, Cfg: o.Retry, Clock: clock}
 	if o.Backpressure != nil {
 		inner = &BackpressureTransport{Base: inner, Mgr: o.Backpressure, Exempt: o.Exempt}
 	}

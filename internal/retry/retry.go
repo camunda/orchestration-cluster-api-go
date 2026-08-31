@@ -36,9 +36,18 @@ type Transport struct {
 	// Cfg is the retry policy.
 	Cfg Config
 
-	// randFloat and sleep are test hooks; nil uses production implementations.
+	// Clock resolves the backoff wait. Required; transport.New always sets it.
+	Clock Clock
+
+	// randFloat is a test hook; nil uses the production implementation.
 	randFloat func() float64
-	sleep     func(ctx context.Context, d time.Duration) error
+}
+
+// Clock is the part of the SDK clock this package needs. Declared here rather than
+// imported so retry stays a leaf package (see architecture_test.go); the injected
+// clock satisfies it structurally.
+type Clock interface {
+	Sleep(ctx context.Context, d time.Duration) error
 }
 
 func (t *Transport) base() http.RoundTripper {
@@ -56,17 +65,7 @@ func (t *Transport) rnd() float64 {
 }
 
 func (t *Transport) doSleep(ctx context.Context, d time.Duration) error {
-	if t.sleep != nil {
-		return t.sleep(ctx, d)
-	}
-	timer := time.NewTimer(d)
-	defer timer.Stop()
-	select {
-	case <-ctx.Done():
-		return ctx.Err()
-	case <-timer.C:
-		return nil
-	}
+	return t.Clock.Sleep(ctx, d)
 }
 
 // IsRetryableStatus reports whether an HTTP status code is a transient failure.

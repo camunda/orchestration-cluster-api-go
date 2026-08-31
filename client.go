@@ -56,7 +56,13 @@ func New(opts ...Option) (*CamundaClient, error) {
 }
 
 func newFromConfig(cfg *Config) (*CamundaClient, error) {
-	authT, err := buildAuthTransport(cfg)
+	// Resolve the clock before any collaborator, so they all share one timeline.
+	clk := cfg.Clock
+	if clk == nil {
+		clk = LiveClock{}
+	}
+
+	authT, err := buildAuthTransport(cfg, clk)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +70,7 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	bp := backpressure.New(backpressureProfile(cfg.BackpressureProfile))
+	bp := backpressure.New(backpressureProfile(cfg.BackpressureProfile), clk)
 
 	rt := transport.New(transport.Options{
 		Base:         base,
@@ -72,22 +78,16 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 		Retry:        retry.Config{MaxAttempts: cfg.Retry.MaxAttempts, BaseDelay: cfg.Retry.BaseDelay, MaxDelay: cfg.Retry.MaxDelay},
 		Backpressure: bp,
 		Exempt:       exemptDrainOps,
-	})
+	}, clk)
 
 	oc := openapi.NewConfiguration()
 	oc.HTTPClient = &http.Client{Transport: rt}
 	oc.Servers = openapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress)}}
 
-	// Resolve the clock once, so every collaborator shares one timeline.
-	clk := cfg.Clock
-	if clk == nil {
-		clk = LiveClock{}
-	}
-
 	return &CamundaClient{
 		cfg:    cfg,
 		raw:    openapi.NewAPIClient(oc),
-		logger: diag.New(logLevel(cfg.LogLevel), nil),
+		logger: diag.New(logLevel(cfg.LogLevel), nil, clk),
 		bp:     bp,
 		clock:  clk,
 	}, nil
@@ -125,7 +125,7 @@ func (c *CamundaClient) wrapError(resp *http.Response, err error) error {
 	return err
 }
 
-func buildAuthTransport(cfg *Config) (*auth.Transport, error) {
+func buildAuthTransport(cfg *Config, clk auth.Clock) (*auth.Transport, error) {
 	switch cfg.AuthStrategy {
 	case AuthOAuth:
 		ts := auth.NewTokenSource(auth.OAuthConfig{
@@ -135,7 +135,7 @@ func buildAuthTransport(cfg *Config) (*auth.Transport, error) {
 			Audience:     cfg.TokenAudience,
 			Scope:        cfg.OAuthScope,
 			CacheDir:     cfg.OAuthCacheDir,
-		})
+		}, clk)
 		return &auth.Transport{Strategy: auth.OAuth, TokenSource: ts}, nil
 	case AuthBasic:
 		return &auth.Transport{

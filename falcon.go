@@ -42,7 +42,7 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	// Another goroutine is already probing, or we're inside the retry backoff after
 	// a transient failure: fall back to REST immediately rather than blocking.
 	if c.falconProbing ||
-		(!c.falconLastProbe.IsZero() && time.Since(c.falconLastProbe) < falconProbeRetryInterval) {
+		(!c.falconLastProbe.IsZero() && c.clock.Now().Sub(c.falconLastProbe) < falconProbeRetryInterval) {
 		c.falconMu.Unlock()
 		return nil
 	}
@@ -57,7 +57,7 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 		c.falconDialer = d
 	}
 	c.falconProbing = true
-	c.falconLastProbe = time.Now()
+	c.falconLastProbe = c.clock.Now()
 	dialer := c.falconDialer
 	c.falconMu.Unlock()
 
@@ -122,7 +122,7 @@ func (c *CamundaClient) falconAuthHeader() (func(context.Context) (http.Header, 
 			Audience:     c.cfg.TokenAudience,
 			Scope:        c.cfg.OAuthScope,
 			CacheDir:     c.cfg.OAuthCacheDir,
-		})
+		}, c.clock)
 		return func(ctx context.Context) (http.Header, error) {
 			tok, err := ts.Token(ctx)
 			if err != nil {

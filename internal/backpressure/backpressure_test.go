@@ -12,11 +12,25 @@ type fakeClock struct {
 	t  time.Time
 }
 
-func (c *fakeClock) now() time.Time {
+func (c *fakeClock) Now() time.Time {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.t
 }
+
+// Sleep advances the fake clock instead of waiting, so a gated acquire settles
+// immediately and the test still observes the backoff that was asked for.
+func (c *fakeClock) Sleep(ctx context.Context, d time.Duration) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	c.advance(d)
+	return nil
+}
+
+// newFakeClock returns a clock at a fixed instant, for tests that need a Clock but
+// do not care what time it is.
+func newFakeClock() *fakeClock { return &fakeClock{t: time.Unix(1_000_000, 0)} }
 
 func (c *fakeClock) advance(d time.Duration) {
 	c.mu.Lock()
@@ -47,7 +61,7 @@ func TestIsBackpressureResponse(t *testing.T) {
 }
 
 func TestStartsUnlimited(t *testing.T) {
-	m := New(Balanced)
+	m := New(Balanced, newFakeClock())
 	if st := m.State(); st.PermitsMax != nil {
 		t.Errorf("expected unlimited on start, got permitsMax=%v", *st.PermitsMax)
 	}
@@ -58,7 +72,7 @@ func TestStartsUnlimited(t *testing.T) {
 }
 
 func TestBackpressureBootsAndShrinks(t *testing.T) {
-	m := New(Balanced)
+	m := New(Balanced, newFakeClock())
 	m.RecordBackpressure() // first signal boots to initialMax and enters soft
 	st := m.State()
 	if st.PermitsMax == nil {
@@ -74,7 +88,7 @@ func TestBackpressureBootsAndShrinks(t *testing.T) {
 }
 
 func TestEscalatesToSevere(t *testing.T) {
-	m := New(Balanced)
+	m := New(Balanced, newFakeClock())
 	for i := 0; i < severeThreshold; i++ {
 		m.RecordBackpressure()
 	}
@@ -84,7 +98,7 @@ func TestEscalatesToSevere(t *testing.T) {
 }
 
 func TestAcquireGatesAndReleaseWakes(t *testing.T) {
-	m := New(Balanced)
+	m := New(Balanced, newFakeClock())
 	// Force a tiny cap by driving many severe signals down to the floor.
 	for i := 0; i < 10; i++ {
 		m.RecordBackpressure()
@@ -123,7 +137,7 @@ func TestAcquireGatesAndReleaseWakes(t *testing.T) {
 }
 
 func TestAcquireRespectsContext(t *testing.T) {
-	m := New(Balanced)
+	m := New(Balanced, newFakeClock())
 	for i := 0; i < 10; i++ {
 		m.RecordBackpressure()
 	}
@@ -141,7 +155,7 @@ func TestAcquireRespectsContext(t *testing.T) {
 }
 
 func TestLegacyObserveOnlyNeverGates(t *testing.T) {
-	m := New(Legacy)
+	m := New(Legacy, newFakeClock())
 	for i := 0; i < 10; i++ {
 		m.RecordBackpressure()
 	}
@@ -159,7 +173,7 @@ func TestLegacyObserveOnlyNeverGates(t *testing.T) {
 
 func TestRecoversToUnlimited(t *testing.T) {
 	clk := &fakeClock{t: time.Unix(1_000_000, 0)}
-	m := New(Balanced).withClock(clk.now)
+	m := New(Balanced, clk)
 	m.RecordBackpressure() // boot + soft
 
 	// Quiet period elapses; repeated healthy hints decay severity and recover.

@@ -47,7 +47,7 @@ func newTransport(base http.RoundTripper) *Transport {
 		Base:      base,
 		Cfg:       Config{MaxAttempts: 4, BaseDelay: time.Millisecond, MaxDelay: 2 * time.Millisecond},
 		randFloat: func() float64 { return 1.0 },
-		sleep:     func(ctx context.Context, d time.Duration) error { return nil },
+		Clock:     instantClock{},
 	}
 }
 
@@ -138,3 +138,9 @@ func TestDoesNotRetryContextCanceled(t *testing.T) {
 		t.Errorf("expected no retries on context cancellation, got %d attempts", base.calls)
 	}
 }
+
+// instantClock makes backoff free so the retry tests exercise attempt counting
+// rather than wall-clock delay.
+type instantClock struct{}
+
+func (instantClock) Sleep(ctx context.Context, d time.Duration) error { return ctx.Err() }

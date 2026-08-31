@@ -72,16 +72,25 @@ type Logger struct {
 	mu    sync.Mutex
 	level Level
 	out   io.Writer
-	now   func() time.Time
+	clock Clock
 }
 
 // New returns a Logger at the given level writing to out. If out is nil,
 // os.Stderr is used.
-func New(level Level, out io.Writer) *Logger {
+// Clock is the part of the SDK clock this package needs. Declared here rather than
+// imported so diag stays a leaf package (see architecture_test.go); the injected
+// clock satisfies it structurally.
+type Clock interface {
+	Now() time.Time
+}
+
+// New builds a logger. clock must not be nil; the client resolves one before
+// constructing any collaborator.
+func New(level Level, out io.Writer, clock Clock) *Logger {
 	if out == nil {
 		out = os.Stderr
 	}
-	return &Logger{level: level, out: out, now: time.Now}
+	return &Logger{level: level, out: out, clock: clock}
 }
 
 // Level returns the logger's current level.
@@ -94,7 +103,7 @@ func (l *Logger) log(lvl Level, msg string, kv ...any) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	var b strings.Builder
-	fmt.Fprintf(&b, "%s [%s] camunda %s", l.now().UTC().Format(time.RFC3339), strings.ToUpper(lvl.String()), msg)
+	fmt.Fprintf(&b, "%s [%s] camunda %s", l.clock.Now().UTC().Format(time.RFC3339), strings.ToUpper(lvl.String()), msg)
 	for i := 0; i+1 < len(kv); i += 2 {
 		fmt.Fprintf(&b, " %v=%v", kv[i], kv[i+1])
 	}

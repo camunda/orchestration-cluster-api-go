@@ -42,13 +42,13 @@ func newReq(t *testing.T) *http.Request {
 
 func TestChainAppliesAuthAndObservesHealthy(t *testing.T) {
 	base := &stubRT{status: 200, body: "{}"}
-	mgr := backpressure.New(backpressure.Balanced)
+	mgr := backpressure.New(backpressure.Balanced, testClock{})
 	rt := New(Options{
 		Base:         base,
 		Auth:         &auth.Transport{Strategy: auth.Basic, BasicUsername: "u", BasicPassword: "p"},
 		Retry:        retry.Config{MaxAttempts: 3, BaseDelay: time.Millisecond, MaxDelay: time.Millisecond},
 		Backpressure: mgr,
-	})
+	}, testClock{})
 	resp, err := rt.RoundTrip(newReq(t))
 	if err != nil {
 		t.Fatalf("RoundTrip: %v", err)
@@ -67,7 +67,7 @@ func TestChainAppliesAuthAndObservesHealthy(t *testing.T) {
 
 func TestBackpressureRecordedOn429(t *testing.T) {
 	base := &stubRT{status: 429}
-	mgr := backpressure.New(backpressure.Balanced)
+	mgr := backpressure.New(backpressure.Balanced, testClock{})
 	rt := &BackpressureTransport{Base: base, Mgr: mgr}
 	if _, err := rt.RoundTrip(newReq(t)); err != nil {
 		t.Fatalf("RoundTrip: %v", err)
@@ -79,7 +79,7 @@ func TestBackpressureRecordedOn429(t *testing.T) {
 
 func TestBackpressureRecordedOn503BareBody(t *testing.T) {
 	base := &stubRT{status: 503, body: ""}
-	mgr := backpressure.New(backpressure.Balanced)
+	mgr := backpressure.New(backpressure.Balanced, testClock{})
 	rt := &BackpressureTransport{Base: base, Mgr: mgr}
 	resp, err := rt.RoundTrip(newReq(t))
 	if err != nil {
@@ -96,7 +96,7 @@ func TestBackpressureRecordedOn503BareBody(t *testing.T) {
 
 func TestExemptBypassesGate(t *testing.T) {
 	base := &stubRT{status: 200}
-	mgr := backpressure.New(backpressure.Balanced)
+	mgr := backpressure.New(backpressure.Balanced, testClock{})
 	// Drive the manager to the floor with a full waiter queue would block a gated
 	// request; an exempt request must pass regardless.
 	for i := 0; i < 10; i++ {
@@ -118,3 +118,9 @@ func TestExemptBypassesGate(t *testing.T) {
 		t.Fatal("exempt request should not have been gated")
 	}
 }
+
+// testClock keeps the transport chain off real time; nothing here asserts on delay.
+type testClock struct{}
+
+func (testClock) Now() time.Time                                   { return time.Unix(1_000_000, 0) }
+func (testClock) Sleep(ctx context.Context, d time.Duration) error { return ctx.Err() }

@@ -102,7 +102,7 @@ func IsBackpressureResponse(status int, body string) bool {
 // intended to be shared across all clones of a client.
 type Manager struct {
 	observeOnly bool
-	now         func() time.Time
+	clock       Clock
 
 	mu               sync.Mutex
 	notify           chan struct{}
@@ -127,18 +127,22 @@ const (
 )
 
 // New creates a Manager for the given profile.
-func New(profile Profile) *Manager {
-	return &Manager{
-		observeOnly: profile == Legacy,
-		now:         time.Now,
-		notify:      make(chan struct{}),
-	}
+// Clock is the part of the SDK clock this package needs. Declared here rather than
+// imported so backpressure stays a leaf package (see architecture_test.go); the
+// injected clock satisfies it structurally.
+type Clock interface {
+	Now() time.Time
+	Sleep(ctx context.Context, d time.Duration) error
 }
 
-// withClock is a test hook to inject a deterministic clock.
-func (m *Manager) withClock(now func() time.Time) *Manager {
-	m.now = now
-	return m
+// New builds a manager. clock must not be nil; the client resolves one before
+// constructing any collaborator.
+func New(profile Profile, clock Clock) *Manager {
+	return &Manager{
+		observeOnly: profile == Legacy,
+		clock:       clock,
+		notify:      make(chan struct{}),
+	}
 }
 
 // Severity returns the current severity level.
@@ -190,12 +194,8 @@ func (m *Manager) Acquire(ctx context.Context) error {
 		m.mu.Unlock()
 
 		if backoff > 0 {
-			t := time.NewTimer(backoff)
-			select {
-			case <-ctx.Done():
-				t.Stop()
-				return ctx.Err()
-			case <-t.C:
+			if err := m.clock.Sleep(ctx, backoff); err != nil {
+				return err
 			}
 		}
 
@@ -250,7 +250,7 @@ func (m *Manager) Release() {
 
 // RecordBackpressure records a backpressure signal from the server.
 func (m *Manager) RecordBackpressure() {
-	now := m.now()
+	now := m.clock.Now()
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -297,7 +297,7 @@ func (m *Manager) RecordBackpressure() {
 // RecordHealthyHint records a successful (non-backpressure) completion, which
 // triggers passive recovery.
 func (m *Manager) RecordHealthyHint() {
-	now := m.now()
+	now := m.clock.Now()
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.backoff > 0 {
