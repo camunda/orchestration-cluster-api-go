@@ -50,6 +50,12 @@ func (j *Job) LeaseToken() string { return j.leaseToken }
 
 // Clock returns the worker's clock. A handler that needs to wait should use this
 // rather than time.Sleep, so an injected clock controls it.
+//
+// For short in-handler coordination only -- spacing a retry, waiting for a resource
+// to settle. A long or business wait belongs in the process as a BPMN timer event: a
+// handler holding a job for minutes occupies a worker slot, risks the job timeout
+// expiring underneath it, and hides the wait from the process model where it cannot
+// be seen or changed.
 func (j *Job) Clock() Clock { return j.clock }
 
 // Variables unmarshals the job variables into v (a pointer to a struct or map).
