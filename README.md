@@ -394,9 +394,14 @@ fmt.Printf("instance state: %v\n", instance.GetState())
 
 ## Clocks
 
-Every wait and every elapsed-time measurement in the runtime — retry backoff, the
-backpressure gate, token refresh, job-worker polling, consistency polling — resolves
-through an injected clock rather than the `time` package.
+Retry backoff, the backpressure gate, token refresh, job-worker polling and
+consistency polling all resolve through an injected clock rather than the `time`
+package, so a test can control cadence instead of waiting for it.
+
+Two places deliberately stay on real time, each marked with a `//nolint:forbidigo`
+naming the reason: `LiveClock` itself, which is the adapter onto the `time` package,
+and `internal/falcon`, whose timers are mostly I/O bounds — read-idle detection and
+create-ack budgets — that would misfire if bound to engine time.
 
 | Clock | Use |
 | --- | --- |

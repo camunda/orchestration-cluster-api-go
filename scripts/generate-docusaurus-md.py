@@ -467,17 +467,22 @@ def _md_table(headers: list[str], rows: list[list[str]]) -> str:
     return out + "\n"
 
 
+def _md_doc_cell(docs: str) -> str:
+    """A doc comment as a table cell, with [Symbol] reduced to code like elsewhere."""
+    return _md_escape_cell(_GO_DOC_LINK_RE.sub(lambda m: f"`{m.group(1)}`", _first_line(docs)))
+
+
 def _md_fields_table(fields: list[Field]) -> str:
     return _md_table(
         ["Field", "Type", "Description"],
-        [[_code(f.name), _code(f.type_str), _md_escape_cell(_first_line(f.docs))] for f in fields],
+        [[_code(f.name), _code(f.type_str), _md_doc_cell(f.docs)] for f in fields],
     )
 
 
 def _md_values_table(values: list[Value]) -> str:
     rows: list[list[str]] = []
     for v in values:
-        rows.append([_code(", ".join(v.names)), _md_escape_cell(_first_line(v.docs))])
+        rows.append([_code(", ".join(v.names)), _md_doc_cell(v.docs)])
     return _md_table(["Name", "Description"], rows)
 
 
