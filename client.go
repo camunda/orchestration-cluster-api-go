@@ -28,6 +28,7 @@ type CamundaClient struct {
 	raw    *openapi.APIClient
 	logger *diag.Logger
 	bp     *backpressure.Manager
+	clock  Clock
 
 	// FALCON (nanobpmn command-stream) state, lazily resolved and shared for the
 	// client's lifetime. falconMu guards a probe that caches a definitive result
@@ -77,13 +78,23 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	oc.HTTPClient = &http.Client{Transport: rt}
 	oc.Servers = openapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress)}}
 
+	// Resolve the clock once, so every collaborator shares one timeline.
+	clk := cfg.Clock
+	if clk == nil {
+		clk = LiveClock{}
+	}
+
 	return &CamundaClient{
 		cfg:    cfg,
 		raw:    openapi.NewAPIClient(oc),
 		logger: diag.New(logLevel(cfg.LogLevel), nil),
 		bp:     bp,
+		clock:  clk,
 	}, nil
 }
+
+// Clock returns the clock this client resolves cadence through.
+func (c *CamundaClient) Clock() Clock { return c.clock }
 
 // Raw returns the underlying generated client for operations or options not yet
 // surfaced on the ergonomic facade.
