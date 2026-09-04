@@ -41,13 +41,6 @@
       "label": "Search agent instances"
     }
   ],
-  "createAgentInstanceHistoryItem": [
-    {
-      "file": "agent_instance.go",
-      "region": "CreateAgentInstanceHistoryItem",
-      "label": "Create agent instance history item"
-    }
-  ],
   "searchAgentInstanceHistory": [
     {
       "file": "agent_instance.go",

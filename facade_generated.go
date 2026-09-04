@@ -75,8 +75,22 @@ func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body openapi
 //
 // Example:
 //
-//	definition := openapi.NewAgentInstanceDefinition("gpt-4o", "openai", "You are a helpful assistant.")
-//	req := openapi.NewAgentInstanceCreationRequest(openapi.ModelString("2251799813685360"), *definition)
+//	systemPrompt := []openapi.AgentInstanceMessageContent{
+//		openapi.AgentInstanceTextContentAsAgentInstanceMessageContent(
+//			openapi.NewAgentInstanceTextContent("TEXT", "You are a helpful assistant.")),
+//	}
+//	configItem := openapi.NewAgentInstanceHistoryItem(
+//		"config-1", 0, openapi.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
+//	configItem.SetModel("gpt-4o")
+//	configItem.SetProvider("openai")
+//	configItem.SetSystemPrompt(systemPrompt)
+//
+//	req := openapi.NewAgentInstanceCreationRequest(
+//		openapi.ModelString("2251799813685360"), // elementInstanceKey
+//		openapi.ModelString("2251799813685424"), // jobKey
+//		"lease-token",
+//		[]openapi.AgentInstanceHistoryItem{*configItem}, // history
+//	)
 //
 //	result, err := client.CreateAgentInstance(ctx, *req)
 //	if err != nil {
@@ -86,35 +100,6 @@ func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body openapi
 func (c *CamundaClient) CreateAgentInstance(ctx context.Context, body openapi.AgentInstanceCreationRequest, opts ...func(openapi.ApiCreateAgentInstanceRequest) openapi.ApiCreateAgentInstanceRequest) (*openapi.AgentInstanceCreationResult, error) {
 	req := c.raw.AgentInstanceAPI.CreateAgentInstance(ctx)
 	req = req.AgentInstanceCreationRequest(body)
-	for _, opt := range opts {
-		req = opt(req)
-	}
-	value, resp, err := req.Execute()
-	return value, c.wrapError(resp, err)
-}
-
-// CreateAgentInstanceHistoryItem calls the CreateAgentInstanceHistoryItem operation.
-//
-// Example:
-//
-//	req := openapi.NewAgentInstanceHistoryItemRequest(
-//		openapi.ModelString("2251799813685360"), // elementInstanceKey
-//		openapi.ModelString("2251799813685424"), // jobKey
-//		"lease-token",
-//		openapi.AGENTINSTANCEHISTORYROLEENUM_USER,
-//		nil, // message content
-//		time.Now(),
-//	)
-//
-//	result, err := client.CreateAgentInstanceHistoryItem(ctx,
-//		openapi.MustAgentInstanceKey("2251799813685370"), *req)
-//	if err != nil {
-//		return err
-//	}
-//	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateAgentInstanceHistoryItem(ctx context.Context, agentInstanceKey openapi.AgentInstanceKey, body openapi.AgentInstanceHistoryItemRequest, opts ...func(openapi.ApiCreateAgentInstanceHistoryItemRequest) openapi.ApiCreateAgentInstanceHistoryItemRequest) (*openapi.AgentInstanceHistoryItemCreationResult, error) {
-	req := c.raw.AgentInstanceAPI.CreateAgentInstanceHistoryItem(ctx, agentInstanceKey)
-	req = req.AgentInstanceHistoryItemRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}
@@ -186,7 +171,11 @@ func (c *CamundaClient) SearchAgentInstances(ctx context.Context, body openapi.A
 //
 // Example:
 //
-//	req := openapi.NewAgentInstanceUpdateRequest(openapi.ModelString("2251799813685360"))
+//	req := openapi.NewAgentInstanceUpdateRequest(
+//		openapi.ModelString("2251799813685360"), // elementInstanceKey
+//		openapi.ModelString("2251799813685424"), // jobKey
+//		"lease-token",
+//	)
 //
 //	result, err := client.UpdateAgentInstance(ctx, openapi.MustAgentInstanceKey("2251799813685370"), *req)
 //	if err != nil {
@@ -443,6 +432,13 @@ func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64,
 }
 
 // DeleteRuntimeBackupAsClusterAdmin calls the DeleteRuntimeBackupAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Deletes the runtime backup with the given id from all physical tenants.
+//	if err := client.DeleteRuntimeBackupAsClusterAdmin(ctx, 42); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) DeleteRuntimeBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteRuntimeBackupAsClusterAdminRequest) openapi.ApiDeleteRuntimeBackupAsClusterAdminRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackupAsClusterAdmin(ctx, backupId)
 	for _, opt := range opts {
@@ -469,6 +465,13 @@ func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...fu
 }
 
 // DeleteRuntimeBackupStateAsClusterAdmin calls the DeleteRuntimeBackupStateAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Clears the persisted runtime backup state across all physical tenants.
+//	if err := client.DeleteRuntimeBackupStateAsClusterAdmin(ctx); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) DeleteRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiDeleteRuntimeBackupStateAsClusterAdminRequest) openapi.ApiDeleteRuntimeBackupStateAsClusterAdminRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
@@ -541,6 +544,17 @@ func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, op
 }
 
 // GetRuntimeBackupAsClusterAdmin calls the GetRuntimeBackupAsClusterAdmin operation.
+//
+// Example:
+//
+//	backup, err := client.GetRuntimeBackupAsClusterAdmin(ctx, 42)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("cluster runtime backup %d: state=%v\n", backup.GetBackupId(), backup.GetState())
+//	for _, tenant := range backup.GetPhysicalTenants() {
+//		fmt.Printf("  tenant %v\n", tenant)
+//	}
 func (c *CamundaClient) GetRuntimeBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetRuntimeBackupAsClusterAdminRequest) openapi.ApiGetRuntimeBackupAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupInfo, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackupAsClusterAdmin(ctx, backupId)
 	for _, opt := range opts {
@@ -571,6 +585,17 @@ func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(
 }
 
 // GetRuntimeBackupStateAsClusterAdmin calls the GetRuntimeBackupStateAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Returns the runtime backup state for every physical tenant in the cluster.
+//	state, err := client.GetRuntimeBackupStateAsClusterAdmin(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, tenant := range state.GetPhysicalTenants() {
+//		fmt.Printf("%v\n", tenant)
+//	}
 func (c *CamundaClient) GetRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiGetRuntimeBackupStateAsClusterAdminRequest) openapi.ApiGetRuntimeBackupStateAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupState, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
@@ -642,6 +667,18 @@ func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(ope
 }
 
 // ListRuntimeBackupsAsClusterAdmin calls the ListRuntimeBackupsAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Lists runtime backups across all physical tenants in the cluster.
+//	backups, err := client.ListRuntimeBackupsAsClusterAdmin(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, backup := range backups {
+//		fmt.Printf("cluster runtime backup %d: state=%v, %d tenant(s)\n",
+//			backup.GetBackupId(), backup.GetState(), len(backup.GetPhysicalTenants()))
+//	}
 func (c *CamundaClient) ListRuntimeBackupsAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiListRuntimeBackupsAsClusterAdminRequest) openapi.ApiListRuntimeBackupsAsClusterAdminRequest) ([]openapi.ClusterRuntimeBackupInfo, error) {
 	req := c.raw.BackupAPI.ListRuntimeBackupsAsClusterAdmin(ctx)
 	for _, opt := range opts {
@@ -673,6 +710,19 @@ func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func
 }
 
 // SyncRuntimeBackupStateAsClusterAdmin calls the SyncRuntimeBackupStateAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Force-writes the current checkpoint/backup metadata to each physical tenant's
+//	// backup store and returns the updated state. Use this to repair stale or missing
+//	// state entries without triggering a new backup.
+//	state, err := client.SyncRuntimeBackupStateAsClusterAdmin(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	for _, tenant := range state.GetPhysicalTenants() {
+//		fmt.Printf("%v\n", tenant)
+//	}
 func (c *CamundaClient) SyncRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiSyncRuntimeBackupStateAsClusterAdminRequest) openapi.ApiSyncRuntimeBackupStateAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupState, error) {
 	req := c.raw.BackupAPI.SyncRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
@@ -747,6 +797,23 @@ func (c *CamundaClient) TakeRuntimeBackup(ctx context.Context, body openapi.Take
 }
 
 // TakeRuntimeBackupAsClusterAdmin calls the TakeRuntimeBackupAsClusterAdmin operation.
+//
+// Example:
+//
+//	// Takes a runtime backup across every physical tenant in the cluster simultaneously.
+//	// Pass SetBackupId to use an explicit backup ID; omit it to let the cluster
+//	// generate one automatically (generated-id mode). Do not mix modes: sending a
+//	// backup ID when the cluster is configured for generated IDs will be rejected.
+//	req := openapi.NewTakeRuntimeBackupRequest()
+//	req.SetBackupId(42)
+//
+//	result, err := client.TakeRuntimeBackupAsClusterAdmin(ctx, *req)
+//	if err != nil {
+//		return err
+//	}
+//	for _, tenant := range result.GetPhysicalTenants() {
+//		fmt.Printf("%v\n", tenant)
+//	}
 func (c *CamundaClient) TakeRuntimeBackupAsClusterAdmin(ctx context.Context, body openapi.TakeRuntimeBackupRequest, opts ...func(openapi.ApiTakeRuntimeBackupAsClusterAdminRequest) openapi.ApiTakeRuntimeBackupAsClusterAdminRequest) (*openapi.ClusterTakeRuntimeBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeRuntimeBackupAsClusterAdmin(ctx)
 	req = req.TakeRuntimeBackupRequest(body)
@@ -892,6 +959,20 @@ func (c *CamundaClient) ResetClock(ctx context.Context, opts ...func(openapi.Api
 }
 
 // CancelClusterRebalance calls the CancelClusterRebalance operation.
+//
+// Example:
+//
+//	// Requires cluster-admin credentials (a separate cluster-admin security chain) —
+//	// calling this with standard Orchestration credentials will fail authorization.
+//	resp, err := client.CancelClusterRebalance(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	if resp.GetWasRunning() {
+//		fmt.Println("rebalance cancelled")
+//	} else {
+//		fmt.Println("no rebalance was running")
+//	}
 func (c *CamundaClient) CancelClusterRebalance(ctx context.Context, opts ...func(openapi.ApiCancelClusterRebalanceRequest) openapi.ApiCancelClusterRebalanceRequest) (*openapi.RebalanceCancellationResponse, error) {
 	req := c.raw.ClusterAPI.CancelClusterRebalance(ctx)
 	for _, opt := range opts {
@@ -902,6 +983,19 @@ func (c *CamundaClient) CancelClusterRebalance(ctx context.Context, opts ...func
 }
 
 // GetClusterRebalance calls the GetClusterRebalance operation.
+//
+// Example:
+//
+//	// Requires cluster-admin credentials (a separate cluster-admin security chain) —
+//	// calling this with standard Orchestration credentials will fail authorization.
+//	balance, err := client.GetClusterRebalance(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("cluster balance state: %s, %d partition(s)\n", balance.GetState(), len(balance.GetPartitions()))
+//	if running, ok := balance.GetRunningRebalanceOk(); ok && running != nil {
+//		fmt.Printf("rebalance in progress: %v\n", running)
+//	}
 func (c *CamundaClient) GetClusterRebalance(ctx context.Context, opts ...func(openapi.ApiGetClusterRebalanceRequest) openapi.ApiGetClusterRebalanceRequest) (*openapi.ClusterBalanceResponse, error) {
 	req := c.raw.ClusterAPI.GetClusterRebalance(ctx)
 	for _, opt := range opts {
@@ -990,6 +1084,20 @@ func (c *CamundaClient) GetTopology(ctx context.Context, opts ...func(openapi.Ap
 }
 
 // TriggerClusterRebalance calls the TriggerClusterRebalance operation.
+//
+// Example:
+//
+//	// Starts a cluster rebalance, redistributing partition leadership to the preferred nodes.
+//	// Requires cluster-admin credentials (a separate cluster-admin security chain) —
+//	// calling this with standard Orchestration credentials will fail authorization.
+//	req := openapi.NewClusterRebalanceRequest()
+//	req.SetReplicationLagThreshold(1024 * 1024) // 1 MiB max lag for leader transfer
+//
+//	balance, err := client.TriggerClusterRebalance(ctx, *req)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("cluster balance state: %s, %d partition(s)\n", balance.GetState(), len(balance.GetPartitions()))
 func (c *CamundaClient) TriggerClusterRebalance(ctx context.Context, body openapi.ClusterRebalanceRequest, opts ...func(openapi.ApiTriggerClusterRebalanceRequest) openapi.ApiTriggerClusterRebalanceRequest) (*openapi.ClusterBalanceResponse, error) {
 	req := c.raw.ClusterAPI.TriggerClusterRebalance(ctx)
 	req = req.ClusterRebalanceRequest(body)

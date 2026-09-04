@@ -24,7 +24,7 @@ type MappingRuleFilter struct {
 	// The value of the claim to match.
 	ClaimValue *string `json:"claimValue,omitempty"`
 	// The name of the mapping rule.
-	Name *string `json:"name,omitempty"`
+	Name *StringFilterProperty `json:"name,omitempty"`
 	// The ID of the mapping rule.
 	MappingRuleId *string `json:"mappingRuleId,omitempty" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 }
@@ -111,9 +111,9 @@ func (o *MappingRuleFilter) SetClaimValue(v string) {
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *MappingRuleFilter) GetName() string {
+func (o *MappingRuleFilter) GetName() StringFilterProperty {
 	if o == nil || IsNil(o.Name) {
-		var ret string
+		var ret StringFilterProperty
 		return ret
 	}
 	return *o.Name
@@ -121,7 +121,7 @@ func (o *MappingRuleFilter) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MappingRuleFilter) GetNameOk() (*string, bool) {
+func (o *MappingRuleFilter) GetNameOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -137,8 +137,8 @@ func (o *MappingRuleFilter) HasName() bool {
 	return false
 }
 
-// SetName gets a reference to the given string and assigns it to the Name field.
-func (o *MappingRuleFilter) SetName(v string) {
+// SetName gets a reference to the given StringFilterProperty and assigns it to the Name field.
+func (o *MappingRuleFilter) SetName(v StringFilterProperty) {
 	o.Name = &v
 }
 

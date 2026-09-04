@@ -23,7 +23,7 @@ var _ MappedNullable = &ProcessInstanceCreationInstructionById{}
 type ProcessInstanceCreationInstructionById struct {
 	// The BPMN process id of the process definition to start an instance of.
 	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
-	// The version of the process. By default, the latest version of the process is used.
+	// The version of the process. If omitted, the latest active version is used.
 	ProcessDefinitionVersion *int32 `json:"processDefinitionVersion,omitempty"`
 	// JSON object that will instantiate the variables for the root variable scope of the process instance.
 	Variables map[string]interface{} `json:"variables,omitempty"`

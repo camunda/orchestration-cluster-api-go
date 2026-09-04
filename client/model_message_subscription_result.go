@@ -22,6 +22,8 @@ var _ MappedNullable = &MessageSubscriptionResult{}
 
 // MessageSubscriptionResult struct for MessageSubscriptionResult
 type MessageSubscriptionResult struct {
+	// The business id inherited from the subscribing process instance when this message subscription was opened. It is `null` when the process instance has no business id, and for message start event subscriptions, which are not tied to a process instance.
+	BusinessId NullableString `json:"businessId"`
 	// The message subscription key associated with this message subscription.
 	MessageSubscriptionKey ModelString `json:"messageSubscriptionKey"`
 	// The process definition ID associated with this message subscription.
@@ -64,8 +66,9 @@ type _MessageSubscriptionResult MessageSubscriptionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMessageSubscriptionResult(messageSubscriptionKey ModelString, processDefinitionId string, processDefinitionKey NullableModelString, processInstanceKey NullableModelString, rootProcessInstanceKey NullableModelString, elementId string, elementInstanceKey NullableModelString, messageSubscriptionState MessageSubscriptionStateEnum, lastUpdatedDate time.Time, messageName string, correlationKey NullableString, messageSubscriptionType MessageSubscriptionTypeEnum, toolProperties map[string]string, processDefinitionName NullableString, processDefinitionVersion NullableInt32, toolName NullableString, inboundConnectorType NullableString, tenantId string) *MessageSubscriptionResult {
+func NewMessageSubscriptionResult(businessId NullableString, messageSubscriptionKey ModelString, processDefinitionId string, processDefinitionKey NullableModelString, processInstanceKey NullableModelString, rootProcessInstanceKey NullableModelString, elementId string, elementInstanceKey NullableModelString, messageSubscriptionState MessageSubscriptionStateEnum, lastUpdatedDate time.Time, messageName string, correlationKey NullableString, messageSubscriptionType MessageSubscriptionTypeEnum, toolProperties map[string]string, processDefinitionName NullableString, processDefinitionVersion NullableInt32, toolName NullableString, inboundConnectorType NullableString, tenantId string) *MessageSubscriptionResult {
 	this := MessageSubscriptionResult{}
+	this.BusinessId = businessId
 	this.MessageSubscriptionKey = messageSubscriptionKey
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionKey = processDefinitionKey
@@ -93,6 +96,32 @@ func NewMessageSubscriptionResult(messageSubscriptionKey ModelString, processDef
 func NewMessageSubscriptionResultWithDefaults() *MessageSubscriptionResult {
 	this := MessageSubscriptionResult{}
 	return &this
+}
+
+// GetBusinessId returns the BusinessId field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *MessageSubscriptionResult) GetBusinessId() string {
+	if o == nil || o.BusinessId.Get() == nil {
+		var ret string
+		return ret
+	}
+
+	return *o.BusinessId.Get()
+}
+
+// GetBusinessIdOk returns a tuple with the BusinessId field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *MessageSubscriptionResult) GetBusinessIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.BusinessId.Get(), o.BusinessId.IsSet()
+}
+
+// SetBusinessId sets field value
+func (o *MessageSubscriptionResult) SetBusinessId(v string) {
+	o.BusinessId.Set(&v)
 }
 
 // GetMessageSubscriptionKey returns the MessageSubscriptionKey field value
@@ -555,6 +584,7 @@ func (o MessageSubscriptionResult) MarshalJSON() ([]byte, error) {
 
 func (o MessageSubscriptionResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["businessId"] = o.BusinessId.Get()
 	toSerialize["messageSubscriptionKey"] = o.MessageSubscriptionKey
 	toSerialize["processDefinitionId"] = o.ProcessDefinitionId
 	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey.Get()

@@ -21,18 +21,14 @@ var _ MappedNullable = &AgentInstanceUpdateRequest{}
 
 // AgentInstanceUpdateRequest Request to update the mutable state of an agent instance.
 type AgentInstanceUpdateRequest struct {
-	// The key of the currently-active element instance for this agent instance. Used for ownership/equality validation against the stored agent instance and, when the supplied key differs from the previous association (re-entry of an ad-hoc sub-process or AI Agent task), appended to elementInstanceKeys with the reverse link updated on the supplied element instance.
+	// The key of the currently-active element instance for this agent instance. Used for ownership/equality validation against the stored agent instance and, when the supplied key differs from the previous association (re-entry of an ad-hoc sub-process or AI Agent task), appended to elementInstanceKeys with the reverse link updated on the supplied element instance. Only one element instance may hold this write claim at a time: any update from a different element instance is rejected while the current writer's job is still active.
 	ElementInstanceKey ModelString `json:"elementInstanceKey"`
 	// The new status of the agent instance.
 	Status *AgentInstanceUpdateStatusEnum `json:"status,omitempty"`
-	// Metric increments to apply to the aggregate counters.
-	Metrics *AgentInstanceMetricsDelta `json:"metrics,omitempty"`
-	// The complete list of tools available to the agent, replacing any previously stored tools. When provided, the engine replaces the existing tool list with this value.
-	Tools []AgentTool `json:"tools,omitempty"`
-	// The key of the job activation during which this update is being made. Required whenever history is provided.
-	JobKey NullableModelString `json:"jobKey,omitempty"`
+	// The key of the job activation during which this update is being made. An update must always be attributed to the active job that produced it.
+	JobKey ModelString `json:"jobKey"`
 	// Opaque lease token received from the job activation response. Disambiguates this activation from any other activation of the same job: if the job is later retried, history items submitted under a superseded lease are discarded rather than committed.
-	JobLease NullableString `json:"jobLease,omitempty"`
+	JobLease string `json:"jobLease"`
 	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated.
 	History []AgentInstanceHistoryItem `json:"history,omitempty"`
 }
@@ -43,9 +39,11 @@ type _AgentInstanceUpdateRequest AgentInstanceUpdateRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceUpdateRequest(elementInstanceKey ModelString) *AgentInstanceUpdateRequest {
+func NewAgentInstanceUpdateRequest(elementInstanceKey ModelString, jobKey ModelString, jobLease string) *AgentInstanceUpdateRequest {
 	this := AgentInstanceUpdateRequest{}
 	this.ElementInstanceKey = elementInstanceKey
+	this.JobKey = jobKey
+	this.JobLease = jobLease
 	return &this
 }
 
@@ -113,155 +111,52 @@ func (o *AgentInstanceUpdateRequest) SetStatus(v AgentInstanceUpdateStatusEnum) 
 	o.Status = &v
 }
 
-// GetMetrics returns the Metrics field value if set, zero value otherwise.
-func (o *AgentInstanceUpdateRequest) GetMetrics() AgentInstanceMetricsDelta {
-	if o == nil || IsNil(o.Metrics) {
-		var ret AgentInstanceMetricsDelta
-		return ret
-	}
-	return *o.Metrics
-}
-
-// GetMetricsOk returns a tuple with the Metrics field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *AgentInstanceUpdateRequest) GetMetricsOk() (*AgentInstanceMetricsDelta, bool) {
-	if o == nil || IsNil(o.Metrics) {
-		return nil, false
-	}
-	return o.Metrics, true
-}
-
-// HasMetrics returns a boolean if a field has been set.
-func (o *AgentInstanceUpdateRequest) HasMetrics() bool {
-	if o != nil && !IsNil(o.Metrics) {
-		return true
-	}
-
-	return false
-}
-
-// SetMetrics gets a reference to the given AgentInstanceMetricsDelta and assigns it to the Metrics field.
-func (o *AgentInstanceUpdateRequest) SetMetrics(v AgentInstanceMetricsDelta) {
-	o.Metrics = &v
-}
-
-// GetTools returns the Tools field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *AgentInstanceUpdateRequest) GetTools() []AgentTool {
-	if o == nil {
-		var ret []AgentTool
-		return ret
-	}
-	return o.Tools
-}
-
-// GetToolsOk returns a tuple with the Tools field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AgentInstanceUpdateRequest) GetToolsOk() ([]AgentTool, bool) {
-	if o == nil || IsNil(o.Tools) {
-		return nil, false
-	}
-	return o.Tools, true
-}
-
-// HasTools returns a boolean if a field has been set.
-func (o *AgentInstanceUpdateRequest) HasTools() bool {
-	if o != nil && !IsNil(o.Tools) {
-		return true
-	}
-
-	return false
-}
-
-// SetTools gets a reference to the given []AgentTool and assigns it to the Tools field.
-func (o *AgentInstanceUpdateRequest) SetTools(v []AgentTool) {
-	o.Tools = v
-}
-
-// GetJobKey returns the JobKey field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetJobKey returns the JobKey field value
 func (o *AgentInstanceUpdateRequest) GetJobKey() ModelString {
-	if o == nil || IsNil(o.JobKey.Get()) {
+	if o == nil {
 		var ret ModelString
 		return ret
 	}
-	return *o.JobKey.Get()
+
+	return o.JobKey
 }
 
-// GetJobKeyOk returns a tuple with the JobKey field value if set, nil otherwise
+// GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceUpdateRequest) GetJobKeyOk() (*ModelString, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.JobKey.Get(), o.JobKey.IsSet()
+	return &o.JobKey, true
 }
 
-// HasJobKey returns a boolean if a field has been set.
-func (o *AgentInstanceUpdateRequest) HasJobKey() bool {
-	if o != nil && o.JobKey.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetJobKey gets a reference to the given NullableModelString and assigns it to the JobKey field.
+// SetJobKey sets field value
 func (o *AgentInstanceUpdateRequest) SetJobKey(v ModelString) {
-	o.JobKey.Set(&v)
+	o.JobKey = v
 }
 
-// SetJobKeyNil sets the value for JobKey to be an explicit nil
-func (o *AgentInstanceUpdateRequest) SetJobKeyNil() {
-	o.JobKey.Set(nil)
-}
-
-// UnsetJobKey ensures that no value is present for JobKey, not even an explicit nil
-func (o *AgentInstanceUpdateRequest) UnsetJobKey() {
-	o.JobKey.Unset()
-}
-
-// GetJobLease returns the JobLease field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetJobLease returns the JobLease field value
 func (o *AgentInstanceUpdateRequest) GetJobLease() string {
-	if o == nil || IsNil(o.JobLease.Get()) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.JobLease.Get()
+
+	return o.JobLease
 }
 
-// GetJobLeaseOk returns a tuple with the JobLease field value if set, nil otherwise
+// GetJobLeaseOk returns a tuple with the JobLease field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceUpdateRequest) GetJobLeaseOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.JobLease.Get(), o.JobLease.IsSet()
+	return &o.JobLease, true
 }
 
-// HasJobLease returns a boolean if a field has been set.
-func (o *AgentInstanceUpdateRequest) HasJobLease() bool {
-	if o != nil && o.JobLease.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetJobLease gets a reference to the given NullableString and assigns it to the JobLease field.
+// SetJobLease sets field value
 func (o *AgentInstanceUpdateRequest) SetJobLease(v string) {
-	o.JobLease.Set(&v)
-}
-
-// SetJobLeaseNil sets the value for JobLease to be an explicit nil
-func (o *AgentInstanceUpdateRequest) SetJobLeaseNil() {
-	o.JobLease.Set(nil)
-}
-
-// UnsetJobLease ensures that no value is present for JobLease, not even an explicit nil
-func (o *AgentInstanceUpdateRequest) UnsetJobLease() {
-	o.JobLease.Unset()
+	o.JobLease = v
 }
 
 // GetHistory returns the History field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -311,18 +206,8 @@ func (o AgentInstanceUpdateRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status
 	}
-	if !IsNil(o.Metrics) {
-		toSerialize["metrics"] = o.Metrics
-	}
-	if o.Tools != nil {
-		toSerialize["tools"] = o.Tools
-	}
-	if o.JobKey.IsSet() {
-		toSerialize["jobKey"] = o.JobKey.Get()
-	}
-	if o.JobLease.IsSet() {
-		toSerialize["jobLease"] = o.JobLease.Get()
-	}
+	toSerialize["jobKey"] = o.JobKey
+	toSerialize["jobLease"] = o.JobLease
 	if o.History != nil {
 		toSerialize["history"] = o.History
 	}
@@ -335,6 +220,8 @@ func (o *AgentInstanceUpdateRequest) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"elementInstanceKey",
+		"jobKey",
+		"jobLease",
 	}
 
 	allProperties := make(map[string]interface{})

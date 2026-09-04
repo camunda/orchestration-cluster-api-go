@@ -23,7 +23,7 @@ var _ MappedNullable = &AgentInstanceCreationResult{}
 type AgentInstanceCreationResult struct {
 	// The system-generated key for the created agent instance.
 	AgentInstanceKey ModelString `json:"agentInstanceKey"`
-	// One entry per history item submitted in the request, in request order. Empty when no history items were submitted.
+	// One entry per history item submitted in the request, in request order.
 	CreatedHistory []AgentInstanceCreatedHistoryItem `json:"createdHistory"`
 }
 

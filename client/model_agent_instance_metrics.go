@@ -25,6 +25,12 @@ type AgentInstanceMetrics struct {
 	InputTokens int64 `json:"inputTokens"`
 	// Total output tokens produced across all model calls.
 	OutputTokens int64 `json:"outputTokens"`
+	// Total reasoning tokens consumed across all model calls.
+	ReasoningTokenCount int64 `json:"reasoningTokenCount"`
+	// Total tokens used to create prompt cache entries across all model calls.
+	CacheCreationTokenCount int64 `json:"cacheCreationTokenCount"`
+	// Total tokens read from prompt cache across all model calls.
+	CacheReadTokenCount int64 `json:"cacheReadTokenCount"`
 	// Total number of LLM calls made.
 	ModelCalls int32 `json:"modelCalls"`
 	// Total number of tool calls made.
@@ -37,10 +43,13 @@ type _AgentInstanceMetrics AgentInstanceMetrics
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceMetrics(inputTokens int64, outputTokens int64, modelCalls int32, toolCalls int32) *AgentInstanceMetrics {
+func NewAgentInstanceMetrics(inputTokens int64, outputTokens int64, reasoningTokenCount int64, cacheCreationTokenCount int64, cacheReadTokenCount int64, modelCalls int32, toolCalls int32) *AgentInstanceMetrics {
 	this := AgentInstanceMetrics{}
 	this.InputTokens = inputTokens
 	this.OutputTokens = outputTokens
+	this.ReasoningTokenCount = reasoningTokenCount
+	this.CacheCreationTokenCount = cacheCreationTokenCount
+	this.CacheReadTokenCount = cacheReadTokenCount
 	this.ModelCalls = modelCalls
 	this.ToolCalls = toolCalls
 	return &this
@@ -100,6 +109,78 @@ func (o *AgentInstanceMetrics) GetOutputTokensOk() (*int64, bool) {
 // SetOutputTokens sets field value
 func (o *AgentInstanceMetrics) SetOutputTokens(v int64) {
 	o.OutputTokens = v
+}
+
+// GetReasoningTokenCount returns the ReasoningTokenCount field value
+func (o *AgentInstanceMetrics) GetReasoningTokenCount() int64 {
+	if o == nil {
+		var ret int64
+		return ret
+	}
+
+	return o.ReasoningTokenCount
+}
+
+// GetReasoningTokenCountOk returns a tuple with the ReasoningTokenCount field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceMetrics) GetReasoningTokenCountOk() (*int64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ReasoningTokenCount, true
+}
+
+// SetReasoningTokenCount sets field value
+func (o *AgentInstanceMetrics) SetReasoningTokenCount(v int64) {
+	o.ReasoningTokenCount = v
+}
+
+// GetCacheCreationTokenCount returns the CacheCreationTokenCount field value
+func (o *AgentInstanceMetrics) GetCacheCreationTokenCount() int64 {
+	if o == nil {
+		var ret int64
+		return ret
+	}
+
+	return o.CacheCreationTokenCount
+}
+
+// GetCacheCreationTokenCountOk returns a tuple with the CacheCreationTokenCount field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceMetrics) GetCacheCreationTokenCountOk() (*int64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CacheCreationTokenCount, true
+}
+
+// SetCacheCreationTokenCount sets field value
+func (o *AgentInstanceMetrics) SetCacheCreationTokenCount(v int64) {
+	o.CacheCreationTokenCount = v
+}
+
+// GetCacheReadTokenCount returns the CacheReadTokenCount field value
+func (o *AgentInstanceMetrics) GetCacheReadTokenCount() int64 {
+	if o == nil {
+		var ret int64
+		return ret
+	}
+
+	return o.CacheReadTokenCount
+}
+
+// GetCacheReadTokenCountOk returns a tuple with the CacheReadTokenCount field value
+// and a boolean to check if the value has been set.
+func (o *AgentInstanceMetrics) GetCacheReadTokenCountOk() (*int64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CacheReadTokenCount, true
+}
+
+// SetCacheReadTokenCount sets field value
+func (o *AgentInstanceMetrics) SetCacheReadTokenCount(v int64) {
+	o.CacheReadTokenCount = v
 }
 
 // GetModelCalls returns the ModelCalls field value
@@ -162,6 +243,9 @@ func (o AgentInstanceMetrics) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["inputTokens"] = o.InputTokens
 	toSerialize["outputTokens"] = o.OutputTokens
+	toSerialize["reasoningTokenCount"] = o.ReasoningTokenCount
+	toSerialize["cacheCreationTokenCount"] = o.CacheCreationTokenCount
+	toSerialize["cacheReadTokenCount"] = o.CacheReadTokenCount
 	toSerialize["modelCalls"] = o.ModelCalls
 	toSerialize["toolCalls"] = o.ToolCalls
 	return toSerialize, nil
@@ -174,6 +258,9 @@ func (o *AgentInstanceMetrics) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"inputTokens",
 		"outputTokens",
+		"reasoningTokenCount",
+		"cacheCreationTokenCount",
+		"cacheReadTokenCount",
 		"modelCalls",
 		"toolCalls",
 	}

@@ -815,6 +815,35 @@ func (k GroupId) String() string { return string(k) }
 // Validate reports whether k satisfies the GroupId constraints.
 func (k GroupId) Validate() error { return specGroupId.validate(string(k)) }
 
+// HistoryItemId is a Camunda semantic key. Construct it with NewHistoryItemId (validated) or
+// MustHistoryItemId (panics on invalid input).
+type HistoryItemId string
+
+var specHistoryItemId = keySpec{name: "HistoryItemId", pattern: nil, min: 1, max: 256}
+
+// NewHistoryItemId validates s against the HistoryItemId constraints and returns a HistoryItemId.
+func NewHistoryItemId(s string) (HistoryItemId, error) {
+	if err := specHistoryItemId.validate(s); err != nil {
+		return "", err
+	}
+	return HistoryItemId(s), nil
+}
+
+// MustHistoryItemId is like NewHistoryItemId but panics if s is invalid.
+func MustHistoryItemId(s string) HistoryItemId {
+	k, err := NewHistoryItemId(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k HistoryItemId) String() string { return string(k) }
+
+// Validate reports whether k satisfies the HistoryItemId constraints.
+func (k HistoryItemId) Validate() error { return specHistoryItemId.validate(string(k)) }
+
 // IncidentKey is a Camunda semantic key. Construct it with NewIncidentKey (validated) or
 // MustIncidentKey (panics on invalid input).
 type IncidentKey string
