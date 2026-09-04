@@ -19,6 +19,8 @@ var _ MappedNullable = &MessageSubscriptionFilter{}
 
 // MessageSubscriptionFilter Message subscription search filter.
 type MessageSubscriptionFilter struct {
+	// Filter by the business id inherited from the subscribing process instance when the subscription was opened. Supports advanced string filtering, including `$like` with `*`/`?` wildcards.
+	BusinessId *StringFilterProperty `json:"businessId,omitempty"`
 	// The message subscription key associated with this message subscription.
 	MessageSubscriptionKey *MessageSubscriptionKeyFilterProperty `json:"messageSubscriptionKey,omitempty"`
 	// The process definition key associated with this correlated message subscription. This only works for data created with 8.9 and later.
@@ -68,6 +70,38 @@ func NewMessageSubscriptionFilter() *MessageSubscriptionFilter {
 func NewMessageSubscriptionFilterWithDefaults() *MessageSubscriptionFilter {
 	this := MessageSubscriptionFilter{}
 	return &this
+}
+
+// GetBusinessId returns the BusinessId field value if set, zero value otherwise.
+func (o *MessageSubscriptionFilter) GetBusinessId() StringFilterProperty {
+	if o == nil || IsNil(o.BusinessId) {
+		var ret StringFilterProperty
+		return ret
+	}
+	return *o.BusinessId
+}
+
+// GetBusinessIdOk returns a tuple with the BusinessId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *MessageSubscriptionFilter) GetBusinessIdOk() (*StringFilterProperty, bool) {
+	if o == nil || IsNil(o.BusinessId) {
+		return nil, false
+	}
+	return o.BusinessId, true
+}
+
+// HasBusinessId returns a boolean if a field has been set.
+func (o *MessageSubscriptionFilter) HasBusinessId() bool {
+	if o != nil && !IsNil(o.BusinessId) {
+		return true
+	}
+
+	return false
+}
+
+// SetBusinessId gets a reference to the given StringFilterProperty and assigns it to the BusinessId field.
+func (o *MessageSubscriptionFilter) SetBusinessId(v StringFilterProperty) {
+	o.BusinessId = &v
 }
 
 // GetMessageSubscriptionKey returns the MessageSubscriptionKey field value if set, zero value otherwise.
@@ -592,6 +626,9 @@ func (o MessageSubscriptionFilter) MarshalJSON() ([]byte, error) {
 
 func (o MessageSubscriptionFilter) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.BusinessId) {
+		toSerialize["businessId"] = o.BusinessId
+	}
 	if !IsNil(o.MessageSubscriptionKey) {
 		toSerialize["messageSubscriptionKey"] = o.MessageSubscriptionKey
 	}

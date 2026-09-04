@@ -24,7 +24,7 @@ var _ MappedNullable = &AgentInstanceHistoryItemResult{}
 type AgentInstanceHistoryItemResult struct {
 	// The unique key for this history item. Stable and sortable by creation order.
 	HistoryItemKey ModelString `json:"historyItemKey"`
-	// The client-supplied identifier this item was created with. Empty for items that don't carry one.
+	// The client-supplied identifier this item was created with. Empty for items that don't carry one. Not unique: a job can be re-activated under a superseded lease any number of times before it completes, so one historyItemId can have zero or more DISCARDED records and at most one COMMITTED record, since only historyItemKey is guaranteed unique. Filter by commitStatus rather than assuming one record per historyItemId.
 	HistoryItemId string `json:"historyItemId"`
 	// The key of the agent instance this item belongs to.
 	AgentInstanceKey ModelString `json:"agentInstanceKey"`

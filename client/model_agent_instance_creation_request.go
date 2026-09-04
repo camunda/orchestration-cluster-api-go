@@ -23,16 +23,12 @@ var _ MappedNullable = &AgentInstanceCreationRequest{}
 type AgentInstanceCreationRequest struct {
 	// The key of the AI Agent Sub-process or AI Agent Task element instance. The engine uses this key to infer processInstanceKey, elementId, processDefinitionKey, and tenantId.
 	ElementInstanceKey ModelString `json:"elementInstanceKey"`
-	// The agent's initial definition; model, provider, and systemPrompt can all be changed later via a CONFIGURATION history item. Required when history is empty or omitted. Must be omitted when history is non-empty — supply model, provider, and systemPrompt through a CONFIGURATION item in history instead.
-	Definition *AgentInstanceDefinition `json:"definition,omitempty"`
-	// Limits for the agent execution. When omitted, all limits default to -1 (no limit). Must be omitted when history is non-empty — supply limits through a CONFIGURATION item in history instead, if needed.
-	Limits *AgentInstanceLimits `json:"limits,omitempty"`
-	// The key of the job activation during which this creation is being made. Required whenever history is non-empty.
-	JobKey NullableModelString `json:"jobKey,omitempty"`
+	// The key of the job activation during which this creation is being made. A creation must always be attributed to the active job that produced it.
+	JobKey ModelString `json:"jobKey"`
 	// Opaque lease token received from the job activation response. Disambiguates this activation from any other activation of the same job: if the job is later retried, history items submitted under a superseded lease are discarded rather than committed.
-	JobLease NullableString `json:"jobLease,omitempty"`
-	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated. When non-empty, model, provider, and systemPrompt (and, if needed, limits) must be established through a CONFIGURATION item in this batch instead of the top-level definition/limits, which must then be omitted.
-	History []AgentInstanceHistoryItem `json:"history,omitempty"`
+	JobLease string `json:"jobLease"`
+	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated. Must include a CONFIGURATION item establishing model, provider, and systemPrompt (and, if needed, limits).
+	History []AgentInstanceHistoryItem `json:"history"`
 }
 
 type _AgentInstanceCreationRequest AgentInstanceCreationRequest
@@ -41,9 +37,12 @@ type _AgentInstanceCreationRequest AgentInstanceCreationRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceCreationRequest(elementInstanceKey ModelString) *AgentInstanceCreationRequest {
+func NewAgentInstanceCreationRequest(elementInstanceKey ModelString, jobKey ModelString, jobLease string, history []AgentInstanceHistoryItem) *AgentInstanceCreationRequest {
 	this := AgentInstanceCreationRequest{}
 	this.ElementInstanceKey = elementInstanceKey
+	this.JobKey = jobKey
+	this.JobLease = jobLease
+	this.History = history
 	return &this
 }
 
@@ -79,185 +78,74 @@ func (o *AgentInstanceCreationRequest) SetElementInstanceKey(v ModelString) {
 	o.ElementInstanceKey = v
 }
 
-// GetDefinition returns the Definition field value if set, zero value otherwise.
-func (o *AgentInstanceCreationRequest) GetDefinition() AgentInstanceDefinition {
-	if o == nil || IsNil(o.Definition) {
-		var ret AgentInstanceDefinition
-		return ret
-	}
-	return *o.Definition
-}
-
-// GetDefinitionOk returns a tuple with the Definition field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *AgentInstanceCreationRequest) GetDefinitionOk() (*AgentInstanceDefinition, bool) {
-	if o == nil || IsNil(o.Definition) {
-		return nil, false
-	}
-	return o.Definition, true
-}
-
-// HasDefinition returns a boolean if a field has been set.
-func (o *AgentInstanceCreationRequest) HasDefinition() bool {
-	if o != nil && !IsNil(o.Definition) {
-		return true
-	}
-
-	return false
-}
-
-// SetDefinition gets a reference to the given AgentInstanceDefinition and assigns it to the Definition field.
-func (o *AgentInstanceCreationRequest) SetDefinition(v AgentInstanceDefinition) {
-	o.Definition = &v
-}
-
-// GetLimits returns the Limits field value if set, zero value otherwise.
-func (o *AgentInstanceCreationRequest) GetLimits() AgentInstanceLimits {
-	if o == nil || IsNil(o.Limits) {
-		var ret AgentInstanceLimits
-		return ret
-	}
-	return *o.Limits
-}
-
-// GetLimitsOk returns a tuple with the Limits field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *AgentInstanceCreationRequest) GetLimitsOk() (*AgentInstanceLimits, bool) {
-	if o == nil || IsNil(o.Limits) {
-		return nil, false
-	}
-	return o.Limits, true
-}
-
-// HasLimits returns a boolean if a field has been set.
-func (o *AgentInstanceCreationRequest) HasLimits() bool {
-	if o != nil && !IsNil(o.Limits) {
-		return true
-	}
-
-	return false
-}
-
-// SetLimits gets a reference to the given AgentInstanceLimits and assigns it to the Limits field.
-func (o *AgentInstanceCreationRequest) SetLimits(v AgentInstanceLimits) {
-	o.Limits = &v
-}
-
-// GetJobKey returns the JobKey field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetJobKey returns the JobKey field value
 func (o *AgentInstanceCreationRequest) GetJobKey() ModelString {
-	if o == nil || IsNil(o.JobKey.Get()) {
+	if o == nil {
 		var ret ModelString
 		return ret
 	}
-	return *o.JobKey.Get()
+
+	return o.JobKey
 }
 
-// GetJobKeyOk returns a tuple with the JobKey field value if set, nil otherwise
+// GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceCreationRequest) GetJobKeyOk() (*ModelString, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.JobKey.Get(), o.JobKey.IsSet()
+	return &o.JobKey, true
 }
 
-// HasJobKey returns a boolean if a field has been set.
-func (o *AgentInstanceCreationRequest) HasJobKey() bool {
-	if o != nil && o.JobKey.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetJobKey gets a reference to the given NullableModelString and assigns it to the JobKey field.
+// SetJobKey sets field value
 func (o *AgentInstanceCreationRequest) SetJobKey(v ModelString) {
-	o.JobKey.Set(&v)
+	o.JobKey = v
 }
 
-// SetJobKeyNil sets the value for JobKey to be an explicit nil
-func (o *AgentInstanceCreationRequest) SetJobKeyNil() {
-	o.JobKey.Set(nil)
-}
-
-// UnsetJobKey ensures that no value is present for JobKey, not even an explicit nil
-func (o *AgentInstanceCreationRequest) UnsetJobKey() {
-	o.JobKey.Unset()
-}
-
-// GetJobLease returns the JobLease field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetJobLease returns the JobLease field value
 func (o *AgentInstanceCreationRequest) GetJobLease() string {
-	if o == nil || IsNil(o.JobLease.Get()) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.JobLease.Get()
+
+	return o.JobLease
 }
 
-// GetJobLeaseOk returns a tuple with the JobLease field value if set, nil otherwise
+// GetJobLeaseOk returns a tuple with the JobLease field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceCreationRequest) GetJobLeaseOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.JobLease.Get(), o.JobLease.IsSet()
+	return &o.JobLease, true
 }
 
-// HasJobLease returns a boolean if a field has been set.
-func (o *AgentInstanceCreationRequest) HasJobLease() bool {
-	if o != nil && o.JobLease.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetJobLease gets a reference to the given NullableString and assigns it to the JobLease field.
+// SetJobLease sets field value
 func (o *AgentInstanceCreationRequest) SetJobLease(v string) {
-	o.JobLease.Set(&v)
+	o.JobLease = v
 }
 
-// SetJobLeaseNil sets the value for JobLease to be an explicit nil
-func (o *AgentInstanceCreationRequest) SetJobLeaseNil() {
-	o.JobLease.Set(nil)
-}
-
-// UnsetJobLease ensures that no value is present for JobLease, not even an explicit nil
-func (o *AgentInstanceCreationRequest) UnsetJobLease() {
-	o.JobLease.Unset()
-}
-
-// GetHistory returns the History field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetHistory returns the History field value
 func (o *AgentInstanceCreationRequest) GetHistory() []AgentInstanceHistoryItem {
 	if o == nil {
 		var ret []AgentInstanceHistoryItem
 		return ret
 	}
+
 	return o.History
 }
 
-// GetHistoryOk returns a tuple with the History field value if set, nil otherwise
+// GetHistoryOk returns a tuple with the History field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *AgentInstanceCreationRequest) GetHistoryOk() ([]AgentInstanceHistoryItem, bool) {
-	if o == nil || IsNil(o.History) {
+	if o == nil {
 		return nil, false
 	}
 	return o.History, true
 }
 
-// HasHistory returns a boolean if a field has been set.
-func (o *AgentInstanceCreationRequest) HasHistory() bool {
-	if o != nil && !IsNil(o.History) {
-		return true
-	}
-
-	return false
-}
-
-// SetHistory gets a reference to the given []AgentInstanceHistoryItem and assigns it to the History field.
+// SetHistory sets field value
 func (o *AgentInstanceCreationRequest) SetHistory(v []AgentInstanceHistoryItem) {
 	o.History = v
 }
@@ -273,21 +161,9 @@ func (o AgentInstanceCreationRequest) MarshalJSON() ([]byte, error) {
 func (o AgentInstanceCreationRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
-	if !IsNil(o.Definition) {
-		toSerialize["definition"] = o.Definition
-	}
-	if !IsNil(o.Limits) {
-		toSerialize["limits"] = o.Limits
-	}
-	if o.JobKey.IsSet() {
-		toSerialize["jobKey"] = o.JobKey.Get()
-	}
-	if o.JobLease.IsSet() {
-		toSerialize["jobLease"] = o.JobLease.Get()
-	}
-	if o.History != nil {
-		toSerialize["history"] = o.History
-	}
+	toSerialize["jobKey"] = o.JobKey
+	toSerialize["jobLease"] = o.JobLease
+	toSerialize["history"] = o.History
 	return toSerialize, nil
 }
 
@@ -297,6 +173,9 @@ func (o *AgentInstanceCreationRequest) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"elementInstanceKey",
+		"jobKey",
+		"jobLease",
+		"history",
 	}
 
 	allProperties := make(map[string]interface{})

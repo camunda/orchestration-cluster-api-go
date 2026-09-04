@@ -33,7 +33,7 @@ type AgentInstanceHistoryItem struct {
 	// Tool calls associated with this history item. For ASSISTANT items: tool calls dispatched by this LLM response. For TOOL_RESULT items: single-entry array referencing the originating tool call. Omit for USER items.
 	ToolCalls []AgentInstanceToolCall `json:"toolCalls,omitempty"`
 	// Per-call token and latency metrics. Present on ASSISTANT items only.
-	Metrics NullableAgentInstanceHistoryItemMetrics `json:"metrics,omitempty"`
+	Metrics NullableAgentInstanceHistoryItemMetricsRequest `json:"metrics,omitempty"`
 	// The agent-side timestamp of when this message was produced.
 	ProducedAt time.Time `json:"producedAt"`
 	// The complete list of tools available to the agent as of this entry. CONFIGURATION items only; omit for other roles. Omit to leave the tool list unchanged; send an empty array to clear it.
@@ -202,9 +202,9 @@ func (o *AgentInstanceHistoryItem) SetToolCalls(v []AgentInstanceToolCall) {
 }
 
 // GetMetrics returns the Metrics field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *AgentInstanceHistoryItem) GetMetrics() AgentInstanceHistoryItemMetrics {
+func (o *AgentInstanceHistoryItem) GetMetrics() AgentInstanceHistoryItemMetricsRequest {
 	if o == nil || IsNil(o.Metrics.Get()) {
-		var ret AgentInstanceHistoryItemMetrics
+		var ret AgentInstanceHistoryItemMetricsRequest
 		return ret
 	}
 	return *o.Metrics.Get()
@@ -213,7 +213,7 @@ func (o *AgentInstanceHistoryItem) GetMetrics() AgentInstanceHistoryItemMetrics 
 // GetMetricsOk returns a tuple with the Metrics field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AgentInstanceHistoryItem) GetMetricsOk() (*AgentInstanceHistoryItemMetrics, bool) {
+func (o *AgentInstanceHistoryItem) GetMetricsOk() (*AgentInstanceHistoryItemMetricsRequest, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -229,8 +229,8 @@ func (o *AgentInstanceHistoryItem) HasMetrics() bool {
 	return false
 }
 
-// SetMetrics gets a reference to the given NullableAgentInstanceHistoryItemMetrics and assigns it to the Metrics field.
-func (o *AgentInstanceHistoryItem) SetMetrics(v AgentInstanceHistoryItemMetrics) {
+// SetMetrics gets a reference to the given NullableAgentInstanceHistoryItemMetricsRequest and assigns it to the Metrics field.
+func (o *AgentInstanceHistoryItem) SetMetrics(v AgentInstanceHistoryItemMetricsRequest) {
 	o.Metrics.Set(&v)
 }
 

@@ -25,6 +25,12 @@ type AgentInstanceHistoryItemMetrics struct {
 	InputTokens NullableInt64 `json:"inputTokens"`
 	// Output tokens produced by this LLM call. Null when not provided.
 	OutputTokens NullableInt64 `json:"outputTokens"`
+	// Reasoning tokens consumed by this LLM call. Null when not provided.
+	ReasoningTokenCount NullableInt64 `json:"reasoningTokenCount"`
+	// Cache-creation tokens consumed by this LLM call. Null when not provided.
+	CacheCreationTokenCount NullableInt64 `json:"cacheCreationTokenCount"`
+	// Cache-read tokens consumed by this LLM call. Null when not provided.
+	CacheReadTokenCount NullableInt64 `json:"cacheReadTokenCount"`
 	// Wall-clock duration of the LLM call in milliseconds. Null when not provided.
 	DurationMs NullableInt64 `json:"durationMs"`
 }
@@ -35,10 +41,13 @@ type _AgentInstanceHistoryItemMetrics AgentInstanceHistoryItemMetrics
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemMetrics(inputTokens NullableInt64, outputTokens NullableInt64, durationMs NullableInt64) *AgentInstanceHistoryItemMetrics {
+func NewAgentInstanceHistoryItemMetrics(inputTokens NullableInt64, outputTokens NullableInt64, reasoningTokenCount NullableInt64, cacheCreationTokenCount NullableInt64, cacheReadTokenCount NullableInt64, durationMs NullableInt64) *AgentInstanceHistoryItemMetrics {
 	this := AgentInstanceHistoryItemMetrics{}
 	this.InputTokens = inputTokens
 	this.OutputTokens = outputTokens
+	this.ReasoningTokenCount = reasoningTokenCount
+	this.CacheCreationTokenCount = cacheCreationTokenCount
+	this.CacheReadTokenCount = cacheReadTokenCount
 	this.DurationMs = durationMs
 	return &this
 }
@@ -103,6 +112,84 @@ func (o *AgentInstanceHistoryItemMetrics) SetOutputTokens(v int64) {
 	o.OutputTokens.Set(&v)
 }
 
+// GetReasoningTokenCount returns the ReasoningTokenCount field value
+// If the value is explicit nil, the zero value for int64 will be returned
+func (o *AgentInstanceHistoryItemMetrics) GetReasoningTokenCount() int64 {
+	if o == nil || o.ReasoningTokenCount.Get() == nil {
+		var ret int64
+		return ret
+	}
+
+	return *o.ReasoningTokenCount.Get()
+}
+
+// GetReasoningTokenCountOk returns a tuple with the ReasoningTokenCount field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AgentInstanceHistoryItemMetrics) GetReasoningTokenCountOk() (*int64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ReasoningTokenCount.Get(), o.ReasoningTokenCount.IsSet()
+}
+
+// SetReasoningTokenCount sets field value
+func (o *AgentInstanceHistoryItemMetrics) SetReasoningTokenCount(v int64) {
+	o.ReasoningTokenCount.Set(&v)
+}
+
+// GetCacheCreationTokenCount returns the CacheCreationTokenCount field value
+// If the value is explicit nil, the zero value for int64 will be returned
+func (o *AgentInstanceHistoryItemMetrics) GetCacheCreationTokenCount() int64 {
+	if o == nil || o.CacheCreationTokenCount.Get() == nil {
+		var ret int64
+		return ret
+	}
+
+	return *o.CacheCreationTokenCount.Get()
+}
+
+// GetCacheCreationTokenCountOk returns a tuple with the CacheCreationTokenCount field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AgentInstanceHistoryItemMetrics) GetCacheCreationTokenCountOk() (*int64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.CacheCreationTokenCount.Get(), o.CacheCreationTokenCount.IsSet()
+}
+
+// SetCacheCreationTokenCount sets field value
+func (o *AgentInstanceHistoryItemMetrics) SetCacheCreationTokenCount(v int64) {
+	o.CacheCreationTokenCount.Set(&v)
+}
+
+// GetCacheReadTokenCount returns the CacheReadTokenCount field value
+// If the value is explicit nil, the zero value for int64 will be returned
+func (o *AgentInstanceHistoryItemMetrics) GetCacheReadTokenCount() int64 {
+	if o == nil || o.CacheReadTokenCount.Get() == nil {
+		var ret int64
+		return ret
+	}
+
+	return *o.CacheReadTokenCount.Get()
+}
+
+// GetCacheReadTokenCountOk returns a tuple with the CacheReadTokenCount field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *AgentInstanceHistoryItemMetrics) GetCacheReadTokenCountOk() (*int64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.CacheReadTokenCount.Get(), o.CacheReadTokenCount.IsSet()
+}
+
+// SetCacheReadTokenCount sets field value
+func (o *AgentInstanceHistoryItemMetrics) SetCacheReadTokenCount(v int64) {
+	o.CacheReadTokenCount.Set(&v)
+}
+
 // GetDurationMs returns the DurationMs field value
 // If the value is explicit nil, the zero value for int64 will be returned
 func (o *AgentInstanceHistoryItemMetrics) GetDurationMs() int64 {
@@ -141,6 +228,9 @@ func (o AgentInstanceHistoryItemMetrics) ToMap() (map[string]interface{}, error)
 	toSerialize := map[string]interface{}{}
 	toSerialize["inputTokens"] = o.InputTokens.Get()
 	toSerialize["outputTokens"] = o.OutputTokens.Get()
+	toSerialize["reasoningTokenCount"] = o.ReasoningTokenCount.Get()
+	toSerialize["cacheCreationTokenCount"] = o.CacheCreationTokenCount.Get()
+	toSerialize["cacheReadTokenCount"] = o.CacheReadTokenCount.Get()
 	toSerialize["durationMs"] = o.DurationMs.Get()
 	return toSerialize, nil
 }
@@ -152,6 +242,9 @@ func (o *AgentInstanceHistoryItemMetrics) UnmarshalJSON(data []byte) (err error)
 	requiredProperties := []string{
 		"inputTokens",
 		"outputTokens",
+		"reasoningTokenCount",
+		"cacheCreationTokenCount",
+		"cacheReadTokenCount",
 		"durationMs",
 	}
 

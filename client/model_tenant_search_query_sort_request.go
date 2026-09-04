@@ -21,7 +21,7 @@ var _ MappedNullable = &TenantSearchQuerySortRequest{}
 
 // TenantSearchQuerySortRequest struct for TenantSearchQuerySortRequest
 type TenantSearchQuerySortRequest struct {
-	// The field to sort by.
+	// The field to sort by. `key` is deprecated and should not be used anymore.
 	Field string         `json:"field"`
 	Order *SortOrderEnum `json:"order,omitempty"`
 }

@@ -22,7 +22,7 @@ type RoleFilter struct {
 	// The role ID search filters.
 	RoleId *string `json:"roleId,omitempty" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The role name search filters.
-	Name *string `json:"name,omitempty"`
+	Name *StringFilterProperty `json:"name,omitempty"`
 }
 
 // NewRoleFilter instantiates a new RoleFilter object
@@ -75,9 +75,9 @@ func (o *RoleFilter) SetRoleId(v string) {
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *RoleFilter) GetName() string {
+func (o *RoleFilter) GetName() StringFilterProperty {
 	if o == nil || IsNil(o.Name) {
-		var ret string
+		var ret StringFilterProperty
 		return ret
 	}
 	return *o.Name
@@ -85,7 +85,7 @@ func (o *RoleFilter) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RoleFilter) GetNameOk() (*string, bool) {
+func (o *RoleFilter) GetNameOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -101,8 +101,8 @@ func (o *RoleFilter) HasName() bool {
 	return false
 }
 
-// SetName gets a reference to the given string and assigns it to the Name field.
-func (o *RoleFilter) SetName(v string) {
+// SetName gets a reference to the given StringFilterProperty and assigns it to the Name field.
+func (o *RoleFilter) SetName(v StringFilterProperty) {
 	o.Name = &v
 }
 

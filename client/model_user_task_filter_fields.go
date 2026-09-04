@@ -14,11 +14,11 @@ import (
 	"encoding/json"
 )
 
-// checks if the UserTaskFilter type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &UserTaskFilter{}
+// checks if the UserTaskFilterFields type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UserTaskFilterFields{}
 
-// UserTaskFilter User task filter request.
-type UserTaskFilter struct {
+// UserTaskFilterFields User task filter fields.
+type UserTaskFilterFields struct {
 	// The user task state.
 	State *UserTaskStateFilterProperty `json:"state,omitempty"`
 	// The assignee of the user task.
@@ -61,29 +61,27 @@ type UserTaskFilter struct {
 	ElementInstanceKey *ModelString `json:"elementInstanceKey,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
 	Tags []string `json:"tags,omitempty"`
-	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"assignee\": \"user1\",   \"$or\": [     { \"candidateGroup\": \"groupA\" },     { \"candidateUser\": \"user2\" }   ] } ``` This matches user tasks that:  <ul style=\"padding-left: 20px; margin-left: 20px;\">   <li style=\"list-style-type: disc;\">are assigned to <em>user1</em></li>   <li style=\"list-style-type: disc;\">and match either:     <ul style=\"padding-left: 20px; margin-left: 20px;\">       <li style=\"list-style-type: circle;\"><code>candidateGroup</code> is <em>groupA</em>, or</li>       <li style=\"list-style-type: circle;\"><code>candidateUser</code> is <em>user2</em></li>     </ul>   </li> </ul> <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
-	Or []UserTaskFilterFields `json:"$or,omitempty"`
 }
 
-// NewUserTaskFilter instantiates a new UserTaskFilter object
+// NewUserTaskFilterFields instantiates a new UserTaskFilterFields object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskFilter() *UserTaskFilter {
-	this := UserTaskFilter{}
+func NewUserTaskFilterFields() *UserTaskFilterFields {
+	this := UserTaskFilterFields{}
 	return &this
 }
 
-// NewUserTaskFilterWithDefaults instantiates a new UserTaskFilter object
+// NewUserTaskFilterFieldsWithDefaults instantiates a new UserTaskFilterFields object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewUserTaskFilterWithDefaults() *UserTaskFilter {
-	this := UserTaskFilter{}
+func NewUserTaskFilterFieldsWithDefaults() *UserTaskFilterFields {
+	this := UserTaskFilterFields{}
 	return &this
 }
 
 // GetState returns the State field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetState() UserTaskStateFilterProperty {
+func (o *UserTaskFilterFields) GetState() UserTaskStateFilterProperty {
 	if o == nil || IsNil(o.State) {
 		var ret UserTaskStateFilterProperty
 		return ret
@@ -93,7 +91,7 @@ func (o *UserTaskFilter) GetState() UserTaskStateFilterProperty {
 
 // GetStateOk returns a tuple with the State field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetStateOk() (*UserTaskStateFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetStateOk() (*UserTaskStateFilterProperty, bool) {
 	if o == nil || IsNil(o.State) {
 		return nil, false
 	}
@@ -101,7 +99,7 @@ func (o *UserTaskFilter) GetStateOk() (*UserTaskStateFilterProperty, bool) {
 }
 
 // HasState returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasState() bool {
+func (o *UserTaskFilterFields) HasState() bool {
 	if o != nil && !IsNil(o.State) {
 		return true
 	}
@@ -110,12 +108,12 @@ func (o *UserTaskFilter) HasState() bool {
 }
 
 // SetState gets a reference to the given UserTaskStateFilterProperty and assigns it to the State field.
-func (o *UserTaskFilter) SetState(v UserTaskStateFilterProperty) {
+func (o *UserTaskFilterFields) SetState(v UserTaskStateFilterProperty) {
 	o.State = &v
 }
 
 // GetAssignee returns the Assignee field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetAssignee() StringFilterProperty {
+func (o *UserTaskFilterFields) GetAssignee() StringFilterProperty {
 	if o == nil || IsNil(o.Assignee) {
 		var ret StringFilterProperty
 		return ret
@@ -125,7 +123,7 @@ func (o *UserTaskFilter) GetAssignee() StringFilterProperty {
 
 // GetAssigneeOk returns a tuple with the Assignee field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetAssigneeOk() (*StringFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetAssigneeOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Assignee) {
 		return nil, false
 	}
@@ -133,7 +131,7 @@ func (o *UserTaskFilter) GetAssigneeOk() (*StringFilterProperty, bool) {
 }
 
 // HasAssignee returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasAssignee() bool {
+func (o *UserTaskFilterFields) HasAssignee() bool {
 	if o != nil && !IsNil(o.Assignee) {
 		return true
 	}
@@ -142,12 +140,12 @@ func (o *UserTaskFilter) HasAssignee() bool {
 }
 
 // SetAssignee gets a reference to the given StringFilterProperty and assigns it to the Assignee field.
-func (o *UserTaskFilter) SetAssignee(v StringFilterProperty) {
+func (o *UserTaskFilterFields) SetAssignee(v StringFilterProperty) {
 	o.Assignee = &v
 }
 
 // GetBusinessId returns the BusinessId field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetBusinessId() StringFilterProperty {
+func (o *UserTaskFilterFields) GetBusinessId() StringFilterProperty {
 	if o == nil || IsNil(o.BusinessId) {
 		var ret StringFilterProperty
 		return ret
@@ -157,7 +155,7 @@ func (o *UserTaskFilter) GetBusinessId() StringFilterProperty {
 
 // GetBusinessIdOk returns a tuple with the BusinessId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetBusinessIdOk() (*StringFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetBusinessIdOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.BusinessId) {
 		return nil, false
 	}
@@ -165,7 +163,7 @@ func (o *UserTaskFilter) GetBusinessIdOk() (*StringFilterProperty, bool) {
 }
 
 // HasBusinessId returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasBusinessId() bool {
+func (o *UserTaskFilterFields) HasBusinessId() bool {
 	if o != nil && !IsNil(o.BusinessId) {
 		return true
 	}
@@ -174,12 +172,12 @@ func (o *UserTaskFilter) HasBusinessId() bool {
 }
 
 // SetBusinessId gets a reference to the given StringFilterProperty and assigns it to the BusinessId field.
-func (o *UserTaskFilter) SetBusinessId(v StringFilterProperty) {
+func (o *UserTaskFilterFields) SetBusinessId(v StringFilterProperty) {
 	o.BusinessId = &v
 }
 
 // GetPriority returns the Priority field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetPriority() IntegerFilterProperty {
+func (o *UserTaskFilterFields) GetPriority() IntegerFilterProperty {
 	if o == nil || IsNil(o.Priority) {
 		var ret IntegerFilterProperty
 		return ret
@@ -189,7 +187,7 @@ func (o *UserTaskFilter) GetPriority() IntegerFilterProperty {
 
 // GetPriorityOk returns a tuple with the Priority field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetPriorityOk() (*IntegerFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetPriorityOk() (*IntegerFilterProperty, bool) {
 	if o == nil || IsNil(o.Priority) {
 		return nil, false
 	}
@@ -197,7 +195,7 @@ func (o *UserTaskFilter) GetPriorityOk() (*IntegerFilterProperty, bool) {
 }
 
 // HasPriority returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasPriority() bool {
+func (o *UserTaskFilterFields) HasPriority() bool {
 	if o != nil && !IsNil(o.Priority) {
 		return true
 	}
@@ -206,12 +204,12 @@ func (o *UserTaskFilter) HasPriority() bool {
 }
 
 // SetPriority gets a reference to the given IntegerFilterProperty and assigns it to the Priority field.
-func (o *UserTaskFilter) SetPriority(v IntegerFilterProperty) {
+func (o *UserTaskFilterFields) SetPriority(v IntegerFilterProperty) {
 	o.Priority = &v
 }
 
 // GetElementId returns the ElementId field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetElementId() string {
+func (o *UserTaskFilterFields) GetElementId() string {
 	if o == nil || IsNil(o.ElementId) {
 		var ret string
 		return ret
@@ -221,7 +219,7 @@ func (o *UserTaskFilter) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetElementIdOk() (*string, bool) {
+func (o *UserTaskFilterFields) GetElementIdOk() (*string, bool) {
 	if o == nil || IsNil(o.ElementId) {
 		return nil, false
 	}
@@ -229,7 +227,7 @@ func (o *UserTaskFilter) GetElementIdOk() (*string, bool) {
 }
 
 // HasElementId returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasElementId() bool {
+func (o *UserTaskFilterFields) HasElementId() bool {
 	if o != nil && !IsNil(o.ElementId) {
 		return true
 	}
@@ -238,12 +236,12 @@ func (o *UserTaskFilter) HasElementId() bool {
 }
 
 // SetElementId gets a reference to the given string and assigns it to the ElementId field.
-func (o *UserTaskFilter) SetElementId(v string) {
+func (o *UserTaskFilterFields) SetElementId(v string) {
 	o.ElementId = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetName() StringFilterProperty {
+func (o *UserTaskFilterFields) GetName() StringFilterProperty {
 	if o == nil || IsNil(o.Name) {
 		var ret StringFilterProperty
 		return ret
@@ -253,7 +251,7 @@ func (o *UserTaskFilter) GetName() StringFilterProperty {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetNameOk() (*StringFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetNameOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -261,7 +259,7 @@ func (o *UserTaskFilter) GetNameOk() (*StringFilterProperty, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasName() bool {
+func (o *UserTaskFilterFields) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -270,12 +268,12 @@ func (o *UserTaskFilter) HasName() bool {
 }
 
 // SetName gets a reference to the given StringFilterProperty and assigns it to the Name field.
-func (o *UserTaskFilter) SetName(v StringFilterProperty) {
+func (o *UserTaskFilterFields) SetName(v StringFilterProperty) {
 	o.Name = &v
 }
 
 // GetCandidateGroup returns the CandidateGroup field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetCandidateGroup() StringFilterProperty {
+func (o *UserTaskFilterFields) GetCandidateGroup() StringFilterProperty {
 	if o == nil || IsNil(o.CandidateGroup) {
 		var ret StringFilterProperty
 		return ret
@@ -285,7 +283,7 @@ func (o *UserTaskFilter) GetCandidateGroup() StringFilterProperty {
 
 // GetCandidateGroupOk returns a tuple with the CandidateGroup field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetCandidateGroupOk() (*StringFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetCandidateGroupOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.CandidateGroup) {
 		return nil, false
 	}
@@ -293,7 +291,7 @@ func (o *UserTaskFilter) GetCandidateGroupOk() (*StringFilterProperty, bool) {
 }
 
 // HasCandidateGroup returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasCandidateGroup() bool {
+func (o *UserTaskFilterFields) HasCandidateGroup() bool {
 	if o != nil && !IsNil(o.CandidateGroup) {
 		return true
 	}
@@ -302,12 +300,12 @@ func (o *UserTaskFilter) HasCandidateGroup() bool {
 }
 
 // SetCandidateGroup gets a reference to the given StringFilterProperty and assigns it to the CandidateGroup field.
-func (o *UserTaskFilter) SetCandidateGroup(v StringFilterProperty) {
+func (o *UserTaskFilterFields) SetCandidateGroup(v StringFilterProperty) {
 	o.CandidateGroup = &v
 }
 
 // GetCandidateUser returns the CandidateUser field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetCandidateUser() StringFilterProperty {
+func (o *UserTaskFilterFields) GetCandidateUser() StringFilterProperty {
 	if o == nil || IsNil(o.CandidateUser) {
 		var ret StringFilterProperty
 		return ret
@@ -317,7 +315,7 @@ func (o *UserTaskFilter) GetCandidateUser() StringFilterProperty {
 
 // GetCandidateUserOk returns a tuple with the CandidateUser field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetCandidateUserOk() (*StringFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetCandidateUserOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.CandidateUser) {
 		return nil, false
 	}
@@ -325,7 +323,7 @@ func (o *UserTaskFilter) GetCandidateUserOk() (*StringFilterProperty, bool) {
 }
 
 // HasCandidateUser returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasCandidateUser() bool {
+func (o *UserTaskFilterFields) HasCandidateUser() bool {
 	if o != nil && !IsNil(o.CandidateUser) {
 		return true
 	}
@@ -334,12 +332,12 @@ func (o *UserTaskFilter) HasCandidateUser() bool {
 }
 
 // SetCandidateUser gets a reference to the given StringFilterProperty and assigns it to the CandidateUser field.
-func (o *UserTaskFilter) SetCandidateUser(v StringFilterProperty) {
+func (o *UserTaskFilterFields) SetCandidateUser(v StringFilterProperty) {
 	o.CandidateUser = &v
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetTenantId() StringFilterProperty {
+func (o *UserTaskFilterFields) GetTenantId() StringFilterProperty {
 	if o == nil || IsNil(o.TenantId) {
 		var ret StringFilterProperty
 		return ret
@@ -349,7 +347,7 @@ func (o *UserTaskFilter) GetTenantId() StringFilterProperty {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetTenantIdOk() (*StringFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetTenantIdOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -357,7 +355,7 @@ func (o *UserTaskFilter) GetTenantIdOk() (*StringFilterProperty, bool) {
 }
 
 // HasTenantId returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasTenantId() bool {
+func (o *UserTaskFilterFields) HasTenantId() bool {
 	if o != nil && !IsNil(o.TenantId) {
 		return true
 	}
@@ -366,12 +364,12 @@ func (o *UserTaskFilter) HasTenantId() bool {
 }
 
 // SetTenantId gets a reference to the given StringFilterProperty and assigns it to the TenantId field.
-func (o *UserTaskFilter) SetTenantId(v StringFilterProperty) {
+func (o *UserTaskFilterFields) SetTenantId(v StringFilterProperty) {
 	o.TenantId = &v
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetProcessDefinitionId() ProcessDefinitionIdFilterProperty {
+func (o *UserTaskFilterFields) GetProcessDefinitionId() ProcessDefinitionIdFilterProperty {
 	if o == nil || IsNil(o.ProcessDefinitionId) {
 		var ret ProcessDefinitionIdFilterProperty
 		return ret
@@ -381,7 +379,7 @@ func (o *UserTaskFilter) GetProcessDefinitionId() ProcessDefinitionIdFilterPrope
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetProcessDefinitionIdOk() (*ProcessDefinitionIdFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetProcessDefinitionIdOk() (*ProcessDefinitionIdFilterProperty, bool) {
 	if o == nil || IsNil(o.ProcessDefinitionId) {
 		return nil, false
 	}
@@ -389,7 +387,7 @@ func (o *UserTaskFilter) GetProcessDefinitionIdOk() (*ProcessDefinitionIdFilterP
 }
 
 // HasProcessDefinitionId returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasProcessDefinitionId() bool {
+func (o *UserTaskFilterFields) HasProcessDefinitionId() bool {
 	if o != nil && !IsNil(o.ProcessDefinitionId) {
 		return true
 	}
@@ -398,12 +396,12 @@ func (o *UserTaskFilter) HasProcessDefinitionId() bool {
 }
 
 // SetProcessDefinitionId gets a reference to the given ProcessDefinitionIdFilterProperty and assigns it to the ProcessDefinitionId field.
-func (o *UserTaskFilter) SetProcessDefinitionId(v ProcessDefinitionIdFilterProperty) {
+func (o *UserTaskFilterFields) SetProcessDefinitionId(v ProcessDefinitionIdFilterProperty) {
 	o.ProcessDefinitionId = &v
 }
 
 // GetCreationDate returns the CreationDate field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetCreationDate() DateTimeFilterProperty {
+func (o *UserTaskFilterFields) GetCreationDate() DateTimeFilterProperty {
 	if o == nil || IsNil(o.CreationDate) {
 		var ret DateTimeFilterProperty
 		return ret
@@ -413,7 +411,7 @@ func (o *UserTaskFilter) GetCreationDate() DateTimeFilterProperty {
 
 // GetCreationDateOk returns a tuple with the CreationDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetCreationDateOk() (*DateTimeFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetCreationDateOk() (*DateTimeFilterProperty, bool) {
 	if o == nil || IsNil(o.CreationDate) {
 		return nil, false
 	}
@@ -421,7 +419,7 @@ func (o *UserTaskFilter) GetCreationDateOk() (*DateTimeFilterProperty, bool) {
 }
 
 // HasCreationDate returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasCreationDate() bool {
+func (o *UserTaskFilterFields) HasCreationDate() bool {
 	if o != nil && !IsNil(o.CreationDate) {
 		return true
 	}
@@ -430,12 +428,12 @@ func (o *UserTaskFilter) HasCreationDate() bool {
 }
 
 // SetCreationDate gets a reference to the given DateTimeFilterProperty and assigns it to the CreationDate field.
-func (o *UserTaskFilter) SetCreationDate(v DateTimeFilterProperty) {
+func (o *UserTaskFilterFields) SetCreationDate(v DateTimeFilterProperty) {
 	o.CreationDate = &v
 }
 
 // GetCompletionDate returns the CompletionDate field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetCompletionDate() DateTimeFilterProperty {
+func (o *UserTaskFilterFields) GetCompletionDate() DateTimeFilterProperty {
 	if o == nil || IsNil(o.CompletionDate) {
 		var ret DateTimeFilterProperty
 		return ret
@@ -445,7 +443,7 @@ func (o *UserTaskFilter) GetCompletionDate() DateTimeFilterProperty {
 
 // GetCompletionDateOk returns a tuple with the CompletionDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetCompletionDateOk() (*DateTimeFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetCompletionDateOk() (*DateTimeFilterProperty, bool) {
 	if o == nil || IsNil(o.CompletionDate) {
 		return nil, false
 	}
@@ -453,7 +451,7 @@ func (o *UserTaskFilter) GetCompletionDateOk() (*DateTimeFilterProperty, bool) {
 }
 
 // HasCompletionDate returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasCompletionDate() bool {
+func (o *UserTaskFilterFields) HasCompletionDate() bool {
 	if o != nil && !IsNil(o.CompletionDate) {
 		return true
 	}
@@ -462,12 +460,12 @@ func (o *UserTaskFilter) HasCompletionDate() bool {
 }
 
 // SetCompletionDate gets a reference to the given DateTimeFilterProperty and assigns it to the CompletionDate field.
-func (o *UserTaskFilter) SetCompletionDate(v DateTimeFilterProperty) {
+func (o *UserTaskFilterFields) SetCompletionDate(v DateTimeFilterProperty) {
 	o.CompletionDate = &v
 }
 
 // GetFollowUpDate returns the FollowUpDate field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetFollowUpDate() DateTimeFilterProperty {
+func (o *UserTaskFilterFields) GetFollowUpDate() DateTimeFilterProperty {
 	if o == nil || IsNil(o.FollowUpDate) {
 		var ret DateTimeFilterProperty
 		return ret
@@ -477,7 +475,7 @@ func (o *UserTaskFilter) GetFollowUpDate() DateTimeFilterProperty {
 
 // GetFollowUpDateOk returns a tuple with the FollowUpDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetFollowUpDateOk() (*DateTimeFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetFollowUpDateOk() (*DateTimeFilterProperty, bool) {
 	if o == nil || IsNil(o.FollowUpDate) {
 		return nil, false
 	}
@@ -485,7 +483,7 @@ func (o *UserTaskFilter) GetFollowUpDateOk() (*DateTimeFilterProperty, bool) {
 }
 
 // HasFollowUpDate returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasFollowUpDate() bool {
+func (o *UserTaskFilterFields) HasFollowUpDate() bool {
 	if o != nil && !IsNil(o.FollowUpDate) {
 		return true
 	}
@@ -494,12 +492,12 @@ func (o *UserTaskFilter) HasFollowUpDate() bool {
 }
 
 // SetFollowUpDate gets a reference to the given DateTimeFilterProperty and assigns it to the FollowUpDate field.
-func (o *UserTaskFilter) SetFollowUpDate(v DateTimeFilterProperty) {
+func (o *UserTaskFilterFields) SetFollowUpDate(v DateTimeFilterProperty) {
 	o.FollowUpDate = &v
 }
 
 // GetDueDate returns the DueDate field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetDueDate() DateTimeFilterProperty {
+func (o *UserTaskFilterFields) GetDueDate() DateTimeFilterProperty {
 	if o == nil || IsNil(o.DueDate) {
 		var ret DateTimeFilterProperty
 		return ret
@@ -509,7 +507,7 @@ func (o *UserTaskFilter) GetDueDate() DateTimeFilterProperty {
 
 // GetDueDateOk returns a tuple with the DueDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetDueDateOk() (*DateTimeFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetDueDateOk() (*DateTimeFilterProperty, bool) {
 	if o == nil || IsNil(o.DueDate) {
 		return nil, false
 	}
@@ -517,7 +515,7 @@ func (o *UserTaskFilter) GetDueDateOk() (*DateTimeFilterProperty, bool) {
 }
 
 // HasDueDate returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasDueDate() bool {
+func (o *UserTaskFilterFields) HasDueDate() bool {
 	if o != nil && !IsNil(o.DueDate) {
 		return true
 	}
@@ -526,12 +524,12 @@ func (o *UserTaskFilter) HasDueDate() bool {
 }
 
 // SetDueDate gets a reference to the given DateTimeFilterProperty and assigns it to the DueDate field.
-func (o *UserTaskFilter) SetDueDate(v DateTimeFilterProperty) {
+func (o *UserTaskFilterFields) SetDueDate(v DateTimeFilterProperty) {
 	o.DueDate = &v
 }
 
 // GetProcessInstanceVariables returns the ProcessInstanceVariables field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetProcessInstanceVariables() []VariableValueFilterProperty {
+func (o *UserTaskFilterFields) GetProcessInstanceVariables() []VariableValueFilterProperty {
 	if o == nil || IsNil(o.ProcessInstanceVariables) {
 		var ret []VariableValueFilterProperty
 		return ret
@@ -541,7 +539,7 @@ func (o *UserTaskFilter) GetProcessInstanceVariables() []VariableValueFilterProp
 
 // GetProcessInstanceVariablesOk returns a tuple with the ProcessInstanceVariables field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetProcessInstanceVariablesOk() ([]VariableValueFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetProcessInstanceVariablesOk() ([]VariableValueFilterProperty, bool) {
 	if o == nil || IsNil(o.ProcessInstanceVariables) {
 		return nil, false
 	}
@@ -549,7 +547,7 @@ func (o *UserTaskFilter) GetProcessInstanceVariablesOk() ([]VariableValueFilterP
 }
 
 // HasProcessInstanceVariables returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasProcessInstanceVariables() bool {
+func (o *UserTaskFilterFields) HasProcessInstanceVariables() bool {
 	if o != nil && !IsNil(o.ProcessInstanceVariables) {
 		return true
 	}
@@ -558,12 +556,12 @@ func (o *UserTaskFilter) HasProcessInstanceVariables() bool {
 }
 
 // SetProcessInstanceVariables gets a reference to the given []VariableValueFilterProperty and assigns it to the ProcessInstanceVariables field.
-func (o *UserTaskFilter) SetProcessInstanceVariables(v []VariableValueFilterProperty) {
+func (o *UserTaskFilterFields) SetProcessInstanceVariables(v []VariableValueFilterProperty) {
 	o.ProcessInstanceVariables = v
 }
 
 // GetLocalVariables returns the LocalVariables field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetLocalVariables() []VariableValueFilterProperty {
+func (o *UserTaskFilterFields) GetLocalVariables() []VariableValueFilterProperty {
 	if o == nil || IsNil(o.LocalVariables) {
 		var ret []VariableValueFilterProperty
 		return ret
@@ -573,7 +571,7 @@ func (o *UserTaskFilter) GetLocalVariables() []VariableValueFilterProperty {
 
 // GetLocalVariablesOk returns a tuple with the LocalVariables field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetLocalVariablesOk() ([]VariableValueFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetLocalVariablesOk() ([]VariableValueFilterProperty, bool) {
 	if o == nil || IsNil(o.LocalVariables) {
 		return nil, false
 	}
@@ -581,7 +579,7 @@ func (o *UserTaskFilter) GetLocalVariablesOk() ([]VariableValueFilterProperty, b
 }
 
 // HasLocalVariables returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasLocalVariables() bool {
+func (o *UserTaskFilterFields) HasLocalVariables() bool {
 	if o != nil && !IsNil(o.LocalVariables) {
 		return true
 	}
@@ -590,12 +588,12 @@ func (o *UserTaskFilter) HasLocalVariables() bool {
 }
 
 // SetLocalVariables gets a reference to the given []VariableValueFilterProperty and assigns it to the LocalVariables field.
-func (o *UserTaskFilter) SetLocalVariables(v []VariableValueFilterProperty) {
+func (o *UserTaskFilterFields) SetLocalVariables(v []VariableValueFilterProperty) {
 	o.LocalVariables = v
 }
 
 // GetUserTaskKey returns the UserTaskKey field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetUserTaskKey() ModelString {
+func (o *UserTaskFilterFields) GetUserTaskKey() ModelString {
 	if o == nil || IsNil(o.UserTaskKey) {
 		var ret ModelString
 		return ret
@@ -605,7 +603,7 @@ func (o *UserTaskFilter) GetUserTaskKey() ModelString {
 
 // GetUserTaskKeyOk returns a tuple with the UserTaskKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetUserTaskKeyOk() (*ModelString, bool) {
+func (o *UserTaskFilterFields) GetUserTaskKeyOk() (*ModelString, bool) {
 	if o == nil || IsNil(o.UserTaskKey) {
 		return nil, false
 	}
@@ -613,7 +611,7 @@ func (o *UserTaskFilter) GetUserTaskKeyOk() (*ModelString, bool) {
 }
 
 // HasUserTaskKey returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasUserTaskKey() bool {
+func (o *UserTaskFilterFields) HasUserTaskKey() bool {
 	if o != nil && !IsNil(o.UserTaskKey) {
 		return true
 	}
@@ -622,12 +620,12 @@ func (o *UserTaskFilter) HasUserTaskKey() bool {
 }
 
 // SetUserTaskKey gets a reference to the given ModelString and assigns it to the UserTaskKey field.
-func (o *UserTaskFilter) SetUserTaskKey(v ModelString) {
+func (o *UserTaskFilterFields) SetUserTaskKey(v ModelString) {
 	o.UserTaskKey = &v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetProcessDefinitionKey() ProcessDefinitionKeyFilterProperty {
+func (o *UserTaskFilterFields) GetProcessDefinitionKey() ProcessDefinitionKeyFilterProperty {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
 		var ret ProcessDefinitionKeyFilterProperty
 		return ret
@@ -637,7 +635,7 @@ func (o *UserTaskFilter) GetProcessDefinitionKey() ProcessDefinitionKeyFilterPro
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetProcessDefinitionKeyOk() (*ProcessDefinitionKeyFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetProcessDefinitionKeyOk() (*ProcessDefinitionKeyFilterProperty, bool) {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
 		return nil, false
 	}
@@ -645,7 +643,7 @@ func (o *UserTaskFilter) GetProcessDefinitionKeyOk() (*ProcessDefinitionKeyFilte
 }
 
 // HasProcessDefinitionKey returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasProcessDefinitionKey() bool {
+func (o *UserTaskFilterFields) HasProcessDefinitionKey() bool {
 	if o != nil && !IsNil(o.ProcessDefinitionKey) {
 		return true
 	}
@@ -654,12 +652,12 @@ func (o *UserTaskFilter) HasProcessDefinitionKey() bool {
 }
 
 // SetProcessDefinitionKey gets a reference to the given ProcessDefinitionKeyFilterProperty and assigns it to the ProcessDefinitionKey field.
-func (o *UserTaskFilter) SetProcessDefinitionKey(v ProcessDefinitionKeyFilterProperty) {
+func (o *UserTaskFilterFields) SetProcessDefinitionKey(v ProcessDefinitionKeyFilterProperty) {
 	o.ProcessDefinitionKey = &v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetProcessInstanceKey() ProcessInstanceKeyFilterProperty {
+func (o *UserTaskFilterFields) GetProcessInstanceKey() ProcessInstanceKeyFilterProperty {
 	if o == nil || IsNil(o.ProcessInstanceKey) {
 		var ret ProcessInstanceKeyFilterProperty
 		return ret
@@ -669,7 +667,7 @@ func (o *UserTaskFilter) GetProcessInstanceKey() ProcessInstanceKeyFilterPropert
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetProcessInstanceKeyOk() (*ProcessInstanceKeyFilterProperty, bool) {
+func (o *UserTaskFilterFields) GetProcessInstanceKeyOk() (*ProcessInstanceKeyFilterProperty, bool) {
 	if o == nil || IsNil(o.ProcessInstanceKey) {
 		return nil, false
 	}
@@ -677,7 +675,7 @@ func (o *UserTaskFilter) GetProcessInstanceKeyOk() (*ProcessInstanceKeyFilterPro
 }
 
 // HasProcessInstanceKey returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasProcessInstanceKey() bool {
+func (o *UserTaskFilterFields) HasProcessInstanceKey() bool {
 	if o != nil && !IsNil(o.ProcessInstanceKey) {
 		return true
 	}
@@ -686,12 +684,12 @@ func (o *UserTaskFilter) HasProcessInstanceKey() bool {
 }
 
 // SetProcessInstanceKey gets a reference to the given ProcessInstanceKeyFilterProperty and assigns it to the ProcessInstanceKey field.
-func (o *UserTaskFilter) SetProcessInstanceKey(v ProcessInstanceKeyFilterProperty) {
+func (o *UserTaskFilterFields) SetProcessInstanceKey(v ProcessInstanceKeyFilterProperty) {
 	o.ProcessInstanceKey = &v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetElementInstanceKey() ModelString {
+func (o *UserTaskFilterFields) GetElementInstanceKey() ModelString {
 	if o == nil || IsNil(o.ElementInstanceKey) {
 		var ret ModelString
 		return ret
@@ -701,7 +699,7 @@ func (o *UserTaskFilter) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *UserTaskFilterFields) GetElementInstanceKeyOk() (*ModelString, bool) {
 	if o == nil || IsNil(o.ElementInstanceKey) {
 		return nil, false
 	}
@@ -709,7 +707,7 @@ func (o *UserTaskFilter) GetElementInstanceKeyOk() (*ModelString, bool) {
 }
 
 // HasElementInstanceKey returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasElementInstanceKey() bool {
+func (o *UserTaskFilterFields) HasElementInstanceKey() bool {
 	if o != nil && !IsNil(o.ElementInstanceKey) {
 		return true
 	}
@@ -718,12 +716,12 @@ func (o *UserTaskFilter) HasElementInstanceKey() bool {
 }
 
 // SetElementInstanceKey gets a reference to the given ModelString and assigns it to the ElementInstanceKey field.
-func (o *UserTaskFilter) SetElementInstanceKey(v ModelString) {
+func (o *UserTaskFilterFields) SetElementInstanceKey(v ModelString) {
 	o.ElementInstanceKey = &v
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetTags() []string {
+func (o *UserTaskFilterFields) GetTags() []string {
 	if o == nil || IsNil(o.Tags) {
 		var ret []string
 		return ret
@@ -733,7 +731,7 @@ func (o *UserTaskFilter) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetTagsOk() ([]string, bool) {
+func (o *UserTaskFilterFields) GetTagsOk() ([]string, bool) {
 	if o == nil || IsNil(o.Tags) {
 		return nil, false
 	}
@@ -741,7 +739,7 @@ func (o *UserTaskFilter) GetTagsOk() ([]string, bool) {
 }
 
 // HasTags returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasTags() bool {
+func (o *UserTaskFilterFields) HasTags() bool {
 	if o != nil && !IsNil(o.Tags) {
 		return true
 	}
@@ -750,43 +748,11 @@ func (o *UserTaskFilter) HasTags() bool {
 }
 
 // SetTags gets a reference to the given []string and assigns it to the Tags field.
-func (o *UserTaskFilter) SetTags(v []string) {
+func (o *UserTaskFilterFields) SetTags(v []string) {
 	o.Tags = v
 }
 
-// GetOr returns the Or field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetOr() []UserTaskFilterFields {
-	if o == nil || IsNil(o.Or) {
-		var ret []UserTaskFilterFields
-		return ret
-	}
-	return o.Or
-}
-
-// GetOrOk returns a tuple with the Or field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetOrOk() ([]UserTaskFilterFields, bool) {
-	if o == nil || IsNil(o.Or) {
-		return nil, false
-	}
-	return o.Or, true
-}
-
-// HasOr returns a boolean if a field has been set.
-func (o *UserTaskFilter) HasOr() bool {
-	if o != nil && !IsNil(o.Or) {
-		return true
-	}
-
-	return false
-}
-
-// SetOr gets a reference to the given []UserTaskFilterFields and assigns it to the Or field.
-func (o *UserTaskFilter) SetOr(v []UserTaskFilterFields) {
-	o.Or = v
-}
-
-func (o UserTaskFilter) MarshalJSON() ([]byte, error) {
+func (o UserTaskFilterFields) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -794,7 +760,7 @@ func (o UserTaskFilter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o UserTaskFilter) ToMap() (map[string]interface{}, error) {
+func (o UserTaskFilterFields) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
@@ -859,44 +825,41 @@ func (o UserTaskFilter) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Tags) {
 		toSerialize["tags"] = o.Tags
 	}
-	if !IsNil(o.Or) {
-		toSerialize["$or"] = o.Or
-	}
 	return toSerialize, nil
 }
 
-type NullableUserTaskFilter struct {
-	value *UserTaskFilter
+type NullableUserTaskFilterFields struct {
+	value *UserTaskFilterFields
 	isSet bool
 }
 
-func (v NullableUserTaskFilter) Get() *UserTaskFilter {
+func (v NullableUserTaskFilterFields) Get() *UserTaskFilterFields {
 	return v.value
 }
 
-func (v *NullableUserTaskFilter) Set(val *UserTaskFilter) {
+func (v *NullableUserTaskFilterFields) Set(val *UserTaskFilterFields) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableUserTaskFilter) IsSet() bool {
+func (v NullableUserTaskFilterFields) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableUserTaskFilter) Unset() {
+func (v *NullableUserTaskFilterFields) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableUserTaskFilter(val *UserTaskFilter) *NullableUserTaskFilter {
-	return &NullableUserTaskFilter{value: val, isSet: true}
+func NewNullableUserTaskFilterFields(val *UserTaskFilterFields) *NullableUserTaskFilterFields {
+	return &NullableUserTaskFilterFields{value: val, isSet: true}
 }
 
-func (v NullableUserTaskFilter) MarshalJSON() ([]byte, error) {
+func (v NullableUserTaskFilterFields) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableUserTaskFilter) UnmarshalJSON(src []byte) error {
+func (v *NullableUserTaskFilterFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
