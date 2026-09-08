@@ -20,9 +20,11 @@ var _ MappedNullable = &RoleFilter{}
 // RoleFilter Role filter request
 type RoleFilter struct {
 	// The role ID search filters.
-	RoleId *string `json:"roleId,omitempty" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	RoleId *StringFilterProperty `json:"roleId,omitempty"`
 	// The role name search filters.
 	Name *StringFilterProperty `json:"name,omitempty"`
+	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"name\": \"Admin\",   \"$or\": [     { \"roleId\": \"role-1\" },     { \"roleId\": \"role-2\" }   ] } ``` This matches roles that:  <ul style=\"padding-left: 20px; margin-left: 20px;\">   <li style=\"list-style-type: disc;\">have name equal to <em>Admin</em></li>   <li style=\"list-style-type: disc;\">and match either:     <ul style=\"padding-left: 20px; margin-left: 20px;\">       <li style=\"list-style-type: circle;\"><code>roleId</code> is <em>role-1</em>, or</li>       <li style=\"list-style-type: circle;\"><code>roleId</code> is <em>role-2</em></li>     </ul>   </li> </ul> <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
+	Or []RoleFilterFields `json:"$or,omitempty"`
 }
 
 // NewRoleFilter instantiates a new RoleFilter object
@@ -43,9 +45,9 @@ func NewRoleFilterWithDefaults() *RoleFilter {
 }
 
 // GetRoleId returns the RoleId field value if set, zero value otherwise.
-func (o *RoleFilter) GetRoleId() string {
+func (o *RoleFilter) GetRoleId() StringFilterProperty {
 	if o == nil || IsNil(o.RoleId) {
-		var ret string
+		var ret StringFilterProperty
 		return ret
 	}
 	return *o.RoleId
@@ -53,7 +55,7 @@ func (o *RoleFilter) GetRoleId() string {
 
 // GetRoleIdOk returns a tuple with the RoleId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RoleFilter) GetRoleIdOk() (*string, bool) {
+func (o *RoleFilter) GetRoleIdOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.RoleId) {
 		return nil, false
 	}
@@ -69,8 +71,8 @@ func (o *RoleFilter) HasRoleId() bool {
 	return false
 }
 
-// SetRoleId gets a reference to the given string and assigns it to the RoleId field.
-func (o *RoleFilter) SetRoleId(v string) {
+// SetRoleId gets a reference to the given StringFilterProperty and assigns it to the RoleId field.
+func (o *RoleFilter) SetRoleId(v StringFilterProperty) {
 	o.RoleId = &v
 }
 
@@ -106,6 +108,38 @@ func (o *RoleFilter) SetName(v StringFilterProperty) {
 	o.Name = &v
 }
 
+// GetOr returns the Or field value if set, zero value otherwise.
+func (o *RoleFilter) GetOr() []RoleFilterFields {
+	if o == nil || IsNil(o.Or) {
+		var ret []RoleFilterFields
+		return ret
+	}
+	return o.Or
+}
+
+// GetOrOk returns a tuple with the Or field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RoleFilter) GetOrOk() ([]RoleFilterFields, bool) {
+	if o == nil || IsNil(o.Or) {
+		return nil, false
+	}
+	return o.Or, true
+}
+
+// HasOr returns a boolean if a field has been set.
+func (o *RoleFilter) HasOr() bool {
+	if o != nil && !IsNil(o.Or) {
+		return true
+	}
+
+	return false
+}
+
+// SetOr gets a reference to the given []RoleFilterFields and assigns it to the Or field.
+func (o *RoleFilter) SetOr(v []RoleFilterFields) {
+	o.Or = v
+}
+
 func (o RoleFilter) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -121,6 +155,9 @@ func (o RoleFilter) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.Or) {
+		toSerialize["$or"] = o.Or
 	}
 	return toSerialize, nil
 }
