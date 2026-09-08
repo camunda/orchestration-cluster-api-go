@@ -14,11 +14,11 @@ import (
 	"encoding/json"
 )
 
-// checks if the MappingRuleFilter type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &MappingRuleFilter{}
+// checks if the MappingRuleFilterFields type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &MappingRuleFilterFields{}
 
-// MappingRuleFilter Mapping rule search filter.
-type MappingRuleFilter struct {
+// MappingRuleFilterFields Mapping rule search filter fields.
+type MappingRuleFilterFields struct {
 	// The claim name to match against a token.
 	ClaimName *string `json:"claimName,omitempty"`
 	// The value of the claim to match.
@@ -27,29 +27,27 @@ type MappingRuleFilter struct {
 	Name *StringFilterProperty `json:"name,omitempty"`
 	// The ID of the mapping rule.
 	MappingRuleId *StringFilterProperty `json:"mappingRuleId,omitempty"`
-	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"$or\": [     { \"mappingRuleId\": \"rule-1\" },     { \"mappingRuleId\": \"rule-2\" }   ] } ``` This matches mapping rules whose <code>mappingRuleId</code> is <em>rule-1</em> or <em>rule-2</em>. <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
-	Or []MappingRuleFilterFields `json:"$or,omitempty"`
 }
 
-// NewMappingRuleFilter instantiates a new MappingRuleFilter object
+// NewMappingRuleFilterFields instantiates a new MappingRuleFilterFields object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMappingRuleFilter() *MappingRuleFilter {
-	this := MappingRuleFilter{}
+func NewMappingRuleFilterFields() *MappingRuleFilterFields {
+	this := MappingRuleFilterFields{}
 	return &this
 }
 
-// NewMappingRuleFilterWithDefaults instantiates a new MappingRuleFilter object
+// NewMappingRuleFilterFieldsWithDefaults instantiates a new MappingRuleFilterFields object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewMappingRuleFilterWithDefaults() *MappingRuleFilter {
-	this := MappingRuleFilter{}
+func NewMappingRuleFilterFieldsWithDefaults() *MappingRuleFilterFields {
+	this := MappingRuleFilterFields{}
 	return &this
 }
 
 // GetClaimName returns the ClaimName field value if set, zero value otherwise.
-func (o *MappingRuleFilter) GetClaimName() string {
+func (o *MappingRuleFilterFields) GetClaimName() string {
 	if o == nil || IsNil(o.ClaimName) {
 		var ret string
 		return ret
@@ -59,7 +57,7 @@ func (o *MappingRuleFilter) GetClaimName() string {
 
 // GetClaimNameOk returns a tuple with the ClaimName field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MappingRuleFilter) GetClaimNameOk() (*string, bool) {
+func (o *MappingRuleFilterFields) GetClaimNameOk() (*string, bool) {
 	if o == nil || IsNil(o.ClaimName) {
 		return nil, false
 	}
@@ -67,7 +65,7 @@ func (o *MappingRuleFilter) GetClaimNameOk() (*string, bool) {
 }
 
 // HasClaimName returns a boolean if a field has been set.
-func (o *MappingRuleFilter) HasClaimName() bool {
+func (o *MappingRuleFilterFields) HasClaimName() bool {
 	if o != nil && !IsNil(o.ClaimName) {
 		return true
 	}
@@ -76,12 +74,12 @@ func (o *MappingRuleFilter) HasClaimName() bool {
 }
 
 // SetClaimName gets a reference to the given string and assigns it to the ClaimName field.
-func (o *MappingRuleFilter) SetClaimName(v string) {
+func (o *MappingRuleFilterFields) SetClaimName(v string) {
 	o.ClaimName = &v
 }
 
 // GetClaimValue returns the ClaimValue field value if set, zero value otherwise.
-func (o *MappingRuleFilter) GetClaimValue() string {
+func (o *MappingRuleFilterFields) GetClaimValue() string {
 	if o == nil || IsNil(o.ClaimValue) {
 		var ret string
 		return ret
@@ -91,7 +89,7 @@ func (o *MappingRuleFilter) GetClaimValue() string {
 
 // GetClaimValueOk returns a tuple with the ClaimValue field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MappingRuleFilter) GetClaimValueOk() (*string, bool) {
+func (o *MappingRuleFilterFields) GetClaimValueOk() (*string, bool) {
 	if o == nil || IsNil(o.ClaimValue) {
 		return nil, false
 	}
@@ -99,7 +97,7 @@ func (o *MappingRuleFilter) GetClaimValueOk() (*string, bool) {
 }
 
 // HasClaimValue returns a boolean if a field has been set.
-func (o *MappingRuleFilter) HasClaimValue() bool {
+func (o *MappingRuleFilterFields) HasClaimValue() bool {
 	if o != nil && !IsNil(o.ClaimValue) {
 		return true
 	}
@@ -108,12 +106,12 @@ func (o *MappingRuleFilter) HasClaimValue() bool {
 }
 
 // SetClaimValue gets a reference to the given string and assigns it to the ClaimValue field.
-func (o *MappingRuleFilter) SetClaimValue(v string) {
+func (o *MappingRuleFilterFields) SetClaimValue(v string) {
 	o.ClaimValue = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *MappingRuleFilter) GetName() StringFilterProperty {
+func (o *MappingRuleFilterFields) GetName() StringFilterProperty {
 	if o == nil || IsNil(o.Name) {
 		var ret StringFilterProperty
 		return ret
@@ -123,7 +121,7 @@ func (o *MappingRuleFilter) GetName() StringFilterProperty {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MappingRuleFilter) GetNameOk() (*StringFilterProperty, bool) {
+func (o *MappingRuleFilterFields) GetNameOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -131,7 +129,7 @@ func (o *MappingRuleFilter) GetNameOk() (*StringFilterProperty, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *MappingRuleFilter) HasName() bool {
+func (o *MappingRuleFilterFields) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -140,12 +138,12 @@ func (o *MappingRuleFilter) HasName() bool {
 }
 
 // SetName gets a reference to the given StringFilterProperty and assigns it to the Name field.
-func (o *MappingRuleFilter) SetName(v StringFilterProperty) {
+func (o *MappingRuleFilterFields) SetName(v StringFilterProperty) {
 	o.Name = &v
 }
 
 // GetMappingRuleId returns the MappingRuleId field value if set, zero value otherwise.
-func (o *MappingRuleFilter) GetMappingRuleId() StringFilterProperty {
+func (o *MappingRuleFilterFields) GetMappingRuleId() StringFilterProperty {
 	if o == nil || IsNil(o.MappingRuleId) {
 		var ret StringFilterProperty
 		return ret
@@ -155,7 +153,7 @@ func (o *MappingRuleFilter) GetMappingRuleId() StringFilterProperty {
 
 // GetMappingRuleIdOk returns a tuple with the MappingRuleId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MappingRuleFilter) GetMappingRuleIdOk() (*StringFilterProperty, bool) {
+func (o *MappingRuleFilterFields) GetMappingRuleIdOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.MappingRuleId) {
 		return nil, false
 	}
@@ -163,7 +161,7 @@ func (o *MappingRuleFilter) GetMappingRuleIdOk() (*StringFilterProperty, bool) {
 }
 
 // HasMappingRuleId returns a boolean if a field has been set.
-func (o *MappingRuleFilter) HasMappingRuleId() bool {
+func (o *MappingRuleFilterFields) HasMappingRuleId() bool {
 	if o != nil && !IsNil(o.MappingRuleId) {
 		return true
 	}
@@ -172,43 +170,11 @@ func (o *MappingRuleFilter) HasMappingRuleId() bool {
 }
 
 // SetMappingRuleId gets a reference to the given StringFilterProperty and assigns it to the MappingRuleId field.
-func (o *MappingRuleFilter) SetMappingRuleId(v StringFilterProperty) {
+func (o *MappingRuleFilterFields) SetMappingRuleId(v StringFilterProperty) {
 	o.MappingRuleId = &v
 }
 
-// GetOr returns the Or field value if set, zero value otherwise.
-func (o *MappingRuleFilter) GetOr() []MappingRuleFilterFields {
-	if o == nil || IsNil(o.Or) {
-		var ret []MappingRuleFilterFields
-		return ret
-	}
-	return o.Or
-}
-
-// GetOrOk returns a tuple with the Or field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *MappingRuleFilter) GetOrOk() ([]MappingRuleFilterFields, bool) {
-	if o == nil || IsNil(o.Or) {
-		return nil, false
-	}
-	return o.Or, true
-}
-
-// HasOr returns a boolean if a field has been set.
-func (o *MappingRuleFilter) HasOr() bool {
-	if o != nil && !IsNil(o.Or) {
-		return true
-	}
-
-	return false
-}
-
-// SetOr gets a reference to the given []MappingRuleFilterFields and assigns it to the Or field.
-func (o *MappingRuleFilter) SetOr(v []MappingRuleFilterFields) {
-	o.Or = v
-}
-
-func (o MappingRuleFilter) MarshalJSON() ([]byte, error) {
+func (o MappingRuleFilterFields) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -216,7 +182,7 @@ func (o MappingRuleFilter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o MappingRuleFilter) ToMap() (map[string]interface{}, error) {
+func (o MappingRuleFilterFields) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.ClaimName) {
 		toSerialize["claimName"] = o.ClaimName
@@ -230,44 +196,41 @@ func (o MappingRuleFilter) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.MappingRuleId) {
 		toSerialize["mappingRuleId"] = o.MappingRuleId
 	}
-	if !IsNil(o.Or) {
-		toSerialize["$or"] = o.Or
-	}
 	return toSerialize, nil
 }
 
-type NullableMappingRuleFilter struct {
-	value *MappingRuleFilter
+type NullableMappingRuleFilterFields struct {
+	value *MappingRuleFilterFields
 	isSet bool
 }
 
-func (v NullableMappingRuleFilter) Get() *MappingRuleFilter {
+func (v NullableMappingRuleFilterFields) Get() *MappingRuleFilterFields {
 	return v.value
 }
 
-func (v *NullableMappingRuleFilter) Set(val *MappingRuleFilter) {
+func (v *NullableMappingRuleFilterFields) Set(val *MappingRuleFilterFields) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableMappingRuleFilter) IsSet() bool {
+func (v NullableMappingRuleFilterFields) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableMappingRuleFilter) Unset() {
+func (v *NullableMappingRuleFilterFields) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableMappingRuleFilter(val *MappingRuleFilter) *NullableMappingRuleFilter {
-	return &NullableMappingRuleFilter{value: val, isSet: true}
+func NewNullableMappingRuleFilterFields(val *MappingRuleFilterFields) *NullableMappingRuleFilterFields {
+	return &NullableMappingRuleFilterFields{value: val, isSet: true}
 }
 
-func (v NullableMappingRuleFilter) MarshalJSON() ([]byte, error) {
+func (v NullableMappingRuleFilterFields) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableMappingRuleFilter) UnmarshalJSON(src []byte) error {
+func (v *NullableMappingRuleFilterFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

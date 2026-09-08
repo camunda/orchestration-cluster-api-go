@@ -14,38 +14,36 @@ import (
 	"encoding/json"
 )
 
-// checks if the GroupFilter type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &GroupFilter{}
+// checks if the GroupFilterFields type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &GroupFilterFields{}
 
-// GroupFilter Group filter request
-type GroupFilter struct {
+// GroupFilterFields Group filter request
+type GroupFilterFields struct {
 	// The group ID search filters.
 	GroupId *StringFilterProperty `json:"groupId,omitempty"`
 	// The group name search filters.
 	Name *StringFilterProperty `json:"name,omitempty"`
-	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"$or\": [     { \"groupId\": \"group-1\" },     { \"groupId\": \"group-2\" }   ] } ``` This matches groups whose <code>groupId</code> is <em>group-1</em> or <em>group-2</em>. <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
-	Or []GroupFilterFields `json:"$or,omitempty"`
 }
 
-// NewGroupFilter instantiates a new GroupFilter object
+// NewGroupFilterFields instantiates a new GroupFilterFields object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGroupFilter() *GroupFilter {
-	this := GroupFilter{}
+func NewGroupFilterFields() *GroupFilterFields {
+	this := GroupFilterFields{}
 	return &this
 }
 
-// NewGroupFilterWithDefaults instantiates a new GroupFilter object
+// NewGroupFilterFieldsWithDefaults instantiates a new GroupFilterFields object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewGroupFilterWithDefaults() *GroupFilter {
-	this := GroupFilter{}
+func NewGroupFilterFieldsWithDefaults() *GroupFilterFields {
+	this := GroupFilterFields{}
 	return &this
 }
 
 // GetGroupId returns the GroupId field value if set, zero value otherwise.
-func (o *GroupFilter) GetGroupId() StringFilterProperty {
+func (o *GroupFilterFields) GetGroupId() StringFilterProperty {
 	if o == nil || IsNil(o.GroupId) {
 		var ret StringFilterProperty
 		return ret
@@ -55,7 +53,7 @@ func (o *GroupFilter) GetGroupId() StringFilterProperty {
 
 // GetGroupIdOk returns a tuple with the GroupId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GroupFilter) GetGroupIdOk() (*StringFilterProperty, bool) {
+func (o *GroupFilterFields) GetGroupIdOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.GroupId) {
 		return nil, false
 	}
@@ -63,7 +61,7 @@ func (o *GroupFilter) GetGroupIdOk() (*StringFilterProperty, bool) {
 }
 
 // HasGroupId returns a boolean if a field has been set.
-func (o *GroupFilter) HasGroupId() bool {
+func (o *GroupFilterFields) HasGroupId() bool {
 	if o != nil && !IsNil(o.GroupId) {
 		return true
 	}
@@ -72,12 +70,12 @@ func (o *GroupFilter) HasGroupId() bool {
 }
 
 // SetGroupId gets a reference to the given StringFilterProperty and assigns it to the GroupId field.
-func (o *GroupFilter) SetGroupId(v StringFilterProperty) {
+func (o *GroupFilterFields) SetGroupId(v StringFilterProperty) {
 	o.GroupId = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *GroupFilter) GetName() StringFilterProperty {
+func (o *GroupFilterFields) GetName() StringFilterProperty {
 	if o == nil || IsNil(o.Name) {
 		var ret StringFilterProperty
 		return ret
@@ -87,7 +85,7 @@ func (o *GroupFilter) GetName() StringFilterProperty {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GroupFilter) GetNameOk() (*StringFilterProperty, bool) {
+func (o *GroupFilterFields) GetNameOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -95,7 +93,7 @@ func (o *GroupFilter) GetNameOk() (*StringFilterProperty, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *GroupFilter) HasName() bool {
+func (o *GroupFilterFields) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -104,43 +102,11 @@ func (o *GroupFilter) HasName() bool {
 }
 
 // SetName gets a reference to the given StringFilterProperty and assigns it to the Name field.
-func (o *GroupFilter) SetName(v StringFilterProperty) {
+func (o *GroupFilterFields) SetName(v StringFilterProperty) {
 	o.Name = &v
 }
 
-// GetOr returns the Or field value if set, zero value otherwise.
-func (o *GroupFilter) GetOr() []GroupFilterFields {
-	if o == nil || IsNil(o.Or) {
-		var ret []GroupFilterFields
-		return ret
-	}
-	return o.Or
-}
-
-// GetOrOk returns a tuple with the Or field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *GroupFilter) GetOrOk() ([]GroupFilterFields, bool) {
-	if o == nil || IsNil(o.Or) {
-		return nil, false
-	}
-	return o.Or, true
-}
-
-// HasOr returns a boolean if a field has been set.
-func (o *GroupFilter) HasOr() bool {
-	if o != nil && !IsNil(o.Or) {
-		return true
-	}
-
-	return false
-}
-
-// SetOr gets a reference to the given []GroupFilterFields and assigns it to the Or field.
-func (o *GroupFilter) SetOr(v []GroupFilterFields) {
-	o.Or = v
-}
-
-func (o GroupFilter) MarshalJSON() ([]byte, error) {
+func (o GroupFilterFields) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -148,7 +114,7 @@ func (o GroupFilter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o GroupFilter) ToMap() (map[string]interface{}, error) {
+func (o GroupFilterFields) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.GroupId) {
 		toSerialize["groupId"] = o.GroupId
@@ -156,44 +122,41 @@ func (o GroupFilter) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
-	if !IsNil(o.Or) {
-		toSerialize["$or"] = o.Or
-	}
 	return toSerialize, nil
 }
 
-type NullableGroupFilter struct {
-	value *GroupFilter
+type NullableGroupFilterFields struct {
+	value *GroupFilterFields
 	isSet bool
 }
 
-func (v NullableGroupFilter) Get() *GroupFilter {
+func (v NullableGroupFilterFields) Get() *GroupFilterFields {
 	return v.value
 }
 
-func (v *NullableGroupFilter) Set(val *GroupFilter) {
+func (v *NullableGroupFilterFields) Set(val *GroupFilterFields) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableGroupFilter) IsSet() bool {
+func (v NullableGroupFilterFields) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableGroupFilter) Unset() {
+func (v *NullableGroupFilterFields) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableGroupFilter(val *GroupFilter) *NullableGroupFilter {
-	return &NullableGroupFilter{value: val, isSet: true}
+func NewNullableGroupFilterFields(val *GroupFilterFields) *NullableGroupFilterFields {
+	return &NullableGroupFilterFields{value: val, isSet: true}
 }
 
-func (v NullableGroupFilter) MarshalJSON() ([]byte, error) {
+func (v NullableGroupFilterFields) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableGroupFilter) UnmarshalJSON(src []byte) error {
+func (v *NullableGroupFilterFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

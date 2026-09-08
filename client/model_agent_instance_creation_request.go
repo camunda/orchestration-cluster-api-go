@@ -27,7 +27,7 @@ type AgentInstanceCreationRequest struct {
 	JobKey ModelString `json:"jobKey"`
 	// Opaque lease token received from the job activation response. Disambiguates this activation from any other activation of the same job: if the job is later retried, history items submitted under a superseded lease are discarded rather than committed.
 	JobLease string `json:"jobLease"`
-	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated. Must include a CONFIGURATION item establishing model, provider, and systemPrompt (and, if needed, limits).
+	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated. Must include a CONFIGURATION item establishing model, provider, and systemPrompt (and, if needed, limits). Every item's role must be CONFIGURATION or USER, and no item may carry non-zero usage-token metrics (inputTokens, outputTokens, reasoningTokenCount, cacheCreationTokenCount, cacheReadTokenCount); durationMs is exempt and may be non-zero.
 	History []AgentInstanceHistoryItem `json:"history"`
 }
 

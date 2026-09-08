@@ -14,40 +14,38 @@ import (
 	"encoding/json"
 )
 
-// checks if the UserFilter type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &UserFilter{}
+// checks if the UserFilterFields type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UserFilterFields{}
 
-// UserFilter User search filter.
-type UserFilter struct {
+// UserFilterFields User search filter fields.
+type UserFilterFields struct {
 	// The username of the user.
 	Username *StringFilterProperty `json:"username,omitempty"`
 	// The name of the user.
 	Name *StringFilterProperty `json:"name,omitempty"`
 	// The email of the user.
 	Email *StringFilterProperty `json:"email,omitempty"`
-	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"$or\": [     { \"username\": \"user-1\" },     { \"username\": \"user-2\" }   ] } ``` This matches users whose <code>username</code> is <em>user-1</em> or <em>user-2</em>. <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
-	Or []UserFilterFields `json:"$or,omitempty"`
 }
 
-// NewUserFilter instantiates a new UserFilter object
+// NewUserFilterFields instantiates a new UserFilterFields object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserFilter() *UserFilter {
-	this := UserFilter{}
+func NewUserFilterFields() *UserFilterFields {
+	this := UserFilterFields{}
 	return &this
 }
 
-// NewUserFilterWithDefaults instantiates a new UserFilter object
+// NewUserFilterFieldsWithDefaults instantiates a new UserFilterFields object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewUserFilterWithDefaults() *UserFilter {
-	this := UserFilter{}
+func NewUserFilterFieldsWithDefaults() *UserFilterFields {
+	this := UserFilterFields{}
 	return &this
 }
 
 // GetUsername returns the Username field value if set, zero value otherwise.
-func (o *UserFilter) GetUsername() StringFilterProperty {
+func (o *UserFilterFields) GetUsername() StringFilterProperty {
 	if o == nil || IsNil(o.Username) {
 		var ret StringFilterProperty
 		return ret
@@ -57,7 +55,7 @@ func (o *UserFilter) GetUsername() StringFilterProperty {
 
 // GetUsernameOk returns a tuple with the Username field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserFilter) GetUsernameOk() (*StringFilterProperty, bool) {
+func (o *UserFilterFields) GetUsernameOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Username) {
 		return nil, false
 	}
@@ -65,7 +63,7 @@ func (o *UserFilter) GetUsernameOk() (*StringFilterProperty, bool) {
 }
 
 // HasUsername returns a boolean if a field has been set.
-func (o *UserFilter) HasUsername() bool {
+func (o *UserFilterFields) HasUsername() bool {
 	if o != nil && !IsNil(o.Username) {
 		return true
 	}
@@ -74,12 +72,12 @@ func (o *UserFilter) HasUsername() bool {
 }
 
 // SetUsername gets a reference to the given StringFilterProperty and assigns it to the Username field.
-func (o *UserFilter) SetUsername(v StringFilterProperty) {
+func (o *UserFilterFields) SetUsername(v StringFilterProperty) {
 	o.Username = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
-func (o *UserFilter) GetName() StringFilterProperty {
+func (o *UserFilterFields) GetName() StringFilterProperty {
 	if o == nil || IsNil(o.Name) {
 		var ret StringFilterProperty
 		return ret
@@ -89,7 +87,7 @@ func (o *UserFilter) GetName() StringFilterProperty {
 
 // GetNameOk returns a tuple with the Name field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserFilter) GetNameOk() (*StringFilterProperty, bool) {
+func (o *UserFilterFields) GetNameOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Name) {
 		return nil, false
 	}
@@ -97,7 +95,7 @@ func (o *UserFilter) GetNameOk() (*StringFilterProperty, bool) {
 }
 
 // HasName returns a boolean if a field has been set.
-func (o *UserFilter) HasName() bool {
+func (o *UserFilterFields) HasName() bool {
 	if o != nil && !IsNil(o.Name) {
 		return true
 	}
@@ -106,12 +104,12 @@ func (o *UserFilter) HasName() bool {
 }
 
 // SetName gets a reference to the given StringFilterProperty and assigns it to the Name field.
-func (o *UserFilter) SetName(v StringFilterProperty) {
+func (o *UserFilterFields) SetName(v StringFilterProperty) {
 	o.Name = &v
 }
 
 // GetEmail returns the Email field value if set, zero value otherwise.
-func (o *UserFilter) GetEmail() StringFilterProperty {
+func (o *UserFilterFields) GetEmail() StringFilterProperty {
 	if o == nil || IsNil(o.Email) {
 		var ret StringFilterProperty
 		return ret
@@ -121,7 +119,7 @@ func (o *UserFilter) GetEmail() StringFilterProperty {
 
 // GetEmailOk returns a tuple with the Email field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserFilter) GetEmailOk() (*StringFilterProperty, bool) {
+func (o *UserFilterFields) GetEmailOk() (*StringFilterProperty, bool) {
 	if o == nil || IsNil(o.Email) {
 		return nil, false
 	}
@@ -129,7 +127,7 @@ func (o *UserFilter) GetEmailOk() (*StringFilterProperty, bool) {
 }
 
 // HasEmail returns a boolean if a field has been set.
-func (o *UserFilter) HasEmail() bool {
+func (o *UserFilterFields) HasEmail() bool {
 	if o != nil && !IsNil(o.Email) {
 		return true
 	}
@@ -138,43 +136,11 @@ func (o *UserFilter) HasEmail() bool {
 }
 
 // SetEmail gets a reference to the given StringFilterProperty and assigns it to the Email field.
-func (o *UserFilter) SetEmail(v StringFilterProperty) {
+func (o *UserFilterFields) SetEmail(v StringFilterProperty) {
 	o.Email = &v
 }
 
-// GetOr returns the Or field value if set, zero value otherwise.
-func (o *UserFilter) GetOr() []UserFilterFields {
-	if o == nil || IsNil(o.Or) {
-		var ret []UserFilterFields
-		return ret
-	}
-	return o.Or
-}
-
-// GetOrOk returns a tuple with the Or field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *UserFilter) GetOrOk() ([]UserFilterFields, bool) {
-	if o == nil || IsNil(o.Or) {
-		return nil, false
-	}
-	return o.Or, true
-}
-
-// HasOr returns a boolean if a field has been set.
-func (o *UserFilter) HasOr() bool {
-	if o != nil && !IsNil(o.Or) {
-		return true
-	}
-
-	return false
-}
-
-// SetOr gets a reference to the given []UserFilterFields and assigns it to the Or field.
-func (o *UserFilter) SetOr(v []UserFilterFields) {
-	o.Or = v
-}
-
-func (o UserFilter) MarshalJSON() ([]byte, error) {
+func (o UserFilterFields) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -182,7 +148,7 @@ func (o UserFilter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o UserFilter) ToMap() (map[string]interface{}, error) {
+func (o UserFilterFields) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Username) {
 		toSerialize["username"] = o.Username
@@ -193,44 +159,41 @@ func (o UserFilter) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Email) {
 		toSerialize["email"] = o.Email
 	}
-	if !IsNil(o.Or) {
-		toSerialize["$or"] = o.Or
-	}
 	return toSerialize, nil
 }
 
-type NullableUserFilter struct {
-	value *UserFilter
+type NullableUserFilterFields struct {
+	value *UserFilterFields
 	isSet bool
 }
 
-func (v NullableUserFilter) Get() *UserFilter {
+func (v NullableUserFilterFields) Get() *UserFilterFields {
 	return v.value
 }
 
-func (v *NullableUserFilter) Set(val *UserFilter) {
+func (v *NullableUserFilterFields) Set(val *UserFilterFields) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableUserFilter) IsSet() bool {
+func (v NullableUserFilterFields) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableUserFilter) Unset() {
+func (v *NullableUserFilterFields) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableUserFilter(val *UserFilter) *NullableUserFilter {
-	return &NullableUserFilter{value: val, isSet: true}
+func NewNullableUserFilterFields(val *UserFilterFields) *NullableUserFilterFields {
+	return &NullableUserFilterFields{value: val, isSet: true}
 }
 
-func (v NullableUserFilter) MarshalJSON() ([]byte, error) {
+func (v NullableUserFilterFields) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableUserFilter) UnmarshalJSON(src []byte) error {
+func (v *NullableUserFilterFields) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

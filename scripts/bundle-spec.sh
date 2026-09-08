@@ -4,14 +4,14 @@
 # camunda-schema-bundler into external-spec/bundled/.
 #
 # Usage:
-#   ./scripts/bundle-spec.sh          # bundle spec at ref $SPEC_REF (default: main)
-#   SPEC_REF=stable/8.8 ./scripts/bundle-spec.sh
+#   ./scripts/bundle-spec.sh          # bundle spec at ref $SPEC_REF (default: stable/8.10)
+#   SPEC_REF=main ./scripts/bundle-spec.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-SPEC_REF="${SPEC_REF:-main}"
+SPEC_REF="${SPEC_REF:-stable/8.10}"
 OUT_SPEC="external-spec/bundled/rest-api.bundle.json"
 OUT_META="external-spec/bundled/spec-metadata.json"
 
