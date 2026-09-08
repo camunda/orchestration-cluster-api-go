@@ -1,6 +1,6 @@
 .PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy tidy-check examples sync-readme sync-readme-check coverage docs-json docs-md check clean
 
-SPEC_REF ?= main
+SPEC_REF ?= stable/8.10
 GO ?= go
 
 help:

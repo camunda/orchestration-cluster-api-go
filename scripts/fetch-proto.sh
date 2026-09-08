@@ -6,13 +6,13 @@
 #
 # Usage:
 #   ./scripts/fetch-proto.sh
-#   SPEC_REF=stable/8.8 ./scripts/fetch-proto.sh
+#   SPEC_REF=main ./scripts/fetch-proto.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-SPEC_REF="${SPEC_REF:-main}"
+SPEC_REF="${SPEC_REF:-stable/8.10}"
 PROTO_PATH="zeebe/gateway-protocol/src/main/proto/gateway.proto"
 RAW_URL="https://raw.githubusercontent.com/camunda/camunda/${SPEC_REF}/${PROTO_PATH}"
 DEST="external-spec/proto/gateway.proto"
