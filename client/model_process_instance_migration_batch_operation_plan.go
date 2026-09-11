@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessInstanceMigrationBatchOperationPlan{}
 // ProcessInstanceMigrationBatchOperationPlan The migration instructions describe how to migrate a process instance from one process definition to another.
 type ProcessInstanceMigrationBatchOperationPlan struct {
 	// The target process definition key.
-	TargetProcessDefinitionKey ModelString `json:"targetProcessDefinitionKey"`
+	TargetProcessDefinitionKey ProcessDefinitionKey `json:"targetProcessDefinitionKey"`
 	// The mapping instructions.
 	MappingInstructions []MigrateProcessInstanceMappingInstruction `json:"mappingInstructions"`
 }
@@ -33,7 +33,7 @@ type _ProcessInstanceMigrationBatchOperationPlan ProcessInstanceMigrationBatchOp
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceMigrationBatchOperationPlan(targetProcessDefinitionKey ModelString, mappingInstructions []MigrateProcessInstanceMappingInstruction) *ProcessInstanceMigrationBatchOperationPlan {
+func NewProcessInstanceMigrationBatchOperationPlan(targetProcessDefinitionKey ProcessDefinitionKey, mappingInstructions []MigrateProcessInstanceMappingInstruction) *ProcessInstanceMigrationBatchOperationPlan {
 	this := ProcessInstanceMigrationBatchOperationPlan{}
 	this.TargetProcessDefinitionKey = targetProcessDefinitionKey
 	this.MappingInstructions = mappingInstructions
@@ -49,9 +49,9 @@ func NewProcessInstanceMigrationBatchOperationPlanWithDefaults() *ProcessInstanc
 }
 
 // GetTargetProcessDefinitionKey returns the TargetProcessDefinitionKey field value
-func (o *ProcessInstanceMigrationBatchOperationPlan) GetTargetProcessDefinitionKey() ModelString {
+func (o *ProcessInstanceMigrationBatchOperationPlan) GetTargetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *ProcessInstanceMigrationBatchOperationPlan) GetTargetProcessDefinitionK
 
 // GetTargetProcessDefinitionKeyOk returns a tuple with the TargetProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceMigrationBatchOperationPlan) GetTargetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceMigrationBatchOperationPlan) GetTargetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,7 +68,7 @@ func (o *ProcessInstanceMigrationBatchOperationPlan) GetTargetProcessDefinitionK
 }
 
 // SetTargetProcessDefinitionKey sets field value
-func (o *ProcessInstanceMigrationBatchOperationPlan) SetTargetProcessDefinitionKey(v ModelString) {
+func (o *ProcessInstanceMigrationBatchOperationPlan) SetTargetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.TargetProcessDefinitionKey = v
 }
 

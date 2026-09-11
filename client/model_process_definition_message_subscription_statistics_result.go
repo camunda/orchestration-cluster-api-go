@@ -22,11 +22,11 @@ var _ MappedNullable = &ProcessDefinitionMessageSubscriptionStatisticsResult{}
 // ProcessDefinitionMessageSubscriptionStatisticsResult struct for ProcessDefinitionMessageSubscriptionStatisticsResult
 type ProcessDefinitionMessageSubscriptionStatisticsResult struct {
 	// The process definition ID associated with this message subscription.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The tenant ID associated with this message subscription.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The process definition key associated with this message subscription.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The number of process instances with active message subscriptions.
 	ProcessInstancesWithActiveSubscriptions int64 `json:"processInstancesWithActiveSubscriptions"`
 	// The total number of active message subscriptions for this process definition key.
@@ -39,7 +39,7 @@ type _ProcessDefinitionMessageSubscriptionStatisticsResult ProcessDefinitionMess
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessDefinitionMessageSubscriptionStatisticsResult(processDefinitionId string, tenantId string, processDefinitionKey ModelString, processInstancesWithActiveSubscriptions int64, activeSubscriptions int64) *ProcessDefinitionMessageSubscriptionStatisticsResult {
+func NewProcessDefinitionMessageSubscriptionStatisticsResult(processDefinitionId ProcessDefinitionId, tenantId TenantId, processDefinitionKey ProcessDefinitionKey, processInstancesWithActiveSubscriptions int64, activeSubscriptions int64) *ProcessDefinitionMessageSubscriptionStatisticsResult {
 	this := ProcessDefinitionMessageSubscriptionStatisticsResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.TenantId = tenantId
@@ -58,9 +58,9 @@ func NewProcessDefinitionMessageSubscriptionStatisticsResultWithDefaults() *Proc
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinitionId() string {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -69,7 +69,7 @@ func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinit
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -77,14 +77,14 @@ func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinit
 }
 
 // SetProcessDefinitionId sets field value
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) SetProcessDefinitionId(v string) {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetTenantId returns the TenantId field value
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetTenantId() string {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -93,7 +93,7 @@ func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetTenantId() str
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetTenantIdOk() (*string, bool) {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,14 +101,14 @@ func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetTenantIdOk() (
 }
 
 // SetTenantId sets field value
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) SetTenantId(v string) {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinitionKey() ModelString {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -117,7 +117,7 @@ func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinit
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -125,7 +125,7 @@ func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) GetProcessDefinit
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) SetProcessDefinitionKey(v ModelString) {
+func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 

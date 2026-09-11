@@ -26,7 +26,7 @@ type DocumentReference struct {
 	// The ID of the document store.
 	StoreId string `json:"storeId"`
 	// The ID of the document.
-	DocumentId string `json:"documentId"`
+	DocumentId DocumentId `json:"documentId"`
 	// The hash of the document.
 	ContentHash NullableString           `json:"contentHash"`
 	Metadata    DocumentMetadataResponse `json:"metadata"`
@@ -38,7 +38,7 @@ type _DocumentReference DocumentReference
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDocumentReference(camundaDocumentType string, storeId string, documentId string, contentHash NullableString, metadata DocumentMetadataResponse) *DocumentReference {
+func NewDocumentReference(camundaDocumentType string, storeId string, documentId DocumentId, contentHash NullableString, metadata DocumentMetadataResponse) *DocumentReference {
 	this := DocumentReference{}
 	this.CamundaDocumentType = camundaDocumentType
 	this.StoreId = storeId
@@ -105,9 +105,9 @@ func (o *DocumentReference) SetStoreId(v string) {
 }
 
 // GetDocumentId returns the DocumentId field value
-func (o *DocumentReference) GetDocumentId() string {
+func (o *DocumentReference) GetDocumentId() DocumentId {
 	if o == nil {
-		var ret string
+		var ret DocumentId
 		return ret
 	}
 
@@ -116,7 +116,7 @@ func (o *DocumentReference) GetDocumentId() string {
 
 // GetDocumentIdOk returns a tuple with the DocumentId field value
 // and a boolean to check if the value has been set.
-func (o *DocumentReference) GetDocumentIdOk() (*string, bool) {
+func (o *DocumentReference) GetDocumentIdOk() (*DocumentId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -124,7 +124,7 @@ func (o *DocumentReference) GetDocumentIdOk() (*string, bool) {
 }
 
 // SetDocumentId sets field value
-func (o *DocumentReference) SetDocumentId(v string) {
+func (o *DocumentReference) SetDocumentId(v DocumentId) {
 	o.DocumentId = v
 }
 

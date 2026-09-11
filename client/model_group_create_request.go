@@ -22,7 +22,7 @@ var _ MappedNullable = &GroupCreateRequest{}
 // GroupCreateRequest struct for GroupCreateRequest
 type GroupCreateRequest struct {
 	// The ID of the new group.
-	GroupId string `json:"groupId"`
+	GroupId GroupId `json:"groupId"`
 	// The display name of the new group.
 	Name string `json:"name"`
 	// The description of the new group.
@@ -35,7 +35,7 @@ type _GroupCreateRequest GroupCreateRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGroupCreateRequest(groupId string, name string) *GroupCreateRequest {
+func NewGroupCreateRequest(groupId GroupId, name string) *GroupCreateRequest {
 	this := GroupCreateRequest{}
 	this.GroupId = groupId
 	this.Name = name
@@ -51,9 +51,9 @@ func NewGroupCreateRequestWithDefaults() *GroupCreateRequest {
 }
 
 // GetGroupId returns the GroupId field value
-func (o *GroupCreateRequest) GetGroupId() string {
+func (o *GroupCreateRequest) GetGroupId() GroupId {
 	if o == nil {
-		var ret string
+		var ret GroupId
 		return ret
 	}
 
@@ -62,7 +62,7 @@ func (o *GroupCreateRequest) GetGroupId() string {
 
 // GetGroupIdOk returns a tuple with the GroupId field value
 // and a boolean to check if the value has been set.
-func (o *GroupCreateRequest) GetGroupIdOk() (*string, bool) {
+func (o *GroupCreateRequest) GetGroupIdOk() (*GroupId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -70,7 +70,7 @@ func (o *GroupCreateRequest) GetGroupIdOk() (*string, bool) {
 }
 
 // SetGroupId sets field value
-func (o *GroupCreateRequest) SetGroupId(v string) {
+func (o *GroupCreateRequest) SetGroupId(v GroupId) {
 	o.GroupId = v
 }
 

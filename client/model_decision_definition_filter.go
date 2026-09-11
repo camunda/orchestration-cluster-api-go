@@ -20,7 +20,7 @@ var _ MappedNullable = &DecisionDefinitionFilter{}
 // DecisionDefinitionFilter Decision definition search filter.
 type DecisionDefinitionFilter struct {
 	// The DMN ID of the decision definition.
-	DecisionDefinitionId *string `json:"decisionDefinitionId,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	DecisionDefinitionId *DecisionDefinitionId `json:"decisionDefinitionId,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The DMN name of the decision definition.
 	Name *string `json:"name,omitempty"`
 	// Whether to only return the latest version of each decision definition. When using this filter, pagination functionality is limited, you can only paginate forward using `after` and `limit`. The response contains no `startCursor` in the `page`, and requests ignore the `from` and `before` in the `page`.
@@ -30,11 +30,11 @@ type DecisionDefinitionFilter struct {
 	// the DMN ID of the decision requirements graph that the decision definition is part of.
 	DecisionRequirementsId *string `json:"decisionRequirementsId,omitempty"`
 	// The tenant ID of the decision definition.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned key, which acts as a unique identifier for this decision definition.
-	DecisionDefinitionKey *ModelString `json:"decisionDefinitionKey,omitempty"`
+	DecisionDefinitionKey *DecisionDefinitionKey `json:"decisionDefinitionKey,omitempty"`
 	// The assigned key of the decision requirements graph that the decision definition is part of.
-	DecisionRequirementsKey *ModelString `json:"decisionRequirementsKey,omitempty"`
+	DecisionRequirementsKey *DecisionRequirementsKey `json:"decisionRequirementsKey,omitempty"`
 	// The DMN name of the decision requirements that the decision definition is part of.
 	DecisionRequirementsName *string `json:"decisionRequirementsName,omitempty"`
 	// The assigned version of the decision requirements that the decision definition is part of.
@@ -59,9 +59,9 @@ func NewDecisionDefinitionFilterWithDefaults() *DecisionDefinitionFilter {
 }
 
 // GetDecisionDefinitionId returns the DecisionDefinitionId field value if set, zero value otherwise.
-func (o *DecisionDefinitionFilter) GetDecisionDefinitionId() string {
+func (o *DecisionDefinitionFilter) GetDecisionDefinitionId() DecisionDefinitionId {
 	if o == nil || IsNil(o.DecisionDefinitionId) {
-		var ret string
+		var ret DecisionDefinitionId
 		return ret
 	}
 	return *o.DecisionDefinitionId
@@ -69,7 +69,7 @@ func (o *DecisionDefinitionFilter) GetDecisionDefinitionId() string {
 
 // GetDecisionDefinitionIdOk returns a tuple with the DecisionDefinitionId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionDefinitionFilter) GetDecisionDefinitionIdOk() (*string, bool) {
+func (o *DecisionDefinitionFilter) GetDecisionDefinitionIdOk() (*DecisionDefinitionId, bool) {
 	if o == nil || IsNil(o.DecisionDefinitionId) {
 		return nil, false
 	}
@@ -85,8 +85,8 @@ func (o *DecisionDefinitionFilter) HasDecisionDefinitionId() bool {
 	return false
 }
 
-// SetDecisionDefinitionId gets a reference to the given string and assigns it to the DecisionDefinitionId field.
-func (o *DecisionDefinitionFilter) SetDecisionDefinitionId(v string) {
+// SetDecisionDefinitionId gets a reference to the given DecisionDefinitionId and assigns it to the DecisionDefinitionId field.
+func (o *DecisionDefinitionFilter) SetDecisionDefinitionId(v DecisionDefinitionId) {
 	o.DecisionDefinitionId = &v
 }
 
@@ -219,9 +219,9 @@ func (o *DecisionDefinitionFilter) SetDecisionRequirementsId(v string) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *DecisionDefinitionFilter) GetTenantId() string {
+func (o *DecisionDefinitionFilter) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -229,7 +229,7 @@ func (o *DecisionDefinitionFilter) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionDefinitionFilter) GetTenantIdOk() (*string, bool) {
+func (o *DecisionDefinitionFilter) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -245,15 +245,15 @@ func (o *DecisionDefinitionFilter) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *DecisionDefinitionFilter) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *DecisionDefinitionFilter) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 
 // GetDecisionDefinitionKey returns the DecisionDefinitionKey field value if set, zero value otherwise.
-func (o *DecisionDefinitionFilter) GetDecisionDefinitionKey() ModelString {
+func (o *DecisionDefinitionFilter) GetDecisionDefinitionKey() DecisionDefinitionKey {
 	if o == nil || IsNil(o.DecisionDefinitionKey) {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 	return *o.DecisionDefinitionKey
@@ -261,7 +261,7 @@ func (o *DecisionDefinitionFilter) GetDecisionDefinitionKey() ModelString {
 
 // GetDecisionDefinitionKeyOk returns a tuple with the DecisionDefinitionKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionDefinitionFilter) GetDecisionDefinitionKeyOk() (*ModelString, bool) {
+func (o *DecisionDefinitionFilter) GetDecisionDefinitionKeyOk() (*DecisionDefinitionKey, bool) {
 	if o == nil || IsNil(o.DecisionDefinitionKey) {
 		return nil, false
 	}
@@ -277,15 +277,15 @@ func (o *DecisionDefinitionFilter) HasDecisionDefinitionKey() bool {
 	return false
 }
 
-// SetDecisionDefinitionKey gets a reference to the given ModelString and assigns it to the DecisionDefinitionKey field.
-func (o *DecisionDefinitionFilter) SetDecisionDefinitionKey(v ModelString) {
+// SetDecisionDefinitionKey gets a reference to the given DecisionDefinitionKey and assigns it to the DecisionDefinitionKey field.
+func (o *DecisionDefinitionFilter) SetDecisionDefinitionKey(v DecisionDefinitionKey) {
 	o.DecisionDefinitionKey = &v
 }
 
 // GetDecisionRequirementsKey returns the DecisionRequirementsKey field value if set, zero value otherwise.
-func (o *DecisionDefinitionFilter) GetDecisionRequirementsKey() ModelString {
+func (o *DecisionDefinitionFilter) GetDecisionRequirementsKey() DecisionRequirementsKey {
 	if o == nil || IsNil(o.DecisionRequirementsKey) {
-		var ret ModelString
+		var ret DecisionRequirementsKey
 		return ret
 	}
 	return *o.DecisionRequirementsKey
@@ -293,7 +293,7 @@ func (o *DecisionDefinitionFilter) GetDecisionRequirementsKey() ModelString {
 
 // GetDecisionRequirementsKeyOk returns a tuple with the DecisionRequirementsKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionDefinitionFilter) GetDecisionRequirementsKeyOk() (*ModelString, bool) {
+func (o *DecisionDefinitionFilter) GetDecisionRequirementsKeyOk() (*DecisionRequirementsKey, bool) {
 	if o == nil || IsNil(o.DecisionRequirementsKey) {
 		return nil, false
 	}
@@ -309,8 +309,8 @@ func (o *DecisionDefinitionFilter) HasDecisionRequirementsKey() bool {
 	return false
 }
 
-// SetDecisionRequirementsKey gets a reference to the given ModelString and assigns it to the DecisionRequirementsKey field.
-func (o *DecisionDefinitionFilter) SetDecisionRequirementsKey(v ModelString) {
+// SetDecisionRequirementsKey gets a reference to the given DecisionRequirementsKey and assigns it to the DecisionRequirementsKey field.
+func (o *DecisionDefinitionFilter) SetDecisionRequirementsKey(v DecisionRequirementsKey) {
 	o.DecisionRequirementsKey = &v
 }
 

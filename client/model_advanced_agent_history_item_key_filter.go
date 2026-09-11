@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedAgentHistoryItemKeyFilter{}
 // AdvancedAgentHistoryItemKeyFilter Advanced AgentHistoryItemKey filter.
 type AdvancedAgentHistoryItemKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *AgentHistoryItemKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *AgentHistoryItemKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []AgentHistoryItemKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []AgentHistoryItemKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedAgentHistoryItemKeyFilter instantiates a new AdvancedAgentHistoryItemKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedAgentHistoryItemKeyFilterWithDefaults() *AdvancedAgentHistoryIte
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedAgentHistoryItemKeyFilter) GetEq() ModelString {
+func (o *AdvancedAgentHistoryItemKeyFilter) GetEq() AgentHistoryItemKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret AgentHistoryItemKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedAgentHistoryItemKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAgentHistoryItemKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedAgentHistoryItemKeyFilter) GetEqOk() (*AgentHistoryItemKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedAgentHistoryItemKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedAgentHistoryItemKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given AgentHistoryItemKey and assigns it to the Eq field.
+func (o *AdvancedAgentHistoryItemKeyFilter) SetEq(v AgentHistoryItemKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedAgentHistoryItemKeyFilter) GetNeq() ModelString {
+func (o *AdvancedAgentHistoryItemKeyFilter) GetNeq() AgentHistoryItemKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret AgentHistoryItemKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedAgentHistoryItemKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAgentHistoryItemKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedAgentHistoryItemKeyFilter) GetNeqOk() (*AgentHistoryItemKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedAgentHistoryItemKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedAgentHistoryItemKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given AgentHistoryItemKey and assigns it to the Neq field.
+func (o *AdvancedAgentHistoryItemKeyFilter) SetNeq(v AgentHistoryItemKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedAgentHistoryItemKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedAgentHistoryItemKeyFilter) GetIn() []ModelString {
+func (o *AdvancedAgentHistoryItemKeyFilter) GetIn() []AgentHistoryItemKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []AgentHistoryItemKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedAgentHistoryItemKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAgentHistoryItemKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedAgentHistoryItemKeyFilter) GetInOk() ([]AgentHistoryItemKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedAgentHistoryItemKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedAgentHistoryItemKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []AgentHistoryItemKey and assigns it to the In field.
+func (o *AdvancedAgentHistoryItemKeyFilter) SetIn(v []AgentHistoryItemKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedAgentHistoryItemKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedAgentHistoryItemKeyFilter) GetNotIn() []AgentHistoryItemKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []AgentHistoryItemKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedAgentHistoryItemKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAgentHistoryItemKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedAgentHistoryItemKeyFilter) GetNotInOk() ([]AgentHistoryItemKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedAgentHistoryItemKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedAgentHistoryItemKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []AgentHistoryItemKey and assigns it to the NotIn field.
+func (o *AdvancedAgentHistoryItemKeyFilter) SetNotIn(v []AgentHistoryItemKey) {
 	o.NotIn = v
 }
 

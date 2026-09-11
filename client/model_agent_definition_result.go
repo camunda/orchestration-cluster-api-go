@@ -22,22 +22,22 @@ var _ MappedNullable = &AgentDefinitionResult{}
 // AgentDefinitionResult An agent definition, created at deploy time for the process element it belongs to.
 type AgentDefinitionResult struct {
 	// The unique key for this agent definition. Unique across process definition versions.
-	AgentDefinitionKey ModelString             `json:"agentDefinitionKey"`
+	AgentDefinitionKey AgentDefinitionKey      `json:"agentDefinitionKey"`
 	AgentType          AgentDefinitionTypeEnum `json:"agentType"`
 	// The human-readable name of the process element that owns the agent definition. Falls back to elementId when the element has no BPMN name configured.
 	Name string `json:"name"`
 	// The BPMN element ID of the process element that owns the agent definition.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The BPMN process ID of the process definition that owns the agent definition.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The key of the process definition that owns the agent definition.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The version of the process definition that owns the agent definition.
 	ProcessDefinitionVersion int32 `json:"processDefinitionVersion"`
 	// The version tag of the process definition that owns the agent definition.
 	ProcessDefinitionVersionTag NullableString `json:"processDefinitionVersionTag"`
 	// The tenant ID of this agent definition.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 }
 
 type _AgentDefinitionResult AgentDefinitionResult
@@ -46,7 +46,7 @@ type _AgentDefinitionResult AgentDefinitionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentDefinitionResult(agentDefinitionKey ModelString, agentType AgentDefinitionTypeEnum, name string, elementId string, processDefinitionId string, processDefinitionKey ModelString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, tenantId string) *AgentDefinitionResult {
+func NewAgentDefinitionResult(agentDefinitionKey AgentDefinitionKey, agentType AgentDefinitionTypeEnum, name string, elementId ElementId, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processDefinitionVersion int32, processDefinitionVersionTag NullableString, tenantId TenantId) *AgentDefinitionResult {
 	this := AgentDefinitionResult{}
 	this.AgentDefinitionKey = agentDefinitionKey
 	this.AgentType = agentType
@@ -69,9 +69,9 @@ func NewAgentDefinitionResultWithDefaults() *AgentDefinitionResult {
 }
 
 // GetAgentDefinitionKey returns the AgentDefinitionKey field value
-func (o *AgentDefinitionResult) GetAgentDefinitionKey() ModelString {
+func (o *AgentDefinitionResult) GetAgentDefinitionKey() AgentDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret AgentDefinitionKey
 		return ret
 	}
 
@@ -80,7 +80,7 @@ func (o *AgentDefinitionResult) GetAgentDefinitionKey() ModelString {
 
 // GetAgentDefinitionKeyOk returns a tuple with the AgentDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentDefinitionResult) GetAgentDefinitionKeyOk() (*ModelString, bool) {
+func (o *AgentDefinitionResult) GetAgentDefinitionKeyOk() (*AgentDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -88,7 +88,7 @@ func (o *AgentDefinitionResult) GetAgentDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetAgentDefinitionKey sets field value
-func (o *AgentDefinitionResult) SetAgentDefinitionKey(v ModelString) {
+func (o *AgentDefinitionResult) SetAgentDefinitionKey(v AgentDefinitionKey) {
 	o.AgentDefinitionKey = v
 }
 
@@ -141,9 +141,9 @@ func (o *AgentDefinitionResult) SetName(v string) {
 }
 
 // GetElementId returns the ElementId field value
-func (o *AgentDefinitionResult) GetElementId() string {
+func (o *AgentDefinitionResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -152,7 +152,7 @@ func (o *AgentDefinitionResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *AgentDefinitionResult) GetElementIdOk() (*string, bool) {
+func (o *AgentDefinitionResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -160,14 +160,14 @@ func (o *AgentDefinitionResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *AgentDefinitionResult) SetElementId(v string) {
+func (o *AgentDefinitionResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *AgentDefinitionResult) GetProcessDefinitionId() string {
+func (o *AgentDefinitionResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -176,7 +176,7 @@ func (o *AgentDefinitionResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *AgentDefinitionResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *AgentDefinitionResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -184,14 +184,14 @@ func (o *AgentDefinitionResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *AgentDefinitionResult) SetProcessDefinitionId(v string) {
+func (o *AgentDefinitionResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *AgentDefinitionResult) GetProcessDefinitionKey() ModelString {
+func (o *AgentDefinitionResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -200,7 +200,7 @@ func (o *AgentDefinitionResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentDefinitionResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *AgentDefinitionResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -208,7 +208,7 @@ func (o *AgentDefinitionResult) GetProcessDefinitionKeyOk() (*ModelString, bool)
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *AgentDefinitionResult) SetProcessDefinitionKey(v ModelString) {
+func (o *AgentDefinitionResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
@@ -263,9 +263,9 @@ func (o *AgentDefinitionResult) SetProcessDefinitionVersionTag(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *AgentDefinitionResult) GetTenantId() string {
+func (o *AgentDefinitionResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -274,7 +274,7 @@ func (o *AgentDefinitionResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *AgentDefinitionResult) GetTenantIdOk() (*string, bool) {
+func (o *AgentDefinitionResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -282,7 +282,7 @@ func (o *AgentDefinitionResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *AgentDefinitionResult) SetTenantId(v string) {
+func (o *AgentDefinitionResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

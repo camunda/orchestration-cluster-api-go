@@ -22,9 +22,9 @@ var _ MappedNullable = &ProcessDefinitionInstanceVersionStatisticsFilter{}
 // ProcessDefinitionInstanceVersionStatisticsFilter Process definition instance version statistics search filter.
 type ProcessDefinitionInstanceVersionStatisticsFilter struct {
 	// The ID of the process definition to retrieve version statistics for.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// Tenant ID of this process definition.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 }
 
 type _ProcessDefinitionInstanceVersionStatisticsFilter ProcessDefinitionInstanceVersionStatisticsFilter
@@ -33,7 +33,7 @@ type _ProcessDefinitionInstanceVersionStatisticsFilter ProcessDefinitionInstance
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessDefinitionInstanceVersionStatisticsFilter(processDefinitionId string) *ProcessDefinitionInstanceVersionStatisticsFilter {
+func NewProcessDefinitionInstanceVersionStatisticsFilter(processDefinitionId ProcessDefinitionId) *ProcessDefinitionInstanceVersionStatisticsFilter {
 	this := ProcessDefinitionInstanceVersionStatisticsFilter{}
 	this.ProcessDefinitionId = processDefinitionId
 	return &this
@@ -48,9 +48,9 @@ func NewProcessDefinitionInstanceVersionStatisticsFilterWithDefaults() *ProcessD
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetProcessDefinitionId() string {
+func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -59,7 +59,7 @@ func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetProcessDefinitionI
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -67,14 +67,14 @@ func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetProcessDefinitionI
 }
 
 // SetProcessDefinitionId sets field value
-func (o *ProcessDefinitionInstanceVersionStatisticsFilter) SetProcessDefinitionId(v string) {
+func (o *ProcessDefinitionInstanceVersionStatisticsFilter) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetTenantId() string {
+func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -82,7 +82,7 @@ func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetTenantId() string 
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetTenantIdOk() (*string, bool) {
+func (o *ProcessDefinitionInstanceVersionStatisticsFilter) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -98,8 +98,8 @@ func (o *ProcessDefinitionInstanceVersionStatisticsFilter) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *ProcessDefinitionInstanceVersionStatisticsFilter) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *ProcessDefinitionInstanceVersionStatisticsFilter) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 

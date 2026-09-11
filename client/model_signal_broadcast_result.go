@@ -22,9 +22,9 @@ var _ MappedNullable = &SignalBroadcastResult{}
 // SignalBroadcastResult struct for SignalBroadcastResult
 type SignalBroadcastResult struct {
 	// The tenant ID of the signal that was broadcast.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The key of the broadcasted signal.
-	SignalKey ModelString `json:"signalKey"`
+	SignalKey SignalKey `json:"signalKey"`
 }
 
 type _SignalBroadcastResult SignalBroadcastResult
@@ -33,7 +33,7 @@ type _SignalBroadcastResult SignalBroadcastResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSignalBroadcastResult(tenantId string, signalKey ModelString) *SignalBroadcastResult {
+func NewSignalBroadcastResult(tenantId TenantId, signalKey SignalKey) *SignalBroadcastResult {
 	this := SignalBroadcastResult{}
 	this.TenantId = tenantId
 	this.SignalKey = signalKey
@@ -49,9 +49,9 @@ func NewSignalBroadcastResultWithDefaults() *SignalBroadcastResult {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *SignalBroadcastResult) GetTenantId() string {
+func (o *SignalBroadcastResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *SignalBroadcastResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *SignalBroadcastResult) GetTenantIdOk() (*string, bool) {
+func (o *SignalBroadcastResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,14 +68,14 @@ func (o *SignalBroadcastResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *SignalBroadcastResult) SetTenantId(v string) {
+func (o *SignalBroadcastResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetSignalKey returns the SignalKey field value
-func (o *SignalBroadcastResult) GetSignalKey() ModelString {
+func (o *SignalBroadcastResult) GetSignalKey() SignalKey {
 	if o == nil {
-		var ret ModelString
+		var ret SignalKey
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *SignalBroadcastResult) GetSignalKey() ModelString {
 
 // GetSignalKeyOk returns a tuple with the SignalKey field value
 // and a boolean to check if the value has been set.
-func (o *SignalBroadcastResult) GetSignalKeyOk() (*ModelString, bool) {
+func (o *SignalBroadcastResult) GetSignalKeyOk() (*SignalKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *SignalBroadcastResult) GetSignalKeyOk() (*ModelString, bool) {
 }
 
 // SetSignalKey sets field value
-func (o *SignalBroadcastResult) SetSignalKey(v ModelString) {
+func (o *SignalBroadcastResult) SetSignalKey(v SignalKey) {
 	o.SignalKey = v
 }
 

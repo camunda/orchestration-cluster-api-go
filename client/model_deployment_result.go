@@ -22,9 +22,9 @@ var _ MappedNullable = &DeploymentResult{}
 // DeploymentResult struct for DeploymentResult
 type DeploymentResult struct {
 	// The unique key identifying the deployment.
-	DeploymentKey ModelString `json:"deploymentKey"`
+	DeploymentKey DeploymentKey `json:"deploymentKey"`
 	// The tenant ID associated with the deployment.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// Items deployed by the request.
 	Deployments []DeploymentMetadataResult `json:"deployments"`
 }
@@ -35,7 +35,7 @@ type _DeploymentResult DeploymentResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentResult(deploymentKey ModelString, tenantId string, deployments []DeploymentMetadataResult) *DeploymentResult {
+func NewDeploymentResult(deploymentKey DeploymentKey, tenantId TenantId, deployments []DeploymentMetadataResult) *DeploymentResult {
 	this := DeploymentResult{}
 	this.DeploymentKey = deploymentKey
 	this.TenantId = tenantId
@@ -52,9 +52,9 @@ func NewDeploymentResultWithDefaults() *DeploymentResult {
 }
 
 // GetDeploymentKey returns the DeploymentKey field value
-func (o *DeploymentResult) GetDeploymentKey() ModelString {
+func (o *DeploymentResult) GetDeploymentKey() DeploymentKey {
 	if o == nil {
-		var ret ModelString
+		var ret DeploymentKey
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *DeploymentResult) GetDeploymentKey() ModelString {
 
 // GetDeploymentKeyOk returns a tuple with the DeploymentKey field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentResult) GetDeploymentKeyOk() (*ModelString, bool) {
+func (o *DeploymentResult) GetDeploymentKeyOk() (*DeploymentKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +71,14 @@ func (o *DeploymentResult) GetDeploymentKeyOk() (*ModelString, bool) {
 }
 
 // SetDeploymentKey sets field value
-func (o *DeploymentResult) SetDeploymentKey(v ModelString) {
+func (o *DeploymentResult) SetDeploymentKey(v DeploymentKey) {
 	o.DeploymentKey = v
 }
 
 // GetTenantId returns the TenantId field value
-func (o *DeploymentResult) GetTenantId() string {
+func (o *DeploymentResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -87,7 +87,7 @@ func (o *DeploymentResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentResult) GetTenantIdOk() (*string, bool) {
+func (o *DeploymentResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,7 +95,7 @@ func (o *DeploymentResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *DeploymentResult) SetTenantId(v string) {
+func (o *DeploymentResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

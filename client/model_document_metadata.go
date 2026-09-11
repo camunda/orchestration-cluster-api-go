@@ -29,9 +29,9 @@ type DocumentMetadata struct {
 	// The size of the document in bytes.
 	Size *int64 `json:"size,omitempty"`
 	// The ID of the process definition that created the document.
-	ProcessDefinitionId *string `json:"processDefinitionId,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId *ProcessDefinitionId `json:"processDefinitionId,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The key of the process instance that created the document.
-	ProcessInstanceKey *ModelString `json:"processInstanceKey,omitempty"`
+	ProcessInstanceKey *ProcessInstanceKey `json:"processInstanceKey,omitempty"`
 	// Custom properties of the document.
 	CustomProperties map[string]interface{} `json:"customProperties,omitempty"`
 }
@@ -182,9 +182,9 @@ func (o *DocumentMetadata) SetSize(v int64) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value if set, zero value otherwise.
-func (o *DocumentMetadata) GetProcessDefinitionId() string {
+func (o *DocumentMetadata) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil || IsNil(o.ProcessDefinitionId) {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 	return *o.ProcessDefinitionId
@@ -192,7 +192,7 @@ func (o *DocumentMetadata) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DocumentMetadata) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *DocumentMetadata) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil || IsNil(o.ProcessDefinitionId) {
 		return nil, false
 	}
@@ -208,15 +208,15 @@ func (o *DocumentMetadata) HasProcessDefinitionId() bool {
 	return false
 }
 
-// SetProcessDefinitionId gets a reference to the given string and assigns it to the ProcessDefinitionId field.
-func (o *DocumentMetadata) SetProcessDefinitionId(v string) {
+// SetProcessDefinitionId gets a reference to the given ProcessDefinitionId and assigns it to the ProcessDefinitionId field.
+func (o *DocumentMetadata) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = &v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value if set, zero value otherwise.
-func (o *DocumentMetadata) GetProcessInstanceKey() ModelString {
+func (o *DocumentMetadata) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || IsNil(o.ProcessInstanceKey) {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 	return *o.ProcessInstanceKey
@@ -224,7 +224,7 @@ func (o *DocumentMetadata) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DocumentMetadata) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *DocumentMetadata) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil || IsNil(o.ProcessInstanceKey) {
 		return nil, false
 	}
@@ -240,8 +240,8 @@ func (o *DocumentMetadata) HasProcessInstanceKey() bool {
 	return false
 }
 
-// SetProcessInstanceKey gets a reference to the given ModelString and assigns it to the ProcessInstanceKey field.
-func (o *DocumentMetadata) SetProcessInstanceKey(v ModelString) {
+// SetProcessInstanceKey gets a reference to the given ProcessInstanceKey and assigns it to the ProcessInstanceKey field.
+func (o *DocumentMetadata) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = &v
 }
 

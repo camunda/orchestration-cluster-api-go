@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedProcessDefinitionIdFilter{}
 // AdvancedProcessDefinitionIdFilter Advanced ProcessDefinitionId filter.
 type AdvancedProcessDefinitionIdFilter struct {
 	// Checks for equality with the provided value.
-	Eq *string `json:"$eq,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	Eq *ProcessDefinitionId `json:"$eq,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// Checks for inequality with the provided value.
-	Neq *string `json:"$neq,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	Neq *ProcessDefinitionId `json:"$neq,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []string `json:"$in,omitempty"`
+	In []ProcessDefinitionId `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []string `json:"$notIn,omitempty"`
+	NotIn []ProcessDefinitionId `json:"$notIn,omitempty"`
 	// Checks if the property matches the provided like value.  Supported wildcard characters are:  * `*`: matches zero, one, or multiple characters. * `?`: matches one, single character.  Wildcard characters can be escaped with backslash, for instance: `\\*`.
 	Like *string `json:"$like,omitempty"`
 }
@@ -51,9 +51,9 @@ func NewAdvancedProcessDefinitionIdFilterWithDefaults() *AdvancedProcessDefiniti
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedProcessDefinitionIdFilter) GetEq() string {
+func (o *AdvancedProcessDefinitionIdFilter) GetEq() ProcessDefinitionId {
 	if o == nil || IsNil(o.Eq) {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 	return *o.Eq
@@ -61,7 +61,7 @@ func (o *AdvancedProcessDefinitionIdFilter) GetEq() string {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessDefinitionIdFilter) GetEqOk() (*string, bool) {
+func (o *AdvancedProcessDefinitionIdFilter) GetEqOk() (*ProcessDefinitionId, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -77,15 +77,15 @@ func (o *AdvancedProcessDefinitionIdFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given string and assigns it to the Eq field.
-func (o *AdvancedProcessDefinitionIdFilter) SetEq(v string) {
+// SetEq gets a reference to the given ProcessDefinitionId and assigns it to the Eq field.
+func (o *AdvancedProcessDefinitionIdFilter) SetEq(v ProcessDefinitionId) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedProcessDefinitionIdFilter) GetNeq() string {
+func (o *AdvancedProcessDefinitionIdFilter) GetNeq() ProcessDefinitionId {
 	if o == nil || IsNil(o.Neq) {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 	return *o.Neq
@@ -93,7 +93,7 @@ func (o *AdvancedProcessDefinitionIdFilter) GetNeq() string {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessDefinitionIdFilter) GetNeqOk() (*string, bool) {
+func (o *AdvancedProcessDefinitionIdFilter) GetNeqOk() (*ProcessDefinitionId, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -109,8 +109,8 @@ func (o *AdvancedProcessDefinitionIdFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given string and assigns it to the Neq field.
-func (o *AdvancedProcessDefinitionIdFilter) SetNeq(v string) {
+// SetNeq gets a reference to the given ProcessDefinitionId and assigns it to the Neq field.
+func (o *AdvancedProcessDefinitionIdFilter) SetNeq(v ProcessDefinitionId) {
 	o.Neq = &v
 }
 
@@ -147,9 +147,9 @@ func (o *AdvancedProcessDefinitionIdFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedProcessDefinitionIdFilter) GetIn() []string {
+func (o *AdvancedProcessDefinitionIdFilter) GetIn() []ProcessDefinitionId {
 	if o == nil || IsNil(o.In) {
-		var ret []string
+		var ret []ProcessDefinitionId
 		return ret
 	}
 	return o.In
@@ -157,7 +157,7 @@ func (o *AdvancedProcessDefinitionIdFilter) GetIn() []string {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessDefinitionIdFilter) GetInOk() ([]string, bool) {
+func (o *AdvancedProcessDefinitionIdFilter) GetInOk() ([]ProcessDefinitionId, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -173,15 +173,15 @@ func (o *AdvancedProcessDefinitionIdFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []string and assigns it to the In field.
-func (o *AdvancedProcessDefinitionIdFilter) SetIn(v []string) {
+// SetIn gets a reference to the given []ProcessDefinitionId and assigns it to the In field.
+func (o *AdvancedProcessDefinitionIdFilter) SetIn(v []ProcessDefinitionId) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedProcessDefinitionIdFilter) GetNotIn() []string {
+func (o *AdvancedProcessDefinitionIdFilter) GetNotIn() []ProcessDefinitionId {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []string
+		var ret []ProcessDefinitionId
 		return ret
 	}
 	return o.NotIn
@@ -189,7 +189,7 @@ func (o *AdvancedProcessDefinitionIdFilter) GetNotIn() []string {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessDefinitionIdFilter) GetNotInOk() ([]string, bool) {
+func (o *AdvancedProcessDefinitionIdFilter) GetNotInOk() ([]ProcessDefinitionId, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -205,8 +205,8 @@ func (o *AdvancedProcessDefinitionIdFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []string and assigns it to the NotIn field.
-func (o *AdvancedProcessDefinitionIdFilter) SetNotIn(v []string) {
+// SetNotIn gets a reference to the given []ProcessDefinitionId and assigns it to the NotIn field.
+func (o *AdvancedProcessDefinitionIdFilter) SetNotIn(v []ProcessDefinitionId) {
 	o.NotIn = v
 }
 

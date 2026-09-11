@@ -24,17 +24,17 @@ type ProcessInstanceSequenceFlowResult struct {
 	// The sequence flow id.
 	SequenceFlowId string `json:"sequenceFlowId"`
 	// The key of this process instance.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The process definition key.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The process definition id.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The element id for this sequence flow, as provided in the BPMN process.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 }
 
 type _ProcessInstanceSequenceFlowResult ProcessInstanceSequenceFlowResult
@@ -43,7 +43,7 @@ type _ProcessInstanceSequenceFlowResult ProcessInstanceSequenceFlowResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceSequenceFlowResult(sequenceFlowId string, processInstanceKey ModelString, rootProcessInstanceKey NullableModelString, processDefinitionKey ModelString, processDefinitionId string, elementId string, tenantId string) *ProcessInstanceSequenceFlowResult {
+func NewProcessInstanceSequenceFlowResult(sequenceFlowId string, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, processDefinitionId ProcessDefinitionId, elementId ElementId, tenantId TenantId) *ProcessInstanceSequenceFlowResult {
 	this := ProcessInstanceSequenceFlowResult{}
 	this.SequenceFlowId = sequenceFlowId
 	this.ProcessInstanceKey = processInstanceKey
@@ -88,9 +88,9 @@ func (o *ProcessInstanceSequenceFlowResult) SetSequenceFlowId(v string) {
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *ProcessInstanceSequenceFlowResult) GetProcessInstanceKey() ModelString {
+func (o *ProcessInstanceSequenceFlowResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -99,7 +99,7 @@ func (o *ProcessInstanceSequenceFlowResult) GetProcessInstanceKey() ModelString 
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceSequenceFlowResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceSequenceFlowResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -107,15 +107,15 @@ func (o *ProcessInstanceSequenceFlowResult) GetProcessInstanceKeyOk() (*ModelStr
 }
 
 // SetProcessInstanceKey sets field value
-func (o *ProcessInstanceSequenceFlowResult) SetProcessInstanceKey(v ModelString) {
+func (o *ProcessInstanceSequenceFlowResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *ProcessInstanceSequenceFlowResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *ProcessInstanceSequenceFlowResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -125,7 +125,7 @@ func (o *ProcessInstanceSequenceFlowResult) GetRootProcessInstanceKey() ModelStr
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ProcessInstanceSequenceFlowResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceSequenceFlowResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -133,14 +133,14 @@ func (o *ProcessInstanceSequenceFlowResult) GetRootProcessInstanceKeyOk() (*Mode
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *ProcessInstanceSequenceFlowResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *ProcessInstanceSequenceFlowResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionKey() ModelString {
+func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -149,7 +149,7 @@ func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionKey() ModelStrin
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -157,14 +157,14 @@ func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionKeyOk() (*ModelS
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *ProcessInstanceSequenceFlowResult) SetProcessDefinitionKey(v ModelString) {
+func (o *ProcessInstanceSequenceFlowResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionId() string {
+func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -173,7 +173,7 @@ func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -181,14 +181,14 @@ func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionIdOk() (*string,
 }
 
 // SetProcessDefinitionId sets field value
-func (o *ProcessInstanceSequenceFlowResult) SetProcessDefinitionId(v string) {
+func (o *ProcessInstanceSequenceFlowResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetElementId returns the ElementId field value
-func (o *ProcessInstanceSequenceFlowResult) GetElementId() string {
+func (o *ProcessInstanceSequenceFlowResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -197,7 +197,7 @@ func (o *ProcessInstanceSequenceFlowResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceSequenceFlowResult) GetElementIdOk() (*string, bool) {
+func (o *ProcessInstanceSequenceFlowResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -205,14 +205,14 @@ func (o *ProcessInstanceSequenceFlowResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *ProcessInstanceSequenceFlowResult) SetElementId(v string) {
+func (o *ProcessInstanceSequenceFlowResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
 // GetTenantId returns the TenantId field value
-func (o *ProcessInstanceSequenceFlowResult) GetTenantId() string {
+func (o *ProcessInstanceSequenceFlowResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -221,7 +221,7 @@ func (o *ProcessInstanceSequenceFlowResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceSequenceFlowResult) GetTenantIdOk() (*string, bool) {
+func (o *ProcessInstanceSequenceFlowResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -229,7 +229,7 @@ func (o *ProcessInstanceSequenceFlowResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *ProcessInstanceSequenceFlowResult) SetTenantId(v string) {
+func (o *ProcessInstanceSequenceFlowResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

@@ -22,9 +22,9 @@ var _ MappedNullable = &MessagePublicationResult{}
 // MessagePublicationResult The message key of the published message.
 type MessagePublicationResult struct {
 	// The tenant ID of the message.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The key of the published message.
-	MessageKey ModelString `json:"messageKey"`
+	MessageKey MessageKey `json:"messageKey"`
 }
 
 type _MessagePublicationResult MessagePublicationResult
@@ -33,7 +33,7 @@ type _MessagePublicationResult MessagePublicationResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMessagePublicationResult(tenantId string, messageKey ModelString) *MessagePublicationResult {
+func NewMessagePublicationResult(tenantId TenantId, messageKey MessageKey) *MessagePublicationResult {
 	this := MessagePublicationResult{}
 	this.TenantId = tenantId
 	this.MessageKey = messageKey
@@ -49,9 +49,9 @@ func NewMessagePublicationResultWithDefaults() *MessagePublicationResult {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *MessagePublicationResult) GetTenantId() string {
+func (o *MessagePublicationResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *MessagePublicationResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *MessagePublicationResult) GetTenantIdOk() (*string, bool) {
+func (o *MessagePublicationResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,14 +68,14 @@ func (o *MessagePublicationResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *MessagePublicationResult) SetTenantId(v string) {
+func (o *MessagePublicationResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetMessageKey returns the MessageKey field value
-func (o *MessagePublicationResult) GetMessageKey() ModelString {
+func (o *MessagePublicationResult) GetMessageKey() MessageKey {
 	if o == nil {
-		var ret ModelString
+		var ret MessageKey
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *MessagePublicationResult) GetMessageKey() ModelString {
 
 // GetMessageKeyOk returns a tuple with the MessageKey field value
 // and a boolean to check if the value has been set.
-func (o *MessagePublicationResult) GetMessageKeyOk() (*ModelString, bool) {
+func (o *MessagePublicationResult) GetMessageKeyOk() (*MessageKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *MessagePublicationResult) GetMessageKeyOk() (*ModelString, bool) {
 }
 
 // SetMessageKey sets field value
-func (o *MessagePublicationResult) SetMessageKey(v ModelString) {
+func (o *MessagePublicationResult) SetMessageKey(v MessageKey) {
 	o.MessageKey = v
 }
 

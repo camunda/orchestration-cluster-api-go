@@ -86,8 +86,8 @@ func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body openapi
 //	configItem.SetSystemPrompt(systemPrompt)
 //
 //	req := openapi.NewAgentInstanceCreationRequest(
-//		openapi.ModelString("2251799813685360"), // elementInstanceKey
-//		openapi.ModelString("2251799813685424"), // jobKey
+//		openapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
+//		openapi.JobKey("2251799813685424"),             // jobKey
 //		"lease-token",
 //		[]openapi.AgentInstanceHistoryItem{*configItem}, // history
 //	)
@@ -172,8 +172,8 @@ func (c *CamundaClient) SearchAgentInstances(ctx context.Context, body openapi.A
 // Example:
 //
 //	req := openapi.NewAgentInstanceUpdateRequest(
-//		openapi.ModelString("2251799813685360"), // elementInstanceKey
-//		openapi.ModelString("2251799813685424"), // jobKey
+//		openapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
+//		openapi.JobKey("2251799813685424"),             // jobKey
 //		"lease-token",
 //	)
 //
@@ -3110,7 +3110,7 @@ func (c *CamundaClient) GetProcessInstanceWaitStateStatistics(ctx context.Contex
 // Example:
 //
 //	instruction := openapi.NewProcessInstanceMigrationInstruction(
-//		openapi.ModelString("2251799813685399"),
+//		openapi.ProcessDefinitionKey("2251799813685399"),
 //		[]openapi.MigrateProcessInstanceMappingInstruction{
 //			*openapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
 //		})
@@ -3131,7 +3131,7 @@ func (c *CamundaClient) MigrateProcessInstance(ctx context.Context, processInsta
 // Example:
 //
 //	plan := openapi.NewProcessInstanceMigrationBatchOperationPlan(
-//		openapi.ModelString("2251799813685399"),
+//		openapi.ProcessDefinitionKey("2251799813685399"),
 //		[]openapi.MigrateProcessInstanceMappingInstruction{
 //			*openapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
 //		})

@@ -22,9 +22,9 @@ var _ MappedNullable = &MigrateProcessInstanceMappingInstruction{}
 // MigrateProcessInstanceMappingInstruction The mapping instructions describe how to map elements from the source process definition to the target process definition.
 type MigrateProcessInstanceMappingInstruction struct {
 	// The element id to migrate from.
-	SourceElementId string `json:"sourceElementId"`
+	SourceElementId ElementId `json:"sourceElementId"`
 	// The element id to migrate into.
-	TargetElementId string `json:"targetElementId"`
+	TargetElementId ElementId `json:"targetElementId"`
 }
 
 type _MigrateProcessInstanceMappingInstruction MigrateProcessInstanceMappingInstruction
@@ -33,7 +33,7 @@ type _MigrateProcessInstanceMappingInstruction MigrateProcessInstanceMappingInst
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMigrateProcessInstanceMappingInstruction(sourceElementId string, targetElementId string) *MigrateProcessInstanceMappingInstruction {
+func NewMigrateProcessInstanceMappingInstruction(sourceElementId ElementId, targetElementId ElementId) *MigrateProcessInstanceMappingInstruction {
 	this := MigrateProcessInstanceMappingInstruction{}
 	this.SourceElementId = sourceElementId
 	this.TargetElementId = targetElementId
@@ -49,9 +49,9 @@ func NewMigrateProcessInstanceMappingInstructionWithDefaults() *MigrateProcessIn
 }
 
 // GetSourceElementId returns the SourceElementId field value
-func (o *MigrateProcessInstanceMappingInstruction) GetSourceElementId() string {
+func (o *MigrateProcessInstanceMappingInstruction) GetSourceElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *MigrateProcessInstanceMappingInstruction) GetSourceElementId() string {
 
 // GetSourceElementIdOk returns a tuple with the SourceElementId field value
 // and a boolean to check if the value has been set.
-func (o *MigrateProcessInstanceMappingInstruction) GetSourceElementIdOk() (*string, bool) {
+func (o *MigrateProcessInstanceMappingInstruction) GetSourceElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,14 +68,14 @@ func (o *MigrateProcessInstanceMappingInstruction) GetSourceElementIdOk() (*stri
 }
 
 // SetSourceElementId sets field value
-func (o *MigrateProcessInstanceMappingInstruction) SetSourceElementId(v string) {
+func (o *MigrateProcessInstanceMappingInstruction) SetSourceElementId(v ElementId) {
 	o.SourceElementId = v
 }
 
 // GetTargetElementId returns the TargetElementId field value
-func (o *MigrateProcessInstanceMappingInstruction) GetTargetElementId() string {
+func (o *MigrateProcessInstanceMappingInstruction) GetTargetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *MigrateProcessInstanceMappingInstruction) GetTargetElementId() string {
 
 // GetTargetElementIdOk returns a tuple with the TargetElementId field value
 // and a boolean to check if the value has been set.
-func (o *MigrateProcessInstanceMappingInstruction) GetTargetElementIdOk() (*string, bool) {
+func (o *MigrateProcessInstanceMappingInstruction) GetTargetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *MigrateProcessInstanceMappingInstruction) GetTargetElementIdOk() (*stri
 }
 
 // SetTargetElementId sets field value
-func (o *MigrateProcessInstanceMappingInstruction) SetTargetElementId(v string) {
+func (o *MigrateProcessInstanceMappingInstruction) SetTargetElementId(v ElementId) {
 	o.TargetElementId = v
 }
 

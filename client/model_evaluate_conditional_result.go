@@ -22,9 +22,9 @@ var _ MappedNullable = &EvaluateConditionalResult{}
 // EvaluateConditionalResult struct for EvaluateConditionalResult
 type EvaluateConditionalResult struct {
 	// The unique key of the conditional evaluation operation.
-	ConditionalEvaluationKey ModelString `json:"conditionalEvaluationKey"`
+	ConditionalEvaluationKey ConditionalEvaluationKey `json:"conditionalEvaluationKey"`
 	// The tenant ID of the conditional evaluation operation.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// List of process instances created. If no root-level conditional start events evaluated to true, the list will be empty.
 	ProcessInstances []ProcessInstanceReference `json:"processInstances"`
 }
@@ -35,7 +35,7 @@ type _EvaluateConditionalResult EvaluateConditionalResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewEvaluateConditionalResult(conditionalEvaluationKey ModelString, tenantId string, processInstances []ProcessInstanceReference) *EvaluateConditionalResult {
+func NewEvaluateConditionalResult(conditionalEvaluationKey ConditionalEvaluationKey, tenantId TenantId, processInstances []ProcessInstanceReference) *EvaluateConditionalResult {
 	this := EvaluateConditionalResult{}
 	this.ConditionalEvaluationKey = conditionalEvaluationKey
 	this.TenantId = tenantId
@@ -52,9 +52,9 @@ func NewEvaluateConditionalResultWithDefaults() *EvaluateConditionalResult {
 }
 
 // GetConditionalEvaluationKey returns the ConditionalEvaluationKey field value
-func (o *EvaluateConditionalResult) GetConditionalEvaluationKey() ModelString {
+func (o *EvaluateConditionalResult) GetConditionalEvaluationKey() ConditionalEvaluationKey {
 	if o == nil {
-		var ret ModelString
+		var ret ConditionalEvaluationKey
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *EvaluateConditionalResult) GetConditionalEvaluationKey() ModelString {
 
 // GetConditionalEvaluationKeyOk returns a tuple with the ConditionalEvaluationKey field value
 // and a boolean to check if the value has been set.
-func (o *EvaluateConditionalResult) GetConditionalEvaluationKeyOk() (*ModelString, bool) {
+func (o *EvaluateConditionalResult) GetConditionalEvaluationKeyOk() (*ConditionalEvaluationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +71,14 @@ func (o *EvaluateConditionalResult) GetConditionalEvaluationKeyOk() (*ModelStrin
 }
 
 // SetConditionalEvaluationKey sets field value
-func (o *EvaluateConditionalResult) SetConditionalEvaluationKey(v ModelString) {
+func (o *EvaluateConditionalResult) SetConditionalEvaluationKey(v ConditionalEvaluationKey) {
 	o.ConditionalEvaluationKey = v
 }
 
 // GetTenantId returns the TenantId field value
-func (o *EvaluateConditionalResult) GetTenantId() string {
+func (o *EvaluateConditionalResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -87,7 +87,7 @@ func (o *EvaluateConditionalResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *EvaluateConditionalResult) GetTenantIdOk() (*string, bool) {
+func (o *EvaluateConditionalResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,7 +95,7 @@ func (o *EvaluateConditionalResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *EvaluateConditionalResult) SetTenantId(v string) {
+func (o *EvaluateConditionalResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedAgentInstanceKeyFilter{}
 // AdvancedAgentInstanceKeyFilter Advanced AgentInstanceKey filter.
 type AdvancedAgentInstanceKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *AgentInstanceKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *AgentInstanceKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []AgentInstanceKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []AgentInstanceKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedAgentInstanceKeyFilter instantiates a new AdvancedAgentInstanceKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedAgentInstanceKeyFilterWithDefaults() *AdvancedAgentInstanceKeyFi
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedAgentInstanceKeyFilter) GetEq() ModelString {
+func (o *AdvancedAgentInstanceKeyFilter) GetEq() AgentInstanceKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret AgentInstanceKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedAgentInstanceKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAgentInstanceKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedAgentInstanceKeyFilter) GetEqOk() (*AgentInstanceKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedAgentInstanceKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedAgentInstanceKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given AgentInstanceKey and assigns it to the Eq field.
+func (o *AdvancedAgentInstanceKeyFilter) SetEq(v AgentInstanceKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedAgentInstanceKeyFilter) GetNeq() ModelString {
+func (o *AdvancedAgentInstanceKeyFilter) GetNeq() AgentInstanceKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret AgentInstanceKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedAgentInstanceKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAgentInstanceKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedAgentInstanceKeyFilter) GetNeqOk() (*AgentInstanceKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedAgentInstanceKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedAgentInstanceKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given AgentInstanceKey and assigns it to the Neq field.
+func (o *AdvancedAgentInstanceKeyFilter) SetNeq(v AgentInstanceKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedAgentInstanceKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedAgentInstanceKeyFilter) GetIn() []ModelString {
+func (o *AdvancedAgentInstanceKeyFilter) GetIn() []AgentInstanceKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []AgentInstanceKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedAgentInstanceKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAgentInstanceKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedAgentInstanceKeyFilter) GetInOk() ([]AgentInstanceKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedAgentInstanceKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedAgentInstanceKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []AgentInstanceKey and assigns it to the In field.
+func (o *AdvancedAgentInstanceKeyFilter) SetIn(v []AgentInstanceKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedAgentInstanceKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedAgentInstanceKeyFilter) GetNotIn() []AgentInstanceKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []AgentInstanceKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedAgentInstanceKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAgentInstanceKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedAgentInstanceKeyFilter) GetNotInOk() ([]AgentInstanceKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedAgentInstanceKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedAgentInstanceKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []AgentInstanceKey and assigns it to the NotIn field.
+func (o *AdvancedAgentInstanceKeyFilter) SetNotIn(v []AgentInstanceKey) {
 	o.NotIn = v
 }
 

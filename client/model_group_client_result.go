@@ -22,7 +22,7 @@ var _ MappedNullable = &GroupClientResult{}
 // GroupClientResult struct for GroupClientResult
 type GroupClientResult struct {
 	// The ID of the client.
-	ClientId string `json:"clientId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	ClientId ClientId `json:"clientId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 }
 
 type _GroupClientResult GroupClientResult
@@ -31,7 +31,7 @@ type _GroupClientResult GroupClientResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGroupClientResult(clientId string) *GroupClientResult {
+func NewGroupClientResult(clientId ClientId) *GroupClientResult {
 	this := GroupClientResult{}
 	this.ClientId = clientId
 	return &this
@@ -46,9 +46,9 @@ func NewGroupClientResultWithDefaults() *GroupClientResult {
 }
 
 // GetClientId returns the ClientId field value
-func (o *GroupClientResult) GetClientId() string {
+func (o *GroupClientResult) GetClientId() ClientId {
 	if o == nil {
-		var ret string
+		var ret ClientId
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *GroupClientResult) GetClientId() string {
 
 // GetClientIdOk returns a tuple with the ClientId field value
 // and a boolean to check if the value has been set.
-func (o *GroupClientResult) GetClientIdOk() (*string, bool) {
+func (o *GroupClientResult) GetClientIdOk() (*ClientId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *GroupClientResult) GetClientIdOk() (*string, bool) {
 }
 
 // SetClientId sets field value
-func (o *GroupClientResult) SetClientId(v string) {
+func (o *GroupClientResult) SetClientId(v ClientId) {
 	o.ClientId = v
 }
 

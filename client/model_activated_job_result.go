@@ -24,11 +24,11 @@ type ActivatedJobResult struct {
 	// The type of the job (should match what was requested).
 	Type string `json:"type"`
 	// The bpmn process ID of the job's process definition.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The version of the job's process definition.
 	ProcessDefinitionVersion int32 `json:"processDefinitionVersion"`
 	// The associated task element ID.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// A set of custom headers defined during modelling; returned as a serialized JSON document.
 	CustomHeaders map[string]interface{} `json:"customHeaders"`
 	// The name of the worker which activated this job.
@@ -40,17 +40,17 @@ type ActivatedJobResult struct {
 	// All variables visible to the task scope, computed at activation time.
 	Variables map[string]interface{} `json:"variables"`
 	// The ID of the tenant that owns the job.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The ID of the physical tenant that the job-activation request was routed to; the default physical tenant when the request did not specify one.
 	PhysicalTenantId string `json:"physicalTenantId"`
 	// The key, a unique identifier for the job.
-	JobKey ModelString `json:"jobKey"`
+	JobKey JobKey `json:"jobKey"`
 	// The job's process instance key.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the job's process definition.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The element instance key of the task.
-	ElementInstanceKey ModelString              `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey       `json:"elementInstanceKey"`
 	Kind               JobKindEnum              `json:"kind"`
 	ListenerEventType  JobListenerEventTypeEnum `json:"listenerEventType"`
 	// User task properties, if the job is a user task. This is `null` if the job is not a user task.
@@ -58,13 +58,13 @@ type ActivatedJobResult struct {
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
 	Tags []string `json:"tags"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The business ID of the owning process instance, inherited when the job was created. This is `null` for jobs created before version 8.10 and for jobs whose owning process instance has no business ID.
-	BusinessId NullableString `json:"businessId"`
+	BusinessId NullableBusinessId `json:"businessId"`
 	// The priority of the job. Higher values indicate higher priority. Jobs created before 8.10 have no stored priority; the API returns 0 for such jobs.
 	Priority int32 `json:"priority"`
 	// The lease token identifying this activation. This is `null` when the job was activated without a lease.
-	LeaseToken NullableString `json:"leaseToken"`
+	LeaseToken NullableJobLeaseToken `json:"leaseToken"`
 }
 
 type _ActivatedJobResult ActivatedJobResult
@@ -73,7 +73,7 @@ type _ActivatedJobResult ActivatedJobResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewActivatedJobResult(type_ string, processDefinitionId string, processDefinitionVersion int32, elementId string, customHeaders map[string]interface{}, worker string, retries int32, deadline int64, variables map[string]interface{}, tenantId string, physicalTenantId string, jobKey ModelString, processInstanceKey ModelString, processDefinitionKey ModelString, elementInstanceKey ModelString, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, userTask NullableUserTaskProperties, tags []string, rootProcessInstanceKey NullableModelString, businessId NullableString, priority int32, leaseToken NullableString) *ActivatedJobResult {
+func NewActivatedJobResult(type_ string, processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, elementId ElementId, customHeaders map[string]interface{}, worker string, retries int32, deadline int64, variables map[string]interface{}, tenantId TenantId, physicalTenantId string, jobKey JobKey, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, elementInstanceKey ElementInstanceKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, userTask NullableUserTaskProperties, tags []string, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, priority int32, leaseToken NullableJobLeaseToken) *ActivatedJobResult {
 	this := ActivatedJobResult{}
 	this.Type = type_
 	this.ProcessDefinitionId = processDefinitionId
@@ -134,9 +134,9 @@ func (o *ActivatedJobResult) SetType(v string) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *ActivatedJobResult) GetProcessDefinitionId() string {
+func (o *ActivatedJobResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -145,7 +145,7 @@ func (o *ActivatedJobResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *ActivatedJobResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *ActivatedJobResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -153,7 +153,7 @@ func (o *ActivatedJobResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *ActivatedJobResult) SetProcessDefinitionId(v string) {
+func (o *ActivatedJobResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
@@ -182,9 +182,9 @@ func (o *ActivatedJobResult) SetProcessDefinitionVersion(v int32) {
 }
 
 // GetElementId returns the ElementId field value
-func (o *ActivatedJobResult) GetElementId() string {
+func (o *ActivatedJobResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -193,7 +193,7 @@ func (o *ActivatedJobResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *ActivatedJobResult) GetElementIdOk() (*string, bool) {
+func (o *ActivatedJobResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -201,7 +201,7 @@ func (o *ActivatedJobResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *ActivatedJobResult) SetElementId(v string) {
+func (o *ActivatedJobResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
@@ -326,9 +326,9 @@ func (o *ActivatedJobResult) SetVariables(v map[string]interface{}) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *ActivatedJobResult) GetTenantId() string {
+func (o *ActivatedJobResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -337,7 +337,7 @@ func (o *ActivatedJobResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *ActivatedJobResult) GetTenantIdOk() (*string, bool) {
+func (o *ActivatedJobResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -345,7 +345,7 @@ func (o *ActivatedJobResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *ActivatedJobResult) SetTenantId(v string) {
+func (o *ActivatedJobResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
@@ -374,9 +374,9 @@ func (o *ActivatedJobResult) SetPhysicalTenantId(v string) {
 }
 
 // GetJobKey returns the JobKey field value
-func (o *ActivatedJobResult) GetJobKey() ModelString {
+func (o *ActivatedJobResult) GetJobKey() JobKey {
 	if o == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -385,7 +385,7 @@ func (o *ActivatedJobResult) GetJobKey() ModelString {
 
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-func (o *ActivatedJobResult) GetJobKeyOk() (*ModelString, bool) {
+func (o *ActivatedJobResult) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -393,14 +393,14 @@ func (o *ActivatedJobResult) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *ActivatedJobResult) SetJobKey(v ModelString) {
+func (o *ActivatedJobResult) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *ActivatedJobResult) GetProcessInstanceKey() ModelString {
+func (o *ActivatedJobResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -409,7 +409,7 @@ func (o *ActivatedJobResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ActivatedJobResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ActivatedJobResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -417,14 +417,14 @@ func (o *ActivatedJobResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessInstanceKey sets field value
-func (o *ActivatedJobResult) SetProcessInstanceKey(v ModelString) {
+func (o *ActivatedJobResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ActivatedJobResult) GetProcessDefinitionKey() ModelString {
+func (o *ActivatedJobResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -433,7 +433,7 @@ func (o *ActivatedJobResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ActivatedJobResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ActivatedJobResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -441,14 +441,14 @@ func (o *ActivatedJobResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *ActivatedJobResult) SetProcessDefinitionKey(v ModelString) {
+func (o *ActivatedJobResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *ActivatedJobResult) GetElementInstanceKey() ModelString {
+func (o *ActivatedJobResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -457,7 +457,7 @@ func (o *ActivatedJobResult) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ActivatedJobResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *ActivatedJobResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -465,7 +465,7 @@ func (o *ActivatedJobResult) GetElementInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetElementInstanceKey sets field value
-func (o *ActivatedJobResult) SetElementInstanceKey(v ModelString) {
+func (o *ActivatedJobResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
@@ -568,10 +568,10 @@ func (o *ActivatedJobResult) SetTags(v []string) {
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *ActivatedJobResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *ActivatedJobResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -581,7 +581,7 @@ func (o *ActivatedJobResult) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ActivatedJobResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ActivatedJobResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -589,15 +589,15 @@ func (o *ActivatedJobResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) 
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *ActivatedJobResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *ActivatedJobResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetBusinessId returns the BusinessId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *ActivatedJobResult) GetBusinessId() string {
+// If the value is explicit nil, the zero value for BusinessId will be returned
+func (o *ActivatedJobResult) GetBusinessId() BusinessId {
 	if o == nil || o.BusinessId.Get() == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -607,7 +607,7 @@ func (o *ActivatedJobResult) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ActivatedJobResult) GetBusinessIdOk() (*string, bool) {
+func (o *ActivatedJobResult) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -615,7 +615,7 @@ func (o *ActivatedJobResult) GetBusinessIdOk() (*string, bool) {
 }
 
 // SetBusinessId sets field value
-func (o *ActivatedJobResult) SetBusinessId(v string) {
+func (o *ActivatedJobResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 
@@ -644,10 +644,10 @@ func (o *ActivatedJobResult) SetPriority(v int32) {
 }
 
 // GetLeaseToken returns the LeaseToken field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *ActivatedJobResult) GetLeaseToken() string {
+// If the value is explicit nil, the zero value for JobLeaseToken will be returned
+func (o *ActivatedJobResult) GetLeaseToken() JobLeaseToken {
 	if o == nil || o.LeaseToken.Get() == nil {
-		var ret string
+		var ret JobLeaseToken
 		return ret
 	}
 
@@ -657,7 +657,7 @@ func (o *ActivatedJobResult) GetLeaseToken() string {
 // GetLeaseTokenOk returns a tuple with the LeaseToken field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ActivatedJobResult) GetLeaseTokenOk() (*string, bool) {
+func (o *ActivatedJobResult) GetLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -665,7 +665,7 @@ func (o *ActivatedJobResult) GetLeaseTokenOk() (*string, bool) {
 }
 
 // SetLeaseToken sets field value
-func (o *ActivatedJobResult) SetLeaseToken(v string) {
+func (o *ActivatedJobResult) SetLeaseToken(v JobLeaseToken) {
 	o.LeaseToken.Set(&v)
 }
 

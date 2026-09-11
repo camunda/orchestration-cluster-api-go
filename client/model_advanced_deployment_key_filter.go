@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedDeploymentKeyFilter{}
 // AdvancedDeploymentKeyFilter Advanced DeploymentKey filter.
 type AdvancedDeploymentKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *DeploymentKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *DeploymentKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []DeploymentKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []DeploymentKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedDeploymentKeyFilter instantiates a new AdvancedDeploymentKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedDeploymentKeyFilterWithDefaults() *AdvancedDeploymentKeyFilter {
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedDeploymentKeyFilter) GetEq() ModelString {
+func (o *AdvancedDeploymentKeyFilter) GetEq() DeploymentKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret DeploymentKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedDeploymentKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDeploymentKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedDeploymentKeyFilter) GetEqOk() (*DeploymentKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedDeploymentKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedDeploymentKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given DeploymentKey and assigns it to the Eq field.
+func (o *AdvancedDeploymentKeyFilter) SetEq(v DeploymentKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedDeploymentKeyFilter) GetNeq() ModelString {
+func (o *AdvancedDeploymentKeyFilter) GetNeq() DeploymentKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret DeploymentKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedDeploymentKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDeploymentKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedDeploymentKeyFilter) GetNeqOk() (*DeploymentKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedDeploymentKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedDeploymentKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given DeploymentKey and assigns it to the Neq field.
+func (o *AdvancedDeploymentKeyFilter) SetNeq(v DeploymentKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedDeploymentKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedDeploymentKeyFilter) GetIn() []ModelString {
+func (o *AdvancedDeploymentKeyFilter) GetIn() []DeploymentKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []DeploymentKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedDeploymentKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDeploymentKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedDeploymentKeyFilter) GetInOk() ([]DeploymentKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedDeploymentKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedDeploymentKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []DeploymentKey and assigns it to the In field.
+func (o *AdvancedDeploymentKeyFilter) SetIn(v []DeploymentKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedDeploymentKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedDeploymentKeyFilter) GetNotIn() []DeploymentKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []DeploymentKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedDeploymentKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDeploymentKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedDeploymentKeyFilter) GetNotInOk() ([]DeploymentKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedDeploymentKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedDeploymentKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []DeploymentKey and assigns it to the NotIn field.
+func (o *AdvancedDeploymentKeyFilter) SetNotIn(v []DeploymentKey) {
 	o.NotIn = v
 }
 

@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedProcessDefinitionKeyFilter{}
 // AdvancedProcessDefinitionKeyFilter Advanced ProcessDefinitionKey filter.
 type AdvancedProcessDefinitionKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *ProcessDefinitionKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *ProcessDefinitionKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []ProcessDefinitionKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []ProcessDefinitionKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedProcessDefinitionKeyFilter instantiates a new AdvancedProcessDefinitionKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedProcessDefinitionKeyFilterWithDefaults() *AdvancedProcessDefinit
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedProcessDefinitionKeyFilter) GetEq() ModelString {
+func (o *AdvancedProcessDefinitionKeyFilter) GetEq() ProcessDefinitionKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedProcessDefinitionKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessDefinitionKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedProcessDefinitionKeyFilter) GetEqOk() (*ProcessDefinitionKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedProcessDefinitionKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedProcessDefinitionKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given ProcessDefinitionKey and assigns it to the Eq field.
+func (o *AdvancedProcessDefinitionKeyFilter) SetEq(v ProcessDefinitionKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedProcessDefinitionKeyFilter) GetNeq() ModelString {
+func (o *AdvancedProcessDefinitionKeyFilter) GetNeq() ProcessDefinitionKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedProcessDefinitionKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessDefinitionKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedProcessDefinitionKeyFilter) GetNeqOk() (*ProcessDefinitionKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedProcessDefinitionKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedProcessDefinitionKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given ProcessDefinitionKey and assigns it to the Neq field.
+func (o *AdvancedProcessDefinitionKeyFilter) SetNeq(v ProcessDefinitionKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedProcessDefinitionKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedProcessDefinitionKeyFilter) GetIn() []ModelString {
+func (o *AdvancedProcessDefinitionKeyFilter) GetIn() []ProcessDefinitionKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []ProcessDefinitionKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedProcessDefinitionKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessDefinitionKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedProcessDefinitionKeyFilter) GetInOk() ([]ProcessDefinitionKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedProcessDefinitionKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedProcessDefinitionKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []ProcessDefinitionKey and assigns it to the In field.
+func (o *AdvancedProcessDefinitionKeyFilter) SetIn(v []ProcessDefinitionKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedProcessDefinitionKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedProcessDefinitionKeyFilter) GetNotIn() []ProcessDefinitionKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []ProcessDefinitionKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedProcessDefinitionKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessDefinitionKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedProcessDefinitionKeyFilter) GetNotInOk() ([]ProcessDefinitionKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedProcessDefinitionKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedProcessDefinitionKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []ProcessDefinitionKey and assigns it to the NotIn field.
+func (o *AdvancedProcessDefinitionKeyFilter) SetNotIn(v []ProcessDefinitionKey) {
 	o.NotIn = v
 }
 

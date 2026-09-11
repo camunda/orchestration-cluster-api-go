@@ -22,7 +22,7 @@ var _ MappedNullable = &AgentInstanceHistoryItemCreationResult{}
 // AgentInstanceHistoryItemCreationResult Response returned after successfully appending a history item.
 type AgentInstanceHistoryItemCreationResult struct {
 	// The system-generated key for the created history item.
-	HistoryItemKey ModelString `json:"historyItemKey"`
+	HistoryItemKey AgentHistoryItemKey `json:"historyItemKey"`
 }
 
 type _AgentInstanceHistoryItemCreationResult AgentInstanceHistoryItemCreationResult
@@ -31,7 +31,7 @@ type _AgentInstanceHistoryItemCreationResult AgentInstanceHistoryItemCreationRes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemCreationResult(historyItemKey ModelString) *AgentInstanceHistoryItemCreationResult {
+func NewAgentInstanceHistoryItemCreationResult(historyItemKey AgentHistoryItemKey) *AgentInstanceHistoryItemCreationResult {
 	this := AgentInstanceHistoryItemCreationResult{}
 	this.HistoryItemKey = historyItemKey
 	return &this
@@ -46,9 +46,9 @@ func NewAgentInstanceHistoryItemCreationResultWithDefaults() *AgentInstanceHisto
 }
 
 // GetHistoryItemKey returns the HistoryItemKey field value
-func (o *AgentInstanceHistoryItemCreationResult) GetHistoryItemKey() ModelString {
+func (o *AgentInstanceHistoryItemCreationResult) GetHistoryItemKey() AgentHistoryItemKey {
 	if o == nil {
-		var ret ModelString
+		var ret AgentHistoryItemKey
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *AgentInstanceHistoryItemCreationResult) GetHistoryItemKey() ModelString
 
 // GetHistoryItemKeyOk returns a tuple with the HistoryItemKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemCreationResult) GetHistoryItemKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceHistoryItemCreationResult) GetHistoryItemKeyOk() (*AgentHistoryItemKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *AgentInstanceHistoryItemCreationResult) GetHistoryItemKeyOk() (*ModelSt
 }
 
 // SetHistoryItemKey sets field value
-func (o *AgentInstanceHistoryItemCreationResult) SetHistoryItemKey(v ModelString) {
+func (o *AgentInstanceHistoryItemCreationResult) SetHistoryItemKey(v AgentHistoryItemKey) {
 	o.HistoryItemKey = v
 }
 

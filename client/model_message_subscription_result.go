@@ -23,21 +23,21 @@ var _ MappedNullable = &MessageSubscriptionResult{}
 // MessageSubscriptionResult struct for MessageSubscriptionResult
 type MessageSubscriptionResult struct {
 	// The business id inherited from the subscribing process instance when this message subscription was opened. It is `null` when the process instance has no business id, and for message start event subscriptions, which are not tied to a process instance.
-	BusinessId NullableString `json:"businessId"`
+	BusinessId NullableBusinessId `json:"businessId"`
 	// The message subscription key associated with this message subscription.
-	MessageSubscriptionKey ModelString `json:"messageSubscriptionKey"`
+	MessageSubscriptionKey MessageSubscriptionKey `json:"messageSubscriptionKey"`
 	// The process definition ID associated with this message subscription.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The process definition key associated with this message subscription.
-	ProcessDefinitionKey NullableModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey NullableProcessDefinitionKey `json:"processDefinitionKey"`
 	// The process instance key associated with this message subscription. Only populated for intermediate event entities.
-	ProcessInstanceKey NullableModelString `json:"processInstanceKey"`
+	ProcessInstanceKey NullableProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The element ID associated with this message subscription.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The element instance key associated with this message subscription. Only populated for intermediate event entities.
-	ElementInstanceKey       NullableModelString          `json:"elementInstanceKey"`
+	ElementInstanceKey       NullableElementInstanceKey   `json:"elementInstanceKey"`
 	MessageSubscriptionState MessageSubscriptionStateEnum `json:"messageSubscriptionState"`
 	// The last updated date of the message subscription.
 	LastUpdatedDate time.Time `json:"lastUpdatedDate"`
@@ -57,7 +57,7 @@ type MessageSubscriptionResult struct {
 	// Inbound connector type extracted from the `inbound.type` zeebe:property. Null when the property is absent.
 	InboundConnectorType NullableString `json:"inboundConnectorType"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 }
 
 type _MessageSubscriptionResult MessageSubscriptionResult
@@ -66,7 +66,7 @@ type _MessageSubscriptionResult MessageSubscriptionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMessageSubscriptionResult(businessId NullableString, messageSubscriptionKey ModelString, processDefinitionId string, processDefinitionKey NullableModelString, processInstanceKey NullableModelString, rootProcessInstanceKey NullableModelString, elementId string, elementInstanceKey NullableModelString, messageSubscriptionState MessageSubscriptionStateEnum, lastUpdatedDate time.Time, messageName string, correlationKey NullableString, messageSubscriptionType MessageSubscriptionTypeEnum, toolProperties map[string]string, processDefinitionName NullableString, processDefinitionVersion NullableInt32, toolName NullableString, inboundConnectorType NullableString, tenantId string) *MessageSubscriptionResult {
+func NewMessageSubscriptionResult(businessId NullableBusinessId, messageSubscriptionKey MessageSubscriptionKey, processDefinitionId ProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, elementId ElementId, elementInstanceKey NullableElementInstanceKey, messageSubscriptionState MessageSubscriptionStateEnum, lastUpdatedDate time.Time, messageName string, correlationKey NullableString, messageSubscriptionType MessageSubscriptionTypeEnum, toolProperties map[string]string, processDefinitionName NullableString, processDefinitionVersion NullableInt32, toolName NullableString, inboundConnectorType NullableString, tenantId TenantId) *MessageSubscriptionResult {
 	this := MessageSubscriptionResult{}
 	this.BusinessId = businessId
 	this.MessageSubscriptionKey = messageSubscriptionKey
@@ -99,10 +99,10 @@ func NewMessageSubscriptionResultWithDefaults() *MessageSubscriptionResult {
 }
 
 // GetBusinessId returns the BusinessId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *MessageSubscriptionResult) GetBusinessId() string {
+// If the value is explicit nil, the zero value for BusinessId will be returned
+func (o *MessageSubscriptionResult) GetBusinessId() BusinessId {
 	if o == nil || o.BusinessId.Get() == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -112,7 +112,7 @@ func (o *MessageSubscriptionResult) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *MessageSubscriptionResult) GetBusinessIdOk() (*string, bool) {
+func (o *MessageSubscriptionResult) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -120,14 +120,14 @@ func (o *MessageSubscriptionResult) GetBusinessIdOk() (*string, bool) {
 }
 
 // SetBusinessId sets field value
-func (o *MessageSubscriptionResult) SetBusinessId(v string) {
+func (o *MessageSubscriptionResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 
 // GetMessageSubscriptionKey returns the MessageSubscriptionKey field value
-func (o *MessageSubscriptionResult) GetMessageSubscriptionKey() ModelString {
+func (o *MessageSubscriptionResult) GetMessageSubscriptionKey() MessageSubscriptionKey {
 	if o == nil {
-		var ret ModelString
+		var ret MessageSubscriptionKey
 		return ret
 	}
 
@@ -136,7 +136,7 @@ func (o *MessageSubscriptionResult) GetMessageSubscriptionKey() ModelString {
 
 // GetMessageSubscriptionKeyOk returns a tuple with the MessageSubscriptionKey field value
 // and a boolean to check if the value has been set.
-func (o *MessageSubscriptionResult) GetMessageSubscriptionKeyOk() (*ModelString, bool) {
+func (o *MessageSubscriptionResult) GetMessageSubscriptionKeyOk() (*MessageSubscriptionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -144,14 +144,14 @@ func (o *MessageSubscriptionResult) GetMessageSubscriptionKeyOk() (*ModelString,
 }
 
 // SetMessageSubscriptionKey sets field value
-func (o *MessageSubscriptionResult) SetMessageSubscriptionKey(v ModelString) {
+func (o *MessageSubscriptionResult) SetMessageSubscriptionKey(v MessageSubscriptionKey) {
 	o.MessageSubscriptionKey = v
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *MessageSubscriptionResult) GetProcessDefinitionId() string {
+func (o *MessageSubscriptionResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -160,7 +160,7 @@ func (o *MessageSubscriptionResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *MessageSubscriptionResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *MessageSubscriptionResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -168,15 +168,15 @@ func (o *MessageSubscriptionResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *MessageSubscriptionResult) SetProcessDefinitionId(v string) {
+func (o *MessageSubscriptionResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *MessageSubscriptionResult) GetProcessDefinitionKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessDefinitionKey will be returned
+func (o *MessageSubscriptionResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil || o.ProcessDefinitionKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -186,7 +186,7 @@ func (o *MessageSubscriptionResult) GetProcessDefinitionKey() ModelString {
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *MessageSubscriptionResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *MessageSubscriptionResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -194,15 +194,15 @@ func (o *MessageSubscriptionResult) GetProcessDefinitionKeyOk() (*ModelString, b
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *MessageSubscriptionResult) SetProcessDefinitionKey(v ModelString) {
+func (o *MessageSubscriptionResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey.Set(&v)
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *MessageSubscriptionResult) GetProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *MessageSubscriptionResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.ProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -212,7 +212,7 @@ func (o *MessageSubscriptionResult) GetProcessInstanceKey() ModelString {
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *MessageSubscriptionResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *MessageSubscriptionResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -220,15 +220,15 @@ func (o *MessageSubscriptionResult) GetProcessInstanceKeyOk() (*ModelString, boo
 }
 
 // SetProcessInstanceKey sets field value
-func (o *MessageSubscriptionResult) SetProcessInstanceKey(v ModelString) {
+func (o *MessageSubscriptionResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey.Set(&v)
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *MessageSubscriptionResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *MessageSubscriptionResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -238,7 +238,7 @@ func (o *MessageSubscriptionResult) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *MessageSubscriptionResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *MessageSubscriptionResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -246,14 +246,14 @@ func (o *MessageSubscriptionResult) GetRootProcessInstanceKeyOk() (*ModelString,
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *MessageSubscriptionResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *MessageSubscriptionResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetElementId returns the ElementId field value
-func (o *MessageSubscriptionResult) GetElementId() string {
+func (o *MessageSubscriptionResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -262,7 +262,7 @@ func (o *MessageSubscriptionResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *MessageSubscriptionResult) GetElementIdOk() (*string, bool) {
+func (o *MessageSubscriptionResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -270,15 +270,15 @@ func (o *MessageSubscriptionResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *MessageSubscriptionResult) SetElementId(v string) {
+func (o *MessageSubscriptionResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *MessageSubscriptionResult) GetElementInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ElementInstanceKey will be returned
+func (o *MessageSubscriptionResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil || o.ElementInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -288,7 +288,7 @@ func (o *MessageSubscriptionResult) GetElementInstanceKey() ModelString {
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *MessageSubscriptionResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *MessageSubscriptionResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -296,7 +296,7 @@ func (o *MessageSubscriptionResult) GetElementInstanceKeyOk() (*ModelString, boo
 }
 
 // SetElementInstanceKey sets field value
-func (o *MessageSubscriptionResult) SetElementInstanceKey(v ModelString) {
+func (o *MessageSubscriptionResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey.Set(&v)
 }
 
@@ -551,9 +551,9 @@ func (o *MessageSubscriptionResult) SetInboundConnectorType(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *MessageSubscriptionResult) GetTenantId() string {
+func (o *MessageSubscriptionResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -562,7 +562,7 @@ func (o *MessageSubscriptionResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *MessageSubscriptionResult) GetTenantIdOk() (*string, bool) {
+func (o *MessageSubscriptionResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -570,7 +570,7 @@ func (o *MessageSubscriptionResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *MessageSubscriptionResult) SetTenantId(v string) {
+func (o *MessageSubscriptionResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

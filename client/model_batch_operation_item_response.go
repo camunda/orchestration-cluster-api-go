@@ -24,13 +24,13 @@ var _ MappedNullable = &BatchOperationItemResponse{}
 type BatchOperationItemResponse struct {
 	OperationType BatchOperationTypeEnum `json:"operationType"`
 	// The key (or operate legacy ID) of the batch operation.
-	BatchOperationKey string `json:"batchOperationKey"`
+	BatchOperationKey BatchOperationKey `json:"batchOperationKey"`
 	// Key of the item, e.g. a process instance key.
 	ItemKey string `json:"itemKey"`
 	// The process instance key of the processed item. Null for batch-op types whose targets are not process instances (e.g. DELETE_DECISION_INSTANCE, DELETE_DECISION_DEFINITION, DELETE_PROCESS_DEFINITION).
-	ProcessInstanceKey NullableModelString `json:"processInstanceKey"`
+	ProcessInstanceKey NullableProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// State of the item.
 	State string `json:"state"`
 	// The date this item was processed. This is `null` if the item has not yet been processed.
@@ -45,7 +45,7 @@ type _BatchOperationItemResponse BatchOperationItemResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBatchOperationItemResponse(operationType BatchOperationTypeEnum, batchOperationKey string, itemKey string, processInstanceKey NullableModelString, rootProcessInstanceKey NullableModelString, state string, processedDate NullableTime, errorMessage NullableString) *BatchOperationItemResponse {
+func NewBatchOperationItemResponse(operationType BatchOperationTypeEnum, batchOperationKey BatchOperationKey, itemKey string, processInstanceKey NullableProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, state string, processedDate NullableTime, errorMessage NullableString) *BatchOperationItemResponse {
 	this := BatchOperationItemResponse{}
 	this.OperationType = operationType
 	this.BatchOperationKey = batchOperationKey
@@ -91,9 +91,9 @@ func (o *BatchOperationItemResponse) SetOperationType(v BatchOperationTypeEnum) 
 }
 
 // GetBatchOperationKey returns the BatchOperationKey field value
-func (o *BatchOperationItemResponse) GetBatchOperationKey() string {
+func (o *BatchOperationItemResponse) GetBatchOperationKey() BatchOperationKey {
 	if o == nil {
-		var ret string
+		var ret BatchOperationKey
 		return ret
 	}
 
@@ -102,7 +102,7 @@ func (o *BatchOperationItemResponse) GetBatchOperationKey() string {
 
 // GetBatchOperationKeyOk returns a tuple with the BatchOperationKey field value
 // and a boolean to check if the value has been set.
-func (o *BatchOperationItemResponse) GetBatchOperationKeyOk() (*string, bool) {
+func (o *BatchOperationItemResponse) GetBatchOperationKeyOk() (*BatchOperationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -110,7 +110,7 @@ func (o *BatchOperationItemResponse) GetBatchOperationKeyOk() (*string, bool) {
 }
 
 // SetBatchOperationKey sets field value
-func (o *BatchOperationItemResponse) SetBatchOperationKey(v string) {
+func (o *BatchOperationItemResponse) SetBatchOperationKey(v BatchOperationKey) {
 	o.BatchOperationKey = v
 }
 
@@ -139,10 +139,10 @@ func (o *BatchOperationItemResponse) SetItemKey(v string) {
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *BatchOperationItemResponse) GetProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *BatchOperationItemResponse) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.ProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -152,7 +152,7 @@ func (o *BatchOperationItemResponse) GetProcessInstanceKey() ModelString {
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BatchOperationItemResponse) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *BatchOperationItemResponse) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -160,15 +160,15 @@ func (o *BatchOperationItemResponse) GetProcessInstanceKeyOk() (*ModelString, bo
 }
 
 // SetProcessInstanceKey sets field value
-func (o *BatchOperationItemResponse) SetProcessInstanceKey(v ModelString) {
+func (o *BatchOperationItemResponse) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey.Set(&v)
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *BatchOperationItemResponse) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *BatchOperationItemResponse) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -178,7 +178,7 @@ func (o *BatchOperationItemResponse) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *BatchOperationItemResponse) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *BatchOperationItemResponse) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -186,7 +186,7 @@ func (o *BatchOperationItemResponse) GetRootProcessInstanceKeyOk() (*ModelString
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *BatchOperationItemResponse) SetRootProcessInstanceKey(v ModelString) {
+func (o *BatchOperationItemResponse) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 

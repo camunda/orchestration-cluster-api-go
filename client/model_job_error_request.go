@@ -28,7 +28,7 @@ type JobErrorRequest struct {
 	// JSON object that will instantiate the variables at the local scope of the error catch event that catches the thrown error.
 	Variables map[string]interface{} `json:"variables,omitempty"`
 	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`. For a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). A job that was activated without a lease requires no token.
-	LeaseToken NullableString `json:"leaseToken,omitempty"`
+	LeaseToken NullableJobLeaseToken `json:"leaseToken,omitempty"`
 }
 
 type _JobErrorRequest JobErrorRequest
@@ -152,9 +152,9 @@ func (o *JobErrorRequest) SetVariables(v map[string]interface{}) {
 }
 
 // GetLeaseToken returns the LeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobErrorRequest) GetLeaseToken() string {
+func (o *JobErrorRequest) GetLeaseToken() JobLeaseToken {
 	if o == nil || IsNil(o.LeaseToken.Get()) {
-		var ret string
+		var ret JobLeaseToken
 		return ret
 	}
 	return *o.LeaseToken.Get()
@@ -163,7 +163,7 @@ func (o *JobErrorRequest) GetLeaseToken() string {
 // GetLeaseTokenOk returns a tuple with the LeaseToken field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobErrorRequest) GetLeaseTokenOk() (*string, bool) {
+func (o *JobErrorRequest) GetLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -180,7 +180,7 @@ func (o *JobErrorRequest) HasLeaseToken() bool {
 }
 
 // SetLeaseToken gets a reference to the given NullableString and assigns it to the LeaseToken field.
-func (o *JobErrorRequest) SetLeaseToken(v string) {
+func (o *JobErrorRequest) SetLeaseToken(v JobLeaseToken) {
 	o.LeaseToken.Set(&v)
 }
 

@@ -23,9 +23,9 @@ var _ MappedNullable = &AgentInstanceHistoryItem{}
 // AgentInstanceHistoryItem A single history item to append to the agent instance's conversation history, submitted as part of the batch on an agent instance update request.
 type AgentInstanceHistoryItem struct {
 	// Caller-assigned identifier used to detect and dedupe retries of the same item. For example, when a retried job activation resubmits history items it already sent in an earlier attempt, those items are not rejected; they are flagged via isDuplicate in the response instead. Must be non-blank.
-	HistoryItemId string `json:"historyItemId"`
+	HistoryItemId HistoryItemId `json:"historyItemId"`
 	// The loop iteration this item belongs to.
-	LoopIteration int32 `json:"loopIteration"`
+	LoopIteration LoopIterationId `json:"loopIteration"`
 	// The role of this history item in the conversation.
 	Role AgentInstanceHistoryRoleEnum `json:"role"`
 	// The content blocks of this history item.
@@ -54,7 +54,7 @@ type _AgentInstanceHistoryItem AgentInstanceHistoryItem
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItem(historyItemId string, loopIteration int32, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, producedAt time.Time) *AgentInstanceHistoryItem {
+func NewAgentInstanceHistoryItem(historyItemId HistoryItemId, loopIteration LoopIterationId, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, producedAt time.Time) *AgentInstanceHistoryItem {
 	this := AgentInstanceHistoryItem{}
 	this.HistoryItemId = historyItemId
 	this.LoopIteration = loopIteration
@@ -73,9 +73,9 @@ func NewAgentInstanceHistoryItemWithDefaults() *AgentInstanceHistoryItem {
 }
 
 // GetHistoryItemId returns the HistoryItemId field value
-func (o *AgentInstanceHistoryItem) GetHistoryItemId() string {
+func (o *AgentInstanceHistoryItem) GetHistoryItemId() HistoryItemId {
 	if o == nil {
-		var ret string
+		var ret HistoryItemId
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *AgentInstanceHistoryItem) GetHistoryItemId() string {
 
 // GetHistoryItemIdOk returns a tuple with the HistoryItemId field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItem) GetHistoryItemIdOk() (*string, bool) {
+func (o *AgentInstanceHistoryItem) GetHistoryItemIdOk() (*HistoryItemId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,14 +92,14 @@ func (o *AgentInstanceHistoryItem) GetHistoryItemIdOk() (*string, bool) {
 }
 
 // SetHistoryItemId sets field value
-func (o *AgentInstanceHistoryItem) SetHistoryItemId(v string) {
+func (o *AgentInstanceHistoryItem) SetHistoryItemId(v HistoryItemId) {
 	o.HistoryItemId = v
 }
 
 // GetLoopIteration returns the LoopIteration field value
-func (o *AgentInstanceHistoryItem) GetLoopIteration() int32 {
+func (o *AgentInstanceHistoryItem) GetLoopIteration() LoopIterationId {
 	if o == nil {
-		var ret int32
+		var ret LoopIterationId
 		return ret
 	}
 
@@ -108,7 +108,7 @@ func (o *AgentInstanceHistoryItem) GetLoopIteration() int32 {
 
 // GetLoopIterationOk returns a tuple with the LoopIteration field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItem) GetLoopIterationOk() (*int32, bool) {
+func (o *AgentInstanceHistoryItem) GetLoopIterationOk() (*LoopIterationId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -116,7 +116,7 @@ func (o *AgentInstanceHistoryItem) GetLoopIterationOk() (*int32, bool) {
 }
 
 // SetLoopIteration sets field value
-func (o *AgentInstanceHistoryItem) SetLoopIteration(v int32) {
+func (o *AgentInstanceHistoryItem) SetLoopIteration(v LoopIterationId) {
 	o.LoopIteration = v
 }
 

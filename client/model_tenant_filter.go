@@ -20,7 +20,7 @@ var _ MappedNullable = &TenantFilter{}
 // TenantFilter Tenant filter request
 type TenantFilter struct {
 	// The unique identifier of the tenant.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The name of the tenant.
 	Name *string `json:"name,omitempty"`
 }
@@ -43,9 +43,9 @@ func NewTenantFilterWithDefaults() *TenantFilter {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *TenantFilter) GetTenantId() string {
+func (o *TenantFilter) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -53,7 +53,7 @@ func (o *TenantFilter) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TenantFilter) GetTenantIdOk() (*string, bool) {
+func (o *TenantFilter) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -69,8 +69,8 @@ func (o *TenantFilter) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *TenantFilter) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *TenantFilter) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 

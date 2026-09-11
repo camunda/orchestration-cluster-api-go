@@ -36,11 +36,11 @@ type UserTaskProperties struct {
 	// The follow-up date of the user task in ISO 8601 format.
 	FollowUpDate NullableString `json:"followUpDate"`
 	// The key of the form associated with the user task.
-	FormKey NullableModelString `json:"formKey"`
+	FormKey NullableFormKey `json:"formKey"`
 	// The priority of the user task.
 	Priority NullableInt32 `json:"priority"`
 	// The unique key identifying the user task.
-	UserTaskKey NullableModelString `json:"userTaskKey"`
+	UserTaskKey NullableUserTaskKey `json:"userTaskKey"`
 }
 
 type _UserTaskProperties UserTaskProperties
@@ -49,7 +49,7 @@ type _UserTaskProperties UserTaskProperties
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskProperties(action string, assignee NullableString, candidateGroups []string, candidateUsers []string, changedAttributes []string, dueDate NullableString, followUpDate NullableString, formKey NullableModelString, priority NullableInt32, userTaskKey NullableModelString) *UserTaskProperties {
+func NewUserTaskProperties(action string, assignee NullableString, candidateGroups []string, candidateUsers []string, changedAttributes []string, dueDate NullableString, followUpDate NullableString, formKey NullableFormKey, priority NullableInt32, userTaskKey NullableUserTaskKey) *UserTaskProperties {
 	this := UserTaskProperties{}
 	this.Action = action
 	this.Assignee = assignee
@@ -247,10 +247,10 @@ func (o *UserTaskProperties) SetFollowUpDate(v string) {
 }
 
 // GetFormKey returns the FormKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *UserTaskProperties) GetFormKey() ModelString {
+// If the value is explicit nil, the zero value for FormKey will be returned
+func (o *UserTaskProperties) GetFormKey() FormKey {
 	if o == nil || o.FormKey.Get() == nil {
-		var ret ModelString
+		var ret FormKey
 		return ret
 	}
 
@@ -260,7 +260,7 @@ func (o *UserTaskProperties) GetFormKey() ModelString {
 // GetFormKeyOk returns a tuple with the FormKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserTaskProperties) GetFormKeyOk() (*ModelString, bool) {
+func (o *UserTaskProperties) GetFormKeyOk() (*FormKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -268,7 +268,7 @@ func (o *UserTaskProperties) GetFormKeyOk() (*ModelString, bool) {
 }
 
 // SetFormKey sets field value
-func (o *UserTaskProperties) SetFormKey(v ModelString) {
+func (o *UserTaskProperties) SetFormKey(v FormKey) {
 	o.FormKey.Set(&v)
 }
 
@@ -299,10 +299,10 @@ func (o *UserTaskProperties) SetPriority(v int32) {
 }
 
 // GetUserTaskKey returns the UserTaskKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *UserTaskProperties) GetUserTaskKey() ModelString {
+// If the value is explicit nil, the zero value for UserTaskKey will be returned
+func (o *UserTaskProperties) GetUserTaskKey() UserTaskKey {
 	if o == nil || o.UserTaskKey.Get() == nil {
-		var ret ModelString
+		var ret UserTaskKey
 		return ret
 	}
 
@@ -312,7 +312,7 @@ func (o *UserTaskProperties) GetUserTaskKey() ModelString {
 // GetUserTaskKeyOk returns a tuple with the UserTaskKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserTaskProperties) GetUserTaskKeyOk() (*ModelString, bool) {
+func (o *UserTaskProperties) GetUserTaskKeyOk() (*UserTaskKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -320,7 +320,7 @@ func (o *UserTaskProperties) GetUserTaskKeyOk() (*ModelString, bool) {
 }
 
 // SetUserTaskKey sets field value
-func (o *UserTaskProperties) SetUserTaskKey(v ModelString) {
+func (o *UserTaskProperties) SetUserTaskKey(v UserTaskKey) {
 	o.UserTaskKey.Set(&v)
 }
 

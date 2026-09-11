@@ -20,7 +20,7 @@ var _ MappedNullable = &CursorForwardPagination{}
 // CursorForwardPagination struct for CursorForwardPagination
 type CursorForwardPagination struct {
 	// Use the `endCursor` value from the previous response to fetch the next page of results.
-	After *string `json:"after,omitempty" validate:"regexp=^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}(?:==)?|[A-Za-z0-9+\\/]{3}=)?$"`
+	After *EndCursor `json:"after,omitempty" validate:"regexp=^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}(?:==)?|[A-Za-z0-9+\\/]{3}=)?$"`
 	// The maximum number of items to return in one request.
 	Limit *int32 `json:"limit,omitempty"`
 }
@@ -47,9 +47,9 @@ func NewCursorForwardPaginationWithDefaults() *CursorForwardPagination {
 }
 
 // GetAfter returns the After field value if set, zero value otherwise.
-func (o *CursorForwardPagination) GetAfter() string {
+func (o *CursorForwardPagination) GetAfter() EndCursor {
 	if o == nil || IsNil(o.After) {
-		var ret string
+		var ret EndCursor
 		return ret
 	}
 	return *o.After
@@ -57,7 +57,7 @@ func (o *CursorForwardPagination) GetAfter() string {
 
 // GetAfterOk returns a tuple with the After field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CursorForwardPagination) GetAfterOk() (*string, bool) {
+func (o *CursorForwardPagination) GetAfterOk() (*EndCursor, bool) {
 	if o == nil || IsNil(o.After) {
 		return nil, false
 	}
@@ -73,8 +73,8 @@ func (o *CursorForwardPagination) HasAfter() bool {
 	return false
 }
 
-// SetAfter gets a reference to the given string and assigns it to the After field.
-func (o *CursorForwardPagination) SetAfter(v string) {
+// SetAfter gets a reference to the given EndCursor and assigns it to the After field.
+func (o *CursorForwardPagination) SetAfter(v EndCursor) {
 	o.After = &v
 }
 

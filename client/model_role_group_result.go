@@ -22,7 +22,7 @@ var _ MappedNullable = &RoleGroupResult{}
 // RoleGroupResult struct for RoleGroupResult
 type RoleGroupResult struct {
 	// The id of the group.
-	GroupId string `json:"groupId"`
+	GroupId GroupId `json:"groupId"`
 }
 
 type _RoleGroupResult RoleGroupResult
@@ -31,7 +31,7 @@ type _RoleGroupResult RoleGroupResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRoleGroupResult(groupId string) *RoleGroupResult {
+func NewRoleGroupResult(groupId GroupId) *RoleGroupResult {
 	this := RoleGroupResult{}
 	this.GroupId = groupId
 	return &this
@@ -46,9 +46,9 @@ func NewRoleGroupResultWithDefaults() *RoleGroupResult {
 }
 
 // GetGroupId returns the GroupId field value
-func (o *RoleGroupResult) GetGroupId() string {
+func (o *RoleGroupResult) GetGroupId() GroupId {
 	if o == nil {
-		var ret string
+		var ret GroupId
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *RoleGroupResult) GetGroupId() string {
 
 // GetGroupIdOk returns a tuple with the GroupId field value
 // and a boolean to check if the value has been set.
-func (o *RoleGroupResult) GetGroupIdOk() (*string, bool) {
+func (o *RoleGroupResult) GetGroupIdOk() (*GroupId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *RoleGroupResult) GetGroupIdOk() (*string, bool) {
 }
 
 // SetGroupId sets field value
-func (o *RoleGroupResult) SetGroupId(v string) {
+func (o *RoleGroupResult) SetGroupId(v GroupId) {
 	o.GroupId = v
 }
 

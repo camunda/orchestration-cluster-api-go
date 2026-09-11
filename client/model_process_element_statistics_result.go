@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessElementStatisticsResult{}
 // ProcessElementStatisticsResult Process element statistics response.
 type ProcessElementStatisticsResult struct {
 	// The element ID for which the results are aggregated.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The total number of active instances of the element.
 	Active int64 `json:"active"`
 	// The total number of canceled instances of the element.
@@ -39,7 +39,7 @@ type _ProcessElementStatisticsResult ProcessElementStatisticsResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessElementStatisticsResult(elementId string, active int64, canceled int64, incidents int64, completed int64) *ProcessElementStatisticsResult {
+func NewProcessElementStatisticsResult(elementId ElementId, active int64, canceled int64, incidents int64, completed int64) *ProcessElementStatisticsResult {
 	this := ProcessElementStatisticsResult{}
 	this.ElementId = elementId
 	this.Active = active
@@ -58,9 +58,9 @@ func NewProcessElementStatisticsResultWithDefaults() *ProcessElementStatisticsRe
 }
 
 // GetElementId returns the ElementId field value
-func (o *ProcessElementStatisticsResult) GetElementId() string {
+func (o *ProcessElementStatisticsResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -69,7 +69,7 @@ func (o *ProcessElementStatisticsResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessElementStatisticsResult) GetElementIdOk() (*string, bool) {
+func (o *ProcessElementStatisticsResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -77,7 +77,7 @@ func (o *ProcessElementStatisticsResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *ProcessElementStatisticsResult) SetElementId(v string) {
+func (o *ProcessElementStatisticsResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 

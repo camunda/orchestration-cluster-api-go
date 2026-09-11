@@ -28,20 +28,20 @@ type DecisionInstanceFilter struct {
 	// The evaluation date of the decision instance.
 	EvaluationDate *DateTimeFilterProperty `json:"evaluationDate,omitempty"`
 	// The ID of the DMN decision.
-	DecisionDefinitionId *string `json:"decisionDefinitionId,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	DecisionDefinitionId *DecisionDefinitionId `json:"decisionDefinitionId,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The name of the DMN decision.
 	DecisionDefinitionName *string `json:"decisionDefinitionName,omitempty"`
 	// The version of the decision.
 	DecisionDefinitionVersion *int32                      `json:"decisionDefinitionVersion,omitempty"`
 	DecisionDefinitionType    *DecisionDefinitionTypeEnum `json:"decisionDefinitionType,omitempty"`
 	// The tenant ID of the decision instance.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The key of the parent decision evaluation. Note that this is not the identifier of an individual decision instance; the `decisionEvaluationInstanceKey` is the identifier for a decision instance.
-	DecisionEvaluationKey *ModelString `json:"decisionEvaluationKey,omitempty"`
+	DecisionEvaluationKey *DecisionEvaluationKey `json:"decisionEvaluationKey,omitempty"`
 	// The key of the process definition.
-	ProcessDefinitionKey *ModelString `json:"processDefinitionKey,omitempty"`
+	ProcessDefinitionKey *ProcessDefinitionKey `json:"processDefinitionKey,omitempty"`
 	// The key of the process instance.
-	ProcessInstanceKey *ModelString `json:"processInstanceKey,omitempty"`
+	ProcessInstanceKey *ProcessInstanceKey `json:"processInstanceKey,omitempty"`
 	// The business ID of the owning process instance the decision instance belongs to. This only works for decision instances created with 8.10 and onwards. Decision instances from prior versions and standalone evaluations don't contain this data and cannot be found.
 	BusinessId *StringFilterProperty `json:"businessId,omitempty"`
 	// The key of the decision.
@@ -200,9 +200,9 @@ func (o *DecisionInstanceFilter) SetEvaluationDate(v DateTimeFilterProperty) {
 }
 
 // GetDecisionDefinitionId returns the DecisionDefinitionId field value if set, zero value otherwise.
-func (o *DecisionInstanceFilter) GetDecisionDefinitionId() string {
+func (o *DecisionInstanceFilter) GetDecisionDefinitionId() DecisionDefinitionId {
 	if o == nil || IsNil(o.DecisionDefinitionId) {
-		var ret string
+		var ret DecisionDefinitionId
 		return ret
 	}
 	return *o.DecisionDefinitionId
@@ -210,7 +210,7 @@ func (o *DecisionInstanceFilter) GetDecisionDefinitionId() string {
 
 // GetDecisionDefinitionIdOk returns a tuple with the DecisionDefinitionId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceFilter) GetDecisionDefinitionIdOk() (*string, bool) {
+func (o *DecisionInstanceFilter) GetDecisionDefinitionIdOk() (*DecisionDefinitionId, bool) {
 	if o == nil || IsNil(o.DecisionDefinitionId) {
 		return nil, false
 	}
@@ -226,8 +226,8 @@ func (o *DecisionInstanceFilter) HasDecisionDefinitionId() bool {
 	return false
 }
 
-// SetDecisionDefinitionId gets a reference to the given string and assigns it to the DecisionDefinitionId field.
-func (o *DecisionInstanceFilter) SetDecisionDefinitionId(v string) {
+// SetDecisionDefinitionId gets a reference to the given DecisionDefinitionId and assigns it to the DecisionDefinitionId field.
+func (o *DecisionInstanceFilter) SetDecisionDefinitionId(v DecisionDefinitionId) {
 	o.DecisionDefinitionId = &v
 }
 
@@ -328,9 +328,9 @@ func (o *DecisionInstanceFilter) SetDecisionDefinitionType(v DecisionDefinitionT
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *DecisionInstanceFilter) GetTenantId() string {
+func (o *DecisionInstanceFilter) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -338,7 +338,7 @@ func (o *DecisionInstanceFilter) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceFilter) GetTenantIdOk() (*string, bool) {
+func (o *DecisionInstanceFilter) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -354,15 +354,15 @@ func (o *DecisionInstanceFilter) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *DecisionInstanceFilter) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *DecisionInstanceFilter) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 
 // GetDecisionEvaluationKey returns the DecisionEvaluationKey field value if set, zero value otherwise.
-func (o *DecisionInstanceFilter) GetDecisionEvaluationKey() ModelString {
+func (o *DecisionInstanceFilter) GetDecisionEvaluationKey() DecisionEvaluationKey {
 	if o == nil || IsNil(o.DecisionEvaluationKey) {
-		var ret ModelString
+		var ret DecisionEvaluationKey
 		return ret
 	}
 	return *o.DecisionEvaluationKey
@@ -370,7 +370,7 @@ func (o *DecisionInstanceFilter) GetDecisionEvaluationKey() ModelString {
 
 // GetDecisionEvaluationKeyOk returns a tuple with the DecisionEvaluationKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceFilter) GetDecisionEvaluationKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceFilter) GetDecisionEvaluationKeyOk() (*DecisionEvaluationKey, bool) {
 	if o == nil || IsNil(o.DecisionEvaluationKey) {
 		return nil, false
 	}
@@ -386,15 +386,15 @@ func (o *DecisionInstanceFilter) HasDecisionEvaluationKey() bool {
 	return false
 }
 
-// SetDecisionEvaluationKey gets a reference to the given ModelString and assigns it to the DecisionEvaluationKey field.
-func (o *DecisionInstanceFilter) SetDecisionEvaluationKey(v ModelString) {
+// SetDecisionEvaluationKey gets a reference to the given DecisionEvaluationKey and assigns it to the DecisionEvaluationKey field.
+func (o *DecisionInstanceFilter) SetDecisionEvaluationKey(v DecisionEvaluationKey) {
 	o.DecisionEvaluationKey = &v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value if set, zero value otherwise.
-func (o *DecisionInstanceFilter) GetProcessDefinitionKey() ModelString {
+func (o *DecisionInstanceFilter) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 	return *o.ProcessDefinitionKey
@@ -402,7 +402,7 @@ func (o *DecisionInstanceFilter) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceFilter) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceFilter) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
 		return nil, false
 	}
@@ -418,15 +418,15 @@ func (o *DecisionInstanceFilter) HasProcessDefinitionKey() bool {
 	return false
 }
 
-// SetProcessDefinitionKey gets a reference to the given ModelString and assigns it to the ProcessDefinitionKey field.
-func (o *DecisionInstanceFilter) SetProcessDefinitionKey(v ModelString) {
+// SetProcessDefinitionKey gets a reference to the given ProcessDefinitionKey and assigns it to the ProcessDefinitionKey field.
+func (o *DecisionInstanceFilter) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = &v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value if set, zero value otherwise.
-func (o *DecisionInstanceFilter) GetProcessInstanceKey() ModelString {
+func (o *DecisionInstanceFilter) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || IsNil(o.ProcessInstanceKey) {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 	return *o.ProcessInstanceKey
@@ -434,7 +434,7 @@ func (o *DecisionInstanceFilter) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceFilter) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceFilter) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil || IsNil(o.ProcessInstanceKey) {
 		return nil, false
 	}
@@ -450,8 +450,8 @@ func (o *DecisionInstanceFilter) HasProcessInstanceKey() bool {
 	return false
 }
 
-// SetProcessInstanceKey gets a reference to the given ModelString and assigns it to the ProcessInstanceKey field.
-func (o *DecisionInstanceFilter) SetProcessInstanceKey(v ModelString) {
+// SetProcessInstanceKey gets a reference to the given ProcessInstanceKey and assigns it to the ProcessInstanceKey field.
+func (o *DecisionInstanceFilter) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = &v
 }
 

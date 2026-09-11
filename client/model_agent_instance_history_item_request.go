@@ -23,13 +23,13 @@ var _ MappedNullable = &AgentInstanceHistoryItemRequest{}
 // AgentInstanceHistoryItemRequest Request to append a single history item to an agent instance's conversation history.
 type AgentInstanceHistoryItemRequest struct {
 	// The key of the currently-active element instance.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// The key of the current job activation during which this history item was produced.
-	JobKey ModelString `json:"jobKey"`
+	JobKey JobKey `json:"jobKey"`
 	// Opaque lease token received from the job activation response.
-	JobLease string `json:"jobLease"`
+	JobLease JobLeaseToken `json:"jobLease"`
 	// The loop iteration this item belongs to. Omit if not grouping items by loopIteration.
-	LoopIteration NullableInt32 `json:"loopIteration,omitempty"`
+	LoopIteration NullableLoopIterationId `json:"loopIteration,omitempty"`
 	// The role of this history item in the conversation.
 	Role AgentInstanceHistoryRoleEnum `json:"role"`
 	// The content blocks of this history item.
@@ -48,7 +48,7 @@ type _AgentInstanceHistoryItemRequest AgentInstanceHistoryItemRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemRequest(elementInstanceKey ModelString, jobKey ModelString, jobLease string, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, producedAt time.Time) *AgentInstanceHistoryItemRequest {
+func NewAgentInstanceHistoryItemRequest(elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLease JobLeaseToken, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, producedAt time.Time) *AgentInstanceHistoryItemRequest {
 	this := AgentInstanceHistoryItemRequest{}
 	this.ElementInstanceKey = elementInstanceKey
 	this.JobKey = jobKey
@@ -68,9 +68,9 @@ func NewAgentInstanceHistoryItemRequestWithDefaults() *AgentInstanceHistoryItemR
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *AgentInstanceHistoryItemRequest) GetElementInstanceKey() ModelString {
+func (o *AgentInstanceHistoryItemRequest) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -79,7 +79,7 @@ func (o *AgentInstanceHistoryItemRequest) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemRequest) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceHistoryItemRequest) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -87,14 +87,14 @@ func (o *AgentInstanceHistoryItemRequest) GetElementInstanceKeyOk() (*ModelStrin
 }
 
 // SetElementInstanceKey sets field value
-func (o *AgentInstanceHistoryItemRequest) SetElementInstanceKey(v ModelString) {
+func (o *AgentInstanceHistoryItemRequest) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
 // GetJobKey returns the JobKey field value
-func (o *AgentInstanceHistoryItemRequest) GetJobKey() ModelString {
+func (o *AgentInstanceHistoryItemRequest) GetJobKey() JobKey {
 	if o == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -103,7 +103,7 @@ func (o *AgentInstanceHistoryItemRequest) GetJobKey() ModelString {
 
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemRequest) GetJobKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceHistoryItemRequest) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -111,14 +111,14 @@ func (o *AgentInstanceHistoryItemRequest) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *AgentInstanceHistoryItemRequest) SetJobKey(v ModelString) {
+func (o *AgentInstanceHistoryItemRequest) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
 // GetJobLease returns the JobLease field value
-func (o *AgentInstanceHistoryItemRequest) GetJobLease() string {
+func (o *AgentInstanceHistoryItemRequest) GetJobLease() JobLeaseToken {
 	if o == nil {
-		var ret string
+		var ret JobLeaseToken
 		return ret
 	}
 
@@ -127,7 +127,7 @@ func (o *AgentInstanceHistoryItemRequest) GetJobLease() string {
 
 // GetJobLeaseOk returns a tuple with the JobLease field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemRequest) GetJobLeaseOk() (*string, bool) {
+func (o *AgentInstanceHistoryItemRequest) GetJobLeaseOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -135,14 +135,14 @@ func (o *AgentInstanceHistoryItemRequest) GetJobLeaseOk() (*string, bool) {
 }
 
 // SetJobLease sets field value
-func (o *AgentInstanceHistoryItemRequest) SetJobLease(v string) {
+func (o *AgentInstanceHistoryItemRequest) SetJobLease(v JobLeaseToken) {
 	o.JobLease = v
 }
 
 // GetLoopIteration returns the LoopIteration field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *AgentInstanceHistoryItemRequest) GetLoopIteration() int32 {
+func (o *AgentInstanceHistoryItemRequest) GetLoopIteration() LoopIterationId {
 	if o == nil || IsNil(o.LoopIteration.Get()) {
-		var ret int32
+		var ret LoopIterationId
 		return ret
 	}
 	return *o.LoopIteration.Get()
@@ -151,7 +151,7 @@ func (o *AgentInstanceHistoryItemRequest) GetLoopIteration() int32 {
 // GetLoopIterationOk returns a tuple with the LoopIteration field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AgentInstanceHistoryItemRequest) GetLoopIterationOk() (*int32, bool) {
+func (o *AgentInstanceHistoryItemRequest) GetLoopIterationOk() (*LoopIterationId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -168,7 +168,7 @@ func (o *AgentInstanceHistoryItemRequest) HasLoopIteration() bool {
 }
 
 // SetLoopIteration gets a reference to the given NullableInt32 and assigns it to the LoopIteration field.
-func (o *AgentInstanceHistoryItemRequest) SetLoopIteration(v int32) {
+func (o *AgentInstanceHistoryItemRequest) SetLoopIteration(v LoopIterationId) {
 	o.LoopIteration.Set(&v)
 }
 

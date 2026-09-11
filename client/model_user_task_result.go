@@ -28,13 +28,13 @@ type UserTaskResult struct {
 	// The assignee of the user task.
 	Assignee NullableString `json:"assignee"`
 	// The element ID of the user task.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The candidate groups for this user task.
 	CandidateGroups []string `json:"candidateGroups"`
 	// The candidate users for this user task.
 	CandidateUsers []string `json:"candidateUsers"`
 	// The ID of the process definition.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The creation date of a user task.
 	CreationDate time.Time `json:"creationDate"`
 	// The completion date of a user task.
@@ -44,7 +44,7 @@ type UserTaskResult struct {
 	// The due date of a user task.
 	DueDate NullableTime `json:"dueDate"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The external form reference.
 	ExternalFormReference NullableString `json:"externalFormReference"`
 	// The version of the process definition.
@@ -54,21 +54,21 @@ type UserTaskResult struct {
 	// The priority of a user task. The higher the value the higher the priority.
 	Priority int32 `json:"priority"`
 	// The key of the user task.
-	UserTaskKey ModelString `json:"userTaskKey"`
+	UserTaskKey UserTaskKey `json:"userTaskKey"`
 	// The key of the element instance.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// The name of the process definition. This is `null` if the process has no name defined.
 	ProcessName NullableString `json:"processName"`
 	// The key of the process definition.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The key of the process instance.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The business ID of the owning process instance, inherited when the user task was created. This is `null` for user tasks created before version 8.10, and for user tasks whose owning process instance has no business ID.
-	BusinessId NullableString `json:"businessId"`
+	BusinessId NullableBusinessId `json:"businessId"`
 	// The key of the form.
-	FormKey NullableModelString `json:"formKey"`
+	FormKey NullableFormKey `json:"formKey"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
 	Tags []string `json:"tags"`
 }
@@ -79,7 +79,7 @@ type _UserTaskResult UserTaskResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee NullableString, elementId string, candidateGroups []string, candidateUsers []string, processDefinitionId string, creationDate time.Time, completionDate NullableTime, followUpDate NullableTime, dueDate NullableTime, tenantId string, externalFormReference NullableString, processDefinitionVersion int32, customHeaders map[string]string, priority int32, userTaskKey ModelString, elementInstanceKey ModelString, processName NullableString, processDefinitionKey ModelString, processInstanceKey ModelString, rootProcessInstanceKey NullableModelString, businessId NullableString, formKey NullableModelString, tags []string) *UserTaskResult {
+func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee NullableString, elementId ElementId, candidateGroups []string, candidateUsers []string, processDefinitionId ProcessDefinitionId, creationDate time.Time, completionDate NullableTime, followUpDate NullableTime, dueDate NullableTime, tenantId TenantId, externalFormReference NullableString, processDefinitionVersion int32, customHeaders map[string]string, priority int32, userTaskKey UserTaskKey, elementInstanceKey ElementInstanceKey, processName NullableString, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, formKey NullableFormKey, tags []string) *UserTaskResult {
 	this := UserTaskResult{}
 	this.Name = name
 	this.State = state
@@ -196,9 +196,9 @@ func (o *UserTaskResult) SetAssignee(v string) {
 }
 
 // GetElementId returns the ElementId field value
-func (o *UserTaskResult) GetElementId() string {
+func (o *UserTaskResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -207,7 +207,7 @@ func (o *UserTaskResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskResult) GetElementIdOk() (*string, bool) {
+func (o *UserTaskResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -215,7 +215,7 @@ func (o *UserTaskResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *UserTaskResult) SetElementId(v string) {
+func (o *UserTaskResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
@@ -268,9 +268,9 @@ func (o *UserTaskResult) SetCandidateUsers(v []string) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *UserTaskResult) GetProcessDefinitionId() string {
+func (o *UserTaskResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -279,7 +279,7 @@ func (o *UserTaskResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *UserTaskResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -287,7 +287,7 @@ func (o *UserTaskResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *UserTaskResult) SetProcessDefinitionId(v string) {
+func (o *UserTaskResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
@@ -394,9 +394,9 @@ func (o *UserTaskResult) SetDueDate(v time.Time) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *UserTaskResult) GetTenantId() string {
+func (o *UserTaskResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -405,7 +405,7 @@ func (o *UserTaskResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskResult) GetTenantIdOk() (*string, bool) {
+func (o *UserTaskResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -413,7 +413,7 @@ func (o *UserTaskResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *UserTaskResult) SetTenantId(v string) {
+func (o *UserTaskResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
@@ -516,9 +516,9 @@ func (o *UserTaskResult) SetPriority(v int32) {
 }
 
 // GetUserTaskKey returns the UserTaskKey field value
-func (o *UserTaskResult) GetUserTaskKey() ModelString {
+func (o *UserTaskResult) GetUserTaskKey() UserTaskKey {
 	if o == nil {
-		var ret ModelString
+		var ret UserTaskKey
 		return ret
 	}
 
@@ -527,7 +527,7 @@ func (o *UserTaskResult) GetUserTaskKey() ModelString {
 
 // GetUserTaskKeyOk returns a tuple with the UserTaskKey field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskResult) GetUserTaskKeyOk() (*ModelString, bool) {
+func (o *UserTaskResult) GetUserTaskKeyOk() (*UserTaskKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -535,14 +535,14 @@ func (o *UserTaskResult) GetUserTaskKeyOk() (*ModelString, bool) {
 }
 
 // SetUserTaskKey sets field value
-func (o *UserTaskResult) SetUserTaskKey(v ModelString) {
+func (o *UserTaskResult) SetUserTaskKey(v UserTaskKey) {
 	o.UserTaskKey = v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *UserTaskResult) GetElementInstanceKey() ModelString {
+func (o *UserTaskResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -551,7 +551,7 @@ func (o *UserTaskResult) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *UserTaskResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -559,7 +559,7 @@ func (o *UserTaskResult) GetElementInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetElementInstanceKey sets field value
-func (o *UserTaskResult) SetElementInstanceKey(v ModelString) {
+func (o *UserTaskResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
@@ -590,9 +590,9 @@ func (o *UserTaskResult) SetProcessName(v string) {
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *UserTaskResult) GetProcessDefinitionKey() ModelString {
+func (o *UserTaskResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -601,7 +601,7 @@ func (o *UserTaskResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *UserTaskResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -609,14 +609,14 @@ func (o *UserTaskResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *UserTaskResult) SetProcessDefinitionKey(v ModelString) {
+func (o *UserTaskResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *UserTaskResult) GetProcessInstanceKey() ModelString {
+func (o *UserTaskResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -625,7 +625,7 @@ func (o *UserTaskResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *UserTaskResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -633,15 +633,15 @@ func (o *UserTaskResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessInstanceKey sets field value
-func (o *UserTaskResult) SetProcessInstanceKey(v ModelString) {
+func (o *UserTaskResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *UserTaskResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *UserTaskResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -651,7 +651,7 @@ func (o *UserTaskResult) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserTaskResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *UserTaskResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -659,15 +659,15 @@ func (o *UserTaskResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *UserTaskResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *UserTaskResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetBusinessId returns the BusinessId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *UserTaskResult) GetBusinessId() string {
+// If the value is explicit nil, the zero value for BusinessId will be returned
+func (o *UserTaskResult) GetBusinessId() BusinessId {
 	if o == nil || o.BusinessId.Get() == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -677,7 +677,7 @@ func (o *UserTaskResult) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserTaskResult) GetBusinessIdOk() (*string, bool) {
+func (o *UserTaskResult) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -685,15 +685,15 @@ func (o *UserTaskResult) GetBusinessIdOk() (*string, bool) {
 }
 
 // SetBusinessId sets field value
-func (o *UserTaskResult) SetBusinessId(v string) {
+func (o *UserTaskResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 
 // GetFormKey returns the FormKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *UserTaskResult) GetFormKey() ModelString {
+// If the value is explicit nil, the zero value for FormKey will be returned
+func (o *UserTaskResult) GetFormKey() FormKey {
 	if o == nil || o.FormKey.Get() == nil {
-		var ret ModelString
+		var ret FormKey
 		return ret
 	}
 
@@ -703,7 +703,7 @@ func (o *UserTaskResult) GetFormKey() ModelString {
 // GetFormKeyOk returns a tuple with the FormKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *UserTaskResult) GetFormKeyOk() (*ModelString, bool) {
+func (o *UserTaskResult) GetFormKeyOk() (*FormKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -711,7 +711,7 @@ func (o *UserTaskResult) GetFormKeyOk() (*ModelString, bool) {
 }
 
 // SetFormKey sets field value
-func (o *UserTaskResult) SetFormKey(v ModelString) {
+func (o *UserTaskResult) SetFormKey(v FormKey) {
 	o.FormKey.Set(&v)
 }
 

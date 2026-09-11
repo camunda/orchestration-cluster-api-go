@@ -26,9 +26,9 @@ type SearchQueryPageResponse struct {
 	// Indicates whether the `totalItems` value has been capped due to system limits. When true, `totalItems` is a lower bound and the actual number of matching items is greater than the reported value.
 	HasMoreTotalItems bool `json:"hasMoreTotalItems"`
 	// The cursor value for getting the previous page of results. Use this in the `before` field of an ensuing request.
-	StartCursor NullableString `json:"startCursor" validate:"regexp=^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}(?:==)?|[A-Za-z0-9+\\/]{3}=)?$"`
+	StartCursor NullableStartCursor `json:"startCursor" validate:"regexp=^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}(?:==)?|[A-Za-z0-9+\\/]{3}=)?$"`
 	// The cursor value for getting the next page of results. Use this in the `after` field of an ensuing request.
-	EndCursor NullableString `json:"endCursor" validate:"regexp=^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}(?:==)?|[A-Za-z0-9+\\/]{3}=)?$"`
+	EndCursor NullableEndCursor `json:"endCursor" validate:"regexp=^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}(?:==)?|[A-Za-z0-9+\\/]{3}=)?$"`
 }
 
 type _SearchQueryPageResponse SearchQueryPageResponse
@@ -37,7 +37,7 @@ type _SearchQueryPageResponse SearchQueryPageResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSearchQueryPageResponse(totalItems int64, hasMoreTotalItems bool, startCursor NullableString, endCursor NullableString) *SearchQueryPageResponse {
+func NewSearchQueryPageResponse(totalItems int64, hasMoreTotalItems bool, startCursor NullableStartCursor, endCursor NullableEndCursor) *SearchQueryPageResponse {
 	this := SearchQueryPageResponse{}
 	this.TotalItems = totalItems
 	this.HasMoreTotalItems = hasMoreTotalItems
@@ -103,10 +103,10 @@ func (o *SearchQueryPageResponse) SetHasMoreTotalItems(v bool) {
 }
 
 // GetStartCursor returns the StartCursor field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *SearchQueryPageResponse) GetStartCursor() string {
+// If the value is explicit nil, the zero value for StartCursor will be returned
+func (o *SearchQueryPageResponse) GetStartCursor() StartCursor {
 	if o == nil || o.StartCursor.Get() == nil {
-		var ret string
+		var ret StartCursor
 		return ret
 	}
 
@@ -116,7 +116,7 @@ func (o *SearchQueryPageResponse) GetStartCursor() string {
 // GetStartCursorOk returns a tuple with the StartCursor field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *SearchQueryPageResponse) GetStartCursorOk() (*string, bool) {
+func (o *SearchQueryPageResponse) GetStartCursorOk() (*StartCursor, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -124,15 +124,15 @@ func (o *SearchQueryPageResponse) GetStartCursorOk() (*string, bool) {
 }
 
 // SetStartCursor sets field value
-func (o *SearchQueryPageResponse) SetStartCursor(v string) {
+func (o *SearchQueryPageResponse) SetStartCursor(v StartCursor) {
 	o.StartCursor.Set(&v)
 }
 
 // GetEndCursor returns the EndCursor field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *SearchQueryPageResponse) GetEndCursor() string {
+// If the value is explicit nil, the zero value for EndCursor will be returned
+func (o *SearchQueryPageResponse) GetEndCursor() EndCursor {
 	if o == nil || o.EndCursor.Get() == nil {
-		var ret string
+		var ret EndCursor
 		return ret
 	}
 
@@ -142,7 +142,7 @@ func (o *SearchQueryPageResponse) GetEndCursor() string {
 // GetEndCursorOk returns a tuple with the EndCursor field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *SearchQueryPageResponse) GetEndCursorOk() (*string, bool) {
+func (o *SearchQueryPageResponse) GetEndCursorOk() (*EndCursor, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -150,7 +150,7 @@ func (o *SearchQueryPageResponse) GetEndCursorOk() (*string, bool) {
 }
 
 // SetEndCursor sets field value
-func (o *SearchQueryPageResponse) SetEndCursor(v string) {
+func (o *SearchQueryPageResponse) SetEndCursor(v EndCursor) {
 	o.EndCursor.Set(&v)
 }
 

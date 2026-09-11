@@ -23,31 +23,31 @@ var _ MappedNullable = &IncidentResult{}
 // IncidentResult struct for IncidentResult
 type IncidentResult struct {
 	// The process definition ID associated to this incident.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The type of the incident error.
 	ErrorType IncidentErrorTypeEnum `json:"errorType"`
 	// Error message which describes the error in more detail.
 	ErrorMessage string `json:"errorMessage"`
 	// The element ID associated to this incident.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The creation time of the incident.
 	CreationTime time.Time `json:"creationTime"`
 	// The incident state.
 	State IncidentStateEnum `json:"state"`
 	// The tenant ID of the incident.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned key, which acts as a unique identifier for this incident.
-	IncidentKey ModelString `json:"incidentKey"`
+	IncidentKey IncidentKey `json:"incidentKey"`
 	// The process definition key associated to this incident.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The process instance key associated to this incident.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The element instance key associated to this incident.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// The job key, if exists, associated with this incident.
-	JobKey NullableModelString `json:"jobKey"`
+	JobKey NullableJobKey `json:"jobKey"`
 }
 
 type _IncidentResult IncidentResult
@@ -56,7 +56,7 @@ type _IncidentResult IncidentResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewIncidentResult(processDefinitionId string, errorType IncidentErrorTypeEnum, errorMessage string, elementId string, creationTime time.Time, state IncidentStateEnum, tenantId string, incidentKey ModelString, processDefinitionKey ModelString, processInstanceKey ModelString, rootProcessInstanceKey NullableModelString, elementInstanceKey ModelString, jobKey NullableModelString) *IncidentResult {
+func NewIncidentResult(processDefinitionId ProcessDefinitionId, errorType IncidentErrorTypeEnum, errorMessage string, elementId ElementId, creationTime time.Time, state IncidentStateEnum, tenantId TenantId, incidentKey IncidentKey, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, elementInstanceKey ElementInstanceKey, jobKey NullableJobKey) *IncidentResult {
 	this := IncidentResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ErrorType = errorType
@@ -83,9 +83,9 @@ func NewIncidentResultWithDefaults() *IncidentResult {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *IncidentResult) GetProcessDefinitionId() string {
+func (o *IncidentResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -94,7 +94,7 @@ func (o *IncidentResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *IncidentResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *IncidentResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -102,7 +102,7 @@ func (o *IncidentResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *IncidentResult) SetProcessDefinitionId(v string) {
+func (o *IncidentResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
@@ -155,9 +155,9 @@ func (o *IncidentResult) SetErrorMessage(v string) {
 }
 
 // GetElementId returns the ElementId field value
-func (o *IncidentResult) GetElementId() string {
+func (o *IncidentResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -166,7 +166,7 @@ func (o *IncidentResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *IncidentResult) GetElementIdOk() (*string, bool) {
+func (o *IncidentResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -174,7 +174,7 @@ func (o *IncidentResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *IncidentResult) SetElementId(v string) {
+func (o *IncidentResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
@@ -227,9 +227,9 @@ func (o *IncidentResult) SetState(v IncidentStateEnum) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *IncidentResult) GetTenantId() string {
+func (o *IncidentResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -238,7 +238,7 @@ func (o *IncidentResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *IncidentResult) GetTenantIdOk() (*string, bool) {
+func (o *IncidentResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -246,14 +246,14 @@ func (o *IncidentResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *IncidentResult) SetTenantId(v string) {
+func (o *IncidentResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetIncidentKey returns the IncidentKey field value
-func (o *IncidentResult) GetIncidentKey() ModelString {
+func (o *IncidentResult) GetIncidentKey() IncidentKey {
 	if o == nil {
-		var ret ModelString
+		var ret IncidentKey
 		return ret
 	}
 
@@ -262,7 +262,7 @@ func (o *IncidentResult) GetIncidentKey() ModelString {
 
 // GetIncidentKeyOk returns a tuple with the IncidentKey field value
 // and a boolean to check if the value has been set.
-func (o *IncidentResult) GetIncidentKeyOk() (*ModelString, bool) {
+func (o *IncidentResult) GetIncidentKeyOk() (*IncidentKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -270,14 +270,14 @@ func (o *IncidentResult) GetIncidentKeyOk() (*ModelString, bool) {
 }
 
 // SetIncidentKey sets field value
-func (o *IncidentResult) SetIncidentKey(v ModelString) {
+func (o *IncidentResult) SetIncidentKey(v IncidentKey) {
 	o.IncidentKey = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *IncidentResult) GetProcessDefinitionKey() ModelString {
+func (o *IncidentResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -286,7 +286,7 @@ func (o *IncidentResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *IncidentResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *IncidentResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -294,14 +294,14 @@ func (o *IncidentResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *IncidentResult) SetProcessDefinitionKey(v ModelString) {
+func (o *IncidentResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *IncidentResult) GetProcessInstanceKey() ModelString {
+func (o *IncidentResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -310,7 +310,7 @@ func (o *IncidentResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *IncidentResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *IncidentResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -318,15 +318,15 @@ func (o *IncidentResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessInstanceKey sets field value
-func (o *IncidentResult) SetProcessInstanceKey(v ModelString) {
+func (o *IncidentResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *IncidentResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *IncidentResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -336,7 +336,7 @@ func (o *IncidentResult) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *IncidentResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *IncidentResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -344,14 +344,14 @@ func (o *IncidentResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *IncidentResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *IncidentResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *IncidentResult) GetElementInstanceKey() ModelString {
+func (o *IncidentResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -360,7 +360,7 @@ func (o *IncidentResult) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *IncidentResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *IncidentResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -368,15 +368,15 @@ func (o *IncidentResult) GetElementInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetElementInstanceKey sets field value
-func (o *IncidentResult) SetElementInstanceKey(v ModelString) {
+func (o *IncidentResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
 // GetJobKey returns the JobKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *IncidentResult) GetJobKey() ModelString {
+// If the value is explicit nil, the zero value for JobKey will be returned
+func (o *IncidentResult) GetJobKey() JobKey {
 	if o == nil || o.JobKey.Get() == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -386,7 +386,7 @@ func (o *IncidentResult) GetJobKey() ModelString {
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *IncidentResult) GetJobKeyOk() (*ModelString, bool) {
+func (o *IncidentResult) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -394,7 +394,7 @@ func (o *IncidentResult) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *IncidentResult) SetJobKey(v ModelString) {
+func (o *IncidentResult) SetJobKey(v JobKey) {
 	o.JobKey.Set(&v)
 }
 

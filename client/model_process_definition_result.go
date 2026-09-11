@@ -30,11 +30,11 @@ type ProcessDefinitionResult struct {
 	// Version tag of this process definition.
 	VersionTag NullableString `json:"versionTag"`
 	// Process definition ID of this process definition.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// Tenant ID of this process definition.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The key for this process definition.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// Indicates whether the start event of the process has an associated Form Key.
 	HasStartForm bool `json:"hasStartForm"`
 	// The state of this process definition. `DRAINING` indicates the definition is being deleted but still has active process instances draining before it is removed.
@@ -47,7 +47,7 @@ type _ProcessDefinitionResult ProcessDefinitionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessDefinitionResult(name NullableString, resourceName string, version int32, versionTag NullableString, processDefinitionId string, tenantId string, processDefinitionKey ModelString, hasStartForm bool, state string) *ProcessDefinitionResult {
+func NewProcessDefinitionResult(name NullableString, resourceName string, version int32, versionTag NullableString, processDefinitionId ProcessDefinitionId, tenantId TenantId, processDefinitionKey ProcessDefinitionKey, hasStartForm bool, state string) *ProcessDefinitionResult {
 	this := ProcessDefinitionResult{}
 	this.Name = name
 	this.ResourceName = resourceName
@@ -170,9 +170,9 @@ func (o *ProcessDefinitionResult) SetVersionTag(v string) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *ProcessDefinitionResult) GetProcessDefinitionId() string {
+func (o *ProcessDefinitionResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -181,7 +181,7 @@ func (o *ProcessDefinitionResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *ProcessDefinitionResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -189,14 +189,14 @@ func (o *ProcessDefinitionResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *ProcessDefinitionResult) SetProcessDefinitionId(v string) {
+func (o *ProcessDefinitionResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetTenantId returns the TenantId field value
-func (o *ProcessDefinitionResult) GetTenantId() string {
+func (o *ProcessDefinitionResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -205,7 +205,7 @@ func (o *ProcessDefinitionResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionResult) GetTenantIdOk() (*string, bool) {
+func (o *ProcessDefinitionResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -213,14 +213,14 @@ func (o *ProcessDefinitionResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *ProcessDefinitionResult) SetTenantId(v string) {
+func (o *ProcessDefinitionResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ProcessDefinitionResult) GetProcessDefinitionKey() ModelString {
+func (o *ProcessDefinitionResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -229,7 +229,7 @@ func (o *ProcessDefinitionResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessDefinitionResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -237,7 +237,7 @@ func (o *ProcessDefinitionResult) GetProcessDefinitionKeyOk() (*ModelString, boo
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *ProcessDefinitionResult) SetProcessDefinitionKey(v ModelString) {
+func (o *ProcessDefinitionResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 

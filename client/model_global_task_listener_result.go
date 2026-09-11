@@ -32,7 +32,7 @@ type GlobalTaskListenerResult struct {
 	// List of user task event types that trigger the listener.
 	EventTypes []GlobalTaskListenerEventTypeEnum `json:"eventTypes,omitempty"`
 	// The user-defined id for the global listener
-	Id     string                   `json:"id" validate:"regexp=^[a-zA-Z0-9_~@.+\\\\-]+$"`
+	Id     GlobalListenerId         `json:"id" validate:"regexp=^[a-zA-Z0-9_~@.+\\\\-]+$"`
 	Source GlobalListenerSourceEnum `json:"source"`
 }
 
@@ -42,7 +42,7 @@ type _GlobalTaskListenerResult GlobalTaskListenerResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGlobalTaskListenerResult(id string, source GlobalListenerSourceEnum) *GlobalTaskListenerResult {
+func NewGlobalTaskListenerResult(id GlobalListenerId, source GlobalListenerSourceEnum) *GlobalTaskListenerResult {
 	this := GlobalTaskListenerResult{}
 	this.Id = id
 	this.Source = source
@@ -218,9 +218,9 @@ func (o *GlobalTaskListenerResult) SetEventTypes(v []GlobalTaskListenerEventType
 }
 
 // GetId returns the Id field value
-func (o *GlobalTaskListenerResult) GetId() string {
+func (o *GlobalTaskListenerResult) GetId() GlobalListenerId {
 	if o == nil {
-		var ret string
+		var ret GlobalListenerId
 		return ret
 	}
 
@@ -229,7 +229,7 @@ func (o *GlobalTaskListenerResult) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *GlobalTaskListenerResult) GetIdOk() (*string, bool) {
+func (o *GlobalTaskListenerResult) GetIdOk() (*GlobalListenerId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -237,7 +237,7 @@ func (o *GlobalTaskListenerResult) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *GlobalTaskListenerResult) SetId(v string) {
+func (o *GlobalTaskListenerResult) SetId(v GlobalListenerId) {
 	o.Id = v
 }
 

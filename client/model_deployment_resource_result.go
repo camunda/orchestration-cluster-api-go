@@ -28,7 +28,7 @@ type DeploymentResourceResult struct {
 	// The description of the deployed resource.
 	Version int32 `json:"version"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned key, which acts as a unique identifier for this Resource.
 	ResourceKey ResourceKey `json:"resourceKey"`
 }
@@ -39,7 +39,7 @@ type _DeploymentResourceResult DeploymentResourceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentResourceResult(resourceId string, resourceName string, version int32, tenantId string, resourceKey ResourceKey) *DeploymentResourceResult {
+func NewDeploymentResourceResult(resourceId string, resourceName string, version int32, tenantId TenantId, resourceKey ResourceKey) *DeploymentResourceResult {
 	this := DeploymentResourceResult{}
 	this.ResourceId = resourceId
 	this.ResourceName = resourceName
@@ -130,9 +130,9 @@ func (o *DeploymentResourceResult) SetVersion(v int32) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *DeploymentResourceResult) GetTenantId() string {
+func (o *DeploymentResourceResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -141,7 +141,7 @@ func (o *DeploymentResourceResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentResourceResult) GetTenantIdOk() (*string, bool) {
+func (o *DeploymentResourceResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -149,7 +149,7 @@ func (o *DeploymentResourceResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *DeploymentResourceResult) SetTenantId(v string) {
+func (o *DeploymentResourceResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

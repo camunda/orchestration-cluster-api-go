@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessInstanceMigrationInstruction{}
 // ProcessInstanceMigrationInstruction The migration instructions describe how to migrate a process instance from one process definition to another.
 type ProcessInstanceMigrationInstruction struct {
 	// The key of process definition to migrate the process instance to.
-	TargetProcessDefinitionKey ModelString `json:"targetProcessDefinitionKey"`
+	TargetProcessDefinitionKey ProcessDefinitionKey `json:"targetProcessDefinitionKey"`
 	// Element mappings from the source process instance to the target process instance.
 	MappingInstructions []MigrateProcessInstanceMappingInstruction `json:"mappingInstructions"`
 	// A reference key chosen by the user that will be part of all records resulting from this operation. Must be > 0 if provided.
@@ -35,7 +35,7 @@ type _ProcessInstanceMigrationInstruction ProcessInstanceMigrationInstruction
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceMigrationInstruction(targetProcessDefinitionKey ModelString, mappingInstructions []MigrateProcessInstanceMappingInstruction) *ProcessInstanceMigrationInstruction {
+func NewProcessInstanceMigrationInstruction(targetProcessDefinitionKey ProcessDefinitionKey, mappingInstructions []MigrateProcessInstanceMappingInstruction) *ProcessInstanceMigrationInstruction {
 	this := ProcessInstanceMigrationInstruction{}
 	this.TargetProcessDefinitionKey = targetProcessDefinitionKey
 	this.MappingInstructions = mappingInstructions
@@ -51,9 +51,9 @@ func NewProcessInstanceMigrationInstructionWithDefaults() *ProcessInstanceMigrat
 }
 
 // GetTargetProcessDefinitionKey returns the TargetProcessDefinitionKey field value
-func (o *ProcessInstanceMigrationInstruction) GetTargetProcessDefinitionKey() ModelString {
+func (o *ProcessInstanceMigrationInstruction) GetTargetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -62,7 +62,7 @@ func (o *ProcessInstanceMigrationInstruction) GetTargetProcessDefinitionKey() Mo
 
 // GetTargetProcessDefinitionKeyOk returns a tuple with the TargetProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceMigrationInstruction) GetTargetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceMigrationInstruction) GetTargetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -70,7 +70,7 @@ func (o *ProcessInstanceMigrationInstruction) GetTargetProcessDefinitionKeyOk() 
 }
 
 // SetTargetProcessDefinitionKey sets field value
-func (o *ProcessInstanceMigrationInstruction) SetTargetProcessDefinitionKey(v ModelString) {
+func (o *ProcessInstanceMigrationInstruction) SetTargetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.TargetProcessDefinitionKey = v
 }
 

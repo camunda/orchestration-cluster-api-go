@@ -20,7 +20,7 @@ var _ MappedNullable = &ElementInstanceFilterFields{}
 // ElementInstanceFilterFields Element instance filter fields.
 type ElementInstanceFilterFields struct {
 	// The process definition ID associated to this element instance.
-	ProcessDefinitionId *string `json:"processDefinitionId,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId *ProcessDefinitionId `json:"processDefinitionId,omitempty" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// State of element instance as defined set of values.
 	State *ElementInstanceStateFilterProperty `json:"state,omitempty"`
 	// Type of element as defined set of values.
@@ -32,15 +32,15 @@ type ElementInstanceFilterFields struct {
 	// Shows whether this element instance has an incident related to.
 	HasIncident *bool `json:"hasIncident,omitempty"`
 	// The unique identifier of the tenant.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned key, which acts as a unique identifier for this element instance.
-	ElementInstanceKey *ModelString `json:"elementInstanceKey,omitempty"`
+	ElementInstanceKey *ElementInstanceKey `json:"elementInstanceKey,omitempty"`
 	// The process instance key associated to this element instance.
-	ProcessInstanceKey *ModelString `json:"processInstanceKey,omitempty"`
+	ProcessInstanceKey *ProcessInstanceKey `json:"processInstanceKey,omitempty"`
 	// The process definition key associated to this element instance.
-	ProcessDefinitionKey *ModelString `json:"processDefinitionKey,omitempty"`
+	ProcessDefinitionKey *ProcessDefinitionKey `json:"processDefinitionKey,omitempty"`
 	// The key of incident if field incident is true.
-	IncidentKey *ModelString `json:"incidentKey,omitempty"`
+	IncidentKey *IncidentKey `json:"incidentKey,omitempty"`
 	// The start date of this element instance.
 	StartDate *DateTimeFilterProperty `json:"startDate,omitempty"`
 	// The end date of this element instance.
@@ -67,9 +67,9 @@ func NewElementInstanceFilterFieldsWithDefaults() *ElementInstanceFilterFields {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value if set, zero value otherwise.
-func (o *ElementInstanceFilterFields) GetProcessDefinitionId() string {
+func (o *ElementInstanceFilterFields) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil || IsNil(o.ProcessDefinitionId) {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 	return *o.ProcessDefinitionId
@@ -77,7 +77,7 @@ func (o *ElementInstanceFilterFields) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceFilterFields) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *ElementInstanceFilterFields) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil || IsNil(o.ProcessDefinitionId) {
 		return nil, false
 	}
@@ -93,8 +93,8 @@ func (o *ElementInstanceFilterFields) HasProcessDefinitionId() bool {
 	return false
 }
 
-// SetProcessDefinitionId gets a reference to the given string and assigns it to the ProcessDefinitionId field.
-func (o *ElementInstanceFilterFields) SetProcessDefinitionId(v string) {
+// SetProcessDefinitionId gets a reference to the given ProcessDefinitionId and assigns it to the ProcessDefinitionId field.
+func (o *ElementInstanceFilterFields) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = &v
 }
 
@@ -259,9 +259,9 @@ func (o *ElementInstanceFilterFields) SetHasIncident(v bool) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *ElementInstanceFilterFields) GetTenantId() string {
+func (o *ElementInstanceFilterFields) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -269,7 +269,7 @@ func (o *ElementInstanceFilterFields) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceFilterFields) GetTenantIdOk() (*string, bool) {
+func (o *ElementInstanceFilterFields) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -285,15 +285,15 @@ func (o *ElementInstanceFilterFields) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *ElementInstanceFilterFields) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *ElementInstanceFilterFields) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value if set, zero value otherwise.
-func (o *ElementInstanceFilterFields) GetElementInstanceKey() ModelString {
+func (o *ElementInstanceFilterFields) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil || IsNil(o.ElementInstanceKey) {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 	return *o.ElementInstanceKey
@@ -301,7 +301,7 @@ func (o *ElementInstanceFilterFields) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceFilterFields) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *ElementInstanceFilterFields) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil || IsNil(o.ElementInstanceKey) {
 		return nil, false
 	}
@@ -317,15 +317,15 @@ func (o *ElementInstanceFilterFields) HasElementInstanceKey() bool {
 	return false
 }
 
-// SetElementInstanceKey gets a reference to the given ModelString and assigns it to the ElementInstanceKey field.
-func (o *ElementInstanceFilterFields) SetElementInstanceKey(v ModelString) {
+// SetElementInstanceKey gets a reference to the given ElementInstanceKey and assigns it to the ElementInstanceKey field.
+func (o *ElementInstanceFilterFields) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = &v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value if set, zero value otherwise.
-func (o *ElementInstanceFilterFields) GetProcessInstanceKey() ModelString {
+func (o *ElementInstanceFilterFields) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || IsNil(o.ProcessInstanceKey) {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 	return *o.ProcessInstanceKey
@@ -333,7 +333,7 @@ func (o *ElementInstanceFilterFields) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceFilterFields) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ElementInstanceFilterFields) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil || IsNil(o.ProcessInstanceKey) {
 		return nil, false
 	}
@@ -349,15 +349,15 @@ func (o *ElementInstanceFilterFields) HasProcessInstanceKey() bool {
 	return false
 }
 
-// SetProcessInstanceKey gets a reference to the given ModelString and assigns it to the ProcessInstanceKey field.
-func (o *ElementInstanceFilterFields) SetProcessInstanceKey(v ModelString) {
+// SetProcessInstanceKey gets a reference to the given ProcessInstanceKey and assigns it to the ProcessInstanceKey field.
+func (o *ElementInstanceFilterFields) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = &v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value if set, zero value otherwise.
-func (o *ElementInstanceFilterFields) GetProcessDefinitionKey() ModelString {
+func (o *ElementInstanceFilterFields) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 	return *o.ProcessDefinitionKey
@@ -365,7 +365,7 @@ func (o *ElementInstanceFilterFields) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceFilterFields) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ElementInstanceFilterFields) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
 		return nil, false
 	}
@@ -381,15 +381,15 @@ func (o *ElementInstanceFilterFields) HasProcessDefinitionKey() bool {
 	return false
 }
 
-// SetProcessDefinitionKey gets a reference to the given ModelString and assigns it to the ProcessDefinitionKey field.
-func (o *ElementInstanceFilterFields) SetProcessDefinitionKey(v ModelString) {
+// SetProcessDefinitionKey gets a reference to the given ProcessDefinitionKey and assigns it to the ProcessDefinitionKey field.
+func (o *ElementInstanceFilterFields) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = &v
 }
 
 // GetIncidentKey returns the IncidentKey field value if set, zero value otherwise.
-func (o *ElementInstanceFilterFields) GetIncidentKey() ModelString {
+func (o *ElementInstanceFilterFields) GetIncidentKey() IncidentKey {
 	if o == nil || IsNil(o.IncidentKey) {
-		var ret ModelString
+		var ret IncidentKey
 		return ret
 	}
 	return *o.IncidentKey
@@ -397,7 +397,7 @@ func (o *ElementInstanceFilterFields) GetIncidentKey() ModelString {
 
 // GetIncidentKeyOk returns a tuple with the IncidentKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceFilterFields) GetIncidentKeyOk() (*ModelString, bool) {
+func (o *ElementInstanceFilterFields) GetIncidentKeyOk() (*IncidentKey, bool) {
 	if o == nil || IsNil(o.IncidentKey) {
 		return nil, false
 	}
@@ -413,8 +413,8 @@ func (o *ElementInstanceFilterFields) HasIncidentKey() bool {
 	return false
 }
 
-// SetIncidentKey gets a reference to the given ModelString and assigns it to the IncidentKey field.
-func (o *ElementInstanceFilterFields) SetIncidentKey(v ModelString) {
+// SetIncidentKey gets a reference to the given IncidentKey and assigns it to the IncidentKey field.
+func (o *ElementInstanceFilterFields) SetIncidentKey(v IncidentKey) {
 	o.IncidentKey = &v
 }
 

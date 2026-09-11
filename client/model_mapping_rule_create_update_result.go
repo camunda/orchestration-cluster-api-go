@@ -28,7 +28,7 @@ type MappingRuleCreateUpdateResult struct {
 	// The name of the mapping rule.
 	Name string `json:"name"`
 	// The unique ID of the mapping rule.
-	MappingRuleId string `json:"mappingRuleId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	MappingRuleId MappingRuleId `json:"mappingRuleId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 }
 
 type _MappingRuleCreateUpdateResult MappingRuleCreateUpdateResult
@@ -37,7 +37,7 @@ type _MappingRuleCreateUpdateResult MappingRuleCreateUpdateResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMappingRuleCreateUpdateResult(claimName string, claimValue string, name string, mappingRuleId string) *MappingRuleCreateUpdateResult {
+func NewMappingRuleCreateUpdateResult(claimName string, claimValue string, name string, mappingRuleId MappingRuleId) *MappingRuleCreateUpdateResult {
 	this := MappingRuleCreateUpdateResult{}
 	this.ClaimName = claimName
 	this.ClaimValue = claimValue
@@ -127,9 +127,9 @@ func (o *MappingRuleCreateUpdateResult) SetName(v string) {
 }
 
 // GetMappingRuleId returns the MappingRuleId field value
-func (o *MappingRuleCreateUpdateResult) GetMappingRuleId() string {
+func (o *MappingRuleCreateUpdateResult) GetMappingRuleId() MappingRuleId {
 	if o == nil {
-		var ret string
+		var ret MappingRuleId
 		return ret
 	}
 
@@ -138,7 +138,7 @@ func (o *MappingRuleCreateUpdateResult) GetMappingRuleId() string {
 
 // GetMappingRuleIdOk returns a tuple with the MappingRuleId field value
 // and a boolean to check if the value has been set.
-func (o *MappingRuleCreateUpdateResult) GetMappingRuleIdOk() (*string, bool) {
+func (o *MappingRuleCreateUpdateResult) GetMappingRuleIdOk() (*MappingRuleId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -146,7 +146,7 @@ func (o *MappingRuleCreateUpdateResult) GetMappingRuleIdOk() (*string, bool) {
 }
 
 // SetMappingRuleId sets field value
-func (o *MappingRuleCreateUpdateResult) SetMappingRuleId(v string) {
+func (o *MappingRuleCreateUpdateResult) SetMappingRuleId(v MappingRuleId) {
 	o.MappingRuleId = v
 }
 

@@ -22,13 +22,13 @@ var _ MappedNullable = &DecisionDefinitionResult{}
 // DecisionDefinitionResult struct for DecisionDefinitionResult
 type DecisionDefinitionResult struct {
 	// The DMN ID of the decision definition.
-	DecisionDefinitionId string `json:"decisionDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	DecisionDefinitionId DecisionDefinitionId `json:"decisionDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The assigned key, which acts as a unique identifier for this decision definition.
-	DecisionDefinitionKey ModelString `json:"decisionDefinitionKey"`
+	DecisionDefinitionKey DecisionDefinitionKey `json:"decisionDefinitionKey"`
 	// the DMN ID of the decision requirements graph that the decision definition is part of.
 	DecisionRequirementsId string `json:"decisionRequirementsId"`
 	// The assigned key of the decision requirements graph that the decision definition is part of.
-	DecisionRequirementsKey ModelString `json:"decisionRequirementsKey"`
+	DecisionRequirementsKey DecisionRequirementsKey `json:"decisionRequirementsKey"`
 	// The DMN name of the decision requirements that the decision definition is part of.
 	DecisionRequirementsName string `json:"decisionRequirementsName"`
 	// The assigned version of the decision requirements that the decision definition is part of.
@@ -36,7 +36,7 @@ type DecisionDefinitionResult struct {
 	// The DMN name of the decision definition.
 	Name string `json:"name"`
 	// The tenant ID of the decision definition.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned version of the decision definition.
 	Version int32 `json:"version"`
 }
@@ -47,7 +47,7 @@ type _DecisionDefinitionResult DecisionDefinitionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDecisionDefinitionResult(decisionDefinitionId string, decisionDefinitionKey ModelString, decisionRequirementsId string, decisionRequirementsKey ModelString, decisionRequirementsName string, decisionRequirementsVersion int32, name string, tenantId string, version int32) *DecisionDefinitionResult {
+func NewDecisionDefinitionResult(decisionDefinitionId DecisionDefinitionId, decisionDefinitionKey DecisionDefinitionKey, decisionRequirementsId string, decisionRequirementsKey DecisionRequirementsKey, decisionRequirementsName string, decisionRequirementsVersion int32, name string, tenantId TenantId, version int32) *DecisionDefinitionResult {
 	this := DecisionDefinitionResult{}
 	this.DecisionDefinitionId = decisionDefinitionId
 	this.DecisionDefinitionKey = decisionDefinitionKey
@@ -70,9 +70,9 @@ func NewDecisionDefinitionResultWithDefaults() *DecisionDefinitionResult {
 }
 
 // GetDecisionDefinitionId returns the DecisionDefinitionId field value
-func (o *DecisionDefinitionResult) GetDecisionDefinitionId() string {
+func (o *DecisionDefinitionResult) GetDecisionDefinitionId() DecisionDefinitionId {
 	if o == nil {
-		var ret string
+		var ret DecisionDefinitionId
 		return ret
 	}
 
@@ -81,7 +81,7 @@ func (o *DecisionDefinitionResult) GetDecisionDefinitionId() string {
 
 // GetDecisionDefinitionIdOk returns a tuple with the DecisionDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *DecisionDefinitionResult) GetDecisionDefinitionIdOk() (*string, bool) {
+func (o *DecisionDefinitionResult) GetDecisionDefinitionIdOk() (*DecisionDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -89,14 +89,14 @@ func (o *DecisionDefinitionResult) GetDecisionDefinitionIdOk() (*string, bool) {
 }
 
 // SetDecisionDefinitionId sets field value
-func (o *DecisionDefinitionResult) SetDecisionDefinitionId(v string) {
+func (o *DecisionDefinitionResult) SetDecisionDefinitionId(v DecisionDefinitionId) {
 	o.DecisionDefinitionId = v
 }
 
 // GetDecisionDefinitionKey returns the DecisionDefinitionKey field value
-func (o *DecisionDefinitionResult) GetDecisionDefinitionKey() ModelString {
+func (o *DecisionDefinitionResult) GetDecisionDefinitionKey() DecisionDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 
@@ -105,7 +105,7 @@ func (o *DecisionDefinitionResult) GetDecisionDefinitionKey() ModelString {
 
 // GetDecisionDefinitionKeyOk returns a tuple with the DecisionDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *DecisionDefinitionResult) GetDecisionDefinitionKeyOk() (*ModelString, bool) {
+func (o *DecisionDefinitionResult) GetDecisionDefinitionKeyOk() (*DecisionDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -113,7 +113,7 @@ func (o *DecisionDefinitionResult) GetDecisionDefinitionKeyOk() (*ModelString, b
 }
 
 // SetDecisionDefinitionKey sets field value
-func (o *DecisionDefinitionResult) SetDecisionDefinitionKey(v ModelString) {
+func (o *DecisionDefinitionResult) SetDecisionDefinitionKey(v DecisionDefinitionKey) {
 	o.DecisionDefinitionKey = v
 }
 
@@ -142,9 +142,9 @@ func (o *DecisionDefinitionResult) SetDecisionRequirementsId(v string) {
 }
 
 // GetDecisionRequirementsKey returns the DecisionRequirementsKey field value
-func (o *DecisionDefinitionResult) GetDecisionRequirementsKey() ModelString {
+func (o *DecisionDefinitionResult) GetDecisionRequirementsKey() DecisionRequirementsKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionRequirementsKey
 		return ret
 	}
 
@@ -153,7 +153,7 @@ func (o *DecisionDefinitionResult) GetDecisionRequirementsKey() ModelString {
 
 // GetDecisionRequirementsKeyOk returns a tuple with the DecisionRequirementsKey field value
 // and a boolean to check if the value has been set.
-func (o *DecisionDefinitionResult) GetDecisionRequirementsKeyOk() (*ModelString, bool) {
+func (o *DecisionDefinitionResult) GetDecisionRequirementsKeyOk() (*DecisionRequirementsKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -161,7 +161,7 @@ func (o *DecisionDefinitionResult) GetDecisionRequirementsKeyOk() (*ModelString,
 }
 
 // SetDecisionRequirementsKey sets field value
-func (o *DecisionDefinitionResult) SetDecisionRequirementsKey(v ModelString) {
+func (o *DecisionDefinitionResult) SetDecisionRequirementsKey(v DecisionRequirementsKey) {
 	o.DecisionRequirementsKey = v
 }
 
@@ -238,9 +238,9 @@ func (o *DecisionDefinitionResult) SetName(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *DecisionDefinitionResult) GetTenantId() string {
+func (o *DecisionDefinitionResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -249,7 +249,7 @@ func (o *DecisionDefinitionResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *DecisionDefinitionResult) GetTenantIdOk() (*string, bool) {
+func (o *DecisionDefinitionResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -257,7 +257,7 @@ func (o *DecisionDefinitionResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *DecisionDefinitionResult) SetTenantId(v string) {
+func (o *DecisionDefinitionResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

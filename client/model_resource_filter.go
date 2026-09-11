@@ -32,7 +32,7 @@ type ResourceFilter struct {
 	// Deployment key of this resource.
 	DeploymentKey *DeploymentKeyFilterProperty `json:"deploymentKey,omitempty"`
 	// Tenant ID of this resource.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 }
 
 // NewResourceFilter instantiates a new ResourceFilter object
@@ -245,9 +245,9 @@ func (o *ResourceFilter) SetDeploymentKey(v DeploymentKeyFilterProperty) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *ResourceFilter) GetTenantId() string {
+func (o *ResourceFilter) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -255,7 +255,7 @@ func (o *ResourceFilter) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ResourceFilter) GetTenantIdOk() (*string, bool) {
+func (o *ResourceFilter) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -271,8 +271,8 @@ func (o *ResourceFilter) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *ResourceFilter) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *ResourceFilter) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 

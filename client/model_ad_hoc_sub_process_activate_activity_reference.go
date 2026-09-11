@@ -22,7 +22,7 @@ var _ MappedNullable = &AdHocSubProcessActivateActivityReference{}
 // AdHocSubProcessActivateActivityReference struct for AdHocSubProcessActivateActivityReference
 type AdHocSubProcessActivateActivityReference struct {
 	// The ID of the element that should be activated.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// Variables to be set when activating the element.
 	Variables map[string]interface{} `json:"variables,omitempty"`
 }
@@ -33,7 +33,7 @@ type _AdHocSubProcessActivateActivityReference AdHocSubProcessActivateActivityRe
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAdHocSubProcessActivateActivityReference(elementId string) *AdHocSubProcessActivateActivityReference {
+func NewAdHocSubProcessActivateActivityReference(elementId ElementId) *AdHocSubProcessActivateActivityReference {
 	this := AdHocSubProcessActivateActivityReference{}
 	this.ElementId = elementId
 	return &this
@@ -48,9 +48,9 @@ func NewAdHocSubProcessActivateActivityReferenceWithDefaults() *AdHocSubProcessA
 }
 
 // GetElementId returns the ElementId field value
-func (o *AdHocSubProcessActivateActivityReference) GetElementId() string {
+func (o *AdHocSubProcessActivateActivityReference) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -59,7 +59,7 @@ func (o *AdHocSubProcessActivateActivityReference) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *AdHocSubProcessActivateActivityReference) GetElementIdOk() (*string, bool) {
+func (o *AdHocSubProcessActivateActivityReference) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -67,7 +67,7 @@ func (o *AdHocSubProcessActivateActivityReference) GetElementIdOk() (*string, bo
 }
 
 // SetElementId sets field value
-func (o *AdHocSubProcessActivateActivityReference) SetElementId(v string) {
+func (o *AdHocSubProcessActivateActivityReference) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 

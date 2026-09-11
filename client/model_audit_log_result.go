@@ -23,13 +23,13 @@ var _ MappedNullable = &AuditLogResult{}
 // AuditLogResult Audit log item.
 type AuditLogResult struct {
 	// The unique key of the audit log entry.
-	AuditLogKey ModelString `json:"auditLogKey"`
+	AuditLogKey AuditLogKey `json:"auditLogKey"`
 	// System-generated entity key for an audit log entry.
-	EntityKey     string                    `json:"entityKey"`
+	EntityKey     AuditLogEntityKey         `json:"entityKey"`
 	EntityType    AuditLogEntityTypeEnum    `json:"entityType"`
 	OperationType AuditLogOperationTypeEnum `json:"operationType"`
 	// Key of the batch operation.
-	BatchOperationKey NullableString `json:"batchOperationKey"`
+	BatchOperationKey NullableBatchOperationKey `json:"batchOperationKey"`
 	// The type of batch operation performed, if this is part of a batch.
 	BatchOperationType NullableBatchOperationTypeEnum `json:"batchOperationType"`
 	// The timestamp when the operation occurred.
@@ -41,41 +41,41 @@ type AuditLogResult struct {
 	// The element ID of the agent that performed the operation (e.g. ad-hoc subprocess element ID).
 	AgentElementId NullableString `json:"agentElementId"`
 	// The tenant ID of the audit log.
-	TenantId NullableString       `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId NullableTenantId     `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	Result   AuditLogResultEnum   `json:"result"`
 	Category AuditLogCategoryEnum `json:"category"`
 	// The process definition ID.
-	ProcessDefinitionId NullableString `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId NullableProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The key of the process definition.
-	ProcessDefinitionKey NullableModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey NullableProcessDefinitionKey `json:"processDefinitionKey"`
 	// The key of the process instance.
-	ProcessInstanceKey NullableModelString `json:"processInstanceKey"`
+	ProcessInstanceKey NullableProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The key of the element instance.
-	ElementInstanceKey NullableModelString `json:"elementInstanceKey"`
+	ElementInstanceKey NullableElementInstanceKey `json:"elementInstanceKey"`
 	// The key of the job.
-	JobKey NullableModelString `json:"jobKey"`
+	JobKey NullableJobKey `json:"jobKey"`
 	// The key of the user task.
-	UserTaskKey NullableModelString `json:"userTaskKey"`
+	UserTaskKey NullableUserTaskKey `json:"userTaskKey"`
 	// The decision requirements ID.
 	DecisionRequirementsId NullableString `json:"decisionRequirementsId"`
 	// The assigned key of the decision requirements.
-	DecisionRequirementsKey NullableModelString `json:"decisionRequirementsKey"`
+	DecisionRequirementsKey NullableDecisionRequirementsKey `json:"decisionRequirementsKey"`
 	// The decision definition ID.
-	DecisionDefinitionId NullableString `json:"decisionDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	DecisionDefinitionId NullableDecisionDefinitionId `json:"decisionDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The key of the decision definition.
-	DecisionDefinitionKey NullableModelString `json:"decisionDefinitionKey"`
+	DecisionDefinitionKey NullableDecisionDefinitionKey `json:"decisionDefinitionKey"`
 	// The key of the decision evaluation.
-	DecisionEvaluationKey NullableModelString `json:"decisionEvaluationKey"`
+	DecisionEvaluationKey NullableDecisionEvaluationKey `json:"decisionEvaluationKey"`
 	// The key of the deployment.
-	DeploymentKey NullableModelString `json:"deploymentKey"`
+	DeploymentKey NullableDeploymentKey `json:"deploymentKey"`
 	// The key of the form.
-	FormKey NullableModelString `json:"formKey"`
+	FormKey NullableFormKey `json:"formKey"`
 	// The system-assigned key for this resource.
 	ResourceKey NullableResourceKey `json:"resourceKey"`
 	// The key of the related entity. The content depends on the operation type and entity type. For example, for authorization operations, this will contain the ID of the owner (e.g., user or group) the authorization belongs to.
-	RelatedEntityKey NullableString `json:"relatedEntityKey"`
+	RelatedEntityKey NullableAuditLogEntityKey `json:"relatedEntityKey"`
 	// The type of the related entity. The content depends on the operation type and entity type. For example, for authorization operations, this will contain the type of the owner (e.g., USER or GROUP) the authorization belongs to.
 	RelatedEntityType NullableAuditLogEntityTypeEnum `json:"relatedEntityType"`
 	// Additional description of the entity affected by the operation. For example, for variable operations, this will contain the variable name.
@@ -92,7 +92,7 @@ type _AuditLogResult AuditLogResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAuditLogResult(auditLogKey ModelString, entityKey string, entityType AuditLogEntityTypeEnum, operationType AuditLogOperationTypeEnum, batchOperationKey NullableString, batchOperationType NullableBatchOperationTypeEnum, timestamp time.Time, actorId NullableString, actorType NullableAuditLogActorTypeEnum, agentElementId NullableString, tenantId NullableString, result AuditLogResultEnum, category AuditLogCategoryEnum, processDefinitionId NullableString, processDefinitionKey NullableModelString, processInstanceKey NullableModelString, rootProcessInstanceKey NullableModelString, elementInstanceKey NullableModelString, jobKey NullableModelString, userTaskKey NullableModelString, decisionRequirementsId NullableString, decisionRequirementsKey NullableModelString, decisionDefinitionId NullableString, decisionDefinitionKey NullableModelString, decisionEvaluationKey NullableModelString, deploymentKey NullableModelString, formKey NullableModelString, resourceKey NullableResourceKey, relatedEntityKey NullableString, relatedEntityType NullableAuditLogEntityTypeEnum, entityDescription NullableString, inboundChannelType NullableString, inboundChannelToolName NullableString) *AuditLogResult {
+func NewAuditLogResult(auditLogKey AuditLogKey, entityKey AuditLogEntityKey, entityType AuditLogEntityTypeEnum, operationType AuditLogOperationTypeEnum, batchOperationKey NullableBatchOperationKey, batchOperationType NullableBatchOperationTypeEnum, timestamp time.Time, actorId NullableString, actorType NullableAuditLogActorTypeEnum, agentElementId NullableString, tenantId NullableTenantId, result AuditLogResultEnum, category AuditLogCategoryEnum, processDefinitionId NullableProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, elementInstanceKey NullableElementInstanceKey, jobKey NullableJobKey, userTaskKey NullableUserTaskKey, decisionRequirementsId NullableString, decisionRequirementsKey NullableDecisionRequirementsKey, decisionDefinitionId NullableDecisionDefinitionId, decisionDefinitionKey NullableDecisionDefinitionKey, decisionEvaluationKey NullableDecisionEvaluationKey, deploymentKey NullableDeploymentKey, formKey NullableFormKey, resourceKey NullableResourceKey, relatedEntityKey NullableAuditLogEntityKey, relatedEntityType NullableAuditLogEntityTypeEnum, entityDescription NullableString, inboundChannelType NullableString, inboundChannelToolName NullableString) *AuditLogResult {
 	this := AuditLogResult{}
 	this.AuditLogKey = auditLogKey
 	this.EntityKey = entityKey
@@ -139,9 +139,9 @@ func NewAuditLogResultWithDefaults() *AuditLogResult {
 }
 
 // GetAuditLogKey returns the AuditLogKey field value
-func (o *AuditLogResult) GetAuditLogKey() ModelString {
+func (o *AuditLogResult) GetAuditLogKey() AuditLogKey {
 	if o == nil {
-		var ret ModelString
+		var ret AuditLogKey
 		return ret
 	}
 
@@ -150,7 +150,7 @@ func (o *AuditLogResult) GetAuditLogKey() ModelString {
 
 // GetAuditLogKeyOk returns a tuple with the AuditLogKey field value
 // and a boolean to check if the value has been set.
-func (o *AuditLogResult) GetAuditLogKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetAuditLogKeyOk() (*AuditLogKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -158,14 +158,14 @@ func (o *AuditLogResult) GetAuditLogKeyOk() (*ModelString, bool) {
 }
 
 // SetAuditLogKey sets field value
-func (o *AuditLogResult) SetAuditLogKey(v ModelString) {
+func (o *AuditLogResult) SetAuditLogKey(v AuditLogKey) {
 	o.AuditLogKey = v
 }
 
 // GetEntityKey returns the EntityKey field value
-func (o *AuditLogResult) GetEntityKey() string {
+func (o *AuditLogResult) GetEntityKey() AuditLogEntityKey {
 	if o == nil {
-		var ret string
+		var ret AuditLogEntityKey
 		return ret
 	}
 
@@ -174,7 +174,7 @@ func (o *AuditLogResult) GetEntityKey() string {
 
 // GetEntityKeyOk returns a tuple with the EntityKey field value
 // and a boolean to check if the value has been set.
-func (o *AuditLogResult) GetEntityKeyOk() (*string, bool) {
+func (o *AuditLogResult) GetEntityKeyOk() (*AuditLogEntityKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -182,7 +182,7 @@ func (o *AuditLogResult) GetEntityKeyOk() (*string, bool) {
 }
 
 // SetEntityKey sets field value
-func (o *AuditLogResult) SetEntityKey(v string) {
+func (o *AuditLogResult) SetEntityKey(v AuditLogEntityKey) {
 	o.EntityKey = v
 }
 
@@ -235,10 +235,10 @@ func (o *AuditLogResult) SetOperationType(v AuditLogOperationTypeEnum) {
 }
 
 // GetBatchOperationKey returns the BatchOperationKey field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *AuditLogResult) GetBatchOperationKey() string {
+// If the value is explicit nil, the zero value for BatchOperationKey will be returned
+func (o *AuditLogResult) GetBatchOperationKey() BatchOperationKey {
 	if o == nil || o.BatchOperationKey.Get() == nil {
-		var ret string
+		var ret BatchOperationKey
 		return ret
 	}
 
@@ -248,7 +248,7 @@ func (o *AuditLogResult) GetBatchOperationKey() string {
 // GetBatchOperationKeyOk returns a tuple with the BatchOperationKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetBatchOperationKeyOk() (*string, bool) {
+func (o *AuditLogResult) GetBatchOperationKeyOk() (*BatchOperationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -256,7 +256,7 @@ func (o *AuditLogResult) GetBatchOperationKeyOk() (*string, bool) {
 }
 
 // SetBatchOperationKey sets field value
-func (o *AuditLogResult) SetBatchOperationKey(v string) {
+func (o *AuditLogResult) SetBatchOperationKey(v BatchOperationKey) {
 	o.BatchOperationKey.Set(&v)
 }
 
@@ -389,10 +389,10 @@ func (o *AuditLogResult) SetAgentElementId(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *AuditLogResult) GetTenantId() string {
+// If the value is explicit nil, the zero value for TenantId will be returned
+func (o *AuditLogResult) GetTenantId() TenantId {
 	if o == nil || o.TenantId.Get() == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -402,7 +402,7 @@ func (o *AuditLogResult) GetTenantId() string {
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetTenantIdOk() (*string, bool) {
+func (o *AuditLogResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -410,7 +410,7 @@ func (o *AuditLogResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *AuditLogResult) SetTenantId(v string) {
+func (o *AuditLogResult) SetTenantId(v TenantId) {
 	o.TenantId.Set(&v)
 }
 
@@ -463,10 +463,10 @@ func (o *AuditLogResult) SetCategory(v AuditLogCategoryEnum) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *AuditLogResult) GetProcessDefinitionId() string {
+// If the value is explicit nil, the zero value for ProcessDefinitionId will be returned
+func (o *AuditLogResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil || o.ProcessDefinitionId.Get() == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -476,7 +476,7 @@ func (o *AuditLogResult) GetProcessDefinitionId() string {
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *AuditLogResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -484,15 +484,15 @@ func (o *AuditLogResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *AuditLogResult) SetProcessDefinitionId(v string) {
+func (o *AuditLogResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId.Set(&v)
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetProcessDefinitionKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessDefinitionKey will be returned
+func (o *AuditLogResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil || o.ProcessDefinitionKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -502,7 +502,7 @@ func (o *AuditLogResult) GetProcessDefinitionKey() ModelString {
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -510,15 +510,15 @@ func (o *AuditLogResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *AuditLogResult) SetProcessDefinitionKey(v ModelString) {
+func (o *AuditLogResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey.Set(&v)
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *AuditLogResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.ProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -528,7 +528,7 @@ func (o *AuditLogResult) GetProcessInstanceKey() ModelString {
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -536,15 +536,15 @@ func (o *AuditLogResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessInstanceKey sets field value
-func (o *AuditLogResult) SetProcessInstanceKey(v ModelString) {
+func (o *AuditLogResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey.Set(&v)
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *AuditLogResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -554,7 +554,7 @@ func (o *AuditLogResult) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -562,15 +562,15 @@ func (o *AuditLogResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *AuditLogResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *AuditLogResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetElementInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ElementInstanceKey will be returned
+func (o *AuditLogResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil || o.ElementInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -580,7 +580,7 @@ func (o *AuditLogResult) GetElementInstanceKey() ModelString {
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -588,15 +588,15 @@ func (o *AuditLogResult) GetElementInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetElementInstanceKey sets field value
-func (o *AuditLogResult) SetElementInstanceKey(v ModelString) {
+func (o *AuditLogResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey.Set(&v)
 }
 
 // GetJobKey returns the JobKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetJobKey() ModelString {
+// If the value is explicit nil, the zero value for JobKey will be returned
+func (o *AuditLogResult) GetJobKey() JobKey {
 	if o == nil || o.JobKey.Get() == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -606,7 +606,7 @@ func (o *AuditLogResult) GetJobKey() ModelString {
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetJobKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -614,15 +614,15 @@ func (o *AuditLogResult) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *AuditLogResult) SetJobKey(v ModelString) {
+func (o *AuditLogResult) SetJobKey(v JobKey) {
 	o.JobKey.Set(&v)
 }
 
 // GetUserTaskKey returns the UserTaskKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetUserTaskKey() ModelString {
+// If the value is explicit nil, the zero value for UserTaskKey will be returned
+func (o *AuditLogResult) GetUserTaskKey() UserTaskKey {
 	if o == nil || o.UserTaskKey.Get() == nil {
-		var ret ModelString
+		var ret UserTaskKey
 		return ret
 	}
 
@@ -632,7 +632,7 @@ func (o *AuditLogResult) GetUserTaskKey() ModelString {
 // GetUserTaskKeyOk returns a tuple with the UserTaskKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetUserTaskKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetUserTaskKeyOk() (*UserTaskKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -640,7 +640,7 @@ func (o *AuditLogResult) GetUserTaskKeyOk() (*ModelString, bool) {
 }
 
 // SetUserTaskKey sets field value
-func (o *AuditLogResult) SetUserTaskKey(v ModelString) {
+func (o *AuditLogResult) SetUserTaskKey(v UserTaskKey) {
 	o.UserTaskKey.Set(&v)
 }
 
@@ -671,10 +671,10 @@ func (o *AuditLogResult) SetDecisionRequirementsId(v string) {
 }
 
 // GetDecisionRequirementsKey returns the DecisionRequirementsKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetDecisionRequirementsKey() ModelString {
+// If the value is explicit nil, the zero value for DecisionRequirementsKey will be returned
+func (o *AuditLogResult) GetDecisionRequirementsKey() DecisionRequirementsKey {
 	if o == nil || o.DecisionRequirementsKey.Get() == nil {
-		var ret ModelString
+		var ret DecisionRequirementsKey
 		return ret
 	}
 
@@ -684,7 +684,7 @@ func (o *AuditLogResult) GetDecisionRequirementsKey() ModelString {
 // GetDecisionRequirementsKeyOk returns a tuple with the DecisionRequirementsKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetDecisionRequirementsKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetDecisionRequirementsKeyOk() (*DecisionRequirementsKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -692,15 +692,15 @@ func (o *AuditLogResult) GetDecisionRequirementsKeyOk() (*ModelString, bool) {
 }
 
 // SetDecisionRequirementsKey sets field value
-func (o *AuditLogResult) SetDecisionRequirementsKey(v ModelString) {
+func (o *AuditLogResult) SetDecisionRequirementsKey(v DecisionRequirementsKey) {
 	o.DecisionRequirementsKey.Set(&v)
 }
 
 // GetDecisionDefinitionId returns the DecisionDefinitionId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *AuditLogResult) GetDecisionDefinitionId() string {
+// If the value is explicit nil, the zero value for DecisionDefinitionId will be returned
+func (o *AuditLogResult) GetDecisionDefinitionId() DecisionDefinitionId {
 	if o == nil || o.DecisionDefinitionId.Get() == nil {
-		var ret string
+		var ret DecisionDefinitionId
 		return ret
 	}
 
@@ -710,7 +710,7 @@ func (o *AuditLogResult) GetDecisionDefinitionId() string {
 // GetDecisionDefinitionIdOk returns a tuple with the DecisionDefinitionId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetDecisionDefinitionIdOk() (*string, bool) {
+func (o *AuditLogResult) GetDecisionDefinitionIdOk() (*DecisionDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -718,15 +718,15 @@ func (o *AuditLogResult) GetDecisionDefinitionIdOk() (*string, bool) {
 }
 
 // SetDecisionDefinitionId sets field value
-func (o *AuditLogResult) SetDecisionDefinitionId(v string) {
+func (o *AuditLogResult) SetDecisionDefinitionId(v DecisionDefinitionId) {
 	o.DecisionDefinitionId.Set(&v)
 }
 
 // GetDecisionDefinitionKey returns the DecisionDefinitionKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetDecisionDefinitionKey() ModelString {
+// If the value is explicit nil, the zero value for DecisionDefinitionKey will be returned
+func (o *AuditLogResult) GetDecisionDefinitionKey() DecisionDefinitionKey {
 	if o == nil || o.DecisionDefinitionKey.Get() == nil {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 
@@ -736,7 +736,7 @@ func (o *AuditLogResult) GetDecisionDefinitionKey() ModelString {
 // GetDecisionDefinitionKeyOk returns a tuple with the DecisionDefinitionKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetDecisionDefinitionKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetDecisionDefinitionKeyOk() (*DecisionDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -744,15 +744,15 @@ func (o *AuditLogResult) GetDecisionDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetDecisionDefinitionKey sets field value
-func (o *AuditLogResult) SetDecisionDefinitionKey(v ModelString) {
+func (o *AuditLogResult) SetDecisionDefinitionKey(v DecisionDefinitionKey) {
 	o.DecisionDefinitionKey.Set(&v)
 }
 
 // GetDecisionEvaluationKey returns the DecisionEvaluationKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetDecisionEvaluationKey() ModelString {
+// If the value is explicit nil, the zero value for DecisionEvaluationKey will be returned
+func (o *AuditLogResult) GetDecisionEvaluationKey() DecisionEvaluationKey {
 	if o == nil || o.DecisionEvaluationKey.Get() == nil {
-		var ret ModelString
+		var ret DecisionEvaluationKey
 		return ret
 	}
 
@@ -762,7 +762,7 @@ func (o *AuditLogResult) GetDecisionEvaluationKey() ModelString {
 // GetDecisionEvaluationKeyOk returns a tuple with the DecisionEvaluationKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetDecisionEvaluationKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetDecisionEvaluationKeyOk() (*DecisionEvaluationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -770,15 +770,15 @@ func (o *AuditLogResult) GetDecisionEvaluationKeyOk() (*ModelString, bool) {
 }
 
 // SetDecisionEvaluationKey sets field value
-func (o *AuditLogResult) SetDecisionEvaluationKey(v ModelString) {
+func (o *AuditLogResult) SetDecisionEvaluationKey(v DecisionEvaluationKey) {
 	o.DecisionEvaluationKey.Set(&v)
 }
 
 // GetDeploymentKey returns the DeploymentKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetDeploymentKey() ModelString {
+// If the value is explicit nil, the zero value for DeploymentKey will be returned
+func (o *AuditLogResult) GetDeploymentKey() DeploymentKey {
 	if o == nil || o.DeploymentKey.Get() == nil {
-		var ret ModelString
+		var ret DeploymentKey
 		return ret
 	}
 
@@ -788,7 +788,7 @@ func (o *AuditLogResult) GetDeploymentKey() ModelString {
 // GetDeploymentKeyOk returns a tuple with the DeploymentKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetDeploymentKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetDeploymentKeyOk() (*DeploymentKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -796,15 +796,15 @@ func (o *AuditLogResult) GetDeploymentKeyOk() (*ModelString, bool) {
 }
 
 // SetDeploymentKey sets field value
-func (o *AuditLogResult) SetDeploymentKey(v ModelString) {
+func (o *AuditLogResult) SetDeploymentKey(v DeploymentKey) {
 	o.DeploymentKey.Set(&v)
 }
 
 // GetFormKey returns the FormKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *AuditLogResult) GetFormKey() ModelString {
+// If the value is explicit nil, the zero value for FormKey will be returned
+func (o *AuditLogResult) GetFormKey() FormKey {
 	if o == nil || o.FormKey.Get() == nil {
-		var ret ModelString
+		var ret FormKey
 		return ret
 	}
 
@@ -814,7 +814,7 @@ func (o *AuditLogResult) GetFormKey() ModelString {
 // GetFormKeyOk returns a tuple with the FormKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetFormKeyOk() (*ModelString, bool) {
+func (o *AuditLogResult) GetFormKeyOk() (*FormKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -822,7 +822,7 @@ func (o *AuditLogResult) GetFormKeyOk() (*ModelString, bool) {
 }
 
 // SetFormKey sets field value
-func (o *AuditLogResult) SetFormKey(v ModelString) {
+func (o *AuditLogResult) SetFormKey(v FormKey) {
 	o.FormKey.Set(&v)
 }
 
@@ -853,10 +853,10 @@ func (o *AuditLogResult) SetResourceKey(v ResourceKey) {
 }
 
 // GetRelatedEntityKey returns the RelatedEntityKey field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *AuditLogResult) GetRelatedEntityKey() string {
+// If the value is explicit nil, the zero value for AuditLogEntityKey will be returned
+func (o *AuditLogResult) GetRelatedEntityKey() AuditLogEntityKey {
 	if o == nil || o.RelatedEntityKey.Get() == nil {
-		var ret string
+		var ret AuditLogEntityKey
 		return ret
 	}
 
@@ -866,7 +866,7 @@ func (o *AuditLogResult) GetRelatedEntityKey() string {
 // GetRelatedEntityKeyOk returns a tuple with the RelatedEntityKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AuditLogResult) GetRelatedEntityKeyOk() (*string, bool) {
+func (o *AuditLogResult) GetRelatedEntityKeyOk() (*AuditLogEntityKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -874,7 +874,7 @@ func (o *AuditLogResult) GetRelatedEntityKeyOk() (*string, bool) {
 }
 
 // SetRelatedEntityKey sets field value
-func (o *AuditLogResult) SetRelatedEntityKey(v string) {
+func (o *AuditLogResult) SetRelatedEntityKey(v AuditLogEntityKey) {
 	o.RelatedEntityKey.Set(&v)
 }
 

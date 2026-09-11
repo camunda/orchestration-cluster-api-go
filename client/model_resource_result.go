@@ -30,7 +30,7 @@ type ResourceResult struct {
 	// The resource ID of this resource.
 	ResourceId string `json:"resourceId"`
 	// The tenant ID of this resource.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The unique key of this resource.
 	ResourceKey ResourceKey `json:"resourceKey"`
 }
@@ -41,7 +41,7 @@ type _ResourceResult ResourceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewResourceResult(resourceName string, version int32, versionTag NullableString, resourceId string, tenantId string, resourceKey ResourceKey) *ResourceResult {
+func NewResourceResult(resourceName string, version int32, versionTag NullableString, resourceId string, tenantId TenantId, resourceKey ResourceKey) *ResourceResult {
 	this := ResourceResult{}
 	this.ResourceName = resourceName
 	this.Version = version
@@ -159,9 +159,9 @@ func (o *ResourceResult) SetResourceId(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *ResourceResult) GetTenantId() string {
+func (o *ResourceResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -170,7 +170,7 @@ func (o *ResourceResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *ResourceResult) GetTenantIdOk() (*string, bool) {
+func (o *ResourceResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -178,7 +178,7 @@ func (o *ResourceResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *ResourceResult) SetTenantId(v string) {
+func (o *ResourceResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

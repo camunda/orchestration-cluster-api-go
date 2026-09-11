@@ -20,7 +20,7 @@ var _ MappedNullable = &CursorBackwardPagination{}
 // CursorBackwardPagination struct for CursorBackwardPagination
 type CursorBackwardPagination struct {
 	// Use the `startCursor` value from the previous response to fetch the previous page of results.
-	Before *string `json:"before,omitempty" validate:"regexp=^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}(?:==)?|[A-Za-z0-9+\\/]{3}=)?$"`
+	Before *StartCursor `json:"before,omitempty" validate:"regexp=^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}(?:==)?|[A-Za-z0-9+\\/]{3}=)?$"`
 	// The maximum number of items to return in one request.
 	Limit *int32 `json:"limit,omitempty"`
 }
@@ -47,9 +47,9 @@ func NewCursorBackwardPaginationWithDefaults() *CursorBackwardPagination {
 }
 
 // GetBefore returns the Before field value if set, zero value otherwise.
-func (o *CursorBackwardPagination) GetBefore() string {
+func (o *CursorBackwardPagination) GetBefore() StartCursor {
 	if o == nil || IsNil(o.Before) {
-		var ret string
+		var ret StartCursor
 		return ret
 	}
 	return *o.Before
@@ -57,7 +57,7 @@ func (o *CursorBackwardPagination) GetBefore() string {
 
 // GetBeforeOk returns a tuple with the Before field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CursorBackwardPagination) GetBeforeOk() (*string, bool) {
+func (o *CursorBackwardPagination) GetBeforeOk() (*StartCursor, bool) {
 	if o == nil || IsNil(o.Before) {
 		return nil, false
 	}
@@ -73,8 +73,8 @@ func (o *CursorBackwardPagination) HasBefore() bool {
 	return false
 }
 
-// SetBefore gets a reference to the given string and assigns it to the Before field.
-func (o *CursorBackwardPagination) SetBefore(v string) {
+// SetBefore gets a reference to the given StartCursor and assigns it to the Before field.
+func (o *CursorBackwardPagination) SetBefore(v StartCursor) {
 	o.Before = &v
 }
 

@@ -32,9 +32,9 @@ type ProcessDefinitionFilter struct {
 	// Process definition ID of this process definition.
 	ProcessDefinitionId *StringFilterProperty `json:"processDefinitionId,omitempty"`
 	// Tenant ID of this process definition.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The key for this process definition.
-	ProcessDefinitionKey *ModelString `json:"processDefinitionKey,omitempty"`
+	ProcessDefinitionKey *ProcessDefinitionKey `json:"processDefinitionKey,omitempty"`
 	// Indicates whether the start event of the process has an associated Form Key.
 	HasStartForm *bool `json:"hasStartForm,omitempty"`
 	// Filter by the process definition's state. When not set, process definitions in any state are returned. Set to `ACTIVE` to exclude draining and deleted definitions (recommended for most use cases). Set to `DRAINING` to return only definitions that are being deleted but still have active process instances draining. Set to `DELETED` to return only definitions that have been deleted but are still retained in secondary storage.
@@ -251,9 +251,9 @@ func (o *ProcessDefinitionFilter) SetProcessDefinitionId(v StringFilterProperty)
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *ProcessDefinitionFilter) GetTenantId() string {
+func (o *ProcessDefinitionFilter) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -261,7 +261,7 @@ func (o *ProcessDefinitionFilter) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionFilter) GetTenantIdOk() (*string, bool) {
+func (o *ProcessDefinitionFilter) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -277,15 +277,15 @@ func (o *ProcessDefinitionFilter) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *ProcessDefinitionFilter) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *ProcessDefinitionFilter) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value if set, zero value otherwise.
-func (o *ProcessDefinitionFilter) GetProcessDefinitionKey() ModelString {
+func (o *ProcessDefinitionFilter) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 	return *o.ProcessDefinitionKey
@@ -293,7 +293,7 @@ func (o *ProcessDefinitionFilter) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionFilter) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessDefinitionFilter) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
 		return nil, false
 	}
@@ -309,8 +309,8 @@ func (o *ProcessDefinitionFilter) HasProcessDefinitionKey() bool {
 	return false
 }
 
-// SetProcessDefinitionKey gets a reference to the given ModelString and assigns it to the ProcessDefinitionKey field.
-func (o *ProcessDefinitionFilter) SetProcessDefinitionKey(v ModelString) {
+// SetProcessDefinitionKey gets a reference to the given ProcessDefinitionKey and assigns it to the ProcessDefinitionKey field.
+func (o *ProcessDefinitionFilter) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = &v
 }
 

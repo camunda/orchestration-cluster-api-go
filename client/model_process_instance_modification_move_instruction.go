@@ -23,7 +23,7 @@ var _ MappedNullable = &ProcessInstanceModificationMoveInstruction{}
 type ProcessInstanceModificationMoveInstruction struct {
 	SourceElementInstruction SourceElementInstruction `json:"sourceElementInstruction"`
 	// The target element id.
-	TargetElementId          string                    `json:"targetElementId"`
+	TargetElementId          ElementId                 `json:"targetElementId"`
 	AncestorScopeInstruction *AncestorScopeInstruction `json:"ancestorScopeInstruction,omitempty"`
 	// Instructions describing which variables to create or update.
 	VariableInstructions []ModifyProcessInstanceVariableInstruction `json:"variableInstructions,omitempty"`
@@ -35,7 +35,7 @@ type _ProcessInstanceModificationMoveInstruction ProcessInstanceModificationMove
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceModificationMoveInstruction(sourceElementInstruction SourceElementInstruction, targetElementId string) *ProcessInstanceModificationMoveInstruction {
+func NewProcessInstanceModificationMoveInstruction(sourceElementInstruction SourceElementInstruction, targetElementId ElementId) *ProcessInstanceModificationMoveInstruction {
 	this := ProcessInstanceModificationMoveInstruction{}
 	this.SourceElementInstruction = sourceElementInstruction
 	this.TargetElementId = targetElementId
@@ -75,9 +75,9 @@ func (o *ProcessInstanceModificationMoveInstruction) SetSourceElementInstruction
 }
 
 // GetTargetElementId returns the TargetElementId field value
-func (o *ProcessInstanceModificationMoveInstruction) GetTargetElementId() string {
+func (o *ProcessInstanceModificationMoveInstruction) GetTargetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -86,7 +86,7 @@ func (o *ProcessInstanceModificationMoveInstruction) GetTargetElementId() string
 
 // GetTargetElementIdOk returns a tuple with the TargetElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceModificationMoveInstruction) GetTargetElementIdOk() (*string, bool) {
+func (o *ProcessInstanceModificationMoveInstruction) GetTargetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -94,7 +94,7 @@ func (o *ProcessInstanceModificationMoveInstruction) GetTargetElementIdOk() (*st
 }
 
 // SetTargetElementId sets field value
-func (o *ProcessInstanceModificationMoveInstruction) SetTargetElementId(v string) {
+func (o *ProcessInstanceModificationMoveInstruction) SetTargetElementId(v ElementId) {
 	o.TargetElementId = v
 }
 

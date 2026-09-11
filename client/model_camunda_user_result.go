@@ -22,7 +22,7 @@ var _ MappedNullable = &CamundaUserResult{}
 // CamundaUserResult struct for CamundaUserResult
 type CamundaUserResult struct {
 	// The username of the user.
-	Username string `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	Username Username `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The display name of the user.
 	DisplayName NullableString `json:"displayName"`
 	// The email of the user.
@@ -49,7 +49,7 @@ type _CamundaUserResult CamundaUserResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCamundaUserResult(username string, displayName NullableString, email NullableString, authorizedComponents []string, tenants []TenantResult, groups []string, roles []string, salesPlanType NullableString, c8Links map[string]string, canLogout bool) *CamundaUserResult {
+func NewCamundaUserResult(username Username, displayName NullableString, email NullableString, authorizedComponents []string, tenants []TenantResult, groups []string, roles []string, salesPlanType NullableString, c8Links map[string]string, canLogout bool) *CamundaUserResult {
 	this := CamundaUserResult{}
 	this.Username = username
 	this.DisplayName = displayName
@@ -73,9 +73,9 @@ func NewCamundaUserResultWithDefaults() *CamundaUserResult {
 }
 
 // GetUsername returns the Username field value
-func (o *CamundaUserResult) GetUsername() string {
+func (o *CamundaUserResult) GetUsername() Username {
 	if o == nil {
-		var ret string
+		var ret Username
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *CamundaUserResult) GetUsername() string {
 
 // GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
-func (o *CamundaUserResult) GetUsernameOk() (*string, bool) {
+func (o *CamundaUserResult) GetUsernameOk() (*Username, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *CamundaUserResult) GetUsernameOk() (*string, bool) {
 }
 
 // SetUsername sets field value
-func (o *CamundaUserResult) SetUsername(v string) {
+func (o *CamundaUserResult) SetUsername(v Username) {
 	o.Username = v
 }
 

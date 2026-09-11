@@ -22,17 +22,17 @@ var _ MappedNullable = &ElementInstanceWaitStateResult{}
 // ElementInstanceWaitStateResult An element instance waiting state.
 type ElementInstanceWaitStateResult struct {
 	// Key of the root process instance.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The process instance key associated to this element instance.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The element instance key associated to this element instance.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// The element ID for this element instance.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The BPMN element type of this element instance.
 	ElementType WaitStateElementTypeEnum `json:"elementType"`
 	// The tenant ID of the element instance.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The BPMN process ID of the process definition associated to this element instance.
 	BpmnProcessId string `json:"bpmnProcessId"`
 	// Wait-state-specific details, resolved by waitStateType.
@@ -45,7 +45,7 @@ type _ElementInstanceWaitStateResult ElementInstanceWaitStateResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewElementInstanceWaitStateResult(rootProcessInstanceKey NullableModelString, processInstanceKey ModelString, elementInstanceKey ModelString, elementId string, elementType WaitStateElementTypeEnum, tenantId string, bpmnProcessId string, details WaitStateDetails) *ElementInstanceWaitStateResult {
+func NewElementInstanceWaitStateResult(rootProcessInstanceKey NullableProcessInstanceKey, processInstanceKey ProcessInstanceKey, elementInstanceKey ElementInstanceKey, elementId ElementId, elementType WaitStateElementTypeEnum, tenantId TenantId, bpmnProcessId string, details WaitStateDetails) *ElementInstanceWaitStateResult {
 	this := ElementInstanceWaitStateResult{}
 	this.RootProcessInstanceKey = rootProcessInstanceKey
 	this.ProcessInstanceKey = processInstanceKey
@@ -67,10 +67,10 @@ func NewElementInstanceWaitStateResultWithDefaults() *ElementInstanceWaitStateRe
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *ElementInstanceWaitStateResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *ElementInstanceWaitStateResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -80,7 +80,7 @@ func (o *ElementInstanceWaitStateResult) GetRootProcessInstanceKey() ModelString
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ElementInstanceWaitStateResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ElementInstanceWaitStateResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -88,14 +88,14 @@ func (o *ElementInstanceWaitStateResult) GetRootProcessInstanceKeyOk() (*ModelSt
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *ElementInstanceWaitStateResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *ElementInstanceWaitStateResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *ElementInstanceWaitStateResult) GetProcessInstanceKey() ModelString {
+func (o *ElementInstanceWaitStateResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -104,7 +104,7 @@ func (o *ElementInstanceWaitStateResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceWaitStateResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ElementInstanceWaitStateResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -112,14 +112,14 @@ func (o *ElementInstanceWaitStateResult) GetProcessInstanceKeyOk() (*ModelString
 }
 
 // SetProcessInstanceKey sets field value
-func (o *ElementInstanceWaitStateResult) SetProcessInstanceKey(v ModelString) {
+func (o *ElementInstanceWaitStateResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *ElementInstanceWaitStateResult) GetElementInstanceKey() ModelString {
+func (o *ElementInstanceWaitStateResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -128,7 +128,7 @@ func (o *ElementInstanceWaitStateResult) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceWaitStateResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *ElementInstanceWaitStateResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -136,14 +136,14 @@ func (o *ElementInstanceWaitStateResult) GetElementInstanceKeyOk() (*ModelString
 }
 
 // SetElementInstanceKey sets field value
-func (o *ElementInstanceWaitStateResult) SetElementInstanceKey(v ModelString) {
+func (o *ElementInstanceWaitStateResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
 // GetElementId returns the ElementId field value
-func (o *ElementInstanceWaitStateResult) GetElementId() string {
+func (o *ElementInstanceWaitStateResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -152,7 +152,7 @@ func (o *ElementInstanceWaitStateResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceWaitStateResult) GetElementIdOk() (*string, bool) {
+func (o *ElementInstanceWaitStateResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -160,7 +160,7 @@ func (o *ElementInstanceWaitStateResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *ElementInstanceWaitStateResult) SetElementId(v string) {
+func (o *ElementInstanceWaitStateResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
@@ -189,9 +189,9 @@ func (o *ElementInstanceWaitStateResult) SetElementType(v WaitStateElementTypeEn
 }
 
 // GetTenantId returns the TenantId field value
-func (o *ElementInstanceWaitStateResult) GetTenantId() string {
+func (o *ElementInstanceWaitStateResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -200,7 +200,7 @@ func (o *ElementInstanceWaitStateResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceWaitStateResult) GetTenantIdOk() (*string, bool) {
+func (o *ElementInstanceWaitStateResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -208,7 +208,7 @@ func (o *ElementInstanceWaitStateResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *ElementInstanceWaitStateResult) SetTenantId(v string) {
+func (o *ElementInstanceWaitStateResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

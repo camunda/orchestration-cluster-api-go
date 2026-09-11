@@ -23,9 +23,9 @@ type JobCompletionRequest struct {
 	Variables map[string]interface{} `json:"variables,omitempty"`
 	Result    *JobResult             `json:"result,omitempty"`
 	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`. For a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). A job that was activated without a lease requires no token.
-	LeaseToken NullableString `json:"leaseToken,omitempty"`
+	LeaseToken NullableJobLeaseToken `json:"leaseToken,omitempty"`
 	// An optional business id to assign to the process instance the job belongs to, as part of completing the job, letting a worker set the identifier from work it just performed. The business id can only be assigned to a root process instance: if the job belongs to a child process instance (one started by a call activity), the completion is rejected. An empty business id is likewise rejected. The assignment is single and irreversible and is only accepted while business id uniqueness is disabled. Only artifacts created after the assignment carry the business id; already-existing ones are not enriched. Completing with a business id that differs from one already assigned rejects the whole completion, leaving the job open; re-sending the identical business id is an idempotent no-op.
-	BusinessId NullableString `json:"businessId,omitempty"`
+	BusinessId NullableBusinessId `json:"businessId,omitempty"`
 }
 
 // NewJobCompletionRequest instantiates a new JobCompletionRequest object
@@ -111,9 +111,9 @@ func (o *JobCompletionRequest) SetResult(v JobResult) {
 }
 
 // GetLeaseToken returns the LeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobCompletionRequest) GetLeaseToken() string {
+func (o *JobCompletionRequest) GetLeaseToken() JobLeaseToken {
 	if o == nil || IsNil(o.LeaseToken.Get()) {
-		var ret string
+		var ret JobLeaseToken
 		return ret
 	}
 	return *o.LeaseToken.Get()
@@ -122,7 +122,7 @@ func (o *JobCompletionRequest) GetLeaseToken() string {
 // GetLeaseTokenOk returns a tuple with the LeaseToken field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobCompletionRequest) GetLeaseTokenOk() (*string, bool) {
+func (o *JobCompletionRequest) GetLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -139,7 +139,7 @@ func (o *JobCompletionRequest) HasLeaseToken() bool {
 }
 
 // SetLeaseToken gets a reference to the given NullableString and assigns it to the LeaseToken field.
-func (o *JobCompletionRequest) SetLeaseToken(v string) {
+func (o *JobCompletionRequest) SetLeaseToken(v JobLeaseToken) {
 	o.LeaseToken.Set(&v)
 }
 
@@ -154,9 +154,9 @@ func (o *JobCompletionRequest) UnsetLeaseToken() {
 }
 
 // GetBusinessId returns the BusinessId field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobCompletionRequest) GetBusinessId() string {
+func (o *JobCompletionRequest) GetBusinessId() BusinessId {
 	if o == nil || IsNil(o.BusinessId.Get()) {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 	return *o.BusinessId.Get()
@@ -165,7 +165,7 @@ func (o *JobCompletionRequest) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobCompletionRequest) GetBusinessIdOk() (*string, bool) {
+func (o *JobCompletionRequest) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -182,7 +182,7 @@ func (o *JobCompletionRequest) HasBusinessId() bool {
 }
 
 // SetBusinessId gets a reference to the given NullableString and assigns it to the BusinessId field.
-func (o *JobCompletionRequest) SetBusinessId(v string) {
+func (o *JobCompletionRequest) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 

@@ -26,7 +26,7 @@ type SignalBroadcastRequest struct {
 	// The signal variables as a JSON object.
 	Variables map[string]interface{} `json:"variables,omitempty"`
 	// The ID of the tenant that owns the signal.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 }
 
 type _SignalBroadcastRequest SignalBroadcastRequest
@@ -106,9 +106,9 @@ func (o *SignalBroadcastRequest) SetVariables(v map[string]interface{}) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *SignalBroadcastRequest) GetTenantId() string {
+func (o *SignalBroadcastRequest) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -116,7 +116,7 @@ func (o *SignalBroadcastRequest) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *SignalBroadcastRequest) GetTenantIdOk() (*string, bool) {
+func (o *SignalBroadcastRequest) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -132,8 +132,8 @@ func (o *SignalBroadcastRequest) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *SignalBroadcastRequest) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *SignalBroadcastRequest) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 

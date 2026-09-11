@@ -32,7 +32,7 @@ type CreateGlobalTaskListenerRequest struct {
 	// List of user task event types that trigger the listener.
 	EventTypes []GlobalTaskListenerEventTypeEnum `json:"eventTypes,omitempty"`
 	// The user-defined id for the global listener
-	Id string `json:"id" validate:"regexp=^[a-zA-Z0-9_~@.+\\\\-]+$"`
+	Id GlobalListenerId `json:"id" validate:"regexp=^[a-zA-Z0-9_~@.+\\\\-]+$"`
 }
 
 type _CreateGlobalTaskListenerRequest CreateGlobalTaskListenerRequest
@@ -41,7 +41,7 @@ type _CreateGlobalTaskListenerRequest CreateGlobalTaskListenerRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateGlobalTaskListenerRequest(id string) *CreateGlobalTaskListenerRequest {
+func NewCreateGlobalTaskListenerRequest(id GlobalListenerId) *CreateGlobalTaskListenerRequest {
 	this := CreateGlobalTaskListenerRequest{}
 	this.Id = id
 	return &this
@@ -216,9 +216,9 @@ func (o *CreateGlobalTaskListenerRequest) SetEventTypes(v []GlobalTaskListenerEv
 }
 
 // GetId returns the Id field value
-func (o *CreateGlobalTaskListenerRequest) GetId() string {
+func (o *CreateGlobalTaskListenerRequest) GetId() GlobalListenerId {
 	if o == nil {
-		var ret string
+		var ret GlobalListenerId
 		return ret
 	}
 
@@ -227,7 +227,7 @@ func (o *CreateGlobalTaskListenerRequest) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *CreateGlobalTaskListenerRequest) GetIdOk() (*string, bool) {
+func (o *CreateGlobalTaskListenerRequest) GetIdOk() (*GlobalListenerId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -235,7 +235,7 @@ func (o *CreateGlobalTaskListenerRequest) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *CreateGlobalTaskListenerRequest) SetId(v string) {
+func (o *CreateGlobalTaskListenerRequest) SetId(v GlobalListenerId) {
 	o.Id = v
 }
 

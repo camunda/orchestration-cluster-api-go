@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessInstanceModificationTerminateByIdInstruction{}
 // ProcessInstanceModificationTerminateByIdInstruction Instruction describing which elements to terminate. The element instances are determined at runtime by the given id.
 type ProcessInstanceModificationTerminateByIdInstruction struct {
 	// The id of the elements to terminate. The element instances are determined at runtime.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 }
 
 type _ProcessInstanceModificationTerminateByIdInstruction ProcessInstanceModificationTerminateByIdInstruction
@@ -31,7 +31,7 @@ type _ProcessInstanceModificationTerminateByIdInstruction ProcessInstanceModific
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceModificationTerminateByIdInstruction(elementId string) *ProcessInstanceModificationTerminateByIdInstruction {
+func NewProcessInstanceModificationTerminateByIdInstruction(elementId ElementId) *ProcessInstanceModificationTerminateByIdInstruction {
 	this := ProcessInstanceModificationTerminateByIdInstruction{}
 	this.ElementId = elementId
 	return &this
@@ -46,9 +46,9 @@ func NewProcessInstanceModificationTerminateByIdInstructionWithDefaults() *Proce
 }
 
 // GetElementId returns the ElementId field value
-func (o *ProcessInstanceModificationTerminateByIdInstruction) GetElementId() string {
+func (o *ProcessInstanceModificationTerminateByIdInstruction) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *ProcessInstanceModificationTerminateByIdInstruction) GetElementId() str
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceModificationTerminateByIdInstruction) GetElementIdOk() (*string, bool) {
+func (o *ProcessInstanceModificationTerminateByIdInstruction) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *ProcessInstanceModificationTerminateByIdInstruction) GetElementIdOk() (
 }
 
 // SetElementId sets field value
-func (o *ProcessInstanceModificationTerminateByIdInstruction) SetElementId(v string) {
+func (o *ProcessInstanceModificationTerminateByIdInstruction) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 

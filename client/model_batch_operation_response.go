@@ -23,7 +23,7 @@ var _ MappedNullable = &BatchOperationResponse{}
 // BatchOperationResponse struct for BatchOperationResponse
 type BatchOperationResponse struct {
 	// Key or (Operate Legacy ID = UUID) of the batch operation.
-	BatchOperationKey  string                  `json:"batchOperationKey"`
+	BatchOperationKey  BatchOperationKey       `json:"batchOperationKey"`
 	State              BatchOperationStateEnum `json:"state"`
 	BatchOperationType BatchOperationTypeEnum  `json:"batchOperationType"`
 	// The start date of the batch operation. This is `null` if the batch operation has not yet started.
@@ -50,7 +50,7 @@ type _BatchOperationResponse BatchOperationResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBatchOperationResponse(batchOperationKey string, state BatchOperationStateEnum, batchOperationType BatchOperationTypeEnum, startDate NullableTime, endDate NullableTime, actorType NullableAuditLogActorTypeEnum, actorId NullableString, operationsTotalCount int32, operationsFailedCount int32, operationsCompletedCount int32, errors []BatchOperationError) *BatchOperationResponse {
+func NewBatchOperationResponse(batchOperationKey BatchOperationKey, state BatchOperationStateEnum, batchOperationType BatchOperationTypeEnum, startDate NullableTime, endDate NullableTime, actorType NullableAuditLogActorTypeEnum, actorId NullableString, operationsTotalCount int32, operationsFailedCount int32, operationsCompletedCount int32, errors []BatchOperationError) *BatchOperationResponse {
 	this := BatchOperationResponse{}
 	this.BatchOperationKey = batchOperationKey
 	this.State = state
@@ -75,9 +75,9 @@ func NewBatchOperationResponseWithDefaults() *BatchOperationResponse {
 }
 
 // GetBatchOperationKey returns the BatchOperationKey field value
-func (o *BatchOperationResponse) GetBatchOperationKey() string {
+func (o *BatchOperationResponse) GetBatchOperationKey() BatchOperationKey {
 	if o == nil {
-		var ret string
+		var ret BatchOperationKey
 		return ret
 	}
 
@@ -86,7 +86,7 @@ func (o *BatchOperationResponse) GetBatchOperationKey() string {
 
 // GetBatchOperationKeyOk returns a tuple with the BatchOperationKey field value
 // and a boolean to check if the value has been set.
-func (o *BatchOperationResponse) GetBatchOperationKeyOk() (*string, bool) {
+func (o *BatchOperationResponse) GetBatchOperationKeyOk() (*BatchOperationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -94,7 +94,7 @@ func (o *BatchOperationResponse) GetBatchOperationKeyOk() (*string, bool) {
 }
 
 // SetBatchOperationKey sets field value
-func (o *BatchOperationResponse) SetBatchOperationKey(v string) {
+func (o *BatchOperationResponse) SetBatchOperationKey(v BatchOperationKey) {
 	o.BatchOperationKey = v
 }
 

@@ -24,7 +24,7 @@ type JobWaitStateDetails struct {
 	// The wait state type discriminator.
 	WaitStateType string `json:"waitStateType"`
 	// The key of the job.
-	JobKey ModelString `json:"jobKey"`
+	JobKey JobKey `json:"jobKey"`
 	// The job type (worker subscription identifier).
 	JobType string `json:"jobType"`
 	// The kind of job.
@@ -41,7 +41,7 @@ type _JobWaitStateDetails JobWaitStateDetails
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobWaitStateDetails(waitStateType string, jobKey ModelString, jobType string, jobKind JobKindEnum, listenerEventType NullableJobListenerEventTypeEnum, retries NullableInt32) *JobWaitStateDetails {
+func NewJobWaitStateDetails(waitStateType string, jobKey JobKey, jobType string, jobKind JobKindEnum, listenerEventType NullableJobListenerEventTypeEnum, retries NullableInt32) *JobWaitStateDetails {
 	this := JobWaitStateDetails{}
 	this.WaitStateType = waitStateType
 	this.JobKey = jobKey
@@ -85,9 +85,9 @@ func (o *JobWaitStateDetails) SetWaitStateType(v string) {
 }
 
 // GetJobKey returns the JobKey field value
-func (o *JobWaitStateDetails) GetJobKey() ModelString {
+func (o *JobWaitStateDetails) GetJobKey() JobKey {
 	if o == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -96,7 +96,7 @@ func (o *JobWaitStateDetails) GetJobKey() ModelString {
 
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-func (o *JobWaitStateDetails) GetJobKeyOk() (*ModelString, bool) {
+func (o *JobWaitStateDetails) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -104,7 +104,7 @@ func (o *JobWaitStateDetails) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *JobWaitStateDetails) SetJobKey(v ModelString) {
+func (o *JobWaitStateDetails) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 

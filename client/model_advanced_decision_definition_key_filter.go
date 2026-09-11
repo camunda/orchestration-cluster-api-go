@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedDecisionDefinitionKeyFilter{}
 // AdvancedDecisionDefinitionKeyFilter Advanced DecisionDefinitionKey filter.
 type AdvancedDecisionDefinitionKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *DecisionDefinitionKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *DecisionDefinitionKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []DecisionDefinitionKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []DecisionDefinitionKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedDecisionDefinitionKeyFilter instantiates a new AdvancedDecisionDefinitionKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedDecisionDefinitionKeyFilterWithDefaults() *AdvancedDecisionDefin
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedDecisionDefinitionKeyFilter) GetEq() ModelString {
+func (o *AdvancedDecisionDefinitionKeyFilter) GetEq() DecisionDefinitionKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedDecisionDefinitionKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDecisionDefinitionKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedDecisionDefinitionKeyFilter) GetEqOk() (*DecisionDefinitionKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedDecisionDefinitionKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedDecisionDefinitionKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given DecisionDefinitionKey and assigns it to the Eq field.
+func (o *AdvancedDecisionDefinitionKeyFilter) SetEq(v DecisionDefinitionKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedDecisionDefinitionKeyFilter) GetNeq() ModelString {
+func (o *AdvancedDecisionDefinitionKeyFilter) GetNeq() DecisionDefinitionKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedDecisionDefinitionKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDecisionDefinitionKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedDecisionDefinitionKeyFilter) GetNeqOk() (*DecisionDefinitionKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedDecisionDefinitionKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedDecisionDefinitionKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given DecisionDefinitionKey and assigns it to the Neq field.
+func (o *AdvancedDecisionDefinitionKeyFilter) SetNeq(v DecisionDefinitionKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedDecisionDefinitionKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedDecisionDefinitionKeyFilter) GetIn() []ModelString {
+func (o *AdvancedDecisionDefinitionKeyFilter) GetIn() []DecisionDefinitionKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []DecisionDefinitionKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedDecisionDefinitionKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDecisionDefinitionKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedDecisionDefinitionKeyFilter) GetInOk() ([]DecisionDefinitionKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedDecisionDefinitionKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedDecisionDefinitionKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []DecisionDefinitionKey and assigns it to the In field.
+func (o *AdvancedDecisionDefinitionKeyFilter) SetIn(v []DecisionDefinitionKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedDecisionDefinitionKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedDecisionDefinitionKeyFilter) GetNotIn() []DecisionDefinitionKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []DecisionDefinitionKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedDecisionDefinitionKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDecisionDefinitionKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedDecisionDefinitionKeyFilter) GetNotInOk() ([]DecisionDefinitionKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedDecisionDefinitionKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedDecisionDefinitionKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []DecisionDefinitionKey and assigns it to the NotIn field.
+func (o *AdvancedDecisionDefinitionKeyFilter) SetNotIn(v []DecisionDefinitionKey) {
 	o.NotIn = v
 }
 

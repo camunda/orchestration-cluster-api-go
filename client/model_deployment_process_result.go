@@ -22,15 +22,15 @@ var _ MappedNullable = &DeploymentProcessResult{}
 // DeploymentProcessResult A deployed process.
 type DeploymentProcessResult struct {
 	// The bpmn process ID, as parsed during deployment, together with the version forms a unique identifier for a specific process definition.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The assigned process version.
 	ProcessDefinitionVersion int32 `json:"processDefinitionVersion"`
 	// The resource name from which this process was parsed.
 	ResourceName string `json:"resourceName"`
 	// The tenant ID of the deployed process.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned key, which acts as a unique identifier for this process.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 }
 
 type _DeploymentProcessResult DeploymentProcessResult
@@ -39,7 +39,7 @@ type _DeploymentProcessResult DeploymentProcessResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentProcessResult(processDefinitionId string, processDefinitionVersion int32, resourceName string, tenantId string, processDefinitionKey ModelString) *DeploymentProcessResult {
+func NewDeploymentProcessResult(processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, resourceName string, tenantId TenantId, processDefinitionKey ProcessDefinitionKey) *DeploymentProcessResult {
 	this := DeploymentProcessResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionVersion = processDefinitionVersion
@@ -58,9 +58,9 @@ func NewDeploymentProcessResultWithDefaults() *DeploymentProcessResult {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *DeploymentProcessResult) GetProcessDefinitionId() string {
+func (o *DeploymentProcessResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -69,7 +69,7 @@ func (o *DeploymentProcessResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentProcessResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *DeploymentProcessResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -77,7 +77,7 @@ func (o *DeploymentProcessResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *DeploymentProcessResult) SetProcessDefinitionId(v string) {
+func (o *DeploymentProcessResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
@@ -130,9 +130,9 @@ func (o *DeploymentProcessResult) SetResourceName(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *DeploymentProcessResult) GetTenantId() string {
+func (o *DeploymentProcessResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -141,7 +141,7 @@ func (o *DeploymentProcessResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentProcessResult) GetTenantIdOk() (*string, bool) {
+func (o *DeploymentProcessResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -149,14 +149,14 @@ func (o *DeploymentProcessResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *DeploymentProcessResult) SetTenantId(v string) {
+func (o *DeploymentProcessResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *DeploymentProcessResult) GetProcessDefinitionKey() ModelString {
+func (o *DeploymentProcessResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -165,7 +165,7 @@ func (o *DeploymentProcessResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentProcessResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *DeploymentProcessResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -173,7 +173,7 @@ func (o *DeploymentProcessResult) GetProcessDefinitionKeyOk() (*ModelString, boo
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *DeploymentProcessResult) SetProcessDefinitionKey(v ModelString) {
+func (o *DeploymentProcessResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 

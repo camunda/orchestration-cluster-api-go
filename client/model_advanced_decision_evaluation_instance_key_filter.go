@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedDecisionEvaluationInstanceKeyFilter{}
 // AdvancedDecisionEvaluationInstanceKeyFilter Advanced DecisionEvaluationInstanceKey filter.
 type AdvancedDecisionEvaluationInstanceKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *string `json:"$eq,omitempty" validate:"regexp=^[0-9]+-[0-9]+$"`
+	Eq *DecisionEvaluationInstanceKey `json:"$eq,omitempty" validate:"regexp=^[0-9]+-[0-9]+$"`
 	// Checks for inequality with the provided value.
-	Neq *string `json:"$neq,omitempty" validate:"regexp=^[0-9]+-[0-9]+$"`
+	Neq *DecisionEvaluationInstanceKey `json:"$neq,omitempty" validate:"regexp=^[0-9]+-[0-9]+$"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []string `json:"$in,omitempty"`
+	In []DecisionEvaluationInstanceKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []string `json:"$notIn,omitempty"`
+	NotIn []DecisionEvaluationInstanceKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedDecisionEvaluationInstanceKeyFilter instantiates a new AdvancedDecisionEvaluationInstanceKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedDecisionEvaluationInstanceKeyFilterWithDefaults() *AdvancedDecis
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetEq() string {
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetEq() DecisionEvaluationInstanceKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret string
+		var ret DecisionEvaluationInstanceKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetEq() string {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetEqOk() (*string, bool) {
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetEqOk() (*DecisionEvaluationInstanceKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given string and assigns it to the Eq field.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetEq(v string) {
+// SetEq gets a reference to the given DecisionEvaluationInstanceKey and assigns it to the Eq field.
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetEq(v DecisionEvaluationInstanceKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNeq() string {
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNeq() DecisionEvaluationInstanceKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret string
+		var ret DecisionEvaluationInstanceKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNeq() string {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNeqOk() (*string, bool) {
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNeqOk() (*DecisionEvaluationInstanceKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given string and assigns it to the Neq field.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetNeq(v string) {
+// SetNeq gets a reference to the given DecisionEvaluationInstanceKey and assigns it to the Neq field.
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetNeq(v DecisionEvaluationInstanceKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetIn() []string {
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetIn() []DecisionEvaluationInstanceKey {
 	if o == nil || IsNil(o.In) {
-		var ret []string
+		var ret []DecisionEvaluationInstanceKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetIn() []string {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetInOk() ([]string, bool) {
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetInOk() ([]DecisionEvaluationInstanceKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []string and assigns it to the In field.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetIn(v []string) {
+// SetIn gets a reference to the given []DecisionEvaluationInstanceKey and assigns it to the In field.
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetIn(v []DecisionEvaluationInstanceKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNotIn() []string {
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNotIn() []DecisionEvaluationInstanceKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []string
+		var ret []DecisionEvaluationInstanceKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNotIn() []string {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNotInOk() ([]string, bool) {
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) GetNotInOk() ([]DecisionEvaluationInstanceKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedDecisionEvaluationInstanceKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []string and assigns it to the NotIn field.
-func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetNotIn(v []string) {
+// SetNotIn gets a reference to the given []DecisionEvaluationInstanceKey and assigns it to the NotIn field.
+func (o *AdvancedDecisionEvaluationInstanceKeyFilter) SetNotIn(v []DecisionEvaluationInstanceKey) {
 	o.NotIn = v
 }
 

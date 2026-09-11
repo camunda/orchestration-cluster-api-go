@@ -21,11 +21,11 @@ var _ MappedNullable = &DecisionEvaluationByKey{}
 
 // DecisionEvaluationByKey struct for DecisionEvaluationByKey
 type DecisionEvaluationByKey struct {
-	DecisionDefinitionKey ModelString `json:"decisionDefinitionKey"`
+	DecisionDefinitionKey DecisionDefinitionKey `json:"decisionDefinitionKey"`
 	// The decision evaluation variables as JSON document.
 	Variables map[string]interface{} `json:"variables,omitempty"`
 	// The tenant ID of the decision.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 }
 
 type _DecisionEvaluationByKey DecisionEvaluationByKey
@@ -34,7 +34,7 @@ type _DecisionEvaluationByKey DecisionEvaluationByKey
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDecisionEvaluationByKey(decisionDefinitionKey ModelString) *DecisionEvaluationByKey {
+func NewDecisionEvaluationByKey(decisionDefinitionKey DecisionDefinitionKey) *DecisionEvaluationByKey {
 	this := DecisionEvaluationByKey{}
 	this.DecisionDefinitionKey = decisionDefinitionKey
 	return &this
@@ -49,9 +49,9 @@ func NewDecisionEvaluationByKeyWithDefaults() *DecisionEvaluationByKey {
 }
 
 // GetDecisionDefinitionKey returns the DecisionDefinitionKey field value
-func (o *DecisionEvaluationByKey) GetDecisionDefinitionKey() ModelString {
+func (o *DecisionEvaluationByKey) GetDecisionDefinitionKey() DecisionDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *DecisionEvaluationByKey) GetDecisionDefinitionKey() ModelString {
 
 // GetDecisionDefinitionKeyOk returns a tuple with the DecisionDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *DecisionEvaluationByKey) GetDecisionDefinitionKeyOk() (*ModelString, bool) {
+func (o *DecisionEvaluationByKey) GetDecisionDefinitionKeyOk() (*DecisionDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,7 +68,7 @@ func (o *DecisionEvaluationByKey) GetDecisionDefinitionKeyOk() (*ModelString, bo
 }
 
 // SetDecisionDefinitionKey sets field value
-func (o *DecisionEvaluationByKey) SetDecisionDefinitionKey(v ModelString) {
+func (o *DecisionEvaluationByKey) SetDecisionDefinitionKey(v DecisionDefinitionKey) {
 	o.DecisionDefinitionKey = v
 }
 
@@ -105,9 +105,9 @@ func (o *DecisionEvaluationByKey) SetVariables(v map[string]interface{}) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *DecisionEvaluationByKey) GetTenantId() string {
+func (o *DecisionEvaluationByKey) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -115,7 +115,7 @@ func (o *DecisionEvaluationByKey) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionEvaluationByKey) GetTenantIdOk() (*string, bool) {
+func (o *DecisionEvaluationByKey) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -131,8 +131,8 @@ func (o *DecisionEvaluationByKey) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *DecisionEvaluationByKey) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *DecisionEvaluationByKey) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 

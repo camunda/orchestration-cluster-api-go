@@ -24,7 +24,7 @@ type DirectAncestorKeyInstruction struct {
 	// The type of ancestor scope instruction.
 	AncestorScopeType string `json:"ancestorScopeType"`
 	// The key of the ancestor scope the element instance should be created in. Set to -1 to create the new element instance within an existing element instance of the flow scope. If multiple instances of the target element's flow scope exist, choose one specifically with this property by providing its key.
-	AncestorElementInstanceKey ModelString `json:"ancestorElementInstanceKey"`
+	AncestorElementInstanceKey ElementInstanceKey `json:"ancestorElementInstanceKey"`
 }
 
 type _DirectAncestorKeyInstruction DirectAncestorKeyInstruction
@@ -33,7 +33,7 @@ type _DirectAncestorKeyInstruction DirectAncestorKeyInstruction
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDirectAncestorKeyInstruction(ancestorScopeType string, ancestorElementInstanceKey ModelString) *DirectAncestorKeyInstruction {
+func NewDirectAncestorKeyInstruction(ancestorScopeType string, ancestorElementInstanceKey ElementInstanceKey) *DirectAncestorKeyInstruction {
 	this := DirectAncestorKeyInstruction{}
 	this.AncestorScopeType = ancestorScopeType
 	this.AncestorElementInstanceKey = ancestorElementInstanceKey
@@ -73,9 +73,9 @@ func (o *DirectAncestorKeyInstruction) SetAncestorScopeType(v string) {
 }
 
 // GetAncestorElementInstanceKey returns the AncestorElementInstanceKey field value
-func (o *DirectAncestorKeyInstruction) GetAncestorElementInstanceKey() ModelString {
+func (o *DirectAncestorKeyInstruction) GetAncestorElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *DirectAncestorKeyInstruction) GetAncestorElementInstanceKey() ModelStri
 
 // GetAncestorElementInstanceKeyOk returns a tuple with the AncestorElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *DirectAncestorKeyInstruction) GetAncestorElementInstanceKeyOk() (*ModelString, bool) {
+func (o *DirectAncestorKeyInstruction) GetAncestorElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *DirectAncestorKeyInstruction) GetAncestorElementInstanceKeyOk() (*Model
 }
 
 // SetAncestorElementInstanceKey sets field value
-func (o *DirectAncestorKeyInstruction) SetAncestorElementInstanceKey(v ModelString) {
+func (o *DirectAncestorKeyInstruction) SetAncestorElementInstanceKey(v ElementInstanceKey) {
 	o.AncestorElementInstanceKey = v
 }
 

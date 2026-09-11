@@ -22,12 +22,12 @@ type DecisionRequirementsFilter struct {
 	// The DMN name of the decision requirements.
 	DecisionRequirementsName *string `json:"decisionRequirementsName,omitempty"`
 	// the DMN ID of the decision requirements.
-	DecisionRequirementsId  *string      `json:"decisionRequirementsId,omitempty"`
-	DecisionRequirementsKey *ModelString `json:"decisionRequirementsKey,omitempty"`
+	DecisionRequirementsId  *string                  `json:"decisionRequirementsId,omitempty"`
+	DecisionRequirementsKey *DecisionRequirementsKey `json:"decisionRequirementsKey,omitempty"`
 	// The assigned version of the decision requirements.
 	Version *int32 `json:"version,omitempty"`
 	// The tenant ID of the decision requirements.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The name of the resource from which the decision requirements were parsed
 	ResourceName *string `json:"resourceName,omitempty"`
 }
@@ -114,9 +114,9 @@ func (o *DecisionRequirementsFilter) SetDecisionRequirementsId(v string) {
 }
 
 // GetDecisionRequirementsKey returns the DecisionRequirementsKey field value if set, zero value otherwise.
-func (o *DecisionRequirementsFilter) GetDecisionRequirementsKey() ModelString {
+func (o *DecisionRequirementsFilter) GetDecisionRequirementsKey() DecisionRequirementsKey {
 	if o == nil || IsNil(o.DecisionRequirementsKey) {
-		var ret ModelString
+		var ret DecisionRequirementsKey
 		return ret
 	}
 	return *o.DecisionRequirementsKey
@@ -124,7 +124,7 @@ func (o *DecisionRequirementsFilter) GetDecisionRequirementsKey() ModelString {
 
 // GetDecisionRequirementsKeyOk returns a tuple with the DecisionRequirementsKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionRequirementsFilter) GetDecisionRequirementsKeyOk() (*ModelString, bool) {
+func (o *DecisionRequirementsFilter) GetDecisionRequirementsKeyOk() (*DecisionRequirementsKey, bool) {
 	if o == nil || IsNil(o.DecisionRequirementsKey) {
 		return nil, false
 	}
@@ -140,8 +140,8 @@ func (o *DecisionRequirementsFilter) HasDecisionRequirementsKey() bool {
 	return false
 }
 
-// SetDecisionRequirementsKey gets a reference to the given ModelString and assigns it to the DecisionRequirementsKey field.
-func (o *DecisionRequirementsFilter) SetDecisionRequirementsKey(v ModelString) {
+// SetDecisionRequirementsKey gets a reference to the given DecisionRequirementsKey and assigns it to the DecisionRequirementsKey field.
+func (o *DecisionRequirementsFilter) SetDecisionRequirementsKey(v DecisionRequirementsKey) {
 	o.DecisionRequirementsKey = &v
 }
 
@@ -178,9 +178,9 @@ func (o *DecisionRequirementsFilter) SetVersion(v int32) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *DecisionRequirementsFilter) GetTenantId() string {
+func (o *DecisionRequirementsFilter) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -188,7 +188,7 @@ func (o *DecisionRequirementsFilter) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecisionRequirementsFilter) GetTenantIdOk() (*string, bool) {
+func (o *DecisionRequirementsFilter) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -204,8 +204,8 @@ func (o *DecisionRequirementsFilter) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *DecisionRequirementsFilter) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *DecisionRequirementsFilter) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 

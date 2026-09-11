@@ -33,7 +33,7 @@ type AuthorizationResult struct {
 	// Specifies the types of the permissions.
 	PermissionTypes []PermissionTypeEnum `json:"permissionTypes"`
 	// The key of the authorization.
-	AuthorizationKey ModelString `json:"authorizationKey"`
+	AuthorizationKey AuthorizationKey `json:"authorizationKey"`
 }
 
 type _AuthorizationResult AuthorizationResult
@@ -42,7 +42,7 @@ type _AuthorizationResult AuthorizationResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAuthorizationResult(ownerId string, ownerType OwnerTypeEnum, resourceType ResourceTypeEnum, resourceId NullableString, resourcePropertyName NullableString, permissionTypes []PermissionTypeEnum, authorizationKey ModelString) *AuthorizationResult {
+func NewAuthorizationResult(ownerId string, ownerType OwnerTypeEnum, resourceType ResourceTypeEnum, resourceId NullableString, resourcePropertyName NullableString, permissionTypes []PermissionTypeEnum, authorizationKey AuthorizationKey) *AuthorizationResult {
 	this := AuthorizationResult{}
 	this.OwnerId = ownerId
 	this.OwnerType = ownerType
@@ -211,9 +211,9 @@ func (o *AuthorizationResult) SetPermissionTypes(v []PermissionTypeEnum) {
 }
 
 // GetAuthorizationKey returns the AuthorizationKey field value
-func (o *AuthorizationResult) GetAuthorizationKey() ModelString {
+func (o *AuthorizationResult) GetAuthorizationKey() AuthorizationKey {
 	if o == nil {
-		var ret ModelString
+		var ret AuthorizationKey
 		return ret
 	}
 
@@ -222,7 +222,7 @@ func (o *AuthorizationResult) GetAuthorizationKey() ModelString {
 
 // GetAuthorizationKeyOk returns a tuple with the AuthorizationKey field value
 // and a boolean to check if the value has been set.
-func (o *AuthorizationResult) GetAuthorizationKeyOk() (*ModelString, bool) {
+func (o *AuthorizationResult) GetAuthorizationKeyOk() (*AuthorizationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -230,7 +230,7 @@ func (o *AuthorizationResult) GetAuthorizationKeyOk() (*ModelString, bool) {
 }
 
 // SetAuthorizationKey sets field value
-func (o *AuthorizationResult) SetAuthorizationKey(v ModelString) {
+func (o *AuthorizationResult) SetAuthorizationKey(v AuthorizationKey) {
 	o.AuthorizationKey = v
 }
 

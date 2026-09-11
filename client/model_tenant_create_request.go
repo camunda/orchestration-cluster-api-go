@@ -22,7 +22,7 @@ var _ MappedNullable = &TenantCreateRequest{}
 // TenantCreateRequest struct for TenantCreateRequest
 type TenantCreateRequest struct {
 	// The unique ID for the tenant. Must be 31 characters or less and match `^[\\w.-]{1,31}$` (word characters, `.`, `-`). The literal `<default>` is also accepted as the default-tenant alias.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The name of the tenant.
 	Name string `json:"name"`
 	// The description of the tenant.
@@ -35,7 +35,7 @@ type _TenantCreateRequest TenantCreateRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTenantCreateRequest(tenantId string, name string) *TenantCreateRequest {
+func NewTenantCreateRequest(tenantId TenantId, name string) *TenantCreateRequest {
 	this := TenantCreateRequest{}
 	this.TenantId = tenantId
 	this.Name = name
@@ -51,9 +51,9 @@ func NewTenantCreateRequestWithDefaults() *TenantCreateRequest {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *TenantCreateRequest) GetTenantId() string {
+func (o *TenantCreateRequest) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -62,7 +62,7 @@ func (o *TenantCreateRequest) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *TenantCreateRequest) GetTenantIdOk() (*string, bool) {
+func (o *TenantCreateRequest) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -70,7 +70,7 @@ func (o *TenantCreateRequest) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *TenantCreateRequest) SetTenantId(v string) {
+func (o *TenantCreateRequest) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

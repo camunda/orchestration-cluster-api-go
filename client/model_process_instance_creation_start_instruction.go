@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessInstanceCreationStartInstruction{}
 // ProcessInstanceCreationStartInstruction struct for ProcessInstanceCreationStartInstruction
 type ProcessInstanceCreationStartInstruction struct {
 	// Future extensions might include:   - different types of start instructions   - ability to set local variables for different flow scopes  For now, however, the start instruction is implicitly a \"startBeforeElement\" instruction
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 }
 
 type _ProcessInstanceCreationStartInstruction ProcessInstanceCreationStartInstruction
@@ -31,7 +31,7 @@ type _ProcessInstanceCreationStartInstruction ProcessInstanceCreationStartInstru
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceCreationStartInstruction(elementId string) *ProcessInstanceCreationStartInstruction {
+func NewProcessInstanceCreationStartInstruction(elementId ElementId) *ProcessInstanceCreationStartInstruction {
 	this := ProcessInstanceCreationStartInstruction{}
 	this.ElementId = elementId
 	return &this
@@ -46,9 +46,9 @@ func NewProcessInstanceCreationStartInstructionWithDefaults() *ProcessInstanceCr
 }
 
 // GetElementId returns the ElementId field value
-func (o *ProcessInstanceCreationStartInstruction) GetElementId() string {
+func (o *ProcessInstanceCreationStartInstruction) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *ProcessInstanceCreationStartInstruction) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationStartInstruction) GetElementIdOk() (*string, bool) {
+func (o *ProcessInstanceCreationStartInstruction) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *ProcessInstanceCreationStartInstruction) GetElementIdOk() (*string, boo
 }
 
 // SetElementId sets field value
-func (o *ProcessInstanceCreationStartInstruction) SetElementId(v string) {
+func (o *ProcessInstanceCreationStartInstruction) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 

@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessInstanceBusinessIdAssignmentInstruction{}
 // ProcessInstanceBusinessIdAssignmentInstruction The instruction describing the business id to assign to a running process instance.
 type ProcessInstanceBusinessIdAssignmentInstruction struct {
 	// An optional, user-defined string identifier that identifies the process instance within the scope of a process definition (scoped by tenant). If provided and uniqueness enforcement is enabled, the engine will reject creation if another root process instance with the same business id is already active for the same process definition. Note that any active child process instances with the same business id are not taken into account.
-	BusinessId string `json:"businessId"`
+	BusinessId BusinessId `json:"businessId"`
 }
 
 type _ProcessInstanceBusinessIdAssignmentInstruction ProcessInstanceBusinessIdAssignmentInstruction
@@ -31,7 +31,7 @@ type _ProcessInstanceBusinessIdAssignmentInstruction ProcessInstanceBusinessIdAs
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceBusinessIdAssignmentInstruction(businessId string) *ProcessInstanceBusinessIdAssignmentInstruction {
+func NewProcessInstanceBusinessIdAssignmentInstruction(businessId BusinessId) *ProcessInstanceBusinessIdAssignmentInstruction {
 	this := ProcessInstanceBusinessIdAssignmentInstruction{}
 	this.BusinessId = businessId
 	return &this
@@ -46,9 +46,9 @@ func NewProcessInstanceBusinessIdAssignmentInstructionWithDefaults() *ProcessIns
 }
 
 // GetBusinessId returns the BusinessId field value
-func (o *ProcessInstanceBusinessIdAssignmentInstruction) GetBusinessId() string {
+func (o *ProcessInstanceBusinessIdAssignmentInstruction) GetBusinessId() BusinessId {
 	if o == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *ProcessInstanceBusinessIdAssignmentInstruction) GetBusinessId() string 
 
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceBusinessIdAssignmentInstruction) GetBusinessIdOk() (*string, bool) {
+func (o *ProcessInstanceBusinessIdAssignmentInstruction) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *ProcessInstanceBusinessIdAssignmentInstruction) GetBusinessIdOk() (*str
 }
 
 // SetBusinessId sets field value
-func (o *ProcessInstanceBusinessIdAssignmentInstruction) SetBusinessId(v string) {
+func (o *ProcessInstanceBusinessIdAssignmentInstruction) SetBusinessId(v BusinessId) {
 	o.BusinessId = v
 }
 

@@ -22,15 +22,15 @@ var _ MappedNullable = &FormResult{}
 // FormResult struct for FormResult
 type FormResult struct {
 	// The tenant ID of the form.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The user-provided identifier of the form.
-	FormId string `json:"formId"`
+	FormId FormId `json:"formId"`
 	// The form schema as a JSON document serialized as a string.
 	Schema string `json:"schema"`
 	// The version of the the deployed form.
 	Version int64 `json:"version"`
 	// The assigned key, which acts as a unique identifier for this form.
-	FormKey ModelString `json:"formKey"`
+	FormKey FormKey `json:"formKey"`
 }
 
 type _FormResult FormResult
@@ -39,7 +39,7 @@ type _FormResult FormResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFormResult(tenantId string, formId string, schema string, version int64, formKey ModelString) *FormResult {
+func NewFormResult(tenantId TenantId, formId FormId, schema string, version int64, formKey FormKey) *FormResult {
 	this := FormResult{}
 	this.TenantId = tenantId
 	this.FormId = formId
@@ -58,9 +58,9 @@ func NewFormResultWithDefaults() *FormResult {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *FormResult) GetTenantId() string {
+func (o *FormResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -69,7 +69,7 @@ func (o *FormResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *FormResult) GetTenantIdOk() (*string, bool) {
+func (o *FormResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -77,14 +77,14 @@ func (o *FormResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *FormResult) SetTenantId(v string) {
+func (o *FormResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetFormId returns the FormId field value
-func (o *FormResult) GetFormId() string {
+func (o *FormResult) GetFormId() FormId {
 	if o == nil {
-		var ret string
+		var ret FormId
 		return ret
 	}
 
@@ -93,7 +93,7 @@ func (o *FormResult) GetFormId() string {
 
 // GetFormIdOk returns a tuple with the FormId field value
 // and a boolean to check if the value has been set.
-func (o *FormResult) GetFormIdOk() (*string, bool) {
+func (o *FormResult) GetFormIdOk() (*FormId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,7 +101,7 @@ func (o *FormResult) GetFormIdOk() (*string, bool) {
 }
 
 // SetFormId sets field value
-func (o *FormResult) SetFormId(v string) {
+func (o *FormResult) SetFormId(v FormId) {
 	o.FormId = v
 }
 
@@ -154,9 +154,9 @@ func (o *FormResult) SetVersion(v int64) {
 }
 
 // GetFormKey returns the FormKey field value
-func (o *FormResult) GetFormKey() ModelString {
+func (o *FormResult) GetFormKey() FormKey {
 	if o == nil {
-		var ret ModelString
+		var ret FormKey
 		return ret
 	}
 
@@ -165,7 +165,7 @@ func (o *FormResult) GetFormKey() ModelString {
 
 // GetFormKeyOk returns a tuple with the FormKey field value
 // and a boolean to check if the value has been set.
-func (o *FormResult) GetFormKeyOk() (*ModelString, bool) {
+func (o *FormResult) GetFormKeyOk() (*FormKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -173,7 +173,7 @@ func (o *FormResult) GetFormKeyOk() (*ModelString, bool) {
 }
 
 // SetFormKey sets field value
-func (o *FormResult) SetFormKey(v ModelString) {
+func (o *FormResult) SetFormKey(v FormKey) {
 	o.FormKey = v
 }
 
