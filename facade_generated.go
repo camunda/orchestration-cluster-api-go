@@ -80,7 +80,7 @@ func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body openapi
 //			openapi.NewAgentInstanceTextContent("TEXT", "You are a helpful assistant.")),
 //	}
 //	configItem := openapi.NewAgentInstanceHistoryItem(
-//		"config-1", 0, openapi.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
+//		"config-1", openapi.MustLoopIterationId(1), openapi.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
 //	configItem.SetModel("gpt-4o")
 //	configItem.SetProvider("openai")
 //	configItem.SetSystemPrompt(systemPrompt)
