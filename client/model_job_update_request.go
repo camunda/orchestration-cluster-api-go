@@ -132,7 +132,7 @@ func (o *JobUpdateRequest) HasLeaseToken() bool {
 	return false
 }
 
-// SetLeaseToken gets a reference to the given NullableString and assigns it to the LeaseToken field.
+// SetLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the LeaseToken field.
 func (o *JobUpdateRequest) SetLeaseToken(v JobLeaseToken) {
 	o.LeaseToken.Set(&v)
 }

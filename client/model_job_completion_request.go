@@ -138,7 +138,7 @@ func (o *JobCompletionRequest) HasLeaseToken() bool {
 	return false
 }
 
-// SetLeaseToken gets a reference to the given NullableString and assigns it to the LeaseToken field.
+// SetLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the LeaseToken field.
 func (o *JobCompletionRequest) SetLeaseToken(v JobLeaseToken) {
 	o.LeaseToken.Set(&v)
 }
@@ -181,7 +181,7 @@ func (o *JobCompletionRequest) HasBusinessId() bool {
 	return false
 }
 
-// SetBusinessId gets a reference to the given NullableString and assigns it to the BusinessId field.
+// SetBusinessId gets a reference to the given NullableBusinessId and assigns it to the BusinessId field.
 func (o *JobCompletionRequest) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }

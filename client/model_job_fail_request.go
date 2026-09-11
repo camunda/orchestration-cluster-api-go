@@ -212,7 +212,7 @@ func (o *JobFailRequest) HasLeaseToken() bool {
 	return false
 }
 
-// SetLeaseToken gets a reference to the given NullableString and assigns it to the LeaseToken field.
+// SetLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the LeaseToken field.
 func (o *JobFailRequest) SetLeaseToken(v JobLeaseToken) {
 	o.LeaseToken.Set(&v)
 }

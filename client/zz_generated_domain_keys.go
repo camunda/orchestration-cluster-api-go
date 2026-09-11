@@ -1381,7 +1381,7 @@ func (v *NullableResourceKey) UnmarshalJSON(src []byte) error {
 	return json.Unmarshal(src, &v.value)
 }
 
-// JobLeaseToken is a Camunda semantic key. Construct it with NewJobLeaseToken (validated) or
+// JobLeaseToken is a Camunda semantic token. Construct it with NewJobLeaseToken (validated) or
 // MustJobLeaseToken (panics on invalid input).
 type JobLeaseToken string
 
@@ -1466,7 +1466,7 @@ func (k LoopIterationId) Validate() error { return specLoopIterationId.validate(
 // MustScopeKey (panics on invalid input).
 type ScopeKey string
 
-var specScopeKey = keySpec{name: "ScopeKey", pattern: nil, min: 0, max: 0}
+var specScopeKey = keySpec{name: "ScopeKey", pattern: regexp.MustCompile(`^-?[0-9]+$`), min: 1, max: 25}
 
 // NewScopeKey validates s against the ScopeKey constraints and returns a ScopeKey.
 func NewScopeKey(s string) (ScopeKey, error) {
