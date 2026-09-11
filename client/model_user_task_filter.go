@@ -28,7 +28,7 @@ type UserTaskFilter struct {
 	// The priority of the user task.
 	Priority *IntegerFilterProperty `json:"priority,omitempty"`
 	// The element ID of the user task.
-	ElementId *string `json:"elementId,omitempty"`
+	ElementId *ElementId `json:"elementId,omitempty"`
 	// The task name. This only works for data created with 8.8 and onwards. Instances from prior versions don't contain this data and cannot be found.
 	Name *StringFilterProperty `json:"name,omitempty"`
 	// The candidate group for this user task.
@@ -52,15 +52,15 @@ type UserTaskFilter struct {
 	// The local variables of the user task.
 	LocalVariables []VariableValueFilterProperty `json:"localVariables,omitempty"`
 	// The key for this user task.
-	UserTaskKey *ModelString `json:"userTaskKey,omitempty"`
+	UserTaskKey *UserTaskKey `json:"userTaskKey,omitempty"`
 	// The key of the process definition.
 	ProcessDefinitionKey *ProcessDefinitionKeyFilterProperty `json:"processDefinitionKey,omitempty"`
 	// The key of the process instance.
 	ProcessInstanceKey *ProcessInstanceKeyFilterProperty `json:"processInstanceKey,omitempty"`
 	// The key of the element instance.
-	ElementInstanceKey *ModelString `json:"elementInstanceKey,omitempty"`
+	ElementInstanceKey *ElementInstanceKey `json:"elementInstanceKey,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags,omitempty"`
+	Tags []Tag `json:"tags,omitempty"`
 	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"assignee\": \"user1\",   \"$or\": [     { \"candidateGroup\": \"groupA\" },     { \"candidateUser\": \"user2\" }   ] } ``` This matches user tasks that:  <ul style=\"padding-left: 20px; margin-left: 20px;\">   <li style=\"list-style-type: disc;\">are assigned to <em>user1</em></li>   <li style=\"list-style-type: disc;\">and match either:     <ul style=\"padding-left: 20px; margin-left: 20px;\">       <li style=\"list-style-type: circle;\"><code>candidateGroup</code> is <em>groupA</em>, or</li>       <li style=\"list-style-type: circle;\"><code>candidateUser</code> is <em>user2</em></li>     </ul>   </li> </ul> <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
 	Or []UserTaskFilterFields `json:"$or,omitempty"`
 }
@@ -211,9 +211,9 @@ func (o *UserTaskFilter) SetPriority(v IntegerFilterProperty) {
 }
 
 // GetElementId returns the ElementId field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetElementId() string {
+func (o *UserTaskFilter) GetElementId() ElementId {
 	if o == nil || IsNil(o.ElementId) {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 	return *o.ElementId
@@ -221,7 +221,7 @@ func (o *UserTaskFilter) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetElementIdOk() (*string, bool) {
+func (o *UserTaskFilter) GetElementIdOk() (*ElementId, bool) {
 	if o == nil || IsNil(o.ElementId) {
 		return nil, false
 	}
@@ -237,8 +237,8 @@ func (o *UserTaskFilter) HasElementId() bool {
 	return false
 }
 
-// SetElementId gets a reference to the given string and assigns it to the ElementId field.
-func (o *UserTaskFilter) SetElementId(v string) {
+// SetElementId gets a reference to the given ElementId and assigns it to the ElementId field.
+func (o *UserTaskFilter) SetElementId(v ElementId) {
 	o.ElementId = &v
 }
 
@@ -595,9 +595,9 @@ func (o *UserTaskFilter) SetLocalVariables(v []VariableValueFilterProperty) {
 }
 
 // GetUserTaskKey returns the UserTaskKey field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetUserTaskKey() ModelString {
+func (o *UserTaskFilter) GetUserTaskKey() UserTaskKey {
 	if o == nil || IsNil(o.UserTaskKey) {
-		var ret ModelString
+		var ret UserTaskKey
 		return ret
 	}
 	return *o.UserTaskKey
@@ -605,7 +605,7 @@ func (o *UserTaskFilter) GetUserTaskKey() ModelString {
 
 // GetUserTaskKeyOk returns a tuple with the UserTaskKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetUserTaskKeyOk() (*ModelString, bool) {
+func (o *UserTaskFilter) GetUserTaskKeyOk() (*UserTaskKey, bool) {
 	if o == nil || IsNil(o.UserTaskKey) {
 		return nil, false
 	}
@@ -621,8 +621,8 @@ func (o *UserTaskFilter) HasUserTaskKey() bool {
 	return false
 }
 
-// SetUserTaskKey gets a reference to the given ModelString and assigns it to the UserTaskKey field.
-func (o *UserTaskFilter) SetUserTaskKey(v ModelString) {
+// SetUserTaskKey gets a reference to the given UserTaskKey and assigns it to the UserTaskKey field.
+func (o *UserTaskFilter) SetUserTaskKey(v UserTaskKey) {
 	o.UserTaskKey = &v
 }
 
@@ -691,9 +691,9 @@ func (o *UserTaskFilter) SetProcessInstanceKey(v ProcessInstanceKeyFilterPropert
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetElementInstanceKey() ModelString {
+func (o *UserTaskFilter) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil || IsNil(o.ElementInstanceKey) {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 	return *o.ElementInstanceKey
@@ -701,7 +701,7 @@ func (o *UserTaskFilter) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *UserTaskFilter) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil || IsNil(o.ElementInstanceKey) {
 		return nil, false
 	}
@@ -717,15 +717,15 @@ func (o *UserTaskFilter) HasElementInstanceKey() bool {
 	return false
 }
 
-// SetElementInstanceKey gets a reference to the given ModelString and assigns it to the ElementInstanceKey field.
-func (o *UserTaskFilter) SetElementInstanceKey(v ModelString) {
+// SetElementInstanceKey gets a reference to the given ElementInstanceKey and assigns it to the ElementInstanceKey field.
+func (o *UserTaskFilter) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = &v
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetTags() []string {
+func (o *UserTaskFilter) GetTags() []Tag {
 	if o == nil || IsNil(o.Tags) {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 	return o.Tags
@@ -733,7 +733,7 @@ func (o *UserTaskFilter) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetTagsOk() ([]string, bool) {
+func (o *UserTaskFilter) GetTagsOk() ([]Tag, bool) {
 	if o == nil || IsNil(o.Tags) {
 		return nil, false
 	}
@@ -749,8 +749,8 @@ func (o *UserTaskFilter) HasTags() bool {
 	return false
 }
 
-// SetTags gets a reference to the given []string and assigns it to the Tags field.
-func (o *UserTaskFilter) SetTags(v []string) {
+// SetTags gets a reference to the given []Tag and assigns it to the Tags field.
+func (o *UserTaskFilter) SetTags(v []Tag) {
 	o.Tags = v
 }
 

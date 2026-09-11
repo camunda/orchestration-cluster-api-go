@@ -22,7 +22,7 @@ var _ MappedNullable = &RoleClientResult{}
 // RoleClientResult struct for RoleClientResult
 type RoleClientResult struct {
 	// The ID of the client.
-	ClientId string `json:"clientId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	ClientId ClientId `json:"clientId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 }
 
 type _RoleClientResult RoleClientResult
@@ -31,7 +31,7 @@ type _RoleClientResult RoleClientResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRoleClientResult(clientId string) *RoleClientResult {
+func NewRoleClientResult(clientId ClientId) *RoleClientResult {
 	this := RoleClientResult{}
 	this.ClientId = clientId
 	return &this
@@ -46,9 +46,9 @@ func NewRoleClientResultWithDefaults() *RoleClientResult {
 }
 
 // GetClientId returns the ClientId field value
-func (o *RoleClientResult) GetClientId() string {
+func (o *RoleClientResult) GetClientId() ClientId {
 	if o == nil {
-		var ret string
+		var ret ClientId
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *RoleClientResult) GetClientId() string {
 
 // GetClientIdOk returns a tuple with the ClientId field value
 // and a boolean to check if the value has been set.
-func (o *RoleClientResult) GetClientIdOk() (*string, bool) {
+func (o *RoleClientResult) GetClientIdOk() (*ClientId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *RoleClientResult) GetClientIdOk() (*string, bool) {
 }
 
 // SetClientId sets field value
-func (o *RoleClientResult) SetClientId(v string) {
+func (o *RoleClientResult) SetClientId(v ClientId) {
 	o.ClientId = v
 }
 

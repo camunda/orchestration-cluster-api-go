@@ -22,11 +22,11 @@ var _ MappedNullable = &AgentInstanceCreationRequest{}
 // AgentInstanceCreationRequest Request to create a new agent instance.
 type AgentInstanceCreationRequest struct {
 	// The key of the AI Agent Sub-process or AI Agent Task element instance. The engine uses this key to infer processInstanceKey, elementId, processDefinitionKey, and tenantId.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// The key of the job activation during which this creation is being made. A creation must always be attributed to the active job that produced it.
-	JobKey ModelString `json:"jobKey"`
+	JobKey JobKey `json:"jobKey"`
 	// Opaque lease token received from the job activation response. Disambiguates this activation from any other activation of the same job: if the job is later retried, history items submitted under a superseded lease are discarded rather than committed.
-	JobLease string `json:"jobLease"`
+	JobLease JobLeaseToken `json:"jobLease"`
 	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated. Must include a CONFIGURATION item establishing model, provider, and systemPrompt (and, if needed, limits). Every item's role must be CONFIGURATION or USER, and no item may carry non-zero usage-token metrics (inputTokens, outputTokens, reasoningTokenCount, cacheCreationTokenCount, cacheReadTokenCount); durationMs is exempt and may be non-zero.
 	History []AgentInstanceHistoryItem `json:"history"`
 }
@@ -37,7 +37,7 @@ type _AgentInstanceCreationRequest AgentInstanceCreationRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceCreationRequest(elementInstanceKey ModelString, jobKey ModelString, jobLease string, history []AgentInstanceHistoryItem) *AgentInstanceCreationRequest {
+func NewAgentInstanceCreationRequest(elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLease JobLeaseToken, history []AgentInstanceHistoryItem) *AgentInstanceCreationRequest {
 	this := AgentInstanceCreationRequest{}
 	this.ElementInstanceKey = elementInstanceKey
 	this.JobKey = jobKey
@@ -55,9 +55,9 @@ func NewAgentInstanceCreationRequestWithDefaults() *AgentInstanceCreationRequest
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *AgentInstanceCreationRequest) GetElementInstanceKey() ModelString {
+func (o *AgentInstanceCreationRequest) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -66,7 +66,7 @@ func (o *AgentInstanceCreationRequest) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceCreationRequest) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceCreationRequest) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -74,14 +74,14 @@ func (o *AgentInstanceCreationRequest) GetElementInstanceKeyOk() (*ModelString, 
 }
 
 // SetElementInstanceKey sets field value
-func (o *AgentInstanceCreationRequest) SetElementInstanceKey(v ModelString) {
+func (o *AgentInstanceCreationRequest) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
 // GetJobKey returns the JobKey field value
-func (o *AgentInstanceCreationRequest) GetJobKey() ModelString {
+func (o *AgentInstanceCreationRequest) GetJobKey() JobKey {
 	if o == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -90,7 +90,7 @@ func (o *AgentInstanceCreationRequest) GetJobKey() ModelString {
 
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceCreationRequest) GetJobKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceCreationRequest) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -98,14 +98,14 @@ func (o *AgentInstanceCreationRequest) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *AgentInstanceCreationRequest) SetJobKey(v ModelString) {
+func (o *AgentInstanceCreationRequest) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
 // GetJobLease returns the JobLease field value
-func (o *AgentInstanceCreationRequest) GetJobLease() string {
+func (o *AgentInstanceCreationRequest) GetJobLease() JobLeaseToken {
 	if o == nil {
-		var ret string
+		var ret JobLeaseToken
 		return ret
 	}
 
@@ -114,7 +114,7 @@ func (o *AgentInstanceCreationRequest) GetJobLease() string {
 
 // GetJobLeaseOk returns a tuple with the JobLease field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceCreationRequest) GetJobLeaseOk() (*string, bool) {
+func (o *AgentInstanceCreationRequest) GetJobLeaseOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -122,7 +122,7 @@ func (o *AgentInstanceCreationRequest) GetJobLeaseOk() (*string, bool) {
 }
 
 // SetJobLease sets field value
-func (o *AgentInstanceCreationRequest) SetJobLease(v string) {
+func (o *AgentInstanceCreationRequest) SetJobLease(v JobLeaseToken) {
 	o.JobLease = v
 }
 

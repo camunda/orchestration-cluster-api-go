@@ -24,7 +24,7 @@ type SourceElementIdInstruction struct {
 	// The type of source element instruction.
 	SourceType string `json:"sourceType"`
 	// The id of the source element for the move instruction.
-	SourceElementId string `json:"sourceElementId"`
+	SourceElementId ElementId `json:"sourceElementId"`
 }
 
 type _SourceElementIdInstruction SourceElementIdInstruction
@@ -33,7 +33,7 @@ type _SourceElementIdInstruction SourceElementIdInstruction
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSourceElementIdInstruction(sourceType string, sourceElementId string) *SourceElementIdInstruction {
+func NewSourceElementIdInstruction(sourceType string, sourceElementId ElementId) *SourceElementIdInstruction {
 	this := SourceElementIdInstruction{}
 	this.SourceType = sourceType
 	this.SourceElementId = sourceElementId
@@ -73,9 +73,9 @@ func (o *SourceElementIdInstruction) SetSourceType(v string) {
 }
 
 // GetSourceElementId returns the SourceElementId field value
-func (o *SourceElementIdInstruction) GetSourceElementId() string {
+func (o *SourceElementIdInstruction) GetSourceElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *SourceElementIdInstruction) GetSourceElementId() string {
 
 // GetSourceElementIdOk returns a tuple with the SourceElementId field value
 // and a boolean to check if the value has been set.
-func (o *SourceElementIdInstruction) GetSourceElementIdOk() (*string, bool) {
+func (o *SourceElementIdInstruction) GetSourceElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *SourceElementIdInstruction) GetSourceElementIdOk() (*string, bool) {
 }
 
 // SetSourceElementId sets field value
-func (o *SourceElementIdInstruction) SetSourceElementId(v string) {
+func (o *SourceElementIdInstruction) SetSourceElementId(v ElementId) {
 	o.SourceElementId = v
 }
 

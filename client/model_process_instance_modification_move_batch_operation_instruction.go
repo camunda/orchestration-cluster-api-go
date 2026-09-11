@@ -22,9 +22,9 @@ var _ MappedNullable = &ProcessInstanceModificationMoveBatchOperationInstruction
 // ProcessInstanceModificationMoveBatchOperationInstruction Instructions describing a move operation. This instruction will terminate all active element instances at `sourceElementId` and activate a new element instance for each terminated one at `targetElementId`. The new element instances are created in the parent scope of the source element instances.
 type ProcessInstanceModificationMoveBatchOperationInstruction struct {
 	// The source element ID.
-	SourceElementId string `json:"sourceElementId"`
+	SourceElementId ElementId `json:"sourceElementId"`
 	// The target element ID.
-	TargetElementId string `json:"targetElementId"`
+	TargetElementId ElementId `json:"targetElementId"`
 }
 
 type _ProcessInstanceModificationMoveBatchOperationInstruction ProcessInstanceModificationMoveBatchOperationInstruction
@@ -33,7 +33,7 @@ type _ProcessInstanceModificationMoveBatchOperationInstruction ProcessInstanceMo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceModificationMoveBatchOperationInstruction(sourceElementId string, targetElementId string) *ProcessInstanceModificationMoveBatchOperationInstruction {
+func NewProcessInstanceModificationMoveBatchOperationInstruction(sourceElementId ElementId, targetElementId ElementId) *ProcessInstanceModificationMoveBatchOperationInstruction {
 	this := ProcessInstanceModificationMoveBatchOperationInstruction{}
 	this.SourceElementId = sourceElementId
 	this.TargetElementId = targetElementId
@@ -49,9 +49,9 @@ func NewProcessInstanceModificationMoveBatchOperationInstructionWithDefaults() *
 }
 
 // GetSourceElementId returns the SourceElementId field value
-func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetSourceElementId() string {
+func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetSourceElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetSourceElem
 
 // GetSourceElementIdOk returns a tuple with the SourceElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetSourceElementIdOk() (*string, bool) {
+func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetSourceElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,14 +68,14 @@ func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetSourceElem
 }
 
 // SetSourceElementId sets field value
-func (o *ProcessInstanceModificationMoveBatchOperationInstruction) SetSourceElementId(v string) {
+func (o *ProcessInstanceModificationMoveBatchOperationInstruction) SetSourceElementId(v ElementId) {
 	o.SourceElementId = v
 }
 
 // GetTargetElementId returns the TargetElementId field value
-func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetTargetElementId() string {
+func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetTargetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetTargetElem
 
 // GetTargetElementIdOk returns a tuple with the TargetElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetTargetElementIdOk() (*string, bool) {
+func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetTargetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *ProcessInstanceModificationMoveBatchOperationInstruction) GetTargetElem
 }
 
 // SetTargetElementId sets field value
-func (o *ProcessInstanceModificationMoveBatchOperationInstruction) SetTargetElementId(v string) {
+func (o *ProcessInstanceModificationMoveBatchOperationInstruction) SetTargetElementId(v ElementId) {
 	o.TargetElementId = v
 }
 

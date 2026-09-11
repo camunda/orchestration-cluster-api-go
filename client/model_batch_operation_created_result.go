@@ -22,7 +22,7 @@ var _ MappedNullable = &BatchOperationCreatedResult{}
 // BatchOperationCreatedResult The created batch operation.
 type BatchOperationCreatedResult struct {
 	// Key of the batch operation.
-	BatchOperationKey  string                 `json:"batchOperationKey"`
+	BatchOperationKey  BatchOperationKey      `json:"batchOperationKey"`
 	BatchOperationType BatchOperationTypeEnum `json:"batchOperationType"`
 }
 
@@ -32,7 +32,7 @@ type _BatchOperationCreatedResult BatchOperationCreatedResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBatchOperationCreatedResult(batchOperationKey string, batchOperationType BatchOperationTypeEnum) *BatchOperationCreatedResult {
+func NewBatchOperationCreatedResult(batchOperationKey BatchOperationKey, batchOperationType BatchOperationTypeEnum) *BatchOperationCreatedResult {
 	this := BatchOperationCreatedResult{}
 	this.BatchOperationKey = batchOperationKey
 	this.BatchOperationType = batchOperationType
@@ -48,9 +48,9 @@ func NewBatchOperationCreatedResultWithDefaults() *BatchOperationCreatedResult {
 }
 
 // GetBatchOperationKey returns the BatchOperationKey field value
-func (o *BatchOperationCreatedResult) GetBatchOperationKey() string {
+func (o *BatchOperationCreatedResult) GetBatchOperationKey() BatchOperationKey {
 	if o == nil {
-		var ret string
+		var ret BatchOperationKey
 		return ret
 	}
 
@@ -59,7 +59,7 @@ func (o *BatchOperationCreatedResult) GetBatchOperationKey() string {
 
 // GetBatchOperationKeyOk returns a tuple with the BatchOperationKey field value
 // and a boolean to check if the value has been set.
-func (o *BatchOperationCreatedResult) GetBatchOperationKeyOk() (*string, bool) {
+func (o *BatchOperationCreatedResult) GetBatchOperationKeyOk() (*BatchOperationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -67,7 +67,7 @@ func (o *BatchOperationCreatedResult) GetBatchOperationKeyOk() (*string, bool) {
 }
 
 // SetBatchOperationKey sets field value
-func (o *BatchOperationCreatedResult) SetBatchOperationKey(v string) {
+func (o *BatchOperationCreatedResult) SetBatchOperationKey(v BatchOperationKey) {
 	o.BatchOperationKey = v
 }
 

@@ -55,6 +55,25 @@ func (s keySpec) validate(v string) error {
 	return nil
 }
 
+// intSpec describes the validation constraints for a semantic integer identifier.
+type intSpec struct {
+	name   string
+	min    int64
+	hasMin bool
+	max    int64
+	hasMax bool
+}
+
+func (s intSpec) validate(v int64) error {
+	if s.hasMin && v < s.min {
+		return fmt.Errorf("%s: value %d is less than the minimum %d", s.name, v, s.min)
+	}
+	if s.hasMax && v > s.max {
+		return fmt.Errorf("%s: value %d is greater than the maximum %d", s.name, v, s.max)
+	}
+	return nil
+}
+
 // AgentDefinitionKey is a Camunda semantic key. Construct it with NewAgentDefinitionKey (validated) or
 // MustAgentDefinitionKey (panics on invalid input).
 type AgentDefinitionKey string
@@ -1358,6 +1377,585 @@ func NewNullableResourceKey(val *ResourceKey) *NullableResourceKey {
 
 func (v NullableResourceKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
 func (v *NullableResourceKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// JobLeaseToken is a Camunda semantic token. Construct it with NewJobLeaseToken (validated) or
+// MustJobLeaseToken (panics on invalid input).
+type JobLeaseToken string
+
+var specJobLeaseToken = keySpec{name: "JobLeaseToken", pattern: nil, min: 0, max: 0}
+
+// NewJobLeaseToken validates s against the JobLeaseToken constraints and returns a JobLeaseToken.
+func NewJobLeaseToken(s string) (JobLeaseToken, error) {
+	if err := specJobLeaseToken.validate(s); err != nil {
+		return "", err
+	}
+	return JobLeaseToken(s), nil
+}
+
+// MustJobLeaseToken is like NewJobLeaseToken but panics if s is invalid.
+func MustJobLeaseToken(s string) JobLeaseToken {
+	k, err := NewJobLeaseToken(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k JobLeaseToken) String() string { return string(k) }
+
+// Validate reports whether k satisfies the JobLeaseToken constraints.
+func (k JobLeaseToken) Validate() error { return specJobLeaseToken.validate(string(k)) }
+
+// NullableJobLeaseToken is the generator's Nullable wrapper for JobLeaseToken (referenced by
+// generated models such as AuditLogResult).
+type NullableJobLeaseToken struct {
+	value *JobLeaseToken
+	isSet bool
+}
+
+func (v NullableJobLeaseToken) Get() *JobLeaseToken     { return v.value }
+func (v *NullableJobLeaseToken) Set(val *JobLeaseToken) { v.value = val; v.isSet = true }
+func (v NullableJobLeaseToken) IsSet() bool             { return v.isSet }
+func (v *NullableJobLeaseToken) Unset()                 { v.value = nil; v.isSet = false }
+
+// NewNullableJobLeaseToken returns a set NullableJobLeaseToken wrapping val.
+func NewNullableJobLeaseToken(val *JobLeaseToken) *NullableJobLeaseToken {
+	return &NullableJobLeaseToken{value: val, isSet: true}
+}
+
+func (v NullableJobLeaseToken) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableJobLeaseToken) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// LoopIterationId is a Camunda semantic integer identifier. Construct it with NewLoopIterationId
+// (validated) or MustLoopIterationId (panics on invalid input).
+type LoopIterationId int32
+
+var specLoopIterationId = intSpec{name: "LoopIterationId", min: 1, hasMin: true, max: 0, hasMax: false}
+
+// NewLoopIterationId validates v against the LoopIterationId constraints and returns a LoopIterationId.
+func NewLoopIterationId(v int32) (LoopIterationId, error) {
+	if err := specLoopIterationId.validate(int64(v)); err != nil {
+		return 0, err
+	}
+	return LoopIterationId(v), nil
+}
+
+// MustLoopIterationId is like NewLoopIterationId but panics if v is invalid.
+func MustLoopIterationId(v int32) LoopIterationId {
+	k, err := NewLoopIterationId(v)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// Int32 returns the underlying int32 value.
+func (k LoopIterationId) Int32() int32 { return int32(k) }
+
+// Validate reports whether k satisfies the LoopIterationId constraints.
+func (k LoopIterationId) Validate() error { return specLoopIterationId.validate(int64(k)) }
+
+// ScopeKey is a Camunda semantic key. Construct it with NewScopeKey (validated) or
+// MustScopeKey (panics on invalid input).
+type ScopeKey string
+
+var specScopeKey = keySpec{name: "ScopeKey", pattern: regexp.MustCompile(`^-?[0-9]+$`), min: 1, max: 25}
+
+// NewScopeKey validates s against the ScopeKey constraints and returns a ScopeKey.
+func NewScopeKey(s string) (ScopeKey, error) {
+	if err := specScopeKey.validate(s); err != nil {
+		return "", err
+	}
+	return ScopeKey(s), nil
+}
+
+// MustScopeKey is like NewScopeKey but panics if s is invalid.
+func MustScopeKey(s string) ScopeKey {
+	k, err := NewScopeKey(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k ScopeKey) String() string { return string(k) }
+
+// Validate reports whether k satisfies the ScopeKey constraints.
+func (k ScopeKey) Validate() error { return specScopeKey.validate(string(k)) }
+
+// NullableAuditLogEntityKey is the generator's Nullable wrapper for AuditLogEntityKey (referenced by
+// generated models such as AuditLogResult).
+type NullableAuditLogEntityKey struct {
+	value *AuditLogEntityKey
+	isSet bool
+}
+
+func (v NullableAuditLogEntityKey) Get() *AuditLogEntityKey     { return v.value }
+func (v *NullableAuditLogEntityKey) Set(val *AuditLogEntityKey) { v.value = val; v.isSet = true }
+func (v NullableAuditLogEntityKey) IsSet() bool                 { return v.isSet }
+func (v *NullableAuditLogEntityKey) Unset()                     { v.value = nil; v.isSet = false }
+
+// NewNullableAuditLogEntityKey returns a set NullableAuditLogEntityKey wrapping val.
+func NewNullableAuditLogEntityKey(val *AuditLogEntityKey) *NullableAuditLogEntityKey {
+	return &NullableAuditLogEntityKey{value: val, isSet: true}
+}
+
+func (v NullableAuditLogEntityKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableAuditLogEntityKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableBatchOperationKey is the generator's Nullable wrapper for BatchOperationKey (referenced by
+// generated models such as AuditLogResult).
+type NullableBatchOperationKey struct {
+	value *BatchOperationKey
+	isSet bool
+}
+
+func (v NullableBatchOperationKey) Get() *BatchOperationKey     { return v.value }
+func (v *NullableBatchOperationKey) Set(val *BatchOperationKey) { v.value = val; v.isSet = true }
+func (v NullableBatchOperationKey) IsSet() bool                 { return v.isSet }
+func (v *NullableBatchOperationKey) Unset()                     { v.value = nil; v.isSet = false }
+
+// NewNullableBatchOperationKey returns a set NullableBatchOperationKey wrapping val.
+func NewNullableBatchOperationKey(val *BatchOperationKey) *NullableBatchOperationKey {
+	return &NullableBatchOperationKey{value: val, isSet: true}
+}
+
+func (v NullableBatchOperationKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableBatchOperationKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableBusinessId is the generator's Nullable wrapper for BusinessId (referenced by
+// generated models such as AuditLogResult).
+type NullableBusinessId struct {
+	value *BusinessId
+	isSet bool
+}
+
+func (v NullableBusinessId) Get() *BusinessId     { return v.value }
+func (v *NullableBusinessId) Set(val *BusinessId) { v.value = val; v.isSet = true }
+func (v NullableBusinessId) IsSet() bool          { return v.isSet }
+func (v *NullableBusinessId) Unset()              { v.value = nil; v.isSet = false }
+
+// NewNullableBusinessId returns a set NullableBusinessId wrapping val.
+func NewNullableBusinessId(val *BusinessId) *NullableBusinessId {
+	return &NullableBusinessId{value: val, isSet: true}
+}
+
+func (v NullableBusinessId) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableBusinessId) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableDecisionDefinitionId is the generator's Nullable wrapper for DecisionDefinitionId (referenced by
+// generated models such as AuditLogResult).
+type NullableDecisionDefinitionId struct {
+	value *DecisionDefinitionId
+	isSet bool
+}
+
+func (v NullableDecisionDefinitionId) Get() *DecisionDefinitionId     { return v.value }
+func (v *NullableDecisionDefinitionId) Set(val *DecisionDefinitionId) { v.value = val; v.isSet = true }
+func (v NullableDecisionDefinitionId) IsSet() bool                    { return v.isSet }
+func (v *NullableDecisionDefinitionId) Unset()                        { v.value = nil; v.isSet = false }
+
+// NewNullableDecisionDefinitionId returns a set NullableDecisionDefinitionId wrapping val.
+func NewNullableDecisionDefinitionId(val *DecisionDefinitionId) *NullableDecisionDefinitionId {
+	return &NullableDecisionDefinitionId{value: val, isSet: true}
+}
+
+func (v NullableDecisionDefinitionId) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableDecisionDefinitionId) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableDecisionDefinitionKey is the generator's Nullable wrapper for DecisionDefinitionKey (referenced by
+// generated models such as AuditLogResult).
+type NullableDecisionDefinitionKey struct {
+	value *DecisionDefinitionKey
+	isSet bool
+}
+
+func (v NullableDecisionDefinitionKey) Get() *DecisionDefinitionKey { return v.value }
+func (v *NullableDecisionDefinitionKey) Set(val *DecisionDefinitionKey) {
+	v.value = val
+	v.isSet = true
+}
+func (v NullableDecisionDefinitionKey) IsSet() bool { return v.isSet }
+func (v *NullableDecisionDefinitionKey) Unset()     { v.value = nil; v.isSet = false }
+
+// NewNullableDecisionDefinitionKey returns a set NullableDecisionDefinitionKey wrapping val.
+func NewNullableDecisionDefinitionKey(val *DecisionDefinitionKey) *NullableDecisionDefinitionKey {
+	return &NullableDecisionDefinitionKey{value: val, isSet: true}
+}
+
+func (v NullableDecisionDefinitionKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableDecisionDefinitionKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableDecisionEvaluationKey is the generator's Nullable wrapper for DecisionEvaluationKey (referenced by
+// generated models such as AuditLogResult).
+type NullableDecisionEvaluationKey struct {
+	value *DecisionEvaluationKey
+	isSet bool
+}
+
+func (v NullableDecisionEvaluationKey) Get() *DecisionEvaluationKey { return v.value }
+func (v *NullableDecisionEvaluationKey) Set(val *DecisionEvaluationKey) {
+	v.value = val
+	v.isSet = true
+}
+func (v NullableDecisionEvaluationKey) IsSet() bool { return v.isSet }
+func (v *NullableDecisionEvaluationKey) Unset()     { v.value = nil; v.isSet = false }
+
+// NewNullableDecisionEvaluationKey returns a set NullableDecisionEvaluationKey wrapping val.
+func NewNullableDecisionEvaluationKey(val *DecisionEvaluationKey) *NullableDecisionEvaluationKey {
+	return &NullableDecisionEvaluationKey{value: val, isSet: true}
+}
+
+func (v NullableDecisionEvaluationKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableDecisionEvaluationKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableDecisionRequirementsKey is the generator's Nullable wrapper for DecisionRequirementsKey (referenced by
+// generated models such as AuditLogResult).
+type NullableDecisionRequirementsKey struct {
+	value *DecisionRequirementsKey
+	isSet bool
+}
+
+func (v NullableDecisionRequirementsKey) Get() *DecisionRequirementsKey { return v.value }
+func (v *NullableDecisionRequirementsKey) Set(val *DecisionRequirementsKey) {
+	v.value = val
+	v.isSet = true
+}
+func (v NullableDecisionRequirementsKey) IsSet() bool { return v.isSet }
+func (v *NullableDecisionRequirementsKey) Unset()     { v.value = nil; v.isSet = false }
+
+// NewNullableDecisionRequirementsKey returns a set NullableDecisionRequirementsKey wrapping val.
+func NewNullableDecisionRequirementsKey(val *DecisionRequirementsKey) *NullableDecisionRequirementsKey {
+	return &NullableDecisionRequirementsKey{value: val, isSet: true}
+}
+
+func (v NullableDecisionRequirementsKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableDecisionRequirementsKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableDeploymentKey is the generator's Nullable wrapper for DeploymentKey (referenced by
+// generated models such as AuditLogResult).
+type NullableDeploymentKey struct {
+	value *DeploymentKey
+	isSet bool
+}
+
+func (v NullableDeploymentKey) Get() *DeploymentKey     { return v.value }
+func (v *NullableDeploymentKey) Set(val *DeploymentKey) { v.value = val; v.isSet = true }
+func (v NullableDeploymentKey) IsSet() bool             { return v.isSet }
+func (v *NullableDeploymentKey) Unset()                 { v.value = nil; v.isSet = false }
+
+// NewNullableDeploymentKey returns a set NullableDeploymentKey wrapping val.
+func NewNullableDeploymentKey(val *DeploymentKey) *NullableDeploymentKey {
+	return &NullableDeploymentKey{value: val, isSet: true}
+}
+
+func (v NullableDeploymentKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableDeploymentKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableElementId is the generator's Nullable wrapper for ElementId (referenced by
+// generated models such as AuditLogResult).
+type NullableElementId struct {
+	value *ElementId
+	isSet bool
+}
+
+func (v NullableElementId) Get() *ElementId     { return v.value }
+func (v *NullableElementId) Set(val *ElementId) { v.value = val; v.isSet = true }
+func (v NullableElementId) IsSet() bool         { return v.isSet }
+func (v *NullableElementId) Unset()             { v.value = nil; v.isSet = false }
+
+// NewNullableElementId returns a set NullableElementId wrapping val.
+func NewNullableElementId(val *ElementId) *NullableElementId {
+	return &NullableElementId{value: val, isSet: true}
+}
+
+func (v NullableElementId) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableElementId) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableElementInstanceKey is the generator's Nullable wrapper for ElementInstanceKey (referenced by
+// generated models such as AuditLogResult).
+type NullableElementInstanceKey struct {
+	value *ElementInstanceKey
+	isSet bool
+}
+
+func (v NullableElementInstanceKey) Get() *ElementInstanceKey     { return v.value }
+func (v *NullableElementInstanceKey) Set(val *ElementInstanceKey) { v.value = val; v.isSet = true }
+func (v NullableElementInstanceKey) IsSet() bool                  { return v.isSet }
+func (v *NullableElementInstanceKey) Unset()                      { v.value = nil; v.isSet = false }
+
+// NewNullableElementInstanceKey returns a set NullableElementInstanceKey wrapping val.
+func NewNullableElementInstanceKey(val *ElementInstanceKey) *NullableElementInstanceKey {
+	return &NullableElementInstanceKey{value: val, isSet: true}
+}
+
+func (v NullableElementInstanceKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableElementInstanceKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableEndCursor is the generator's Nullable wrapper for EndCursor (referenced by
+// generated models such as AuditLogResult).
+type NullableEndCursor struct {
+	value *EndCursor
+	isSet bool
+}
+
+func (v NullableEndCursor) Get() *EndCursor     { return v.value }
+func (v *NullableEndCursor) Set(val *EndCursor) { v.value = val; v.isSet = true }
+func (v NullableEndCursor) IsSet() bool         { return v.isSet }
+func (v *NullableEndCursor) Unset()             { v.value = nil; v.isSet = false }
+
+// NewNullableEndCursor returns a set NullableEndCursor wrapping val.
+func NewNullableEndCursor(val *EndCursor) *NullableEndCursor {
+	return &NullableEndCursor{value: val, isSet: true}
+}
+
+func (v NullableEndCursor) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableEndCursor) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableFormKey is the generator's Nullable wrapper for FormKey (referenced by
+// generated models such as AuditLogResult).
+type NullableFormKey struct {
+	value *FormKey
+	isSet bool
+}
+
+func (v NullableFormKey) Get() *FormKey     { return v.value }
+func (v *NullableFormKey) Set(val *FormKey) { v.value = val; v.isSet = true }
+func (v NullableFormKey) IsSet() bool       { return v.isSet }
+func (v *NullableFormKey) Unset()           { v.value = nil; v.isSet = false }
+
+// NewNullableFormKey returns a set NullableFormKey wrapping val.
+func NewNullableFormKey(val *FormKey) *NullableFormKey {
+	return &NullableFormKey{value: val, isSet: true}
+}
+
+func (v NullableFormKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableFormKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableIncidentKey is the generator's Nullable wrapper for IncidentKey (referenced by
+// generated models such as AuditLogResult).
+type NullableIncidentKey struct {
+	value *IncidentKey
+	isSet bool
+}
+
+func (v NullableIncidentKey) Get() *IncidentKey     { return v.value }
+func (v *NullableIncidentKey) Set(val *IncidentKey) { v.value = val; v.isSet = true }
+func (v NullableIncidentKey) IsSet() bool           { return v.isSet }
+func (v *NullableIncidentKey) Unset()               { v.value = nil; v.isSet = false }
+
+// NewNullableIncidentKey returns a set NullableIncidentKey wrapping val.
+func NewNullableIncidentKey(val *IncidentKey) *NullableIncidentKey {
+	return &NullableIncidentKey{value: val, isSet: true}
+}
+
+func (v NullableIncidentKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableIncidentKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableJobKey is the generator's Nullable wrapper for JobKey (referenced by
+// generated models such as AuditLogResult).
+type NullableJobKey struct {
+	value *JobKey
+	isSet bool
+}
+
+func (v NullableJobKey) Get() *JobKey     { return v.value }
+func (v *NullableJobKey) Set(val *JobKey) { v.value = val; v.isSet = true }
+func (v NullableJobKey) IsSet() bool      { return v.isSet }
+func (v *NullableJobKey) Unset()          { v.value = nil; v.isSet = false }
+
+// NewNullableJobKey returns a set NullableJobKey wrapping val.
+func NewNullableJobKey(val *JobKey) *NullableJobKey {
+	return &NullableJobKey{value: val, isSet: true}
+}
+
+func (v NullableJobKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableJobKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableProcessDefinitionId is the generator's Nullable wrapper for ProcessDefinitionId (referenced by
+// generated models such as AuditLogResult).
+type NullableProcessDefinitionId struct {
+	value *ProcessDefinitionId
+	isSet bool
+}
+
+func (v NullableProcessDefinitionId) Get() *ProcessDefinitionId     { return v.value }
+func (v *NullableProcessDefinitionId) Set(val *ProcessDefinitionId) { v.value = val; v.isSet = true }
+func (v NullableProcessDefinitionId) IsSet() bool                   { return v.isSet }
+func (v *NullableProcessDefinitionId) Unset()                       { v.value = nil; v.isSet = false }
+
+// NewNullableProcessDefinitionId returns a set NullableProcessDefinitionId wrapping val.
+func NewNullableProcessDefinitionId(val *ProcessDefinitionId) *NullableProcessDefinitionId {
+	return &NullableProcessDefinitionId{value: val, isSet: true}
+}
+
+func (v NullableProcessDefinitionId) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableProcessDefinitionId) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableProcessDefinitionKey is the generator's Nullable wrapper for ProcessDefinitionKey (referenced by
+// generated models such as AuditLogResult).
+type NullableProcessDefinitionKey struct {
+	value *ProcessDefinitionKey
+	isSet bool
+}
+
+func (v NullableProcessDefinitionKey) Get() *ProcessDefinitionKey     { return v.value }
+func (v *NullableProcessDefinitionKey) Set(val *ProcessDefinitionKey) { v.value = val; v.isSet = true }
+func (v NullableProcessDefinitionKey) IsSet() bool                    { return v.isSet }
+func (v *NullableProcessDefinitionKey) Unset()                        { v.value = nil; v.isSet = false }
+
+// NewNullableProcessDefinitionKey returns a set NullableProcessDefinitionKey wrapping val.
+func NewNullableProcessDefinitionKey(val *ProcessDefinitionKey) *NullableProcessDefinitionKey {
+	return &NullableProcessDefinitionKey{value: val, isSet: true}
+}
+
+func (v NullableProcessDefinitionKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableProcessDefinitionKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableProcessInstanceKey is the generator's Nullable wrapper for ProcessInstanceKey (referenced by
+// generated models such as AuditLogResult).
+type NullableProcessInstanceKey struct {
+	value *ProcessInstanceKey
+	isSet bool
+}
+
+func (v NullableProcessInstanceKey) Get() *ProcessInstanceKey     { return v.value }
+func (v *NullableProcessInstanceKey) Set(val *ProcessInstanceKey) { v.value = val; v.isSet = true }
+func (v NullableProcessInstanceKey) IsSet() bool                  { return v.isSet }
+func (v *NullableProcessInstanceKey) Unset()                      { v.value = nil; v.isSet = false }
+
+// NewNullableProcessInstanceKey returns a set NullableProcessInstanceKey wrapping val.
+func NewNullableProcessInstanceKey(val *ProcessInstanceKey) *NullableProcessInstanceKey {
+	return &NullableProcessInstanceKey{value: val, isSet: true}
+}
+
+func (v NullableProcessInstanceKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableProcessInstanceKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableStartCursor is the generator's Nullable wrapper for StartCursor (referenced by
+// generated models such as AuditLogResult).
+type NullableStartCursor struct {
+	value *StartCursor
+	isSet bool
+}
+
+func (v NullableStartCursor) Get() *StartCursor     { return v.value }
+func (v *NullableStartCursor) Set(val *StartCursor) { v.value = val; v.isSet = true }
+func (v NullableStartCursor) IsSet() bool           { return v.isSet }
+func (v *NullableStartCursor) Unset()               { v.value = nil; v.isSet = false }
+
+// NewNullableStartCursor returns a set NullableStartCursor wrapping val.
+func NewNullableStartCursor(val *StartCursor) *NullableStartCursor {
+	return &NullableStartCursor{value: val, isSet: true}
+}
+
+func (v NullableStartCursor) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableStartCursor) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableTenantId is the generator's Nullable wrapper for TenantId (referenced by
+// generated models such as AuditLogResult).
+type NullableTenantId struct {
+	value *TenantId
+	isSet bool
+}
+
+func (v NullableTenantId) Get() *TenantId     { return v.value }
+func (v *NullableTenantId) Set(val *TenantId) { v.value = val; v.isSet = true }
+func (v NullableTenantId) IsSet() bool        { return v.isSet }
+func (v *NullableTenantId) Unset()            { v.value = nil; v.isSet = false }
+
+// NewNullableTenantId returns a set NullableTenantId wrapping val.
+func NewNullableTenantId(val *TenantId) *NullableTenantId {
+	return &NullableTenantId{value: val, isSet: true}
+}
+
+func (v NullableTenantId) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableTenantId) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableUserTaskKey is the generator's Nullable wrapper for UserTaskKey (referenced by
+// generated models such as AuditLogResult).
+type NullableUserTaskKey struct {
+	value *UserTaskKey
+	isSet bool
+}
+
+func (v NullableUserTaskKey) Get() *UserTaskKey     { return v.value }
+func (v *NullableUserTaskKey) Set(val *UserTaskKey) { v.value = val; v.isSet = true }
+func (v NullableUserTaskKey) IsSet() bool           { return v.isSet }
+func (v *NullableUserTaskKey) Unset()               { v.value = nil; v.isSet = false }
+
+// NewNullableUserTaskKey returns a set NullableUserTaskKey wrapping val.
+func NewNullableUserTaskKey(val *UserTaskKey) *NullableUserTaskKey {
+	return &NullableUserTaskKey{value: val, isSet: true}
+}
+
+func (v NullableUserTaskKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableUserTaskKey) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

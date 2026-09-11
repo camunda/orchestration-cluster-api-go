@@ -22,7 +22,7 @@ var _ MappedNullable = &GroupUserResult{}
 // GroupUserResult struct for GroupUserResult
 type GroupUserResult struct {
 	// The unique name of a user.
-	Username string `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	Username Username `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 }
 
 type _GroupUserResult GroupUserResult
@@ -31,7 +31,7 @@ type _GroupUserResult GroupUserResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGroupUserResult(username string) *GroupUserResult {
+func NewGroupUserResult(username Username) *GroupUserResult {
 	this := GroupUserResult{}
 	this.Username = username
 	return &this
@@ -46,9 +46,9 @@ func NewGroupUserResultWithDefaults() *GroupUserResult {
 }
 
 // GetUsername returns the Username field value
-func (o *GroupUserResult) GetUsername() string {
+func (o *GroupUserResult) GetUsername() Username {
 	if o == nil {
-		var ret string
+		var ret Username
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *GroupUserResult) GetUsername() string {
 
 // GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
-func (o *GroupUserResult) GetUsernameOk() (*string, bool) {
+func (o *GroupUserResult) GetUsernameOk() (*Username, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *GroupUserResult) GetUsernameOk() (*string, bool) {
 }
 
 // SetUsername sets field value
-func (o *GroupUserResult) SetUsername(v string) {
+func (o *GroupUserResult) SetUsername(v Username) {
 	o.Username = v
 }
 

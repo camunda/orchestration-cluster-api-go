@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessInstanceWaitStateStatisticsResult{}
 // ProcessInstanceWaitStateStatisticsResult Process instance wait state statistics response item.
 type ProcessInstanceWaitStateStatisticsResult struct {
 	// The element id for which the wait states are aggregated.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The total number of waiting instances of the element.
 	WaitingCount int64 `json:"waitingCount"`
 }
@@ -33,7 +33,7 @@ type _ProcessInstanceWaitStateStatisticsResult ProcessInstanceWaitStateStatistic
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceWaitStateStatisticsResult(elementId string, waitingCount int64) *ProcessInstanceWaitStateStatisticsResult {
+func NewProcessInstanceWaitStateStatisticsResult(elementId ElementId, waitingCount int64) *ProcessInstanceWaitStateStatisticsResult {
 	this := ProcessInstanceWaitStateStatisticsResult{}
 	this.ElementId = elementId
 	this.WaitingCount = waitingCount
@@ -49,9 +49,9 @@ func NewProcessInstanceWaitStateStatisticsResultWithDefaults() *ProcessInstanceW
 }
 
 // GetElementId returns the ElementId field value
-func (o *ProcessInstanceWaitStateStatisticsResult) GetElementId() string {
+func (o *ProcessInstanceWaitStateStatisticsResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *ProcessInstanceWaitStateStatisticsResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceWaitStateStatisticsResult) GetElementIdOk() (*string, bool) {
+func (o *ProcessInstanceWaitStateStatisticsResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,7 +68,7 @@ func (o *ProcessInstanceWaitStateStatisticsResult) GetElementIdOk() (*string, bo
 }
 
 // SetElementId sets field value
-func (o *ProcessInstanceWaitStateStatisticsResult) SetElementId(v string) {
+func (o *ProcessInstanceWaitStateStatisticsResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 

@@ -23,19 +23,19 @@ var _ MappedNullable = &AgentInstanceHistoryItemResult{}
 // AgentInstanceHistoryItemResult A single conversation history item belonging to an agent instance.
 type AgentInstanceHistoryItemResult struct {
 	// The unique key for this history item. Stable and sortable by creation order.
-	HistoryItemKey ModelString `json:"historyItemKey"`
+	HistoryItemKey AgentHistoryItemKey `json:"historyItemKey"`
 	// The client-supplied identifier this item was created with. Empty for items that don't carry one. Not unique: a job can be re-activated under a superseded lease any number of times before it completes, so one historyItemId can have zero or more DISCARDED records and at most one COMMITTED record, since only historyItemKey is guaranteed unique. Filter by commitStatus rather than assuming one record per historyItemId.
-	HistoryItemId string `json:"historyItemId"`
+	HistoryItemId HistoryItemId `json:"historyItemId"`
 	// The key of the agent instance this item belongs to.
-	AgentInstanceKey ModelString `json:"agentInstanceKey"`
+	AgentInstanceKey AgentInstanceKey `json:"agentInstanceKey"`
 	// The key of the AI Agent Task or ad-hoc sub-process element instance under which this item was produced.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// The key of the job activation during which this item was produced.
-	JobKey ModelString `json:"jobKey"`
+	JobKey JobKey `json:"jobKey"`
 	// The lease token of the activation that produced this item.
-	JobLease string `json:"jobLease"`
+	JobLease JobLeaseToken `json:"jobLease"`
 	// The loop iteration this item belongs to.
-	LoopIteration int32 `json:"loopIteration"`
+	LoopIteration LoopIterationId `json:"loopIteration"`
 	// The role of this history item in the conversation.
 	Role AgentInstanceHistoryRoleEnum `json:"role"`
 	// The content blocks of this history item.
@@ -66,7 +66,7 @@ type _AgentInstanceHistoryItemResult AgentInstanceHistoryItemResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemResult(historyItemKey ModelString, historyItemId string, agentInstanceKey ModelString, elementInstanceKey ModelString, jobKey ModelString, jobLease string, loopIteration int32, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time, tools []AgentTool, model NullableString, provider NullableString, limits AgentInstanceLimits, systemPrompt []AgentInstanceMessageContent) *AgentInstanceHistoryItemResult {
+func NewAgentInstanceHistoryItemResult(historyItemKey AgentHistoryItemKey, historyItemId HistoryItemId, agentInstanceKey AgentInstanceKey, elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLease JobLeaseToken, loopIteration LoopIterationId, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time, tools []AgentTool, model NullableString, provider NullableString, limits AgentInstanceLimits, systemPrompt []AgentInstanceMessageContent) *AgentInstanceHistoryItemResult {
 	this := AgentInstanceHistoryItemResult{}
 	this.HistoryItemKey = historyItemKey
 	this.HistoryItemId = historyItemId
@@ -98,9 +98,9 @@ func NewAgentInstanceHistoryItemResultWithDefaults() *AgentInstanceHistoryItemRe
 }
 
 // GetHistoryItemKey returns the HistoryItemKey field value
-func (o *AgentInstanceHistoryItemResult) GetHistoryItemKey() ModelString {
+func (o *AgentInstanceHistoryItemResult) GetHistoryItemKey() AgentHistoryItemKey {
 	if o == nil {
-		var ret ModelString
+		var ret AgentHistoryItemKey
 		return ret
 	}
 
@@ -109,7 +109,7 @@ func (o *AgentInstanceHistoryItemResult) GetHistoryItemKey() ModelString {
 
 // GetHistoryItemKeyOk returns a tuple with the HistoryItemKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemResult) GetHistoryItemKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceHistoryItemResult) GetHistoryItemKeyOk() (*AgentHistoryItemKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -117,14 +117,14 @@ func (o *AgentInstanceHistoryItemResult) GetHistoryItemKeyOk() (*ModelString, bo
 }
 
 // SetHistoryItemKey sets field value
-func (o *AgentInstanceHistoryItemResult) SetHistoryItemKey(v ModelString) {
+func (o *AgentInstanceHistoryItemResult) SetHistoryItemKey(v AgentHistoryItemKey) {
 	o.HistoryItemKey = v
 }
 
 // GetHistoryItemId returns the HistoryItemId field value
-func (o *AgentInstanceHistoryItemResult) GetHistoryItemId() string {
+func (o *AgentInstanceHistoryItemResult) GetHistoryItemId() HistoryItemId {
 	if o == nil {
-		var ret string
+		var ret HistoryItemId
 		return ret
 	}
 
@@ -133,7 +133,7 @@ func (o *AgentInstanceHistoryItemResult) GetHistoryItemId() string {
 
 // GetHistoryItemIdOk returns a tuple with the HistoryItemId field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemResult) GetHistoryItemIdOk() (*string, bool) {
+func (o *AgentInstanceHistoryItemResult) GetHistoryItemIdOk() (*HistoryItemId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -141,14 +141,14 @@ func (o *AgentInstanceHistoryItemResult) GetHistoryItemIdOk() (*string, bool) {
 }
 
 // SetHistoryItemId sets field value
-func (o *AgentInstanceHistoryItemResult) SetHistoryItemId(v string) {
+func (o *AgentInstanceHistoryItemResult) SetHistoryItemId(v HistoryItemId) {
 	o.HistoryItemId = v
 }
 
 // GetAgentInstanceKey returns the AgentInstanceKey field value
-func (o *AgentInstanceHistoryItemResult) GetAgentInstanceKey() ModelString {
+func (o *AgentInstanceHistoryItemResult) GetAgentInstanceKey() AgentInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret AgentInstanceKey
 		return ret
 	}
 
@@ -157,7 +157,7 @@ func (o *AgentInstanceHistoryItemResult) GetAgentInstanceKey() ModelString {
 
 // GetAgentInstanceKeyOk returns a tuple with the AgentInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemResult) GetAgentInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceHistoryItemResult) GetAgentInstanceKeyOk() (*AgentInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -165,14 +165,14 @@ func (o *AgentInstanceHistoryItemResult) GetAgentInstanceKeyOk() (*ModelString, 
 }
 
 // SetAgentInstanceKey sets field value
-func (o *AgentInstanceHistoryItemResult) SetAgentInstanceKey(v ModelString) {
+func (o *AgentInstanceHistoryItemResult) SetAgentInstanceKey(v AgentInstanceKey) {
 	o.AgentInstanceKey = v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *AgentInstanceHistoryItemResult) GetElementInstanceKey() ModelString {
+func (o *AgentInstanceHistoryItemResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -181,7 +181,7 @@ func (o *AgentInstanceHistoryItemResult) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceHistoryItemResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -189,14 +189,14 @@ func (o *AgentInstanceHistoryItemResult) GetElementInstanceKeyOk() (*ModelString
 }
 
 // SetElementInstanceKey sets field value
-func (o *AgentInstanceHistoryItemResult) SetElementInstanceKey(v ModelString) {
+func (o *AgentInstanceHistoryItemResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
 // GetJobKey returns the JobKey field value
-func (o *AgentInstanceHistoryItemResult) GetJobKey() ModelString {
+func (o *AgentInstanceHistoryItemResult) GetJobKey() JobKey {
 	if o == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -205,7 +205,7 @@ func (o *AgentInstanceHistoryItemResult) GetJobKey() ModelString {
 
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemResult) GetJobKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceHistoryItemResult) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -213,14 +213,14 @@ func (o *AgentInstanceHistoryItemResult) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *AgentInstanceHistoryItemResult) SetJobKey(v ModelString) {
+func (o *AgentInstanceHistoryItemResult) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
 // GetJobLease returns the JobLease field value
-func (o *AgentInstanceHistoryItemResult) GetJobLease() string {
+func (o *AgentInstanceHistoryItemResult) GetJobLease() JobLeaseToken {
 	if o == nil {
-		var ret string
+		var ret JobLeaseToken
 		return ret
 	}
 
@@ -229,7 +229,7 @@ func (o *AgentInstanceHistoryItemResult) GetJobLease() string {
 
 // GetJobLeaseOk returns a tuple with the JobLease field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemResult) GetJobLeaseOk() (*string, bool) {
+func (o *AgentInstanceHistoryItemResult) GetJobLeaseOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -237,14 +237,14 @@ func (o *AgentInstanceHistoryItemResult) GetJobLeaseOk() (*string, bool) {
 }
 
 // SetJobLease sets field value
-func (o *AgentInstanceHistoryItemResult) SetJobLease(v string) {
+func (o *AgentInstanceHistoryItemResult) SetJobLease(v JobLeaseToken) {
 	o.JobLease = v
 }
 
 // GetLoopIteration returns the LoopIteration field value
-func (o *AgentInstanceHistoryItemResult) GetLoopIteration() int32 {
+func (o *AgentInstanceHistoryItemResult) GetLoopIteration() LoopIterationId {
 	if o == nil {
-		var ret int32
+		var ret LoopIterationId
 		return ret
 	}
 
@@ -253,7 +253,7 @@ func (o *AgentInstanceHistoryItemResult) GetLoopIteration() int32 {
 
 // GetLoopIterationOk returns a tuple with the LoopIteration field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemResult) GetLoopIterationOk() (*int32, bool) {
+func (o *AgentInstanceHistoryItemResult) GetLoopIterationOk() (*LoopIterationId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -261,7 +261,7 @@ func (o *AgentInstanceHistoryItemResult) GetLoopIterationOk() (*int32, bool) {
 }
 
 // SetLoopIteration sets field value
-func (o *AgentInstanceHistoryItemResult) SetLoopIteration(v int32) {
+func (o *AgentInstanceHistoryItemResult) SetLoopIteration(v LoopIterationId) {
 	o.LoopIteration = v
 }
 

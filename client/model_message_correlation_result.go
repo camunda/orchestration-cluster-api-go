@@ -22,11 +22,11 @@ var _ MappedNullable = &MessageCorrelationResult{}
 // MessageCorrelationResult The message key of the correlated message, as well as the first process instance key it correlated with.
 type MessageCorrelationResult struct {
 	// The tenant ID of the correlated message
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The key of the correlated message.
-	MessageKey ModelString `json:"messageKey"`
+	MessageKey MessageKey `json:"messageKey"`
 	// The key of the first process instance the message correlated with
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 }
 
 type _MessageCorrelationResult MessageCorrelationResult
@@ -35,7 +35,7 @@ type _MessageCorrelationResult MessageCorrelationResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMessageCorrelationResult(tenantId string, messageKey ModelString, processInstanceKey ModelString) *MessageCorrelationResult {
+func NewMessageCorrelationResult(tenantId TenantId, messageKey MessageKey, processInstanceKey ProcessInstanceKey) *MessageCorrelationResult {
 	this := MessageCorrelationResult{}
 	this.TenantId = tenantId
 	this.MessageKey = messageKey
@@ -52,9 +52,9 @@ func NewMessageCorrelationResultWithDefaults() *MessageCorrelationResult {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *MessageCorrelationResult) GetTenantId() string {
+func (o *MessageCorrelationResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *MessageCorrelationResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *MessageCorrelationResult) GetTenantIdOk() (*string, bool) {
+func (o *MessageCorrelationResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +71,14 @@ func (o *MessageCorrelationResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *MessageCorrelationResult) SetTenantId(v string) {
+func (o *MessageCorrelationResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetMessageKey returns the MessageKey field value
-func (o *MessageCorrelationResult) GetMessageKey() ModelString {
+func (o *MessageCorrelationResult) GetMessageKey() MessageKey {
 	if o == nil {
-		var ret ModelString
+		var ret MessageKey
 		return ret
 	}
 
@@ -87,7 +87,7 @@ func (o *MessageCorrelationResult) GetMessageKey() ModelString {
 
 // GetMessageKeyOk returns a tuple with the MessageKey field value
 // and a boolean to check if the value has been set.
-func (o *MessageCorrelationResult) GetMessageKeyOk() (*ModelString, bool) {
+func (o *MessageCorrelationResult) GetMessageKeyOk() (*MessageKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,14 +95,14 @@ func (o *MessageCorrelationResult) GetMessageKeyOk() (*ModelString, bool) {
 }
 
 // SetMessageKey sets field value
-func (o *MessageCorrelationResult) SetMessageKey(v ModelString) {
+func (o *MessageCorrelationResult) SetMessageKey(v MessageKey) {
 	o.MessageKey = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *MessageCorrelationResult) GetProcessInstanceKey() ModelString {
+func (o *MessageCorrelationResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -111,7 +111,7 @@ func (o *MessageCorrelationResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *MessageCorrelationResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *MessageCorrelationResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -119,7 +119,7 @@ func (o *MessageCorrelationResult) GetProcessInstanceKeyOk() (*ModelString, bool
 }
 
 // SetProcessInstanceKey sets field value
-func (o *MessageCorrelationResult) SetProcessInstanceKey(v ModelString) {
+func (o *MessageCorrelationResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 

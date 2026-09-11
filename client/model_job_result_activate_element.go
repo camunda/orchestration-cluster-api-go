@@ -20,7 +20,7 @@ var _ MappedNullable = &JobResultActivateElement{}
 // JobResultActivateElement Instruction to activate a single BPMN element within an ad‑hoc sub‑process, optionally providing variables scoped to that element.
 type JobResultActivateElement struct {
 	// The element ID to activate.
-	ElementId *string `json:"elementId,omitempty"`
+	ElementId *ElementId `json:"elementId,omitempty"`
 	// Variables for the element.
 	Variables map[string]interface{} `json:"variables,omitempty"`
 }
@@ -43,9 +43,9 @@ func NewJobResultActivateElementWithDefaults() *JobResultActivateElement {
 }
 
 // GetElementId returns the ElementId field value if set, zero value otherwise.
-func (o *JobResultActivateElement) GetElementId() string {
+func (o *JobResultActivateElement) GetElementId() ElementId {
 	if o == nil || IsNil(o.ElementId) {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 	return *o.ElementId
@@ -53,7 +53,7 @@ func (o *JobResultActivateElement) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *JobResultActivateElement) GetElementIdOk() (*string, bool) {
+func (o *JobResultActivateElement) GetElementIdOk() (*ElementId, bool) {
 	if o == nil || IsNil(o.ElementId) {
 		return nil, false
 	}
@@ -69,8 +69,8 @@ func (o *JobResultActivateElement) HasElementId() bool {
 	return false
 }
 
-// SetElementId gets a reference to the given string and assigns it to the ElementId field.
-func (o *JobResultActivateElement) SetElementId(v string) {
+// SetElementId gets a reference to the given ElementId and assigns it to the ElementId field.
+func (o *JobResultActivateElement) SetElementId(v ElementId) {
 	o.ElementId = &v
 }
 

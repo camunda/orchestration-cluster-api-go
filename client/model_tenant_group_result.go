@@ -22,7 +22,7 @@ var _ MappedNullable = &TenantGroupResult{}
 // TenantGroupResult struct for TenantGroupResult
 type TenantGroupResult struct {
 	// The group ID.
-	GroupId string `json:"groupId"`
+	GroupId GroupId `json:"groupId"`
 }
 
 type _TenantGroupResult TenantGroupResult
@@ -31,7 +31,7 @@ type _TenantGroupResult TenantGroupResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTenantGroupResult(groupId string) *TenantGroupResult {
+func NewTenantGroupResult(groupId GroupId) *TenantGroupResult {
 	this := TenantGroupResult{}
 	this.GroupId = groupId
 	return &this
@@ -46,9 +46,9 @@ func NewTenantGroupResultWithDefaults() *TenantGroupResult {
 }
 
 // GetGroupId returns the GroupId field value
-func (o *TenantGroupResult) GetGroupId() string {
+func (o *TenantGroupResult) GetGroupId() GroupId {
 	if o == nil {
-		var ret string
+		var ret GroupId
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *TenantGroupResult) GetGroupId() string {
 
 // GetGroupIdOk returns a tuple with the GroupId field value
 // and a boolean to check if the value has been set.
-func (o *TenantGroupResult) GetGroupIdOk() (*string, bool) {
+func (o *TenantGroupResult) GetGroupIdOk() (*GroupId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *TenantGroupResult) GetGroupIdOk() (*string, bool) {
 }
 
 // SetGroupId sets field value
-func (o *TenantGroupResult) SetGroupId(v string) {
+func (o *TenantGroupResult) SetGroupId(v GroupId) {
 	o.GroupId = v
 }
 

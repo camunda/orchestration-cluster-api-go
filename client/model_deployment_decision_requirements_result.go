@@ -30,9 +30,9 @@ type DeploymentDecisionRequirementsResult struct {
 	// The name of the resource.
 	ResourceName string `json:"resourceName"`
 	// The tenant ID of the deployed decision requirements.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned decision requirements key, which acts as a unique identifier for this decision requirements.
-	DecisionRequirementsKey ModelString `json:"decisionRequirementsKey"`
+	DecisionRequirementsKey DecisionRequirementsKey `json:"decisionRequirementsKey"`
 }
 
 type _DeploymentDecisionRequirementsResult DeploymentDecisionRequirementsResult
@@ -41,7 +41,7 @@ type _DeploymentDecisionRequirementsResult DeploymentDecisionRequirementsResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentDecisionRequirementsResult(decisionRequirementsId string, decisionRequirementsName string, version int32, resourceName string, tenantId string, decisionRequirementsKey ModelString) *DeploymentDecisionRequirementsResult {
+func NewDeploymentDecisionRequirementsResult(decisionRequirementsId string, decisionRequirementsName string, version int32, resourceName string, tenantId TenantId, decisionRequirementsKey DecisionRequirementsKey) *DeploymentDecisionRequirementsResult {
 	this := DeploymentDecisionRequirementsResult{}
 	this.DecisionRequirementsId = decisionRequirementsId
 	this.DecisionRequirementsName = decisionRequirementsName
@@ -157,9 +157,9 @@ func (o *DeploymentDecisionRequirementsResult) SetResourceName(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *DeploymentDecisionRequirementsResult) GetTenantId() string {
+func (o *DeploymentDecisionRequirementsResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -168,7 +168,7 @@ func (o *DeploymentDecisionRequirementsResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentDecisionRequirementsResult) GetTenantIdOk() (*string, bool) {
+func (o *DeploymentDecisionRequirementsResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -176,14 +176,14 @@ func (o *DeploymentDecisionRequirementsResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *DeploymentDecisionRequirementsResult) SetTenantId(v string) {
+func (o *DeploymentDecisionRequirementsResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetDecisionRequirementsKey returns the DecisionRequirementsKey field value
-func (o *DeploymentDecisionRequirementsResult) GetDecisionRequirementsKey() ModelString {
+func (o *DeploymentDecisionRequirementsResult) GetDecisionRequirementsKey() DecisionRequirementsKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionRequirementsKey
 		return ret
 	}
 
@@ -192,7 +192,7 @@ func (o *DeploymentDecisionRequirementsResult) GetDecisionRequirementsKey() Mode
 
 // GetDecisionRequirementsKeyOk returns a tuple with the DecisionRequirementsKey field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentDecisionRequirementsResult) GetDecisionRequirementsKeyOk() (*ModelString, bool) {
+func (o *DeploymentDecisionRequirementsResult) GetDecisionRequirementsKeyOk() (*DecisionRequirementsKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -200,7 +200,7 @@ func (o *DeploymentDecisionRequirementsResult) GetDecisionRequirementsKeyOk() (*
 }
 
 // SetDecisionRequirementsKey sets field value
-func (o *DeploymentDecisionRequirementsResult) SetDecisionRequirementsKey(v ModelString) {
+func (o *DeploymentDecisionRequirementsResult) SetDecisionRequirementsKey(v DecisionRequirementsKey) {
 	o.DecisionRequirementsKey = v
 }
 

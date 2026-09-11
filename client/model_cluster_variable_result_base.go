@@ -22,7 +22,7 @@ var _ MappedNullable = &ClusterVariableResultBase{}
 // ClusterVariableResultBase Cluster variable response item.
 type ClusterVariableResultBase struct {
 	// The name of the cluster variable. Unique within its scope (global or tenant-specific).
-	Name  string                   `json:"name" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	Name  ClusterVariableName      `json:"name" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	Scope ClusterVariableScopeEnum `json:"scope"`
 	// Only provided if the cluster variable scope is TENANT. Null for global scope variables.
 	TenantId NullableString `json:"tenantId"`
@@ -37,7 +37,7 @@ type _ClusterVariableResultBase ClusterVariableResultBase
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewClusterVariableResultBase(name string, scope ClusterVariableScopeEnum, tenantId NullableString, metadata map[string]CreateClusterVariableRequestMetadataValue, kind ClusterVariableKindEnum) *ClusterVariableResultBase {
+func NewClusterVariableResultBase(name ClusterVariableName, scope ClusterVariableScopeEnum, tenantId NullableString, metadata map[string]CreateClusterVariableRequestMetadataValue, kind ClusterVariableKindEnum) *ClusterVariableResultBase {
 	this := ClusterVariableResultBase{}
 	this.Name = name
 	this.Scope = scope
@@ -56,9 +56,9 @@ func NewClusterVariableResultBaseWithDefaults() *ClusterVariableResultBase {
 }
 
 // GetName returns the Name field value
-func (o *ClusterVariableResultBase) GetName() string {
+func (o *ClusterVariableResultBase) GetName() ClusterVariableName {
 	if o == nil {
-		var ret string
+		var ret ClusterVariableName
 		return ret
 	}
 
@@ -67,7 +67,7 @@ func (o *ClusterVariableResultBase) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *ClusterVariableResultBase) GetNameOk() (*string, bool) {
+func (o *ClusterVariableResultBase) GetNameOk() (*ClusterVariableName, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -75,7 +75,7 @@ func (o *ClusterVariableResultBase) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *ClusterVariableResultBase) SetName(v string) {
+func (o *ClusterVariableResultBase) SetName(v ClusterVariableName) {
 	o.Name = v
 }
 

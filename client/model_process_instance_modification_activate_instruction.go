@@ -22,11 +22,11 @@ var _ MappedNullable = &ProcessInstanceModificationActivateInstruction{}
 // ProcessInstanceModificationActivateInstruction Instruction describing an element to activate.
 type ProcessInstanceModificationActivateInstruction struct {
 	// The id of the element to activate.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// Instructions describing which variables to create or update.
 	VariableInstructions []ModifyProcessInstanceVariableInstruction `json:"variableInstructions,omitempty"`
 	// The key of the ancestor scope the element instance should be created in. Set to -1 to create the new element instance within an existing element instance of the flow scope. If multiple instances of the target element's flow scope exist, choose one specifically with this property by providing its key.
-	AncestorElementInstanceKey *ModelString `json:"ancestorElementInstanceKey,omitempty"`
+	AncestorElementInstanceKey *ElementInstanceKey `json:"ancestorElementInstanceKey,omitempty"`
 }
 
 type _ProcessInstanceModificationActivateInstruction ProcessInstanceModificationActivateInstruction
@@ -35,7 +35,7 @@ type _ProcessInstanceModificationActivateInstruction ProcessInstanceModification
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceModificationActivateInstruction(elementId string) *ProcessInstanceModificationActivateInstruction {
+func NewProcessInstanceModificationActivateInstruction(elementId ElementId) *ProcessInstanceModificationActivateInstruction {
 	this := ProcessInstanceModificationActivateInstruction{}
 	this.ElementId = elementId
 	return &this
@@ -50,9 +50,9 @@ func NewProcessInstanceModificationActivateInstructionWithDefaults() *ProcessIns
 }
 
 // GetElementId returns the ElementId field value
-func (o *ProcessInstanceModificationActivateInstruction) GetElementId() string {
+func (o *ProcessInstanceModificationActivateInstruction) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -61,7 +61,7 @@ func (o *ProcessInstanceModificationActivateInstruction) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceModificationActivateInstruction) GetElementIdOk() (*string, bool) {
+func (o *ProcessInstanceModificationActivateInstruction) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -69,7 +69,7 @@ func (o *ProcessInstanceModificationActivateInstruction) GetElementIdOk() (*stri
 }
 
 // SetElementId sets field value
-func (o *ProcessInstanceModificationActivateInstruction) SetElementId(v string) {
+func (o *ProcessInstanceModificationActivateInstruction) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
@@ -106,9 +106,9 @@ func (o *ProcessInstanceModificationActivateInstruction) SetVariableInstructions
 }
 
 // GetAncestorElementInstanceKey returns the AncestorElementInstanceKey field value if set, zero value otherwise.
-func (o *ProcessInstanceModificationActivateInstruction) GetAncestorElementInstanceKey() ModelString {
+func (o *ProcessInstanceModificationActivateInstruction) GetAncestorElementInstanceKey() ElementInstanceKey {
 	if o == nil || IsNil(o.AncestorElementInstanceKey) {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 	return *o.AncestorElementInstanceKey
@@ -116,7 +116,7 @@ func (o *ProcessInstanceModificationActivateInstruction) GetAncestorElementInsta
 
 // GetAncestorElementInstanceKeyOk returns a tuple with the AncestorElementInstanceKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceModificationActivateInstruction) GetAncestorElementInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceModificationActivateInstruction) GetAncestorElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil || IsNil(o.AncestorElementInstanceKey) {
 		return nil, false
 	}
@@ -132,8 +132,8 @@ func (o *ProcessInstanceModificationActivateInstruction) HasAncestorElementInsta
 	return false
 }
 
-// SetAncestorElementInstanceKey gets a reference to the given ModelString and assigns it to the AncestorElementInstanceKey field.
-func (o *ProcessInstanceModificationActivateInstruction) SetAncestorElementInstanceKey(v ModelString) {
+// SetAncestorElementInstanceKey gets a reference to the given ElementInstanceKey and assigns it to the AncestorElementInstanceKey field.
+func (o *ProcessInstanceModificationActivateInstruction) SetAncestorElementInstanceKey(v ElementInstanceKey) {
 	o.AncestorElementInstanceKey = &v
 }
 

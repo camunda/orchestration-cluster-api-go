@@ -22,7 +22,7 @@ var _ MappedNullable = &EvaluatedDecisionResult{}
 // EvaluatedDecisionResult A decision that was evaluated.
 type EvaluatedDecisionResult struct {
 	// The ID of the decision which was evaluated.
-	DecisionDefinitionId string `json:"decisionDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	DecisionDefinitionId DecisionDefinitionId `json:"decisionDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The name of the decision which was evaluated.
 	DecisionDefinitionName string `json:"decisionDefinitionName"`
 	// The version of the decision which was evaluated.
@@ -32,15 +32,15 @@ type EvaluatedDecisionResult struct {
 	// JSON document that will instantiate the result of the decision which was evaluated.
 	Output string `json:"output"`
 	// The tenant ID of the evaluated decision.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The decision rules that matched within this decision evaluation.
 	MatchedRules []MatchedDecisionRuleItem `json:"matchedRules"`
 	// The decision inputs that were evaluated within this decision evaluation.
 	EvaluatedInputs []EvaluatedDecisionInputItem `json:"evaluatedInputs"`
 	// The unique key identifying the decision which was evaluate.
-	DecisionDefinitionKey ModelString `json:"decisionDefinitionKey"`
+	DecisionDefinitionKey DecisionDefinitionKey `json:"decisionDefinitionKey"`
 	// The unique key identifying this decision evaluation instance.
-	DecisionEvaluationInstanceKey string `json:"decisionEvaluationInstanceKey" validate:"regexp=^[0-9]+-[0-9]+$"`
+	DecisionEvaluationInstanceKey DecisionEvaluationInstanceKey `json:"decisionEvaluationInstanceKey" validate:"regexp=^[0-9]+-[0-9]+$"`
 }
 
 type _EvaluatedDecisionResult EvaluatedDecisionResult
@@ -49,7 +49,7 @@ type _EvaluatedDecisionResult EvaluatedDecisionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewEvaluatedDecisionResult(decisionDefinitionId string, decisionDefinitionName string, decisionDefinitionVersion int32, decisionDefinitionType string, output string, tenantId string, matchedRules []MatchedDecisionRuleItem, evaluatedInputs []EvaluatedDecisionInputItem, decisionDefinitionKey ModelString, decisionEvaluationInstanceKey string) *EvaluatedDecisionResult {
+func NewEvaluatedDecisionResult(decisionDefinitionId DecisionDefinitionId, decisionDefinitionName string, decisionDefinitionVersion int32, decisionDefinitionType string, output string, tenantId TenantId, matchedRules []MatchedDecisionRuleItem, evaluatedInputs []EvaluatedDecisionInputItem, decisionDefinitionKey DecisionDefinitionKey, decisionEvaluationInstanceKey DecisionEvaluationInstanceKey) *EvaluatedDecisionResult {
 	this := EvaluatedDecisionResult{}
 	this.DecisionDefinitionId = decisionDefinitionId
 	this.DecisionDefinitionName = decisionDefinitionName
@@ -73,9 +73,9 @@ func NewEvaluatedDecisionResultWithDefaults() *EvaluatedDecisionResult {
 }
 
 // GetDecisionDefinitionId returns the DecisionDefinitionId field value
-func (o *EvaluatedDecisionResult) GetDecisionDefinitionId() string {
+func (o *EvaluatedDecisionResult) GetDecisionDefinitionId() DecisionDefinitionId {
 	if o == nil {
-		var ret string
+		var ret DecisionDefinitionId
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *EvaluatedDecisionResult) GetDecisionDefinitionId() string {
 
 // GetDecisionDefinitionIdOk returns a tuple with the DecisionDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *EvaluatedDecisionResult) GetDecisionDefinitionIdOk() (*string, bool) {
+func (o *EvaluatedDecisionResult) GetDecisionDefinitionIdOk() (*DecisionDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *EvaluatedDecisionResult) GetDecisionDefinitionIdOk() (*string, bool) {
 }
 
 // SetDecisionDefinitionId sets field value
-func (o *EvaluatedDecisionResult) SetDecisionDefinitionId(v string) {
+func (o *EvaluatedDecisionResult) SetDecisionDefinitionId(v DecisionDefinitionId) {
 	o.DecisionDefinitionId = v
 }
 
@@ -193,9 +193,9 @@ func (o *EvaluatedDecisionResult) SetOutput(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *EvaluatedDecisionResult) GetTenantId() string {
+func (o *EvaluatedDecisionResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -204,7 +204,7 @@ func (o *EvaluatedDecisionResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *EvaluatedDecisionResult) GetTenantIdOk() (*string, bool) {
+func (o *EvaluatedDecisionResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -212,7 +212,7 @@ func (o *EvaluatedDecisionResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *EvaluatedDecisionResult) SetTenantId(v string) {
+func (o *EvaluatedDecisionResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
@@ -265,9 +265,9 @@ func (o *EvaluatedDecisionResult) SetEvaluatedInputs(v []EvaluatedDecisionInputI
 }
 
 // GetDecisionDefinitionKey returns the DecisionDefinitionKey field value
-func (o *EvaluatedDecisionResult) GetDecisionDefinitionKey() ModelString {
+func (o *EvaluatedDecisionResult) GetDecisionDefinitionKey() DecisionDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 
@@ -276,7 +276,7 @@ func (o *EvaluatedDecisionResult) GetDecisionDefinitionKey() ModelString {
 
 // GetDecisionDefinitionKeyOk returns a tuple with the DecisionDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *EvaluatedDecisionResult) GetDecisionDefinitionKeyOk() (*ModelString, bool) {
+func (o *EvaluatedDecisionResult) GetDecisionDefinitionKeyOk() (*DecisionDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -284,14 +284,14 @@ func (o *EvaluatedDecisionResult) GetDecisionDefinitionKeyOk() (*ModelString, bo
 }
 
 // SetDecisionDefinitionKey sets field value
-func (o *EvaluatedDecisionResult) SetDecisionDefinitionKey(v ModelString) {
+func (o *EvaluatedDecisionResult) SetDecisionDefinitionKey(v DecisionDefinitionKey) {
 	o.DecisionDefinitionKey = v
 }
 
 // GetDecisionEvaluationInstanceKey returns the DecisionEvaluationInstanceKey field value
-func (o *EvaluatedDecisionResult) GetDecisionEvaluationInstanceKey() string {
+func (o *EvaluatedDecisionResult) GetDecisionEvaluationInstanceKey() DecisionEvaluationInstanceKey {
 	if o == nil {
-		var ret string
+		var ret DecisionEvaluationInstanceKey
 		return ret
 	}
 
@@ -300,7 +300,7 @@ func (o *EvaluatedDecisionResult) GetDecisionEvaluationInstanceKey() string {
 
 // GetDecisionEvaluationInstanceKeyOk returns a tuple with the DecisionEvaluationInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *EvaluatedDecisionResult) GetDecisionEvaluationInstanceKeyOk() (*string, bool) {
+func (o *EvaluatedDecisionResult) GetDecisionEvaluationInstanceKeyOk() (*DecisionEvaluationInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -308,7 +308,7 @@ func (o *EvaluatedDecisionResult) GetDecisionEvaluationInstanceKeyOk() (*string,
 }
 
 // SetDecisionEvaluationInstanceKey sets field value
-func (o *EvaluatedDecisionResult) SetDecisionEvaluationInstanceKey(v string) {
+func (o *EvaluatedDecisionResult) SetDecisionEvaluationInstanceKey(v DecisionEvaluationInstanceKey) {
 	o.DecisionEvaluationInstanceKey = v
 }
 

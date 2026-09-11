@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedFormKeyFilter{}
 // AdvancedFormKeyFilter Advanced FormKey filter.
 type AdvancedFormKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *FormKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *FormKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []FormKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []FormKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedFormKeyFilter instantiates a new AdvancedFormKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedFormKeyFilterWithDefaults() *AdvancedFormKeyFilter {
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedFormKeyFilter) GetEq() ModelString {
+func (o *AdvancedFormKeyFilter) GetEq() FormKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret FormKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedFormKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedFormKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedFormKeyFilter) GetEqOk() (*FormKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedFormKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedFormKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given FormKey and assigns it to the Eq field.
+func (o *AdvancedFormKeyFilter) SetEq(v FormKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedFormKeyFilter) GetNeq() ModelString {
+func (o *AdvancedFormKeyFilter) GetNeq() FormKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret FormKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedFormKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedFormKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedFormKeyFilter) GetNeqOk() (*FormKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedFormKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedFormKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given FormKey and assigns it to the Neq field.
+func (o *AdvancedFormKeyFilter) SetNeq(v FormKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedFormKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedFormKeyFilter) GetIn() []ModelString {
+func (o *AdvancedFormKeyFilter) GetIn() []FormKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []FormKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedFormKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedFormKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedFormKeyFilter) GetInOk() ([]FormKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedFormKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedFormKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []FormKey and assigns it to the In field.
+func (o *AdvancedFormKeyFilter) SetIn(v []FormKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedFormKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedFormKeyFilter) GetNotIn() []FormKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []FormKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedFormKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedFormKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedFormKeyFilter) GetNotInOk() ([]FormKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedFormKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedFormKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []FormKey and assigns it to the NotIn field.
+func (o *AdvancedFormKeyFilter) SetNotIn(v []FormKey) {
 	o.NotIn = v
 }
 

@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedVariableKeyFilter{}
 // AdvancedVariableKeyFilter Advanced VariableKey filter.
 type AdvancedVariableKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *VariableKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *VariableKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []VariableKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []VariableKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedVariableKeyFilter instantiates a new AdvancedVariableKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedVariableKeyFilterWithDefaults() *AdvancedVariableKeyFilter {
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedVariableKeyFilter) GetEq() ModelString {
+func (o *AdvancedVariableKeyFilter) GetEq() VariableKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret VariableKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedVariableKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedVariableKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedVariableKeyFilter) GetEqOk() (*VariableKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedVariableKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedVariableKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given VariableKey and assigns it to the Eq field.
+func (o *AdvancedVariableKeyFilter) SetEq(v VariableKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedVariableKeyFilter) GetNeq() ModelString {
+func (o *AdvancedVariableKeyFilter) GetNeq() VariableKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret VariableKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedVariableKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedVariableKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedVariableKeyFilter) GetNeqOk() (*VariableKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedVariableKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedVariableKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given VariableKey and assigns it to the Neq field.
+func (o *AdvancedVariableKeyFilter) SetNeq(v VariableKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedVariableKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedVariableKeyFilter) GetIn() []ModelString {
+func (o *AdvancedVariableKeyFilter) GetIn() []VariableKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []VariableKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedVariableKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedVariableKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedVariableKeyFilter) GetInOk() ([]VariableKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedVariableKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedVariableKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []VariableKey and assigns it to the In field.
+func (o *AdvancedVariableKeyFilter) SetIn(v []VariableKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedVariableKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedVariableKeyFilter) GetNotIn() []VariableKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []VariableKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedVariableKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedVariableKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedVariableKeyFilter) GetNotInOk() ([]VariableKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedVariableKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedVariableKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []VariableKey and assigns it to the NotIn field.
+func (o *AdvancedVariableKeyFilter) SetNotIn(v []VariableKey) {
 	o.NotIn = v
 }
 

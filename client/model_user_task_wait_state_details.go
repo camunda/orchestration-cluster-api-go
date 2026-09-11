@@ -25,7 +25,7 @@ type UserTaskWaitStateDetails struct {
 	// The wait state type discriminator.
 	WaitStateType string `json:"waitStateType"`
 	// The key of the user task.
-	TaskKey ModelString `json:"taskKey"`
+	TaskKey UserTaskKey `json:"taskKey"`
 	// The due date of the user task, if set.
 	DueDate NullableTime `json:"dueDate"`
 }
@@ -36,7 +36,7 @@ type _UserTaskWaitStateDetails UserTaskWaitStateDetails
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskWaitStateDetails(waitStateType string, taskKey ModelString, dueDate NullableTime) *UserTaskWaitStateDetails {
+func NewUserTaskWaitStateDetails(waitStateType string, taskKey UserTaskKey, dueDate NullableTime) *UserTaskWaitStateDetails {
 	this := UserTaskWaitStateDetails{}
 	this.WaitStateType = waitStateType
 	this.TaskKey = taskKey
@@ -77,9 +77,9 @@ func (o *UserTaskWaitStateDetails) SetWaitStateType(v string) {
 }
 
 // GetTaskKey returns the TaskKey field value
-func (o *UserTaskWaitStateDetails) GetTaskKey() ModelString {
+func (o *UserTaskWaitStateDetails) GetTaskKey() UserTaskKey {
 	if o == nil {
-		var ret ModelString
+		var ret UserTaskKey
 		return ret
 	}
 
@@ -88,7 +88,7 @@ func (o *UserTaskWaitStateDetails) GetTaskKey() ModelString {
 
 // GetTaskKeyOk returns a tuple with the TaskKey field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskWaitStateDetails) GetTaskKeyOk() (*ModelString, bool) {
+func (o *UserTaskWaitStateDetails) GetTaskKeyOk() (*UserTaskKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -96,7 +96,7 @@ func (o *UserTaskWaitStateDetails) GetTaskKeyOk() (*ModelString, bool) {
 }
 
 // SetTaskKey sets field value
-func (o *UserTaskWaitStateDetails) SetTaskKey(v ModelString) {
+func (o *UserTaskWaitStateDetails) SetTaskKey(v UserTaskKey) {
 	o.TaskKey = v
 }
 

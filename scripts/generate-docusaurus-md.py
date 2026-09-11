@@ -579,8 +579,15 @@ RUNTIME_TYPES = [
 
 # Types declared alongside the domain keys that are serialization plumbing, not
 # identifiers. Everything else in domain-keys.json is published as a key, so a
-# newly generated key type appears on the page without any change here.
-NON_KEY_TYPES = {"ModelString", "NullableModelString", "NullableResourceKey"}
+# newly generated key type appears on the page without any change here. The
+# generated ``Nullable<Type>`` wrappers are likewise plumbing and are filtered out
+# generically (see ``load`` below), so they need not be listed individually.
+#
+# ``JobLeaseToken`` is a semantic *scalar* the hook mints alongside the keys, but
+# it is an opaque lease token, not a validated key/identifier, so it must not be
+# counted or presented on the Domain keys page (mirrors the ``noun`` override in
+# scripts/hooks/hook_01_domain_type_system.py's ``_EXTRA_SCALAR_TYPES``).
+NON_KEY_TYPES = {"ModelString", "JobLeaseToken"}
 
 # Package-level var groups, keyed by their first declared name.
 VAR_BUCKETS = {
@@ -1080,7 +1087,11 @@ def generate_api_reference() -> None:
     keys: list[TypeItem] = []
     if KEYS_JSON_PATH.is_file():
         key_pkg = load_doc_json(KEYS_JSON_PATH)
-        keys = [t for t in key_pkg.types.values() if t.name not in NON_KEY_TYPES]
+        keys = [
+            t
+            for t in key_pkg.types.values()
+            if t.name not in NON_KEY_TYPES and not t.name.startswith("Nullable")
+        ]
     else:
         print(f"  (no {KEYS_JSON_PATH.name}; skipping the domain keys page)")
 

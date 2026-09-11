@@ -22,14 +22,14 @@ var _ MappedNullable = &IncidentProcessInstanceStatisticsByDefinitionResult{}
 // IncidentProcessInstanceStatisticsByDefinitionResult struct for IncidentProcessInstanceStatisticsByDefinitionResult
 type IncidentProcessInstanceStatisticsByDefinitionResult struct {
 	// Id of a process definition, from the model. Only ids of process definitions that are deployed are useful.
-	ProcessDefinitionId  string      `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionId  ProcessDefinitionId  `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The name of the process definition.
 	ProcessDefinitionName string `json:"processDefinitionName"`
 	// The version of the process definition.
 	ProcessDefinitionVersion int32 `json:"processDefinitionVersion"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The number of active process instances that currently have an incident with the specified error hash code.
 	ActiveInstancesWithErrorCount int64 `json:"activeInstancesWithErrorCount"`
 }
@@ -40,7 +40,7 @@ type _IncidentProcessInstanceStatisticsByDefinitionResult IncidentProcessInstanc
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewIncidentProcessInstanceStatisticsByDefinitionResult(processDefinitionId string, processDefinitionKey ModelString, processDefinitionName string, processDefinitionVersion int32, tenantId string, activeInstancesWithErrorCount int64) *IncidentProcessInstanceStatisticsByDefinitionResult {
+func NewIncidentProcessInstanceStatisticsByDefinitionResult(processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processDefinitionName string, processDefinitionVersion int32, tenantId TenantId, activeInstancesWithErrorCount int64) *IncidentProcessInstanceStatisticsByDefinitionResult {
 	this := IncidentProcessInstanceStatisticsByDefinitionResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionKey = processDefinitionKey
@@ -60,9 +60,9 @@ func NewIncidentProcessInstanceStatisticsByDefinitionResultWithDefaults() *Incid
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefinitionId() string {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -71,7 +71,7 @@ func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefiniti
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -79,14 +79,14 @@ func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefiniti
 }
 
 // SetProcessDefinitionId sets field value
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) SetProcessDefinitionId(v string) {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefinitionKey() ModelString {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -95,7 +95,7 @@ func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefiniti
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -103,7 +103,7 @@ func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetProcessDefiniti
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) SetProcessDefinitionKey(v ModelString) {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
@@ -156,9 +156,9 @@ func (o *IncidentProcessInstanceStatisticsByDefinitionResult) SetProcessDefiniti
 }
 
 // GetTenantId returns the TenantId field value
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetTenantId() string {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -167,7 +167,7 @@ func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetTenantId() stri
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetTenantIdOk() (*string, bool) {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -175,7 +175,7 @@ func (o *IncidentProcessInstanceStatisticsByDefinitionResult) GetTenantIdOk() (*
 }
 
 // SetTenantId sets field value
-func (o *IncidentProcessInstanceStatisticsByDefinitionResult) SetTenantId(v string) {
+func (o *IncidentProcessInstanceStatisticsByDefinitionResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

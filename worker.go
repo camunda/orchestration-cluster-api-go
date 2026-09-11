@@ -243,6 +243,16 @@ func (w *JobWorker) runRESTPoll(ctx context.Context) error {
 	return ctx.Err()
 }
 
+// toTenantIDs brands a slice of plain tenant-id strings as []openapi.TenantId for
+// the generated request setters.
+func toTenantIDs(ids []string) []openapi.TenantId {
+	out := make([]openapi.TenantId, len(ids))
+	for i, id := range ids {
+		out[i] = openapi.TenantId(id)
+	}
+	return out
+}
+
 func (w *JobWorker) activate(ctx context.Context, maxJobs int) ([]openapi.ActivatedJobResult, error) {
 	req := openapi.NewJobActivationRequest(w.jobType, w.timeout.Milliseconds(), int32(maxJobs))
 	if w.name != "" {
@@ -255,7 +265,7 @@ func (w *JobWorker) activate(ctx context.Context, maxJobs int) ([]openapi.Activa
 		req.SetFetchVariable(w.fetchVariables)
 	}
 	if len(w.tenantIDs) > 0 {
-		req.SetTenantIds(w.tenantIDs)
+		req.SetTenantIds(toTenantIDs(w.tenantIDs))
 	}
 	if w.withLease {
 		req.SetWithLease(true)
@@ -301,7 +311,7 @@ func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[
 		req.SetVariables(vars)
 	}
 	if job.leaseToken != "" {
-		req.SetLeaseToken(job.leaseToken)
+		req.SetLeaseToken(openapi.JobLeaseToken(job.leaseToken))
 	}
 	_, err := c.raw.JobAPI.CompleteJob(ctx, openapi.JobKey(job.key)).
 		JobCompletionRequest(*req).Execute()
@@ -321,7 +331,7 @@ func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) 
 		req.SetErrorMessage(cause.Error())
 	}
 	if job.leaseToken != "" {
-		req.SetLeaseToken(job.leaseToken)
+		req.SetLeaseToken(openapi.JobLeaseToken(job.leaseToken))
 	}
 	_, err := c.raw.JobAPI.FailJob(ctx, openapi.JobKey(job.key)).
 		JobFailRequest(*req).Execute()
@@ -339,7 +349,7 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 		req.SetVariables(bpmn.Variables)
 	}
 	if job.leaseToken != "" {
-		req.SetLeaseToken(job.leaseToken)
+		req.SetLeaseToken(openapi.JobLeaseToken(job.leaseToken))
 	}
 	_, err := c.raw.JobAPI.ThrowJobError(ctx, openapi.JobKey(job.key)).
 		JobErrorRequest(*req).Execute()

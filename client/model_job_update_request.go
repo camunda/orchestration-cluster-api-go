@@ -25,7 +25,7 @@ type JobUpdateRequest struct {
 	// A reference key chosen by the user that will be part of all records resulting from this operation. Must be > 0 if provided.
 	OperationReference *int64 `json:"operationReference,omitempty"`
 	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`. For a leased job, a supplied token is validated to prove the command comes from the worker that holds the current lease; a command carrying a stale token is rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). An update without a token always applies to support operator and bulk updates of leased jobs. Note that this is different from lifecycle requests like complete, fail, and throw-error that always require a token for leased jobs. A job that was activated without a lease requires no token.
-	LeaseToken NullableString `json:"leaseToken,omitempty"`
+	LeaseToken NullableJobLeaseToken `json:"leaseToken,omitempty"`
 }
 
 type _JobUpdateRequest JobUpdateRequest
@@ -105,9 +105,9 @@ func (o *JobUpdateRequest) SetOperationReference(v int64) {
 }
 
 // GetLeaseToken returns the LeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobUpdateRequest) GetLeaseToken() string {
+func (o *JobUpdateRequest) GetLeaseToken() JobLeaseToken {
 	if o == nil || IsNil(o.LeaseToken.Get()) {
-		var ret string
+		var ret JobLeaseToken
 		return ret
 	}
 	return *o.LeaseToken.Get()
@@ -116,7 +116,7 @@ func (o *JobUpdateRequest) GetLeaseToken() string {
 // GetLeaseTokenOk returns a tuple with the LeaseToken field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobUpdateRequest) GetLeaseTokenOk() (*string, bool) {
+func (o *JobUpdateRequest) GetLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -132,8 +132,8 @@ func (o *JobUpdateRequest) HasLeaseToken() bool {
 	return false
 }
 
-// SetLeaseToken gets a reference to the given NullableString and assigns it to the LeaseToken field.
-func (o *JobUpdateRequest) SetLeaseToken(v string) {
+// SetLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the LeaseToken field.
+func (o *JobUpdateRequest) SetLeaseToken(v JobLeaseToken) {
 	o.LeaseToken.Set(&v)
 }
 

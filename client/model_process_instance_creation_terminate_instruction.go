@@ -24,7 +24,7 @@ type ProcessInstanceCreationTerminateInstruction struct {
 	// The type of the runtime instruction
 	Type *string `json:"type,omitempty"`
 	// The id of the element that, once completed or terminated, will cause the process to be terminated.
-	AfterElementId string `json:"afterElementId"`
+	AfterElementId ElementId `json:"afterElementId"`
 }
 
 type _ProcessInstanceCreationTerminateInstruction ProcessInstanceCreationTerminateInstruction
@@ -33,7 +33,7 @@ type _ProcessInstanceCreationTerminateInstruction ProcessInstanceCreationTermina
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceCreationTerminateInstruction(afterElementId string) *ProcessInstanceCreationTerminateInstruction {
+func NewProcessInstanceCreationTerminateInstruction(afterElementId ElementId) *ProcessInstanceCreationTerminateInstruction {
 	this := ProcessInstanceCreationTerminateInstruction{}
 	this.AfterElementId = afterElementId
 	return &this
@@ -80,9 +80,9 @@ func (o *ProcessInstanceCreationTerminateInstruction) SetType(v string) {
 }
 
 // GetAfterElementId returns the AfterElementId field value
-func (o *ProcessInstanceCreationTerminateInstruction) GetAfterElementId() string {
+func (o *ProcessInstanceCreationTerminateInstruction) GetAfterElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -91,7 +91,7 @@ func (o *ProcessInstanceCreationTerminateInstruction) GetAfterElementId() string
 
 // GetAfterElementIdOk returns a tuple with the AfterElementId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationTerminateInstruction) GetAfterElementIdOk() (*string, bool) {
+func (o *ProcessInstanceCreationTerminateInstruction) GetAfterElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -99,7 +99,7 @@ func (o *ProcessInstanceCreationTerminateInstruction) GetAfterElementIdOk() (*st
 }
 
 // SetAfterElementId sets field value
-func (o *ProcessInstanceCreationTerminateInstruction) SetAfterElementId(v string) {
+func (o *ProcessInstanceCreationTerminateInstruction) SetAfterElementId(v ElementId) {
 	o.AfterElementId = v
 }
 

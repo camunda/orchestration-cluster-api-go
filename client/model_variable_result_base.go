@@ -24,15 +24,15 @@ type VariableResultBase struct {
 	// Name of this variable.
 	Name string `json:"name"`
 	// Tenant ID of this variable.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The key for this variable.
-	VariableKey ModelString `json:"variableKey"`
+	VariableKey VariableKey `json:"variableKey"`
 	// The key of the scope where this variable is directly defined. For process-level variables, this is the process instance key. For local variables, this is the key of the specific element instance (task, subprocess, gateway, event, etc.) where the variable is directly defined.
 	ScopeKey ScopeKey `json:"scopeKey"`
 	// The key of the process instance of this variable.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 }
 
 type _VariableResultBase VariableResultBase
@@ -41,7 +41,7 @@ type _VariableResultBase VariableResultBase
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVariableResultBase(name string, tenantId string, variableKey ModelString, scopeKey ScopeKey, processInstanceKey ModelString, rootProcessInstanceKey NullableModelString) *VariableResultBase {
+func NewVariableResultBase(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey) *VariableResultBase {
 	this := VariableResultBase{}
 	this.Name = name
 	this.TenantId = tenantId
@@ -85,9 +85,9 @@ func (o *VariableResultBase) SetName(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *VariableResultBase) GetTenantId() string {
+func (o *VariableResultBase) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -96,7 +96,7 @@ func (o *VariableResultBase) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *VariableResultBase) GetTenantIdOk() (*string, bool) {
+func (o *VariableResultBase) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -104,14 +104,14 @@ func (o *VariableResultBase) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *VariableResultBase) SetTenantId(v string) {
+func (o *VariableResultBase) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetVariableKey returns the VariableKey field value
-func (o *VariableResultBase) GetVariableKey() ModelString {
+func (o *VariableResultBase) GetVariableKey() VariableKey {
 	if o == nil {
-		var ret ModelString
+		var ret VariableKey
 		return ret
 	}
 
@@ -120,7 +120,7 @@ func (o *VariableResultBase) GetVariableKey() ModelString {
 
 // GetVariableKeyOk returns a tuple with the VariableKey field value
 // and a boolean to check if the value has been set.
-func (o *VariableResultBase) GetVariableKeyOk() (*ModelString, bool) {
+func (o *VariableResultBase) GetVariableKeyOk() (*VariableKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -128,7 +128,7 @@ func (o *VariableResultBase) GetVariableKeyOk() (*ModelString, bool) {
 }
 
 // SetVariableKey sets field value
-func (o *VariableResultBase) SetVariableKey(v ModelString) {
+func (o *VariableResultBase) SetVariableKey(v VariableKey) {
 	o.VariableKey = v
 }
 
@@ -157,9 +157,9 @@ func (o *VariableResultBase) SetScopeKey(v ScopeKey) {
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *VariableResultBase) GetProcessInstanceKey() ModelString {
+func (o *VariableResultBase) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -168,7 +168,7 @@ func (o *VariableResultBase) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *VariableResultBase) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *VariableResultBase) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -176,15 +176,15 @@ func (o *VariableResultBase) GetProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessInstanceKey sets field value
-func (o *VariableResultBase) SetProcessInstanceKey(v ModelString) {
+func (o *VariableResultBase) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *VariableResultBase) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *VariableResultBase) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -194,7 +194,7 @@ func (o *VariableResultBase) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *VariableResultBase) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *VariableResultBase) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -202,7 +202,7 @@ func (o *VariableResultBase) GetRootProcessInstanceKeyOk() (*ModelString, bool) 
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *VariableResultBase) SetRootProcessInstanceKey(v ModelString) {
+func (o *VariableResultBase) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 

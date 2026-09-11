@@ -22,7 +22,7 @@ var _ MappedNullable = &AgentInstanceCreationResult{}
 // AgentInstanceCreationResult Response returned after successfully creating an agent instance.
 type AgentInstanceCreationResult struct {
 	// The system-generated key for the created agent instance.
-	AgentInstanceKey ModelString `json:"agentInstanceKey"`
+	AgentInstanceKey AgentInstanceKey `json:"agentInstanceKey"`
 	// One entry per history item submitted in the request, in request order.
 	CreatedHistory []AgentInstanceCreatedHistoryItem `json:"createdHistory"`
 }
@@ -33,7 +33,7 @@ type _AgentInstanceCreationResult AgentInstanceCreationResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceCreationResult(agentInstanceKey ModelString, createdHistory []AgentInstanceCreatedHistoryItem) *AgentInstanceCreationResult {
+func NewAgentInstanceCreationResult(agentInstanceKey AgentInstanceKey, createdHistory []AgentInstanceCreatedHistoryItem) *AgentInstanceCreationResult {
 	this := AgentInstanceCreationResult{}
 	this.AgentInstanceKey = agentInstanceKey
 	this.CreatedHistory = createdHistory
@@ -49,9 +49,9 @@ func NewAgentInstanceCreationResultWithDefaults() *AgentInstanceCreationResult {
 }
 
 // GetAgentInstanceKey returns the AgentInstanceKey field value
-func (o *AgentInstanceCreationResult) GetAgentInstanceKey() ModelString {
+func (o *AgentInstanceCreationResult) GetAgentInstanceKey() AgentInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret AgentInstanceKey
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *AgentInstanceCreationResult) GetAgentInstanceKey() ModelString {
 
 // GetAgentInstanceKeyOk returns a tuple with the AgentInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceCreationResult) GetAgentInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceCreationResult) GetAgentInstanceKeyOk() (*AgentInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,7 +68,7 @@ func (o *AgentInstanceCreationResult) GetAgentInstanceKeyOk() (*ModelString, boo
 }
 
 // SetAgentInstanceKey sets field value
-func (o *AgentInstanceCreationResult) SetAgentInstanceKey(v ModelString) {
+func (o *AgentInstanceCreationResult) SetAgentInstanceKey(v AgentInstanceKey) {
 	o.AgentInstanceKey = v
 }
 

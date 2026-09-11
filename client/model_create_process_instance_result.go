@@ -22,21 +22,21 @@ var _ MappedNullable = &CreateProcessInstanceResult{}
 // CreateProcessInstanceResult struct for CreateProcessInstanceResult
 type CreateProcessInstanceResult struct {
 	// The BPMN process id of the process definition which was used to create the process. instance
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The version of the process definition which was used to create the process instance.
 	ProcessDefinitionVersion int32 `json:"processDefinitionVersion"`
 	// The tenant id of the created process instance.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// All the variables visible in the root scope.
 	Variables map[string]interface{} `json:"variables"`
 	// The key of the process definition which was used to create the process instance.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The unique identifier of the created process instance; to be used wherever a request needs a process instance key (e.g. CancelProcessInstanceRequest).
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags"`
+	Tags []Tag `json:"tags"`
 	// Business id as provided on creation.
-	BusinessId NullableString `json:"businessId"`
+	BusinessId NullableBusinessId `json:"businessId"`
 }
 
 type _CreateProcessInstanceResult CreateProcessInstanceResult
@@ -45,7 +45,7 @@ type _CreateProcessInstanceResult CreateProcessInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProcessInstanceResult(processDefinitionId string, processDefinitionVersion int32, tenantId string, variables map[string]interface{}, processDefinitionKey ModelString, processInstanceKey ModelString, tags []string, businessId NullableString) *CreateProcessInstanceResult {
+func NewCreateProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, tenantId TenantId, variables map[string]interface{}, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, tags []Tag, businessId NullableBusinessId) *CreateProcessInstanceResult {
 	this := CreateProcessInstanceResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionVersion = processDefinitionVersion
@@ -67,9 +67,9 @@ func NewCreateProcessInstanceResultWithDefaults() *CreateProcessInstanceResult {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *CreateProcessInstanceResult) GetProcessDefinitionId() string {
+func (o *CreateProcessInstanceResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -78,7 +78,7 @@ func (o *CreateProcessInstanceResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *CreateProcessInstanceResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *CreateProcessInstanceResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -86,7 +86,7 @@ func (o *CreateProcessInstanceResult) GetProcessDefinitionIdOk() (*string, bool)
 }
 
 // SetProcessDefinitionId sets field value
-func (o *CreateProcessInstanceResult) SetProcessDefinitionId(v string) {
+func (o *CreateProcessInstanceResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
@@ -115,9 +115,9 @@ func (o *CreateProcessInstanceResult) SetProcessDefinitionVersion(v int32) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *CreateProcessInstanceResult) GetTenantId() string {
+func (o *CreateProcessInstanceResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -126,7 +126,7 @@ func (o *CreateProcessInstanceResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *CreateProcessInstanceResult) GetTenantIdOk() (*string, bool) {
+func (o *CreateProcessInstanceResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -134,7 +134,7 @@ func (o *CreateProcessInstanceResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *CreateProcessInstanceResult) SetTenantId(v string) {
+func (o *CreateProcessInstanceResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
@@ -163,9 +163,9 @@ func (o *CreateProcessInstanceResult) SetVariables(v map[string]interface{}) {
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *CreateProcessInstanceResult) GetProcessDefinitionKey() ModelString {
+func (o *CreateProcessInstanceResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -174,7 +174,7 @@ func (o *CreateProcessInstanceResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *CreateProcessInstanceResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *CreateProcessInstanceResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -182,14 +182,14 @@ func (o *CreateProcessInstanceResult) GetProcessDefinitionKeyOk() (*ModelString,
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *CreateProcessInstanceResult) SetProcessDefinitionKey(v ModelString) {
+func (o *CreateProcessInstanceResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *CreateProcessInstanceResult) GetProcessInstanceKey() ModelString {
+func (o *CreateProcessInstanceResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -198,7 +198,7 @@ func (o *CreateProcessInstanceResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *CreateProcessInstanceResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *CreateProcessInstanceResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -206,14 +206,14 @@ func (o *CreateProcessInstanceResult) GetProcessInstanceKeyOk() (*ModelString, b
 }
 
 // SetProcessInstanceKey sets field value
-func (o *CreateProcessInstanceResult) SetProcessInstanceKey(v ModelString) {
+func (o *CreateProcessInstanceResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetTags returns the Tags field value
-func (o *CreateProcessInstanceResult) GetTags() []string {
+func (o *CreateProcessInstanceResult) GetTags() []Tag {
 	if o == nil {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 
@@ -222,7 +222,7 @@ func (o *CreateProcessInstanceResult) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value
 // and a boolean to check if the value has been set.
-func (o *CreateProcessInstanceResult) GetTagsOk() ([]string, bool) {
+func (o *CreateProcessInstanceResult) GetTagsOk() ([]Tag, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -230,15 +230,15 @@ func (o *CreateProcessInstanceResult) GetTagsOk() ([]string, bool) {
 }
 
 // SetTags sets field value
-func (o *CreateProcessInstanceResult) SetTags(v []string) {
+func (o *CreateProcessInstanceResult) SetTags(v []Tag) {
 	o.Tags = v
 }
 
 // GetBusinessId returns the BusinessId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *CreateProcessInstanceResult) GetBusinessId() string {
+// If the value is explicit nil, the zero value for BusinessId will be returned
+func (o *CreateProcessInstanceResult) GetBusinessId() BusinessId {
 	if o == nil || o.BusinessId.Get() == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -248,7 +248,7 @@ func (o *CreateProcessInstanceResult) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *CreateProcessInstanceResult) GetBusinessIdOk() (*string, bool) {
+func (o *CreateProcessInstanceResult) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -256,7 +256,7 @@ func (o *CreateProcessInstanceResult) GetBusinessIdOk() (*string, bool) {
 }
 
 // SetBusinessId sets field value
-func (o *CreateProcessInstanceResult) SetBusinessId(v string) {
+func (o *CreateProcessInstanceResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 

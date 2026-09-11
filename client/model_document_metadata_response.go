@@ -31,9 +31,9 @@ type DocumentMetadataResponse struct {
 	// The size of the document in bytes.
 	Size int64 `json:"size"`
 	// The ID of the process definition that created the document.
-	ProcessDefinitionId NullableString `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId NullableProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The key of the process instance that created the document.
-	ProcessInstanceKey NullableModelString `json:"processInstanceKey"`
+	ProcessInstanceKey NullableProcessInstanceKey `json:"processInstanceKey"`
 	// Custom properties of the document.
 	CustomProperties map[string]interface{} `json:"customProperties"`
 }
@@ -44,7 +44,7 @@ type _DocumentMetadataResponse DocumentMetadataResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDocumentMetadataResponse(contentType string, fileName string, expiresAt NullableTime, size int64, processDefinitionId NullableString, processInstanceKey NullableModelString, customProperties map[string]interface{}) *DocumentMetadataResponse {
+func NewDocumentMetadataResponse(contentType string, fileName string, expiresAt NullableTime, size int64, processDefinitionId NullableProcessDefinitionId, processInstanceKey NullableProcessInstanceKey, customProperties map[string]interface{}) *DocumentMetadataResponse {
 	this := DocumentMetadataResponse{}
 	this.ContentType = contentType
 	this.FileName = fileName
@@ -163,10 +163,10 @@ func (o *DocumentMetadataResponse) SetSize(v int64) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *DocumentMetadataResponse) GetProcessDefinitionId() string {
+// If the value is explicit nil, the zero value for ProcessDefinitionId will be returned
+func (o *DocumentMetadataResponse) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil || o.ProcessDefinitionId.Get() == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -176,7 +176,7 @@ func (o *DocumentMetadataResponse) GetProcessDefinitionId() string {
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DocumentMetadataResponse) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *DocumentMetadataResponse) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -184,15 +184,15 @@ func (o *DocumentMetadataResponse) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *DocumentMetadataResponse) SetProcessDefinitionId(v string) {
+func (o *DocumentMetadataResponse) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId.Set(&v)
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *DocumentMetadataResponse) GetProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *DocumentMetadataResponse) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.ProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -202,7 +202,7 @@ func (o *DocumentMetadataResponse) GetProcessInstanceKey() ModelString {
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DocumentMetadataResponse) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *DocumentMetadataResponse) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -210,7 +210,7 @@ func (o *DocumentMetadataResponse) GetProcessInstanceKeyOk() (*ModelString, bool
 }
 
 // SetProcessInstanceKey sets field value
-func (o *DocumentMetadataResponse) SetProcessInstanceKey(v ModelString) {
+func (o *DocumentMetadataResponse) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey.Set(&v)
 }
 

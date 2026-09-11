@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedElementIdFilter{}
 // AdvancedElementIdFilter Advanced ElementId filter.
 type AdvancedElementIdFilter struct {
 	// Checks for equality with the provided value.
-	Eq *string `json:"$eq,omitempty"`
+	Eq *ElementId `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *string `json:"$neq,omitempty"`
+	Neq *ElementId `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []string `json:"$in,omitempty"`
+	In []ElementId `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []string `json:"$notIn,omitempty"`
+	NotIn []ElementId `json:"$notIn,omitempty"`
 	// Checks if the property matches the provided like value.  Supported wildcard characters are:  * `*`: matches zero, one, or multiple characters. * `?`: matches one, single character.  Wildcard characters can be escaped with backslash, for instance: `\\*`.
 	Like *string `json:"$like,omitempty"`
 }
@@ -51,9 +51,9 @@ func NewAdvancedElementIdFilterWithDefaults() *AdvancedElementIdFilter {
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedElementIdFilter) GetEq() string {
+func (o *AdvancedElementIdFilter) GetEq() ElementId {
 	if o == nil || IsNil(o.Eq) {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 	return *o.Eq
@@ -61,7 +61,7 @@ func (o *AdvancedElementIdFilter) GetEq() string {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedElementIdFilter) GetEqOk() (*string, bool) {
+func (o *AdvancedElementIdFilter) GetEqOk() (*ElementId, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -77,15 +77,15 @@ func (o *AdvancedElementIdFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given string and assigns it to the Eq field.
-func (o *AdvancedElementIdFilter) SetEq(v string) {
+// SetEq gets a reference to the given ElementId and assigns it to the Eq field.
+func (o *AdvancedElementIdFilter) SetEq(v ElementId) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedElementIdFilter) GetNeq() string {
+func (o *AdvancedElementIdFilter) GetNeq() ElementId {
 	if o == nil || IsNil(o.Neq) {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 	return *o.Neq
@@ -93,7 +93,7 @@ func (o *AdvancedElementIdFilter) GetNeq() string {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedElementIdFilter) GetNeqOk() (*string, bool) {
+func (o *AdvancedElementIdFilter) GetNeqOk() (*ElementId, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -109,8 +109,8 @@ func (o *AdvancedElementIdFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given string and assigns it to the Neq field.
-func (o *AdvancedElementIdFilter) SetNeq(v string) {
+// SetNeq gets a reference to the given ElementId and assigns it to the Neq field.
+func (o *AdvancedElementIdFilter) SetNeq(v ElementId) {
 	o.Neq = &v
 }
 
@@ -147,9 +147,9 @@ func (o *AdvancedElementIdFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedElementIdFilter) GetIn() []string {
+func (o *AdvancedElementIdFilter) GetIn() []ElementId {
 	if o == nil || IsNil(o.In) {
-		var ret []string
+		var ret []ElementId
 		return ret
 	}
 	return o.In
@@ -157,7 +157,7 @@ func (o *AdvancedElementIdFilter) GetIn() []string {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedElementIdFilter) GetInOk() ([]string, bool) {
+func (o *AdvancedElementIdFilter) GetInOk() ([]ElementId, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -173,15 +173,15 @@ func (o *AdvancedElementIdFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []string and assigns it to the In field.
-func (o *AdvancedElementIdFilter) SetIn(v []string) {
+// SetIn gets a reference to the given []ElementId and assigns it to the In field.
+func (o *AdvancedElementIdFilter) SetIn(v []ElementId) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedElementIdFilter) GetNotIn() []string {
+func (o *AdvancedElementIdFilter) GetNotIn() []ElementId {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []string
+		var ret []ElementId
 		return ret
 	}
 	return o.NotIn
@@ -189,7 +189,7 @@ func (o *AdvancedElementIdFilter) GetNotIn() []string {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedElementIdFilter) GetNotInOk() ([]string, bool) {
+func (o *AdvancedElementIdFilter) GetNotInOk() ([]ElementId, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -205,8 +205,8 @@ func (o *AdvancedElementIdFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []string and assigns it to the NotIn field.
-func (o *AdvancedElementIdFilter) SetNotIn(v []string) {
+// SetNotIn gets a reference to the given []ElementId and assigns it to the NotIn field.
+func (o *AdvancedElementIdFilter) SetNotIn(v []ElementId) {
 	o.NotIn = v
 }
 

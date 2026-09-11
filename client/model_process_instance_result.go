@@ -23,7 +23,7 @@ var _ MappedNullable = &ProcessInstanceResult{}
 // ProcessInstanceResult Process instance search response item.
 type ProcessInstanceResult struct {
 	// Id of a process definition, from the model. Only ids of process definitions that are deployed are useful.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The process definition name.
 	ProcessDefinitionName NullableString `json:"processDefinitionName"`
 	// The process definition version.
@@ -40,21 +40,21 @@ type ProcessInstanceResult struct {
 	// Whether this process instance has a related incident or not.
 	HasIncident bool `json:"hasIncident"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The key of this process instance.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The process definition key.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The parent process instance key.
-	ParentProcessInstanceKey NullableModelString `json:"parentProcessInstanceKey"`
+	ParentProcessInstanceKey NullableProcessInstanceKey `json:"parentProcessInstanceKey"`
 	// The parent element instance key.
-	ParentElementInstanceKey NullableModelString `json:"parentElementInstanceKey"`
+	ParentElementInstanceKey NullableElementInstanceKey `json:"parentElementInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags"`
+	Tags []Tag `json:"tags"`
 	// The business id associated with this process instance.
-	BusinessId NullableString `json:"businessId"`
+	BusinessId NullableBusinessId `json:"businessId"`
 }
 
 type _ProcessInstanceResult ProcessInstanceResult
@@ -63,7 +63,7 @@ type _ProcessInstanceResult ProcessInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceResult(processDefinitionId string, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId string, processInstanceKey ModelString, processDefinitionKey ModelString, parentProcessInstanceKey NullableModelString, parentElementInstanceKey NullableModelString, rootProcessInstanceKey NullableModelString, tags []string, businessId NullableString) *ProcessInstanceResult {
+func NewProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId TenantId, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, parentProcessInstanceKey NullableProcessInstanceKey, parentElementInstanceKey NullableElementInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, tags []Tag, businessId NullableBusinessId) *ProcessInstanceResult {
 	this := ProcessInstanceResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionName = processDefinitionName
@@ -94,9 +94,9 @@ func NewProcessInstanceResultWithDefaults() *ProcessInstanceResult {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *ProcessInstanceResult) GetProcessDefinitionId() string {
+func (o *ProcessInstanceResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -105,7 +105,7 @@ func (o *ProcessInstanceResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *ProcessInstanceResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -113,7 +113,7 @@ func (o *ProcessInstanceResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *ProcessInstanceResult) SetProcessDefinitionId(v string) {
+func (o *ProcessInstanceResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
@@ -318,9 +318,9 @@ func (o *ProcessInstanceResult) SetHasIncident(v bool) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *ProcessInstanceResult) GetTenantId() string {
+func (o *ProcessInstanceResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -329,7 +329,7 @@ func (o *ProcessInstanceResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceResult) GetTenantIdOk() (*string, bool) {
+func (o *ProcessInstanceResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -337,14 +337,14 @@ func (o *ProcessInstanceResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *ProcessInstanceResult) SetTenantId(v string) {
+func (o *ProcessInstanceResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *ProcessInstanceResult) GetProcessInstanceKey() ModelString {
+func (o *ProcessInstanceResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -353,7 +353,7 @@ func (o *ProcessInstanceResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -361,14 +361,14 @@ func (o *ProcessInstanceResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessInstanceKey sets field value
-func (o *ProcessInstanceResult) SetProcessInstanceKey(v ModelString) {
+func (o *ProcessInstanceResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ProcessInstanceResult) GetProcessDefinitionKey() ModelString {
+func (o *ProcessInstanceResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -377,7 +377,7 @@ func (o *ProcessInstanceResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -385,15 +385,15 @@ func (o *ProcessInstanceResult) GetProcessDefinitionKeyOk() (*ModelString, bool)
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *ProcessInstanceResult) SetProcessDefinitionKey(v ModelString) {
+func (o *ProcessInstanceResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetParentProcessInstanceKey returns the ParentProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *ProcessInstanceResult) GetParentProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *ProcessInstanceResult) GetParentProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.ParentProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -403,7 +403,7 @@ func (o *ProcessInstanceResult) GetParentProcessInstanceKey() ModelString {
 // GetParentProcessInstanceKeyOk returns a tuple with the ParentProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ProcessInstanceResult) GetParentProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceResult) GetParentProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -411,15 +411,15 @@ func (o *ProcessInstanceResult) GetParentProcessInstanceKeyOk() (*ModelString, b
 }
 
 // SetParentProcessInstanceKey sets field value
-func (o *ProcessInstanceResult) SetParentProcessInstanceKey(v ModelString) {
+func (o *ProcessInstanceResult) SetParentProcessInstanceKey(v ProcessInstanceKey) {
 	o.ParentProcessInstanceKey.Set(&v)
 }
 
 // GetParentElementInstanceKey returns the ParentElementInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *ProcessInstanceResult) GetParentElementInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ElementInstanceKey will be returned
+func (o *ProcessInstanceResult) GetParentElementInstanceKey() ElementInstanceKey {
 	if o == nil || o.ParentElementInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -429,7 +429,7 @@ func (o *ProcessInstanceResult) GetParentElementInstanceKey() ModelString {
 // GetParentElementInstanceKeyOk returns a tuple with the ParentElementInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ProcessInstanceResult) GetParentElementInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceResult) GetParentElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -437,15 +437,15 @@ func (o *ProcessInstanceResult) GetParentElementInstanceKeyOk() (*ModelString, b
 }
 
 // SetParentElementInstanceKey sets field value
-func (o *ProcessInstanceResult) SetParentElementInstanceKey(v ModelString) {
+func (o *ProcessInstanceResult) SetParentElementInstanceKey(v ElementInstanceKey) {
 	o.ParentElementInstanceKey.Set(&v)
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *ProcessInstanceResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *ProcessInstanceResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -455,7 +455,7 @@ func (o *ProcessInstanceResult) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ProcessInstanceResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -463,14 +463,14 @@ func (o *ProcessInstanceResult) GetRootProcessInstanceKeyOk() (*ModelString, boo
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *ProcessInstanceResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *ProcessInstanceResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetTags returns the Tags field value
-func (o *ProcessInstanceResult) GetTags() []string {
+func (o *ProcessInstanceResult) GetTags() []Tag {
 	if o == nil {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 
@@ -479,7 +479,7 @@ func (o *ProcessInstanceResult) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceResult) GetTagsOk() ([]string, bool) {
+func (o *ProcessInstanceResult) GetTagsOk() ([]Tag, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -487,15 +487,15 @@ func (o *ProcessInstanceResult) GetTagsOk() ([]string, bool) {
 }
 
 // SetTags sets field value
-func (o *ProcessInstanceResult) SetTags(v []string) {
+func (o *ProcessInstanceResult) SetTags(v []Tag) {
 	o.Tags = v
 }
 
 // GetBusinessId returns the BusinessId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *ProcessInstanceResult) GetBusinessId() string {
+// If the value is explicit nil, the zero value for BusinessId will be returned
+func (o *ProcessInstanceResult) GetBusinessId() BusinessId {
 	if o == nil || o.BusinessId.Get() == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -505,7 +505,7 @@ func (o *ProcessInstanceResult) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ProcessInstanceResult) GetBusinessIdOk() (*string, bool) {
+func (o *ProcessInstanceResult) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -513,7 +513,7 @@ func (o *ProcessInstanceResult) GetBusinessIdOk() (*string, bool) {
 }
 
 // SetBusinessId sets field value
-func (o *ProcessInstanceResult) SetBusinessId(v string) {
+func (o *ProcessInstanceResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 

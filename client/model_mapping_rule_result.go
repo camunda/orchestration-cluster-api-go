@@ -28,7 +28,7 @@ type MappingRuleResult struct {
 	// The name of the mapping rule.
 	Name string `json:"name"`
 	// The ID of the mapping rule.
-	MappingRuleId string `json:"mappingRuleId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	MappingRuleId MappingRuleId `json:"mappingRuleId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 }
 
 type _MappingRuleResult MappingRuleResult
@@ -37,7 +37,7 @@ type _MappingRuleResult MappingRuleResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMappingRuleResult(claimName string, claimValue string, name string, mappingRuleId string) *MappingRuleResult {
+func NewMappingRuleResult(claimName string, claimValue string, name string, mappingRuleId MappingRuleId) *MappingRuleResult {
 	this := MappingRuleResult{}
 	this.ClaimName = claimName
 	this.ClaimValue = claimValue
@@ -127,9 +127,9 @@ func (o *MappingRuleResult) SetName(v string) {
 }
 
 // GetMappingRuleId returns the MappingRuleId field value
-func (o *MappingRuleResult) GetMappingRuleId() string {
+func (o *MappingRuleResult) GetMappingRuleId() MappingRuleId {
 	if o == nil {
-		var ret string
+		var ret MappingRuleId
 		return ret
 	}
 
@@ -138,7 +138,7 @@ func (o *MappingRuleResult) GetMappingRuleId() string {
 
 // GetMappingRuleIdOk returns a tuple with the MappingRuleId field value
 // and a boolean to check if the value has been set.
-func (o *MappingRuleResult) GetMappingRuleIdOk() (*string, bool) {
+func (o *MappingRuleResult) GetMappingRuleIdOk() (*MappingRuleId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -146,7 +146,7 @@ func (o *MappingRuleResult) GetMappingRuleIdOk() (*string, bool) {
 }
 
 // SetMappingRuleId sets field value
-func (o *MappingRuleResult) SetMappingRuleId(v string) {
+func (o *MappingRuleResult) SetMappingRuleId(v MappingRuleId) {
 	o.MappingRuleId = v
 }
 

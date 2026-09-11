@@ -125,7 +125,7 @@ func TestCreateProcessInstanceRoutesOverFalcon(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 	instr := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
-		openapi.NewProcessInstanceCreationInstructionById("order-process"))
+		openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("order-process")))
 	res, err := c.CreateProcessInstance(context.Background(), instr)
 	if err != nil {
 		t.Fatalf("CreateProcessInstance: %v", err)
@@ -169,7 +169,7 @@ func TestCreateProcessInstanceForceRESTBypassesFalcon(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 	instr := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
-		openapi.NewProcessInstanceCreationInstructionById("order-process"))
+		openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("order-process")))
 	if _, err := c.CreateProcessInstance(context.Background(), instr); err != nil {
 		t.Fatalf("CreateProcessInstance: %v", err)
 	}

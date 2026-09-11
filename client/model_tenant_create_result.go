@@ -22,7 +22,7 @@ var _ MappedNullable = &TenantCreateResult{}
 // TenantCreateResult struct for TenantCreateResult
 type TenantCreateResult struct {
 	// The unique identifier of the created tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The name of the tenant.
 	Name string `json:"name"`
 	// The description of the tenant.
@@ -35,7 +35,7 @@ type _TenantCreateResult TenantCreateResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTenantCreateResult(tenantId string, name string, description NullableString) *TenantCreateResult {
+func NewTenantCreateResult(tenantId TenantId, name string, description NullableString) *TenantCreateResult {
 	this := TenantCreateResult{}
 	this.TenantId = tenantId
 	this.Name = name
@@ -52,9 +52,9 @@ func NewTenantCreateResultWithDefaults() *TenantCreateResult {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *TenantCreateResult) GetTenantId() string {
+func (o *TenantCreateResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *TenantCreateResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *TenantCreateResult) GetTenantIdOk() (*string, bool) {
+func (o *TenantCreateResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,7 +71,7 @@ func (o *TenantCreateResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *TenantCreateResult) SetTenantId(v string) {
+func (o *TenantCreateResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

@@ -22,9 +22,9 @@ var _ MappedNullable = &ProcessInstanceCallHierarchyEntry{}
 // ProcessInstanceCallHierarchyEntry struct for ProcessInstanceCallHierarchyEntry
 type ProcessInstanceCallHierarchyEntry struct {
 	// The key of the process instance.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the process definition.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The name of the process definition (fall backs to the process definition id if not available).
 	ProcessDefinitionName string `json:"processDefinitionName"`
 }
@@ -35,7 +35,7 @@ type _ProcessInstanceCallHierarchyEntry ProcessInstanceCallHierarchyEntry
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceCallHierarchyEntry(processInstanceKey ModelString, processDefinitionKey ModelString, processDefinitionName string) *ProcessInstanceCallHierarchyEntry {
+func NewProcessInstanceCallHierarchyEntry(processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, processDefinitionName string) *ProcessInstanceCallHierarchyEntry {
 	this := ProcessInstanceCallHierarchyEntry{}
 	this.ProcessInstanceKey = processInstanceKey
 	this.ProcessDefinitionKey = processDefinitionKey
@@ -52,9 +52,9 @@ func NewProcessInstanceCallHierarchyEntryWithDefaults() *ProcessInstanceCallHier
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *ProcessInstanceCallHierarchyEntry) GetProcessInstanceKey() ModelString {
+func (o *ProcessInstanceCallHierarchyEntry) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *ProcessInstanceCallHierarchyEntry) GetProcessInstanceKey() ModelString 
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCallHierarchyEntry) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceCallHierarchyEntry) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +71,14 @@ func (o *ProcessInstanceCallHierarchyEntry) GetProcessInstanceKeyOk() (*ModelStr
 }
 
 // SetProcessInstanceKey sets field value
-func (o *ProcessInstanceCallHierarchyEntry) SetProcessInstanceKey(v ModelString) {
+func (o *ProcessInstanceCallHierarchyEntry) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ProcessInstanceCallHierarchyEntry) GetProcessDefinitionKey() ModelString {
+func (o *ProcessInstanceCallHierarchyEntry) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -87,7 +87,7 @@ func (o *ProcessInstanceCallHierarchyEntry) GetProcessDefinitionKey() ModelStrin
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCallHierarchyEntry) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceCallHierarchyEntry) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,7 +95,7 @@ func (o *ProcessInstanceCallHierarchyEntry) GetProcessDefinitionKeyOk() (*ModelS
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *ProcessInstanceCallHierarchyEntry) SetProcessDefinitionKey(v ModelString) {
+func (o *ProcessInstanceCallHierarchyEntry) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 

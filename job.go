@@ -75,10 +75,10 @@ func newRESTJob(aj openapi.ActivatedJobResult, clock Clock) *Job {
 		jobType:            aj.GetType(),
 		retries:            aj.GetRetries(),
 		processInstanceKey: string(aj.GetProcessInstanceKey()),
-		elementID:          aj.GetElementId(),
+		elementID:          string(aj.GetElementId()),
 		customHeaders:      aj.GetCustomHeaders(),
 		variables:          aj.GetVariables(),
-		leaseToken:         aj.GetLeaseToken(),
+		leaseToken:         string(aj.GetLeaseToken()),
 		clock:              clock,
 	}
 }

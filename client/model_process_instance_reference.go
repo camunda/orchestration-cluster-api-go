@@ -22,9 +22,9 @@ var _ MappedNullable = &ProcessInstanceReference{}
 // ProcessInstanceReference struct for ProcessInstanceReference
 type ProcessInstanceReference struct {
 	// The key of the process definition.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The key of the created process instance.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 }
 
 type _ProcessInstanceReference ProcessInstanceReference
@@ -33,7 +33,7 @@ type _ProcessInstanceReference ProcessInstanceReference
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceReference(processDefinitionKey ModelString, processInstanceKey ModelString) *ProcessInstanceReference {
+func NewProcessInstanceReference(processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey) *ProcessInstanceReference {
 	this := ProcessInstanceReference{}
 	this.ProcessDefinitionKey = processDefinitionKey
 	this.ProcessInstanceKey = processInstanceKey
@@ -49,9 +49,9 @@ func NewProcessInstanceReferenceWithDefaults() *ProcessInstanceReference {
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ProcessInstanceReference) GetProcessDefinitionKey() ModelString {
+func (o *ProcessInstanceReference) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -60,7 +60,7 @@ func (o *ProcessInstanceReference) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceReference) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceReference) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,14 +68,14 @@ func (o *ProcessInstanceReference) GetProcessDefinitionKeyOk() (*ModelString, bo
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *ProcessInstanceReference) SetProcessDefinitionKey(v ModelString) {
+func (o *ProcessInstanceReference) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *ProcessInstanceReference) GetProcessInstanceKey() ModelString {
+func (o *ProcessInstanceReference) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *ProcessInstanceReference) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceReference) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceReference) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *ProcessInstanceReference) GetProcessInstanceKeyOk() (*ModelString, bool
 }
 
 // SetProcessInstanceKey sets field value
-func (o *ProcessInstanceReference) SetProcessInstanceKey(v ModelString) {
+func (o *ProcessInstanceReference) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 

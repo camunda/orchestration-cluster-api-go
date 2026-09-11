@@ -24,7 +24,7 @@ type VariableFilter struct {
 	// The value of the variable. Variable values in filters need to be in serialized JSON format. For example, a variable with string value `myValue` can be found with the filter value `\"myValue\"`. Consider appropriate escaping for special characters in JSON strings when constructing filter values.
 	Value *StringFilterProperty `json:"value,omitempty"`
 	// Tenant ID of this variable.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// Whether the value is truncated or not.
 	IsTruncated *bool `json:"isTruncated,omitempty"`
 	// The key for this variable.
@@ -117,9 +117,9 @@ func (o *VariableFilter) SetValue(v StringFilterProperty) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *VariableFilter) GetTenantId() string {
+func (o *VariableFilter) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -127,7 +127,7 @@ func (o *VariableFilter) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *VariableFilter) GetTenantIdOk() (*string, bool) {
+func (o *VariableFilter) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -143,8 +143,8 @@ func (o *VariableFilter) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *VariableFilter) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *VariableFilter) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 

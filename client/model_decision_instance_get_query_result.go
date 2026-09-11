@@ -23,39 +23,39 @@ var _ MappedNullable = &DecisionInstanceGetQueryResult{}
 // DecisionInstanceGetQueryResult struct for DecisionInstanceGetQueryResult
 type DecisionInstanceGetQueryResult struct {
 	// The business ID of the owning process instance, inherited when the decision instance was evaluated. This is `null` for decision instances created before version 8.10, for standalone decision evaluations, and for decision instances whose owning process instance has no business ID.
-	BusinessId NullableString `json:"businessId"`
+	BusinessId NullableBusinessId `json:"businessId"`
 	// The ID of the DMN decision.
-	DecisionDefinitionId string `json:"decisionDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	DecisionDefinitionId DecisionDefinitionId `json:"decisionDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The key of the decision.
-	DecisionDefinitionKey ModelString `json:"decisionDefinitionKey"`
+	DecisionDefinitionKey DecisionDefinitionKey `json:"decisionDefinitionKey"`
 	// The name of the DMN decision.
 	DecisionDefinitionName string                     `json:"decisionDefinitionName"`
 	DecisionDefinitionType DecisionDefinitionTypeEnum `json:"decisionDefinitionType"`
 	// The version of the decision.
 	DecisionDefinitionVersion int32 `json:"decisionDefinitionVersion"`
 	// System-generated identifier for a decision evaluation instance. It is composed of the parent decision evaluation key and the 1-based index of the evaluated decision within that evaluation, joined by a hyphen (format: `<decisionEvaluationKey>-<index>`).
-	DecisionEvaluationInstanceKey string `json:"decisionEvaluationInstanceKey" validate:"regexp=^[0-9]+-[0-9]+$"`
+	DecisionEvaluationInstanceKey DecisionEvaluationInstanceKey `json:"decisionEvaluationInstanceKey" validate:"regexp=^[0-9]+-[0-9]+$"`
 	// The key of the decision evaluation where this instance was created.
-	DecisionEvaluationKey ModelString `json:"decisionEvaluationKey"`
+	DecisionEvaluationKey DecisionEvaluationKey `json:"decisionEvaluationKey"`
 	// The key of the element instance this decision instance is linked to.
-	ElementInstanceKey NullableModelString `json:"elementInstanceKey"`
+	ElementInstanceKey NullableElementInstanceKey `json:"elementInstanceKey"`
 	// The evaluation date of the decision instance.
 	EvaluationDate time.Time `json:"evaluationDate"`
 	// The evaluation failure of the decision instance.
 	EvaluationFailure NullableString `json:"evaluationFailure"`
 	// The key of the process definition.
-	ProcessDefinitionKey NullableModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey NullableProcessDefinitionKey `json:"processDefinitionKey"`
 	// The key of the process instance.
-	ProcessInstanceKey NullableModelString `json:"processInstanceKey"`
+	ProcessInstanceKey NullableProcessInstanceKey `json:"processInstanceKey"`
 	// The result of the decision instance.
 	Result string `json:"result"`
 	// The key of the root decision definition.
-	RootDecisionDefinitionKey ModelString `json:"rootDecisionDefinitionKey"`
+	RootDecisionDefinitionKey DecisionDefinitionKey `json:"rootDecisionDefinitionKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString       `json:"rootProcessInstanceKey"`
-	State                  DecisionInstanceStateEnum `json:"state"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
+	State                  DecisionInstanceStateEnum  `json:"state"`
 	// The tenant ID of the decision instance.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The evaluated inputs of the decision instance.
 	EvaluatedInputs []EvaluatedDecisionInputItem `json:"evaluatedInputs"`
 	// The matched rules of the decision instance.
@@ -68,7 +68,7 @@ type _DecisionInstanceGetQueryResult DecisionInstanceGetQueryResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDecisionInstanceGetQueryResult(businessId NullableString, decisionDefinitionId string, decisionDefinitionKey ModelString, decisionDefinitionName string, decisionDefinitionType DecisionDefinitionTypeEnum, decisionDefinitionVersion int32, decisionEvaluationInstanceKey string, decisionEvaluationKey ModelString, elementInstanceKey NullableModelString, evaluationDate time.Time, evaluationFailure NullableString, processDefinitionKey NullableModelString, processInstanceKey NullableModelString, result string, rootDecisionDefinitionKey ModelString, rootProcessInstanceKey NullableModelString, state DecisionInstanceStateEnum, tenantId string, evaluatedInputs []EvaluatedDecisionInputItem, matchedRules []MatchedDecisionRuleItem) *DecisionInstanceGetQueryResult {
+func NewDecisionInstanceGetQueryResult(businessId NullableBusinessId, decisionDefinitionId DecisionDefinitionId, decisionDefinitionKey DecisionDefinitionKey, decisionDefinitionName string, decisionDefinitionType DecisionDefinitionTypeEnum, decisionDefinitionVersion int32, decisionEvaluationInstanceKey DecisionEvaluationInstanceKey, decisionEvaluationKey DecisionEvaluationKey, elementInstanceKey NullableElementInstanceKey, evaluationDate time.Time, evaluationFailure NullableString, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, result string, rootDecisionDefinitionKey DecisionDefinitionKey, rootProcessInstanceKey NullableProcessInstanceKey, state DecisionInstanceStateEnum, tenantId TenantId, evaluatedInputs []EvaluatedDecisionInputItem, matchedRules []MatchedDecisionRuleItem) *DecisionInstanceGetQueryResult {
 	this := DecisionInstanceGetQueryResult{}
 	this.BusinessId = businessId
 	this.DecisionDefinitionId = decisionDefinitionId
@@ -102,10 +102,10 @@ func NewDecisionInstanceGetQueryResultWithDefaults() *DecisionInstanceGetQueryRe
 }
 
 // GetBusinessId returns the BusinessId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *DecisionInstanceGetQueryResult) GetBusinessId() string {
+// If the value is explicit nil, the zero value for BusinessId will be returned
+func (o *DecisionInstanceGetQueryResult) GetBusinessId() BusinessId {
 	if o == nil || o.BusinessId.Get() == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -115,7 +115,7 @@ func (o *DecisionInstanceGetQueryResult) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DecisionInstanceGetQueryResult) GetBusinessIdOk() (*string, bool) {
+func (o *DecisionInstanceGetQueryResult) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -123,14 +123,14 @@ func (o *DecisionInstanceGetQueryResult) GetBusinessIdOk() (*string, bool) {
 }
 
 // SetBusinessId sets field value
-func (o *DecisionInstanceGetQueryResult) SetBusinessId(v string) {
+func (o *DecisionInstanceGetQueryResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 
 // GetDecisionDefinitionId returns the DecisionDefinitionId field value
-func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionId() string {
+func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionId() DecisionDefinitionId {
 	if o == nil {
-		var ret string
+		var ret DecisionDefinitionId
 		return ret
 	}
 
@@ -139,7 +139,7 @@ func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionId() string {
 
 // GetDecisionDefinitionIdOk returns a tuple with the DecisionDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionIdOk() (*string, bool) {
+func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionIdOk() (*DecisionDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -147,14 +147,14 @@ func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionIdOk() (*string, b
 }
 
 // SetDecisionDefinitionId sets field value
-func (o *DecisionInstanceGetQueryResult) SetDecisionDefinitionId(v string) {
+func (o *DecisionInstanceGetQueryResult) SetDecisionDefinitionId(v DecisionDefinitionId) {
 	o.DecisionDefinitionId = v
 }
 
 // GetDecisionDefinitionKey returns the DecisionDefinitionKey field value
-func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionKey() ModelString {
+func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionKey() DecisionDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 
@@ -163,7 +163,7 @@ func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionKey() ModelString 
 
 // GetDecisionDefinitionKeyOk returns a tuple with the DecisionDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionKeyOk() (*DecisionDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -171,7 +171,7 @@ func (o *DecisionInstanceGetQueryResult) GetDecisionDefinitionKeyOk() (*ModelStr
 }
 
 // SetDecisionDefinitionKey sets field value
-func (o *DecisionInstanceGetQueryResult) SetDecisionDefinitionKey(v ModelString) {
+func (o *DecisionInstanceGetQueryResult) SetDecisionDefinitionKey(v DecisionDefinitionKey) {
 	o.DecisionDefinitionKey = v
 }
 
@@ -248,9 +248,9 @@ func (o *DecisionInstanceGetQueryResult) SetDecisionDefinitionVersion(v int32) {
 }
 
 // GetDecisionEvaluationInstanceKey returns the DecisionEvaluationInstanceKey field value
-func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationInstanceKey() string {
+func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationInstanceKey() DecisionEvaluationInstanceKey {
 	if o == nil {
-		var ret string
+		var ret DecisionEvaluationInstanceKey
 		return ret
 	}
 
@@ -259,7 +259,7 @@ func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationInstanceKey() stri
 
 // GetDecisionEvaluationInstanceKeyOk returns a tuple with the DecisionEvaluationInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationInstanceKeyOk() (*string, bool) {
+func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationInstanceKeyOk() (*DecisionEvaluationInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -267,14 +267,14 @@ func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationInstanceKeyOk() (*
 }
 
 // SetDecisionEvaluationInstanceKey sets field value
-func (o *DecisionInstanceGetQueryResult) SetDecisionEvaluationInstanceKey(v string) {
+func (o *DecisionInstanceGetQueryResult) SetDecisionEvaluationInstanceKey(v DecisionEvaluationInstanceKey) {
 	o.DecisionEvaluationInstanceKey = v
 }
 
 // GetDecisionEvaluationKey returns the DecisionEvaluationKey field value
-func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationKey() ModelString {
+func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationKey() DecisionEvaluationKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionEvaluationKey
 		return ret
 	}
 
@@ -283,7 +283,7 @@ func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationKey() ModelString 
 
 // GetDecisionEvaluationKeyOk returns a tuple with the DecisionEvaluationKey field value
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationKeyOk() (*DecisionEvaluationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -291,15 +291,15 @@ func (o *DecisionInstanceGetQueryResult) GetDecisionEvaluationKeyOk() (*ModelStr
 }
 
 // SetDecisionEvaluationKey sets field value
-func (o *DecisionInstanceGetQueryResult) SetDecisionEvaluationKey(v ModelString) {
+func (o *DecisionInstanceGetQueryResult) SetDecisionEvaluationKey(v DecisionEvaluationKey) {
 	o.DecisionEvaluationKey = v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *DecisionInstanceGetQueryResult) GetElementInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ElementInstanceKey will be returned
+func (o *DecisionInstanceGetQueryResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil || o.ElementInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -309,7 +309,7 @@ func (o *DecisionInstanceGetQueryResult) GetElementInstanceKey() ModelString {
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DecisionInstanceGetQueryResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceGetQueryResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -317,7 +317,7 @@ func (o *DecisionInstanceGetQueryResult) GetElementInstanceKeyOk() (*ModelString
 }
 
 // SetElementInstanceKey sets field value
-func (o *DecisionInstanceGetQueryResult) SetElementInstanceKey(v ModelString) {
+func (o *DecisionInstanceGetQueryResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey.Set(&v)
 }
 
@@ -372,10 +372,10 @@ func (o *DecisionInstanceGetQueryResult) SetEvaluationFailure(v string) {
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *DecisionInstanceGetQueryResult) GetProcessDefinitionKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessDefinitionKey will be returned
+func (o *DecisionInstanceGetQueryResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil || o.ProcessDefinitionKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -385,7 +385,7 @@ func (o *DecisionInstanceGetQueryResult) GetProcessDefinitionKey() ModelString {
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DecisionInstanceGetQueryResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceGetQueryResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -393,15 +393,15 @@ func (o *DecisionInstanceGetQueryResult) GetProcessDefinitionKeyOk() (*ModelStri
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *DecisionInstanceGetQueryResult) SetProcessDefinitionKey(v ModelString) {
+func (o *DecisionInstanceGetQueryResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey.Set(&v)
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *DecisionInstanceGetQueryResult) GetProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *DecisionInstanceGetQueryResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.ProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -411,7 +411,7 @@ func (o *DecisionInstanceGetQueryResult) GetProcessInstanceKey() ModelString {
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DecisionInstanceGetQueryResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceGetQueryResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -419,7 +419,7 @@ func (o *DecisionInstanceGetQueryResult) GetProcessInstanceKeyOk() (*ModelString
 }
 
 // SetProcessInstanceKey sets field value
-func (o *DecisionInstanceGetQueryResult) SetProcessInstanceKey(v ModelString) {
+func (o *DecisionInstanceGetQueryResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey.Set(&v)
 }
 
@@ -448,9 +448,9 @@ func (o *DecisionInstanceGetQueryResult) SetResult(v string) {
 }
 
 // GetRootDecisionDefinitionKey returns the RootDecisionDefinitionKey field value
-func (o *DecisionInstanceGetQueryResult) GetRootDecisionDefinitionKey() ModelString {
+func (o *DecisionInstanceGetQueryResult) GetRootDecisionDefinitionKey() DecisionDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionDefinitionKey
 		return ret
 	}
 
@@ -459,7 +459,7 @@ func (o *DecisionInstanceGetQueryResult) GetRootDecisionDefinitionKey() ModelStr
 
 // GetRootDecisionDefinitionKeyOk returns a tuple with the RootDecisionDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceGetQueryResult) GetRootDecisionDefinitionKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceGetQueryResult) GetRootDecisionDefinitionKeyOk() (*DecisionDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -467,15 +467,15 @@ func (o *DecisionInstanceGetQueryResult) GetRootDecisionDefinitionKeyOk() (*Mode
 }
 
 // SetRootDecisionDefinitionKey sets field value
-func (o *DecisionInstanceGetQueryResult) SetRootDecisionDefinitionKey(v ModelString) {
+func (o *DecisionInstanceGetQueryResult) SetRootDecisionDefinitionKey(v DecisionDefinitionKey) {
 	o.RootDecisionDefinitionKey = v
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *DecisionInstanceGetQueryResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *DecisionInstanceGetQueryResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -485,7 +485,7 @@ func (o *DecisionInstanceGetQueryResult) GetRootProcessInstanceKey() ModelString
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DecisionInstanceGetQueryResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *DecisionInstanceGetQueryResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -493,7 +493,7 @@ func (o *DecisionInstanceGetQueryResult) GetRootProcessInstanceKeyOk() (*ModelSt
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *DecisionInstanceGetQueryResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *DecisionInstanceGetQueryResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
@@ -522,9 +522,9 @@ func (o *DecisionInstanceGetQueryResult) SetState(v DecisionInstanceStateEnum) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *DecisionInstanceGetQueryResult) GetTenantId() string {
+func (o *DecisionInstanceGetQueryResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -533,7 +533,7 @@ func (o *DecisionInstanceGetQueryResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *DecisionInstanceGetQueryResult) GetTenantIdOk() (*string, bool) {
+func (o *DecisionInstanceGetQueryResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -541,7 +541,7 @@ func (o *DecisionInstanceGetQueryResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *DecisionInstanceGetQueryResult) SetTenantId(v string) {
+func (o *DecisionInstanceGetQueryResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

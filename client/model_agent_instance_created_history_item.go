@@ -22,9 +22,9 @@ var _ MappedNullable = &AgentInstanceCreatedHistoryItem{}
 // AgentInstanceCreatedHistoryItem The outcome of appending a single history item from an update request's history batch.
 type AgentInstanceCreatedHistoryItem struct {
 	// The historyItemId of the corresponding item in the request, echoed back so callers can correlate response entries with request items by id.
-	HistoryItemId string `json:"historyItemId"`
+	HistoryItemId HistoryItemId `json:"historyItemId"`
 	// The system-generated key for the history item. When isDuplicate is true, this is the key of the original entry, not a new one.
-	HistoryItemKey ModelString `json:"historyItemKey"`
+	HistoryItemKey AgentHistoryItemKey `json:"historyItemKey"`
 	// True if this item had already been recorded and no new AGENT_HISTORY event was created for it; false if a new event was created.
 	IsDuplicate bool `json:"isDuplicate"`
 }
@@ -35,7 +35,7 @@ type _AgentInstanceCreatedHistoryItem AgentInstanceCreatedHistoryItem
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceCreatedHistoryItem(historyItemId string, historyItemKey ModelString, isDuplicate bool) *AgentInstanceCreatedHistoryItem {
+func NewAgentInstanceCreatedHistoryItem(historyItemId HistoryItemId, historyItemKey AgentHistoryItemKey, isDuplicate bool) *AgentInstanceCreatedHistoryItem {
 	this := AgentInstanceCreatedHistoryItem{}
 	this.HistoryItemId = historyItemId
 	this.HistoryItemKey = historyItemKey
@@ -52,9 +52,9 @@ func NewAgentInstanceCreatedHistoryItemWithDefaults() *AgentInstanceCreatedHisto
 }
 
 // GetHistoryItemId returns the HistoryItemId field value
-func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemId() string {
+func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemId() HistoryItemId {
 	if o == nil {
-		var ret string
+		var ret HistoryItemId
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemId() string {
 
 // GetHistoryItemIdOk returns a tuple with the HistoryItemId field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemIdOk() (*string, bool) {
+func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemIdOk() (*HistoryItemId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,14 +71,14 @@ func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemIdOk() (*string, bool) {
 }
 
 // SetHistoryItemId sets field value
-func (o *AgentInstanceCreatedHistoryItem) SetHistoryItemId(v string) {
+func (o *AgentInstanceCreatedHistoryItem) SetHistoryItemId(v HistoryItemId) {
 	o.HistoryItemId = v
 }
 
 // GetHistoryItemKey returns the HistoryItemKey field value
-func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemKey() ModelString {
+func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemKey() AgentHistoryItemKey {
 	if o == nil {
-		var ret ModelString
+		var ret AgentHistoryItemKey
 		return ret
 	}
 
@@ -87,7 +87,7 @@ func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemKey() ModelString {
 
 // GetHistoryItemKeyOk returns a tuple with the HistoryItemKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemKeyOk() (*AgentHistoryItemKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,7 +95,7 @@ func (o *AgentInstanceCreatedHistoryItem) GetHistoryItemKeyOk() (*ModelString, b
 }
 
 // SetHistoryItemKey sets field value
-func (o *AgentInstanceCreatedHistoryItem) SetHistoryItemKey(v ModelString) {
+func (o *AgentInstanceCreatedHistoryItem) SetHistoryItemKey(v AgentHistoryItemKey) {
 	o.HistoryItemKey = v
 }
 

@@ -22,9 +22,9 @@ var _ MappedNullable = &ProcessDefinitionInstanceStatisticsResult{}
 // ProcessDefinitionInstanceStatisticsResult Process definition instance statistics response.
 type ProcessDefinitionInstanceStatisticsResult struct {
 	// Id of a process definition, from the model. Only ids of process definitions that are deployed are useful.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// Name of the latest deployed process definition instance version.
 	LatestProcessDefinitionName NullableString `json:"latestProcessDefinitionName"`
 	// Indicates whether multiple versions of this process definition instance are deployed.
@@ -41,7 +41,7 @@ type _ProcessDefinitionInstanceStatisticsResult ProcessDefinitionInstanceStatist
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessDefinitionInstanceStatisticsResult(processDefinitionId string, tenantId string, latestProcessDefinitionName NullableString, hasMultipleVersions bool, activeInstancesWithoutIncidentCount int64, activeInstancesWithIncidentCount int64) *ProcessDefinitionInstanceStatisticsResult {
+func NewProcessDefinitionInstanceStatisticsResult(processDefinitionId ProcessDefinitionId, tenantId TenantId, latestProcessDefinitionName NullableString, hasMultipleVersions bool, activeInstancesWithoutIncidentCount int64, activeInstancesWithIncidentCount int64) *ProcessDefinitionInstanceStatisticsResult {
 	this := ProcessDefinitionInstanceStatisticsResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.TenantId = tenantId
@@ -61,9 +61,9 @@ func NewProcessDefinitionInstanceStatisticsResultWithDefaults() *ProcessDefiniti
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *ProcessDefinitionInstanceStatisticsResult) GetProcessDefinitionId() string {
+func (o *ProcessDefinitionInstanceStatisticsResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -72,7 +72,7 @@ func (o *ProcessDefinitionInstanceStatisticsResult) GetProcessDefinitionId() str
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionInstanceStatisticsResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *ProcessDefinitionInstanceStatisticsResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -80,14 +80,14 @@ func (o *ProcessDefinitionInstanceStatisticsResult) GetProcessDefinitionIdOk() (
 }
 
 // SetProcessDefinitionId sets field value
-func (o *ProcessDefinitionInstanceStatisticsResult) SetProcessDefinitionId(v string) {
+func (o *ProcessDefinitionInstanceStatisticsResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetTenantId returns the TenantId field value
-func (o *ProcessDefinitionInstanceStatisticsResult) GetTenantId() string {
+func (o *ProcessDefinitionInstanceStatisticsResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -96,7 +96,7 @@ func (o *ProcessDefinitionInstanceStatisticsResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionInstanceStatisticsResult) GetTenantIdOk() (*string, bool) {
+func (o *ProcessDefinitionInstanceStatisticsResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -104,7 +104,7 @@ func (o *ProcessDefinitionInstanceStatisticsResult) GetTenantIdOk() (*string, bo
 }
 
 // SetTenantId sets field value
-func (o *ProcessDefinitionInstanceStatisticsResult) SetTenantId(v string) {
+func (o *ProcessDefinitionInstanceStatisticsResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

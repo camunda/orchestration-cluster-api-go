@@ -22,7 +22,7 @@ var _ MappedNullable = &RoleUserResult{}
 // RoleUserResult struct for RoleUserResult
 type RoleUserResult struct {
 	// The unique name of a user.
-	Username string `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	Username Username `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 }
 
 type _RoleUserResult RoleUserResult
@@ -31,7 +31,7 @@ type _RoleUserResult RoleUserResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRoleUserResult(username string) *RoleUserResult {
+func NewRoleUserResult(username Username) *RoleUserResult {
 	this := RoleUserResult{}
 	this.Username = username
 	return &this
@@ -46,9 +46,9 @@ func NewRoleUserResultWithDefaults() *RoleUserResult {
 }
 
 // GetUsername returns the Username field value
-func (o *RoleUserResult) GetUsername() string {
+func (o *RoleUserResult) GetUsername() Username {
 	if o == nil {
-		var ret string
+		var ret Username
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *RoleUserResult) GetUsername() string {
 
 // GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
-func (o *RoleUserResult) GetUsernameOk() (*string, bool) {
+func (o *RoleUserResult) GetUsernameOk() (*Username, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *RoleUserResult) GetUsernameOk() (*string, bool) {
 }
 
 // SetUsername sets field value
-func (o *RoleUserResult) SetUsername(v string) {
+func (o *RoleUserResult) SetUsername(v Username) {
 	o.Username = v
 }
 

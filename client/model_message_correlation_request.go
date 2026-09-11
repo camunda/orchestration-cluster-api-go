@@ -28,9 +28,9 @@ type MessageCorrelationRequest struct {
 	// The message variables as JSON document
 	Variables map[string]interface{} `json:"variables,omitempty"`
 	// the tenant for which the message is published
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// An optional business id used to enforce uniqueness of the process instance that a message start event would create. If provided and uniqueness enforcement is enabled, the engine rejects starting a new process instance when another root process instance with the same business id is already active for the same process definition. It has no effect when the message correlates to a catch, boundary, or intermediate event.
-	BusinessId *string `json:"businessId,omitempty"`
+	BusinessId *BusinessId `json:"businessId,omitempty"`
 }
 
 type _MessageCorrelationRequest MessageCorrelationRequest
@@ -146,9 +146,9 @@ func (o *MessageCorrelationRequest) SetVariables(v map[string]interface{}) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *MessageCorrelationRequest) GetTenantId() string {
+func (o *MessageCorrelationRequest) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -156,7 +156,7 @@ func (o *MessageCorrelationRequest) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MessageCorrelationRequest) GetTenantIdOk() (*string, bool) {
+func (o *MessageCorrelationRequest) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -172,15 +172,15 @@ func (o *MessageCorrelationRequest) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *MessageCorrelationRequest) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *MessageCorrelationRequest) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 
 // GetBusinessId returns the BusinessId field value if set, zero value otherwise.
-func (o *MessageCorrelationRequest) GetBusinessId() string {
+func (o *MessageCorrelationRequest) GetBusinessId() BusinessId {
 	if o == nil || IsNil(o.BusinessId) {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 	return *o.BusinessId
@@ -188,7 +188,7 @@ func (o *MessageCorrelationRequest) GetBusinessId() string {
 
 // GetBusinessIdOk returns a tuple with the BusinessId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *MessageCorrelationRequest) GetBusinessIdOk() (*string, bool) {
+func (o *MessageCorrelationRequest) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil || IsNil(o.BusinessId) {
 		return nil, false
 	}
@@ -204,8 +204,8 @@ func (o *MessageCorrelationRequest) HasBusinessId() bool {
 	return false
 }
 
-// SetBusinessId gets a reference to the given string and assigns it to the BusinessId field.
-func (o *MessageCorrelationRequest) SetBusinessId(v string) {
+// SetBusinessId gets a reference to the given BusinessId and assigns it to the BusinessId field.
+func (o *MessageCorrelationRequest) SetBusinessId(v BusinessId) {
 	o.BusinessId = &v
 }
 

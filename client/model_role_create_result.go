@@ -22,7 +22,7 @@ var _ MappedNullable = &RoleCreateResult{}
 // RoleCreateResult struct for RoleCreateResult
 type RoleCreateResult struct {
 	// The ID of the created role.
-	RoleId string `json:"roleId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	RoleId RoleId `json:"roleId" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The display name of the created role.
 	Name string `json:"name"`
 	// The description of the created role.
@@ -35,7 +35,7 @@ type _RoleCreateResult RoleCreateResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRoleCreateResult(roleId string, name string, description NullableString) *RoleCreateResult {
+func NewRoleCreateResult(roleId RoleId, name string, description NullableString) *RoleCreateResult {
 	this := RoleCreateResult{}
 	this.RoleId = roleId
 	this.Name = name
@@ -52,9 +52,9 @@ func NewRoleCreateResultWithDefaults() *RoleCreateResult {
 }
 
 // GetRoleId returns the RoleId field value
-func (o *RoleCreateResult) GetRoleId() string {
+func (o *RoleCreateResult) GetRoleId() RoleId {
 	if o == nil {
-		var ret string
+		var ret RoleId
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *RoleCreateResult) GetRoleId() string {
 
 // GetRoleIdOk returns a tuple with the RoleId field value
 // and a boolean to check if the value has been set.
-func (o *RoleCreateResult) GetRoleIdOk() (*string, bool) {
+func (o *RoleCreateResult) GetRoleIdOk() (*RoleId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,7 +71,7 @@ func (o *RoleCreateResult) GetRoleIdOk() (*string, bool) {
 }
 
 // SetRoleId sets field value
-func (o *RoleCreateResult) SetRoleId(v string) {
+func (o *RoleCreateResult) SetRoleId(v RoleId) {
 	o.RoleId = v
 }
 

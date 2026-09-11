@@ -24,7 +24,7 @@ type TenantResult struct {
 	// The tenant name.
 	Name string `json:"name"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The tenant description.
 	Description NullableString `json:"description"`
 }
@@ -35,7 +35,7 @@ type _TenantResult TenantResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTenantResult(name string, tenantId string, description NullableString) *TenantResult {
+func NewTenantResult(name string, tenantId TenantId, description NullableString) *TenantResult {
 	this := TenantResult{}
 	this.Name = name
 	this.TenantId = tenantId
@@ -76,9 +76,9 @@ func (o *TenantResult) SetName(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *TenantResult) GetTenantId() string {
+func (o *TenantResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -87,7 +87,7 @@ func (o *TenantResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *TenantResult) GetTenantIdOk() (*string, bool) {
+func (o *TenantResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,7 +95,7 @@ func (o *TenantResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *TenantResult) SetTenantId(v string) {
+func (o *TenantResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

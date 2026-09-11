@@ -57,7 +57,7 @@ type ProcessDefinitionStatisticsFilter struct {
 	// The incident error hash code, associated with this process.
 	IncidentErrorHashCode *IntegerFilterProperty `json:"incidentErrorHashCode,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags,omitempty"`
+	Tags []Tag `json:"tags,omitempty"`
 	// The business id associated with the process instance.
 	BusinessId *StringFilterProperty `json:"businessId,omitempty"`
 	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"state\": \"ACTIVE\",   \"tenantId\": 123,   \"$or\": [     { \"processDefinitionId\": \"process_v1\" },     { \"processDefinitionId\": \"process_v2\", \"hasIncident\": true }   ] } ``` This matches process instances that:  <ul style=\"padding-left: 20px; margin-left: 20px;\">   <li style=\"list-style-type: disc;\">are in <em>ACTIVE</em> state</li>   <li style=\"list-style-type: disc;\">have tenant id equal to <em>123</em></li>   <li style=\"list-style-type: disc;\">and match either:     <ul style=\"padding-left: 20px; margin-left: 20px;\">       <li style=\"list-style-type: circle;\"><code>processDefinitionId</code> is <em>process_v1</em>, or</li>       <li style=\"list-style-type: circle;\"><code>processDefinitionId</code> is <em>process_v2</em> and <code>hasIncident</code> is <em>true</em></li>     </ul>   </li> </ul> <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
@@ -661,9 +661,9 @@ func (o *ProcessDefinitionStatisticsFilter) SetIncidentErrorHashCode(v IntegerFi
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
-func (o *ProcessDefinitionStatisticsFilter) GetTags() []string {
+func (o *ProcessDefinitionStatisticsFilter) GetTags() []Tag {
 	if o == nil || IsNil(o.Tags) {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 	return o.Tags
@@ -671,7 +671,7 @@ func (o *ProcessDefinitionStatisticsFilter) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessDefinitionStatisticsFilter) GetTagsOk() ([]string, bool) {
+func (o *ProcessDefinitionStatisticsFilter) GetTagsOk() ([]Tag, bool) {
 	if o == nil || IsNil(o.Tags) {
 		return nil, false
 	}
@@ -687,8 +687,8 @@ func (o *ProcessDefinitionStatisticsFilter) HasTags() bool {
 	return false
 }
 
-// SetTags gets a reference to the given []string and assigns it to the Tags field.
-func (o *ProcessDefinitionStatisticsFilter) SetTags(v []string) {
+// SetTags gets a reference to the given []Tag and assigns it to the Tags field.
+func (o *ProcessDefinitionStatisticsFilter) SetTags(v []Tag) {
 	o.Tags = v
 }
 

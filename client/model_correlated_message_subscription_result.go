@@ -23,7 +23,7 @@ var _ MappedNullable = &CorrelatedMessageSubscriptionResult{}
 // CorrelatedMessageSubscriptionResult struct for CorrelatedMessageSubscriptionResult
 type CorrelatedMessageSubscriptionResult struct {
 	// The business id associated with this correlated message subscription. For a message start event correlation, it is the business id carried by the correlating message that was stamped on the started process instance to enforce its uniqueness. For a catch, boundary, or intermediate event correlation, it is the business id of the subscribing process instance, captured when the subscription was opened. It is `null` when the relevant process instance has no business id.
-	BusinessId NullableString `json:"businessId"`
+	BusinessId NullableBusinessId `json:"businessId"`
 	// The correlation key of the message.
 	CorrelationKey NullableString `json:"correlationKey"`
 	// The time when the message was correlated.
@@ -31,25 +31,25 @@ type CorrelatedMessageSubscriptionResult struct {
 	// The element ID that received the message.
 	ElementId string `json:"elementId"`
 	// The element instance key that received the message. It is `null` for start event subscriptions.
-	ElementInstanceKey NullableModelString `json:"elementInstanceKey"`
+	ElementInstanceKey NullableElementInstanceKey `json:"elementInstanceKey"`
 	// The message key.
-	MessageKey ModelString `json:"messageKey"`
+	MessageKey MessageKey `json:"messageKey"`
 	// The name of the message.
 	MessageName string `json:"messageName"`
 	// The partition ID that correlated the message.
 	PartitionId int32 `json:"partitionId"`
 	// The process definition ID associated with this correlated message subscription.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The process definition key associated with this correlated message subscription.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The process instance key associated with this correlated message subscription.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The subscription key that received the message.
-	SubscriptionKey ModelString `json:"subscriptionKey"`
+	SubscriptionKey MessageSubscriptionKey `json:"subscriptionKey"`
 	// The tenant ID associated with this correlated message subscription.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 }
 
 type _CorrelatedMessageSubscriptionResult CorrelatedMessageSubscriptionResult
@@ -58,7 +58,7 @@ type _CorrelatedMessageSubscriptionResult CorrelatedMessageSubscriptionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCorrelatedMessageSubscriptionResult(businessId NullableString, correlationKey NullableString, correlationTime time.Time, elementId string, elementInstanceKey NullableModelString, messageKey ModelString, messageName string, partitionId int32, processDefinitionId string, processDefinitionKey ModelString, processInstanceKey ModelString, rootProcessInstanceKey NullableModelString, subscriptionKey ModelString, tenantId string) *CorrelatedMessageSubscriptionResult {
+func NewCorrelatedMessageSubscriptionResult(businessId NullableBusinessId, correlationKey NullableString, correlationTime time.Time, elementId string, elementInstanceKey NullableElementInstanceKey, messageKey MessageKey, messageName string, partitionId int32, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, subscriptionKey MessageSubscriptionKey, tenantId TenantId) *CorrelatedMessageSubscriptionResult {
 	this := CorrelatedMessageSubscriptionResult{}
 	this.BusinessId = businessId
 	this.CorrelationKey = correlationKey
@@ -86,10 +86,10 @@ func NewCorrelatedMessageSubscriptionResultWithDefaults() *CorrelatedMessageSubs
 }
 
 // GetBusinessId returns the BusinessId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *CorrelatedMessageSubscriptionResult) GetBusinessId() string {
+// If the value is explicit nil, the zero value for BusinessId will be returned
+func (o *CorrelatedMessageSubscriptionResult) GetBusinessId() BusinessId {
 	if o == nil || o.BusinessId.Get() == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -99,7 +99,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *CorrelatedMessageSubscriptionResult) GetBusinessIdOk() (*string, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -107,7 +107,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetBusinessIdOk() (*string, bool) 
 }
 
 // SetBusinessId sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetBusinessId(v string) {
+func (o *CorrelatedMessageSubscriptionResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 
@@ -186,10 +186,10 @@ func (o *CorrelatedMessageSubscriptionResult) SetElementId(v string) {
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *CorrelatedMessageSubscriptionResult) GetElementInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ElementInstanceKey will be returned
+func (o *CorrelatedMessageSubscriptionResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil || o.ElementInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -199,7 +199,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetElementInstanceKey() ModelStrin
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *CorrelatedMessageSubscriptionResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -207,14 +207,14 @@ func (o *CorrelatedMessageSubscriptionResult) GetElementInstanceKeyOk() (*ModelS
 }
 
 // SetElementInstanceKey sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetElementInstanceKey(v ModelString) {
+func (o *CorrelatedMessageSubscriptionResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey.Set(&v)
 }
 
 // GetMessageKey returns the MessageKey field value
-func (o *CorrelatedMessageSubscriptionResult) GetMessageKey() ModelString {
+func (o *CorrelatedMessageSubscriptionResult) GetMessageKey() MessageKey {
 	if o == nil {
-		var ret ModelString
+		var ret MessageKey
 		return ret
 	}
 
@@ -223,7 +223,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetMessageKey() ModelString {
 
 // GetMessageKeyOk returns a tuple with the MessageKey field value
 // and a boolean to check if the value has been set.
-func (o *CorrelatedMessageSubscriptionResult) GetMessageKeyOk() (*ModelString, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetMessageKeyOk() (*MessageKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -231,7 +231,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetMessageKeyOk() (*ModelString, b
 }
 
 // SetMessageKey sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetMessageKey(v ModelString) {
+func (o *CorrelatedMessageSubscriptionResult) SetMessageKey(v MessageKey) {
 	o.MessageKey = v
 }
 
@@ -284,9 +284,9 @@ func (o *CorrelatedMessageSubscriptionResult) SetPartitionId(v int32) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionId() string {
+func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -295,7 +295,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -303,14 +303,14 @@ func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionIdOk() (*strin
 }
 
 // SetProcessDefinitionId sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetProcessDefinitionId(v string) {
+func (o *CorrelatedMessageSubscriptionResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionKey() ModelString {
+func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -319,7 +319,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionKey() ModelStr
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -327,14 +327,14 @@ func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionKeyOk() (*Mode
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetProcessDefinitionKey(v ModelString) {
+func (o *CorrelatedMessageSubscriptionResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *CorrelatedMessageSubscriptionResult) GetProcessInstanceKey() ModelString {
+func (o *CorrelatedMessageSubscriptionResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -343,7 +343,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetProcessInstanceKey() ModelStrin
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *CorrelatedMessageSubscriptionResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -351,15 +351,15 @@ func (o *CorrelatedMessageSubscriptionResult) GetProcessInstanceKeyOk() (*ModelS
 }
 
 // SetProcessInstanceKey sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetProcessInstanceKey(v ModelString) {
+func (o *CorrelatedMessageSubscriptionResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *CorrelatedMessageSubscriptionResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *CorrelatedMessageSubscriptionResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -369,7 +369,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetRootProcessInstanceKey() ModelS
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *CorrelatedMessageSubscriptionResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -377,14 +377,14 @@ func (o *CorrelatedMessageSubscriptionResult) GetRootProcessInstanceKeyOk() (*Mo
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *CorrelatedMessageSubscriptionResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetSubscriptionKey returns the SubscriptionKey field value
-func (o *CorrelatedMessageSubscriptionResult) GetSubscriptionKey() ModelString {
+func (o *CorrelatedMessageSubscriptionResult) GetSubscriptionKey() MessageSubscriptionKey {
 	if o == nil {
-		var ret ModelString
+		var ret MessageSubscriptionKey
 		return ret
 	}
 
@@ -393,7 +393,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetSubscriptionKey() ModelString {
 
 // GetSubscriptionKeyOk returns a tuple with the SubscriptionKey field value
 // and a boolean to check if the value has been set.
-func (o *CorrelatedMessageSubscriptionResult) GetSubscriptionKeyOk() (*ModelString, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetSubscriptionKeyOk() (*MessageSubscriptionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -401,14 +401,14 @@ func (o *CorrelatedMessageSubscriptionResult) GetSubscriptionKeyOk() (*ModelStri
 }
 
 // SetSubscriptionKey sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetSubscriptionKey(v ModelString) {
+func (o *CorrelatedMessageSubscriptionResult) SetSubscriptionKey(v MessageSubscriptionKey) {
 	o.SubscriptionKey = v
 }
 
 // GetTenantId returns the TenantId field value
-func (o *CorrelatedMessageSubscriptionResult) GetTenantId() string {
+func (o *CorrelatedMessageSubscriptionResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -417,7 +417,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *CorrelatedMessageSubscriptionResult) GetTenantIdOk() (*string, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -425,7 +425,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetTenantId(v string) {
+func (o *CorrelatedMessageSubscriptionResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

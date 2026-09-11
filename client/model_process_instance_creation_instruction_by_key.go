@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessInstanceCreationInstructionByKey{}
 // ProcessInstanceCreationInstructionByKey struct for ProcessInstanceCreationInstructionByKey
 type ProcessInstanceCreationInstructionByKey struct {
 	// The unique key identifying the process definition, for example, returned for a process in the deploy resources endpoint.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// As the version is already identified by the `processDefinitionKey`, the value of this field is ignored. It's here for backwards-compatibility only as previous releases accepted it in request bodies.
 	ProcessDefinitionVersion *int32 `json:"processDefinitionVersion,omitempty"`
 	// Set of variables as JSON object to instantiate in the root variable scope of the process instance. Can include nested complex objects.
@@ -32,7 +32,7 @@ type ProcessInstanceCreationInstructionByKey struct {
 	// Runtime instructions (alpha). List of instructions that affect the runtime behavior of the process instance. Refer to specific instruction types for more details.  This parameter is an alpha feature and may be subject to change in future releases.
 	RuntimeInstructions []ProcessInstanceCreationTerminateInstruction `json:"runtimeInstructions,omitempty"`
 	// The tenant id of the process definition. If multi-tenancy is enabled, provide the tenant id of the process definition to start a process instance of. If multi-tenancy is disabled, don't provide this parameter.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// A reference key chosen by the user that will be part of all records resulting from this operation. Must be > 0 if provided.
 	OperationReference *int64 `json:"operationReference,omitempty"`
 	// Wait for the process instance to complete. If the process instance does not complete within the request timeout limit, a 504 response status will be returned. The process instance will continue to run in the background regardless of the timeout. Disabled by default.
@@ -42,9 +42,9 @@ type ProcessInstanceCreationInstructionByKey struct {
 	// List of variables by name to be included in the response when awaitCompletion is set to true. If empty, all visible variables in the root scope will be returned.
 	FetchVariables []string `json:"fetchVariables,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags,omitempty"`
+	Tags []Tag `json:"tags,omitempty"`
 	// An optional, user-defined string identifier that identifies the process instance within the scope of a process definition (scoped by tenant). If provided and uniqueness enforcement is enabled, the engine will reject creation if another root process instance with the same business id is already active for the same process definition. Note that any active child process instances with the same business id are not taken into account.
-	BusinessId *string `json:"businessId,omitempty"`
+	BusinessId *BusinessId `json:"businessId,omitempty"`
 }
 
 type _ProcessInstanceCreationInstructionByKey ProcessInstanceCreationInstructionByKey
@@ -53,7 +53,7 @@ type _ProcessInstanceCreationInstructionByKey ProcessInstanceCreationInstruction
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceCreationInstructionByKey(processDefinitionKey ModelString) *ProcessInstanceCreationInstructionByKey {
+func NewProcessInstanceCreationInstructionByKey(processDefinitionKey ProcessDefinitionKey) *ProcessInstanceCreationInstructionByKey {
 	this := ProcessInstanceCreationInstructionByKey{}
 	this.ProcessDefinitionKey = processDefinitionKey
 	var processDefinitionVersion int32 = -1
@@ -80,9 +80,9 @@ func NewProcessInstanceCreationInstructionByKeyWithDefaults() *ProcessInstanceCr
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKey() ModelString {
+func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -91,7 +91,7 @@ func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKey() Mode
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -99,7 +99,7 @@ func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKeyOk() (*
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *ProcessInstanceCreationInstructionByKey) SetProcessDefinitionKey(v ModelString) {
+func (o *ProcessInstanceCreationInstructionByKey) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
@@ -232,9 +232,9 @@ func (o *ProcessInstanceCreationInstructionByKey) SetRuntimeInstructions(v []Pro
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionByKey) GetTenantId() string {
+func (o *ProcessInstanceCreationInstructionByKey) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -242,7 +242,7 @@ func (o *ProcessInstanceCreationInstructionByKey) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetTenantIdOk() (*string, bool) {
+func (o *ProcessInstanceCreationInstructionByKey) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -258,8 +258,8 @@ func (o *ProcessInstanceCreationInstructionByKey) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *ProcessInstanceCreationInstructionByKey) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *ProcessInstanceCreationInstructionByKey) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 
@@ -392,9 +392,9 @@ func (o *ProcessInstanceCreationInstructionByKey) SetFetchVariables(v []string) 
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionByKey) GetTags() []string {
+func (o *ProcessInstanceCreationInstructionByKey) GetTags() []Tag {
 	if o == nil || IsNil(o.Tags) {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 	return o.Tags
@@ -402,7 +402,7 @@ func (o *ProcessInstanceCreationInstructionByKey) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetTagsOk() ([]string, bool) {
+func (o *ProcessInstanceCreationInstructionByKey) GetTagsOk() ([]Tag, bool) {
 	if o == nil || IsNil(o.Tags) {
 		return nil, false
 	}
@@ -418,15 +418,15 @@ func (o *ProcessInstanceCreationInstructionByKey) HasTags() bool {
 	return false
 }
 
-// SetTags gets a reference to the given []string and assigns it to the Tags field.
-func (o *ProcessInstanceCreationInstructionByKey) SetTags(v []string) {
+// SetTags gets a reference to the given []Tag and assigns it to the Tags field.
+func (o *ProcessInstanceCreationInstructionByKey) SetTags(v []Tag) {
 	o.Tags = v
 }
 
 // GetBusinessId returns the BusinessId field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionByKey) GetBusinessId() string {
+func (o *ProcessInstanceCreationInstructionByKey) GetBusinessId() BusinessId {
 	if o == nil || IsNil(o.BusinessId) {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 	return *o.BusinessId
@@ -434,7 +434,7 @@ func (o *ProcessInstanceCreationInstructionByKey) GetBusinessId() string {
 
 // GetBusinessIdOk returns a tuple with the BusinessId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetBusinessIdOk() (*string, bool) {
+func (o *ProcessInstanceCreationInstructionByKey) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil || IsNil(o.BusinessId) {
 		return nil, false
 	}
@@ -450,8 +450,8 @@ func (o *ProcessInstanceCreationInstructionByKey) HasBusinessId() bool {
 	return false
 }
 
-// SetBusinessId gets a reference to the given string and assigns it to the BusinessId field.
-func (o *ProcessInstanceCreationInstructionByKey) SetBusinessId(v string) {
+// SetBusinessId gets a reference to the given BusinessId and assigns it to the BusinessId field.
+func (o *ProcessInstanceCreationInstructionByKey) SetBusinessId(v BusinessId) {
 	o.BusinessId = &v
 }
 

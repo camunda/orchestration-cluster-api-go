@@ -24,7 +24,7 @@ type UserRequest struct {
 	// The password of the user.
 	Password string `json:"password"`
 	// The username of the new user.
-	Username string `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	Username Username `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The name of the user.
 	Name *string `json:"name,omitempty"`
 	// The email of the user.
@@ -37,7 +37,7 @@ type _UserRequest UserRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserRequest(password string, username string) *UserRequest {
+func NewUserRequest(password string, username Username) *UserRequest {
 	this := UserRequest{}
 	this.Password = password
 	this.Username = username
@@ -77,9 +77,9 @@ func (o *UserRequest) SetPassword(v string) {
 }
 
 // GetUsername returns the Username field value
-func (o *UserRequest) GetUsername() string {
+func (o *UserRequest) GetUsername() Username {
 	if o == nil {
-		var ret string
+		var ret Username
 		return ret
 	}
 
@@ -88,7 +88,7 @@ func (o *UserRequest) GetUsername() string {
 
 // GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
-func (o *UserRequest) GetUsernameOk() (*string, bool) {
+func (o *UserRequest) GetUsernameOk() (*Username, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -96,7 +96,7 @@ func (o *UserRequest) GetUsernameOk() (*string, bool) {
 }
 
 // SetUsername sets field value
-func (o *UserRequest) SetUsername(v string) {
+func (o *UserRequest) SetUsername(v Username) {
 	o.Username = v
 }
 

@@ -17,14 +17,14 @@ func createAgentInstanceExample(ctx context.Context, client *camunda.CamundaClie
 			openapi.NewAgentInstanceTextContent("TEXT", "You are a helpful assistant.")),
 	}
 	configItem := openapi.NewAgentInstanceHistoryItem(
-		"config-1", 0, openapi.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
+		"config-1", openapi.MustLoopIterationId(1), openapi.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
 	configItem.SetModel("gpt-4o")
 	configItem.SetProvider("openai")
 	configItem.SetSystemPrompt(systemPrompt)
 
 	req := openapi.NewAgentInstanceCreationRequest(
-		openapi.ModelString("2251799813685360"), // elementInstanceKey
-		openapi.ModelString("2251799813685424"), // jobKey
+		openapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
+		openapi.JobKey("2251799813685424"),             // jobKey
 		"lease-token",
 		[]openapi.AgentInstanceHistoryItem{*configItem}, // history
 	)
@@ -52,8 +52,8 @@ func getAgentInstanceExample(ctx context.Context, client *camunda.CamundaClient)
 func updateAgentInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateAgentInstance
 	req := openapi.NewAgentInstanceUpdateRequest(
-		openapi.ModelString("2251799813685360"), // elementInstanceKey
-		openapi.ModelString("2251799813685424"), // jobKey
+		openapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
+		openapi.JobKey("2251799813685424"),             // jobKey
 		"lease-token",
 	)
 

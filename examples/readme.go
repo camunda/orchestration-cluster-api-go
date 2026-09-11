@@ -129,7 +129,7 @@ func deployAndStart(ctx context.Context, client *camunda.CamundaClient) error {
 
 	// Start an instance by process id. The request body is a first-class facade
 	// parameter — no Raw() needed.
-	byID := openapi.NewProcessInstanceCreationInstructionById("demo-process")
+	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("demo-process"))
 	byID.SetVariables(map[string]any{"name": "Camunda"})
 	instruction := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
 

@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedProcessInstanceKeyFilter{}
 // AdvancedProcessInstanceKeyFilter Advanced ProcessInstanceKey filter.
 type AdvancedProcessInstanceKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *ProcessInstanceKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *ProcessInstanceKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []ProcessInstanceKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []ProcessInstanceKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedProcessInstanceKeyFilter instantiates a new AdvancedProcessInstanceKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedProcessInstanceKeyFilterWithDefaults() *AdvancedProcessInstanceK
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedProcessInstanceKeyFilter) GetEq() ModelString {
+func (o *AdvancedProcessInstanceKeyFilter) GetEq() ProcessInstanceKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedProcessInstanceKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessInstanceKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedProcessInstanceKeyFilter) GetEqOk() (*ProcessInstanceKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedProcessInstanceKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedProcessInstanceKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given ProcessInstanceKey and assigns it to the Eq field.
+func (o *AdvancedProcessInstanceKeyFilter) SetEq(v ProcessInstanceKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedProcessInstanceKeyFilter) GetNeq() ModelString {
+func (o *AdvancedProcessInstanceKeyFilter) GetNeq() ProcessInstanceKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedProcessInstanceKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessInstanceKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedProcessInstanceKeyFilter) GetNeqOk() (*ProcessInstanceKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedProcessInstanceKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedProcessInstanceKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given ProcessInstanceKey and assigns it to the Neq field.
+func (o *AdvancedProcessInstanceKeyFilter) SetNeq(v ProcessInstanceKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedProcessInstanceKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedProcessInstanceKeyFilter) GetIn() []ModelString {
+func (o *AdvancedProcessInstanceKeyFilter) GetIn() []ProcessInstanceKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []ProcessInstanceKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedProcessInstanceKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessInstanceKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedProcessInstanceKeyFilter) GetInOk() ([]ProcessInstanceKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedProcessInstanceKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedProcessInstanceKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []ProcessInstanceKey and assigns it to the In field.
+func (o *AdvancedProcessInstanceKeyFilter) SetIn(v []ProcessInstanceKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedProcessInstanceKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedProcessInstanceKeyFilter) GetNotIn() []ProcessInstanceKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []ProcessInstanceKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedProcessInstanceKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedProcessInstanceKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedProcessInstanceKeyFilter) GetNotInOk() ([]ProcessInstanceKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedProcessInstanceKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedProcessInstanceKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []ProcessInstanceKey and assigns it to the NotIn field.
+func (o *AdvancedProcessInstanceKeyFilter) SetNotIn(v []ProcessInstanceKey) {
 	o.NotIn = v
 }
 

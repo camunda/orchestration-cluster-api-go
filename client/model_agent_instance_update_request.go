@@ -22,13 +22,13 @@ var _ MappedNullable = &AgentInstanceUpdateRequest{}
 // AgentInstanceUpdateRequest Request to update the mutable state of an agent instance.
 type AgentInstanceUpdateRequest struct {
 	// The key of the currently-active element instance for this agent instance. Used for ownership/equality validation against the stored agent instance and, when the supplied key differs from the previous association (re-entry of an ad-hoc sub-process or AI Agent task), appended to elementInstanceKeys with the reverse link updated on the supplied element instance. Only one element instance may hold this write claim at a time: any update from a different element instance is rejected while the current writer's job is still active.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// The new status of the agent instance.
 	Status *AgentInstanceUpdateStatusEnum `json:"status,omitempty"`
 	// The key of the job activation during which this update is being made. An update must always be attributed to the active job that produced it.
-	JobKey ModelString `json:"jobKey"`
+	JobKey JobKey `json:"jobKey"`
 	// Opaque lease token received from the job activation response. Disambiguates this activation from any other activation of the same job: if the job is later retried, history items submitted under a superseded lease are discarded rather than committed.
-	JobLease string `json:"jobLease"`
+	JobLease JobLeaseToken `json:"jobLease"`
 	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated.
 	History []AgentInstanceHistoryItem `json:"history,omitempty"`
 }
@@ -39,7 +39,7 @@ type _AgentInstanceUpdateRequest AgentInstanceUpdateRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceUpdateRequest(elementInstanceKey ModelString, jobKey ModelString, jobLease string) *AgentInstanceUpdateRequest {
+func NewAgentInstanceUpdateRequest(elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLease JobLeaseToken) *AgentInstanceUpdateRequest {
 	this := AgentInstanceUpdateRequest{}
 	this.ElementInstanceKey = elementInstanceKey
 	this.JobKey = jobKey
@@ -56,9 +56,9 @@ func NewAgentInstanceUpdateRequestWithDefaults() *AgentInstanceUpdateRequest {
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *AgentInstanceUpdateRequest) GetElementInstanceKey() ModelString {
+func (o *AgentInstanceUpdateRequest) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -67,7 +67,7 @@ func (o *AgentInstanceUpdateRequest) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceUpdateRequest) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceUpdateRequest) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -75,7 +75,7 @@ func (o *AgentInstanceUpdateRequest) GetElementInstanceKeyOk() (*ModelString, bo
 }
 
 // SetElementInstanceKey sets field value
-func (o *AgentInstanceUpdateRequest) SetElementInstanceKey(v ModelString) {
+func (o *AgentInstanceUpdateRequest) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
@@ -112,9 +112,9 @@ func (o *AgentInstanceUpdateRequest) SetStatus(v AgentInstanceUpdateStatusEnum) 
 }
 
 // GetJobKey returns the JobKey field value
-func (o *AgentInstanceUpdateRequest) GetJobKey() ModelString {
+func (o *AgentInstanceUpdateRequest) GetJobKey() JobKey {
 	if o == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -123,7 +123,7 @@ func (o *AgentInstanceUpdateRequest) GetJobKey() ModelString {
 
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceUpdateRequest) GetJobKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceUpdateRequest) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -131,14 +131,14 @@ func (o *AgentInstanceUpdateRequest) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *AgentInstanceUpdateRequest) SetJobKey(v ModelString) {
+func (o *AgentInstanceUpdateRequest) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
 // GetJobLease returns the JobLease field value
-func (o *AgentInstanceUpdateRequest) GetJobLease() string {
+func (o *AgentInstanceUpdateRequest) GetJobLease() JobLeaseToken {
 	if o == nil {
-		var ret string
+		var ret JobLeaseToken
 		return ret
 	}
 
@@ -147,7 +147,7 @@ func (o *AgentInstanceUpdateRequest) GetJobLease() string {
 
 // GetJobLeaseOk returns a tuple with the JobLease field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceUpdateRequest) GetJobLeaseOk() (*string, bool) {
+func (o *AgentInstanceUpdateRequest) GetJobLeaseOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -155,7 +155,7 @@ func (o *AgentInstanceUpdateRequest) GetJobLeaseOk() (*string, bool) {
 }
 
 // SetJobLease sets field value
-func (o *AgentInstanceUpdateRequest) SetJobLease(v string) {
+func (o *AgentInstanceUpdateRequest) SetJobLease(v JobLeaseToken) {
 	o.JobLease = v
 }
 

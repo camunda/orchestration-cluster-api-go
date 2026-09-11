@@ -37,6 +37,32 @@ done
 echo "==> Generating REST client with openapi-generator..."
 npx --yes @openapitools/openapi-generator-cli generate -c openapi-generator-config.yaml
 
+# openapi-generator only ever *writes* the files it emits this run; it never deletes a
+# file it emitted on a previous run. When upstream removes or renames a schema, the stale
+# model/api/test/doc file is left behind in client/ as an orphan the generator will never
+# touch again — so the post-processing hooks (which key off the current spec) can neither
+# rebrand nor fix it, and it lingers with dead code and stale doc comments. Prune every
+# generator-owned file no longer listed in the run's own FILES manifest so the generated
+# surface matches the current spec exactly.
+echo "==> Pruning generated files orphaned by upstream spec changes..."
+MANIFEST="client/.openapi-generator/FILES"
+if [[ -f "$MANIFEST" ]]; then
+  pruned=0
+  for f in client/model_*.go client/api_*.go client/test/*_test.go client/docs/*.md; do
+    [[ -e "$f" ]] || continue
+    rel="${f#client/}"
+    if ! grep -Fxq "$rel" "$MANIFEST"; then
+      echo "    pruning orphan: $f"
+      rm -f "$f"
+      pruned=$((pruned + 1))
+    fi
+  done
+  echo "    pruned $pruned orphan file(s)"
+else
+  echo "error: openapi-generator FILES manifest not found at $MANIFEST" >&2
+  exit 1
+fi
+
 echo "==> Generating gRPC stubs with buf..."
 npx --yes @bufbuild/buf@1.72.0 generate
 

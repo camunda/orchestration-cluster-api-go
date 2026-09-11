@@ -29,9 +29,9 @@ type JobSearchResult struct {
 	// The reason provided by the user task listener for denying the work.
 	DeniedReason NullableString `json:"deniedReason"`
 	// The element ID associated with the job. May be missing on job failure.
-	ElementId NullableString `json:"elementId"`
+	ElementId NullableElementId `json:"elementId"`
 	// The element instance key associated with the job.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// End date of the job. This is `null` if the job is not in an end state yet.
 	EndTime NullableTime `json:"endTime"`
 	// The error code provided for a failed job.
@@ -43,24 +43,24 @@ type JobSearchResult struct {
 	// Indicates whether the user task listener denies the work.
 	IsDenied NullableBool `json:"isDenied"`
 	// The key, a unique identifier for the job.
-	JobKey            ModelString              `json:"jobKey"`
+	JobKey            JobKey                   `json:"jobKey"`
 	Kind              JobKindEnum              `json:"kind"`
 	ListenerEventType JobListenerEventTypeEnum `json:"listenerEventType"`
 	// The process definition ID associated with the job.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The process definition key associated with the job.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The process instance key associated with the job.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
-	RootProcessInstanceKey NullableModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The business ID of the owning process instance, inherited when the job was created. This is `null` for jobs created before version 8.10 and for jobs whose owning process instance has no business ID.
-	BusinessId NullableString `json:"businessId"`
+	BusinessId NullableBusinessId `json:"businessId"`
 	// The amount of retries left to this job.
 	Retries int32        `json:"retries"`
 	State   JobStateEnum `json:"state"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The type of the job.
 	Type string `json:"type"`
 	// The name of the worker of this job.
@@ -79,7 +79,7 @@ type _JobSearchResult JobSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableString, elementInstanceKey ModelString, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey ModelString, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId string, processDefinitionKey ModelString, processInstanceKey ModelString, rootProcessInstanceKey NullableModelString, businessId NullableString, retries int32, state JobStateEnum, tenantId string, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
+func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
 	this := JobSearchResult{}
 	this.CustomHeaders = customHeaders
 	this.Deadline = deadline
@@ -195,10 +195,10 @@ func (o *JobSearchResult) SetDeniedReason(v string) {
 }
 
 // GetElementId returns the ElementId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *JobSearchResult) GetElementId() string {
+// If the value is explicit nil, the zero value for ElementId will be returned
+func (o *JobSearchResult) GetElementId() ElementId {
 	if o == nil || o.ElementId.Get() == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -208,7 +208,7 @@ func (o *JobSearchResult) GetElementId() string {
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobSearchResult) GetElementIdOk() (*string, bool) {
+func (o *JobSearchResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -216,14 +216,14 @@ func (o *JobSearchResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *JobSearchResult) SetElementId(v string) {
+func (o *JobSearchResult) SetElementId(v ElementId) {
 	o.ElementId.Set(&v)
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *JobSearchResult) GetElementInstanceKey() ModelString {
+func (o *JobSearchResult) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -232,7 +232,7 @@ func (o *JobSearchResult) GetElementInstanceKey() ModelString {
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *JobSearchResult) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *JobSearchResult) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -240,7 +240,7 @@ func (o *JobSearchResult) GetElementInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetElementInstanceKey sets field value
-func (o *JobSearchResult) SetElementInstanceKey(v ModelString) {
+func (o *JobSearchResult) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 
@@ -373,9 +373,9 @@ func (o *JobSearchResult) SetIsDenied(v bool) {
 }
 
 // GetJobKey returns the JobKey field value
-func (o *JobSearchResult) GetJobKey() ModelString {
+func (o *JobSearchResult) GetJobKey() JobKey {
 	if o == nil {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 
@@ -384,7 +384,7 @@ func (o *JobSearchResult) GetJobKey() ModelString {
 
 // GetJobKeyOk returns a tuple with the JobKey field value
 // and a boolean to check if the value has been set.
-func (o *JobSearchResult) GetJobKeyOk() (*ModelString, bool) {
+func (o *JobSearchResult) GetJobKeyOk() (*JobKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -392,7 +392,7 @@ func (o *JobSearchResult) GetJobKeyOk() (*ModelString, bool) {
 }
 
 // SetJobKey sets field value
-func (o *JobSearchResult) SetJobKey(v ModelString) {
+func (o *JobSearchResult) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
@@ -445,9 +445,9 @@ func (o *JobSearchResult) SetListenerEventType(v JobListenerEventTypeEnum) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *JobSearchResult) GetProcessDefinitionId() string {
+func (o *JobSearchResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -456,7 +456,7 @@ func (o *JobSearchResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *JobSearchResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *JobSearchResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -464,14 +464,14 @@ func (o *JobSearchResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *JobSearchResult) SetProcessDefinitionId(v string) {
+func (o *JobSearchResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *JobSearchResult) GetProcessDefinitionKey() ModelString {
+func (o *JobSearchResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -480,7 +480,7 @@ func (o *JobSearchResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *JobSearchResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *JobSearchResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -488,14 +488,14 @@ func (o *JobSearchResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *JobSearchResult) SetProcessDefinitionKey(v ModelString) {
+func (o *JobSearchResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *JobSearchResult) GetProcessInstanceKey() ModelString {
+func (o *JobSearchResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -504,7 +504,7 @@ func (o *JobSearchResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *JobSearchResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *JobSearchResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -512,15 +512,15 @@ func (o *JobSearchResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessInstanceKey sets field value
-func (o *JobSearchResult) SetProcessInstanceKey(v ModelString) {
+func (o *JobSearchResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-// If the value is explicit nil, the zero value for ModelString will be returned
-func (o *JobSearchResult) GetRootProcessInstanceKey() ModelString {
+// If the value is explicit nil, the zero value for ProcessInstanceKey will be returned
+func (o *JobSearchResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil || o.RootProcessInstanceKey.Get() == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -530,7 +530,7 @@ func (o *JobSearchResult) GetRootProcessInstanceKey() ModelString {
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobSearchResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *JobSearchResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -538,15 +538,15 @@ func (o *JobSearchResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *JobSearchResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *JobSearchResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
 // GetBusinessId returns the BusinessId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *JobSearchResult) GetBusinessId() string {
+// If the value is explicit nil, the zero value for BusinessId will be returned
+func (o *JobSearchResult) GetBusinessId() BusinessId {
 	if o == nil || o.BusinessId.Get() == nil {
-		var ret string
+		var ret BusinessId
 		return ret
 	}
 
@@ -556,7 +556,7 @@ func (o *JobSearchResult) GetBusinessId() string {
 // GetBusinessIdOk returns a tuple with the BusinessId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobSearchResult) GetBusinessIdOk() (*string, bool) {
+func (o *JobSearchResult) GetBusinessIdOk() (*BusinessId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -564,7 +564,7 @@ func (o *JobSearchResult) GetBusinessIdOk() (*string, bool) {
 }
 
 // SetBusinessId sets field value
-func (o *JobSearchResult) SetBusinessId(v string) {
+func (o *JobSearchResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 
@@ -617,9 +617,9 @@ func (o *JobSearchResult) SetState(v JobStateEnum) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *JobSearchResult) GetTenantId() string {
+func (o *JobSearchResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -628,7 +628,7 @@ func (o *JobSearchResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *JobSearchResult) GetTenantIdOk() (*string, bool) {
+func (o *JobSearchResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -636,7 +636,7 @@ func (o *JobSearchResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *JobSearchResult) SetTenantId(v string) {
+func (o *JobSearchResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

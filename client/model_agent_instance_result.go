@@ -23,9 +23,9 @@ var _ MappedNullable = &AgentInstanceResult{}
 // AgentInstanceResult struct for AgentInstanceResult
 type AgentInstanceResult struct {
 	// The unique key for this agent instance.
-	AgentInstanceKey ModelString `json:"agentInstanceKey"`
+	AgentInstanceKey AgentInstanceKey `json:"agentInstanceKey"`
 	// The key of the agent definition this agent instance is an instance of.
-	AgentDefinitionKey ModelString             `json:"agentDefinitionKey"`
+	AgentDefinitionKey AgentDefinitionKey      `json:"agentDefinitionKey"`
 	Status             AgentInstanceStatusEnum `json:"status"`
 	// The definition of the agent, including model, provider, and system prompt. Set at creation, but can change later via a CONFIGURATION history item.
 	Definition AgentInstanceDefinitionResult `json:"definition"`
@@ -36,21 +36,21 @@ type AgentInstanceResult struct {
 	// The tools available to the agent.
 	Tools []AgentTool `json:"tools"`
 	// The BPMN element ID of the ad-hoc sub-process or AI agent task that owns this agent instance.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The key of the process instance that owns this agent instance.
-	ProcessInstanceKey ModelString `json:"processInstanceKey"`
+	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy.
-	RootProcessInstanceKey ModelString `json:"rootProcessInstanceKey"`
+	RootProcessInstanceKey ProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The key of the process definition associated with this agent instance.
-	ProcessDefinitionKey ModelString `json:"processDefinitionKey"`
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// The BPMN process ID of the process definition associated with this agent instance.
-	ProcessDefinitionId string `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The version of the process definition associated with this agent instance.
 	ProcessDefinitionVersion int32 `json:"processDefinitionVersion"`
 	// The version tag of the process definition associated with this agent instance.
 	ProcessDefinitionVersionTag NullableString `json:"processDefinitionVersionTag"`
 	// The tenant ID of this agent instance.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The date when this agent instance was created.
 	CreationDate time.Time `json:"creationDate"`
 	// The date when this agent instance was last updated.
@@ -58,7 +58,7 @@ type AgentInstanceResult struct {
 	// The date when this agent instance completed. Null while the agent is still running.
 	CompletionDate NullableTime `json:"completionDate"`
 	// The keys of all element instances associated with this agent instance.
-	ElementInstanceKeys []string `json:"elementInstanceKeys"`
+	ElementInstanceKeys []ElementInstanceKey `json:"elementInstanceKeys"`
 }
 
 type _AgentInstanceResult AgentInstanceResult
@@ -67,7 +67,7 @@ type _AgentInstanceResult AgentInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceResult(agentInstanceKey ModelString, agentDefinitionKey ModelString, status AgentInstanceStatusEnum, definition AgentInstanceDefinitionResult, metrics AgentInstanceMetrics, limits AgentInstanceLimits, tools []AgentTool, elementId string, processInstanceKey ModelString, rootProcessInstanceKey ModelString, processDefinitionKey ModelString, processDefinitionId string, processDefinitionVersion int32, processDefinitionVersionTag NullableString, tenantId string, creationDate time.Time, lastUpdatedDate time.Time, completionDate NullableTime, elementInstanceKeys []string) *AgentInstanceResult {
+func NewAgentInstanceResult(agentInstanceKey AgentInstanceKey, agentDefinitionKey AgentDefinitionKey, status AgentInstanceStatusEnum, definition AgentInstanceDefinitionResult, metrics AgentInstanceMetrics, limits AgentInstanceLimits, tools []AgentTool, elementId ElementId, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, processDefinitionVersionTag NullableString, tenantId TenantId, creationDate time.Time, lastUpdatedDate time.Time, completionDate NullableTime, elementInstanceKeys []ElementInstanceKey) *AgentInstanceResult {
 	this := AgentInstanceResult{}
 	this.AgentInstanceKey = agentInstanceKey
 	this.AgentDefinitionKey = agentDefinitionKey
@@ -100,9 +100,9 @@ func NewAgentInstanceResultWithDefaults() *AgentInstanceResult {
 }
 
 // GetAgentInstanceKey returns the AgentInstanceKey field value
-func (o *AgentInstanceResult) GetAgentInstanceKey() ModelString {
+func (o *AgentInstanceResult) GetAgentInstanceKey() AgentInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret AgentInstanceKey
 		return ret
 	}
 
@@ -111,7 +111,7 @@ func (o *AgentInstanceResult) GetAgentInstanceKey() ModelString {
 
 // GetAgentInstanceKeyOk returns a tuple with the AgentInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetAgentInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceResult) GetAgentInstanceKeyOk() (*AgentInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -119,14 +119,14 @@ func (o *AgentInstanceResult) GetAgentInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetAgentInstanceKey sets field value
-func (o *AgentInstanceResult) SetAgentInstanceKey(v ModelString) {
+func (o *AgentInstanceResult) SetAgentInstanceKey(v AgentInstanceKey) {
 	o.AgentInstanceKey = v
 }
 
 // GetAgentDefinitionKey returns the AgentDefinitionKey field value
-func (o *AgentInstanceResult) GetAgentDefinitionKey() ModelString {
+func (o *AgentInstanceResult) GetAgentDefinitionKey() AgentDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret AgentDefinitionKey
 		return ret
 	}
 
@@ -135,7 +135,7 @@ func (o *AgentInstanceResult) GetAgentDefinitionKey() ModelString {
 
 // GetAgentDefinitionKeyOk returns a tuple with the AgentDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetAgentDefinitionKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceResult) GetAgentDefinitionKeyOk() (*AgentDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -143,7 +143,7 @@ func (o *AgentInstanceResult) GetAgentDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetAgentDefinitionKey sets field value
-func (o *AgentInstanceResult) SetAgentDefinitionKey(v ModelString) {
+func (o *AgentInstanceResult) SetAgentDefinitionKey(v AgentDefinitionKey) {
 	o.AgentDefinitionKey = v
 }
 
@@ -268,9 +268,9 @@ func (o *AgentInstanceResult) SetTools(v []AgentTool) {
 }
 
 // GetElementId returns the ElementId field value
-func (o *AgentInstanceResult) GetElementId() string {
+func (o *AgentInstanceResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -279,7 +279,7 @@ func (o *AgentInstanceResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetElementIdOk() (*string, bool) {
+func (o *AgentInstanceResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -287,14 +287,14 @@ func (o *AgentInstanceResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *AgentInstanceResult) SetElementId(v string) {
+func (o *AgentInstanceResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
-func (o *AgentInstanceResult) GetProcessInstanceKey() ModelString {
+func (o *AgentInstanceResult) GetProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -303,7 +303,7 @@ func (o *AgentInstanceResult) GetProcessInstanceKey() ModelString {
 
 // GetProcessInstanceKeyOk returns a tuple with the ProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceResult) GetProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -311,14 +311,14 @@ func (o *AgentInstanceResult) GetProcessInstanceKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessInstanceKey sets field value
-func (o *AgentInstanceResult) SetProcessInstanceKey(v ModelString) {
+func (o *AgentInstanceResult) SetProcessInstanceKey(v ProcessInstanceKey) {
 	o.ProcessInstanceKey = v
 }
 
 // GetRootProcessInstanceKey returns the RootProcessInstanceKey field value
-func (o *AgentInstanceResult) GetRootProcessInstanceKey() ModelString {
+func (o *AgentInstanceResult) GetRootProcessInstanceKey() ProcessInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessInstanceKey
 		return ret
 	}
 
@@ -327,7 +327,7 @@ func (o *AgentInstanceResult) GetRootProcessInstanceKey() ModelString {
 
 // GetRootProcessInstanceKeyOk returns a tuple with the RootProcessInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetRootProcessInstanceKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceResult) GetRootProcessInstanceKeyOk() (*ProcessInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -335,14 +335,14 @@ func (o *AgentInstanceResult) GetRootProcessInstanceKeyOk() (*ModelString, bool)
 }
 
 // SetRootProcessInstanceKey sets field value
-func (o *AgentInstanceResult) SetRootProcessInstanceKey(v ModelString) {
+func (o *AgentInstanceResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey = v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *AgentInstanceResult) GetProcessDefinitionKey() ModelString {
+func (o *AgentInstanceResult) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 
@@ -351,7 +351,7 @@ func (o *AgentInstanceResult) GetProcessDefinitionKey() ModelString {
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *AgentInstanceResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -359,14 +359,14 @@ func (o *AgentInstanceResult) GetProcessDefinitionKeyOk() (*ModelString, bool) {
 }
 
 // SetProcessDefinitionKey sets field value
-func (o *AgentInstanceResult) SetProcessDefinitionKey(v ModelString) {
+func (o *AgentInstanceResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = v
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *AgentInstanceResult) GetProcessDefinitionId() string {
+func (o *AgentInstanceResult) GetProcessDefinitionId() ProcessDefinitionId {
 	if o == nil {
-		var ret string
+		var ret ProcessDefinitionId
 		return ret
 	}
 
@@ -375,7 +375,7 @@ func (o *AgentInstanceResult) GetProcessDefinitionId() string {
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetProcessDefinitionIdOk() (*string, bool) {
+func (o *AgentInstanceResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -383,7 +383,7 @@ func (o *AgentInstanceResult) GetProcessDefinitionIdOk() (*string, bool) {
 }
 
 // SetProcessDefinitionId sets field value
-func (o *AgentInstanceResult) SetProcessDefinitionId(v string) {
+func (o *AgentInstanceResult) SetProcessDefinitionId(v ProcessDefinitionId) {
 	o.ProcessDefinitionId = v
 }
 
@@ -438,9 +438,9 @@ func (o *AgentInstanceResult) SetProcessDefinitionVersionTag(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *AgentInstanceResult) GetTenantId() string {
+func (o *AgentInstanceResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -449,7 +449,7 @@ func (o *AgentInstanceResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetTenantIdOk() (*string, bool) {
+func (o *AgentInstanceResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -457,7 +457,7 @@ func (o *AgentInstanceResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *AgentInstanceResult) SetTenantId(v string) {
+func (o *AgentInstanceResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
@@ -536,9 +536,9 @@ func (o *AgentInstanceResult) SetCompletionDate(v time.Time) {
 }
 
 // GetElementInstanceKeys returns the ElementInstanceKeys field value
-func (o *AgentInstanceResult) GetElementInstanceKeys() []string {
+func (o *AgentInstanceResult) GetElementInstanceKeys() []ElementInstanceKey {
 	if o == nil {
-		var ret []string
+		var ret []ElementInstanceKey
 		return ret
 	}
 
@@ -547,7 +547,7 @@ func (o *AgentInstanceResult) GetElementInstanceKeys() []string {
 
 // GetElementInstanceKeysOk returns a tuple with the ElementInstanceKeys field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceResult) GetElementInstanceKeysOk() ([]string, bool) {
+func (o *AgentInstanceResult) GetElementInstanceKeysOk() ([]ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -555,7 +555,7 @@ func (o *AgentInstanceResult) GetElementInstanceKeysOk() ([]string, bool) {
 }
 
 // SetElementInstanceKeys sets field value
-func (o *AgentInstanceResult) SetElementInstanceKeys(v []string) {
+func (o *AgentInstanceResult) SetElementInstanceKeys(v []ElementInstanceKey) {
 	o.ElementInstanceKeys = v
 }
 

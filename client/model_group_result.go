@@ -24,7 +24,7 @@ type GroupResult struct {
 	// The group name.
 	Name string `json:"name"`
 	// The group ID.
-	GroupId string `json:"groupId"`
+	GroupId GroupId `json:"groupId"`
 	// The group description.
 	Description NullableString `json:"description"`
 }
@@ -35,7 +35,7 @@ type _GroupResult GroupResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewGroupResult(name string, groupId string, description NullableString) *GroupResult {
+func NewGroupResult(name string, groupId GroupId, description NullableString) *GroupResult {
 	this := GroupResult{}
 	this.Name = name
 	this.GroupId = groupId
@@ -76,9 +76,9 @@ func (o *GroupResult) SetName(v string) {
 }
 
 // GetGroupId returns the GroupId field value
-func (o *GroupResult) GetGroupId() string {
+func (o *GroupResult) GetGroupId() GroupId {
 	if o == nil {
-		var ret string
+		var ret GroupId
 		return ret
 	}
 
@@ -87,7 +87,7 @@ func (o *GroupResult) GetGroupId() string {
 
 // GetGroupIdOk returns a tuple with the GroupId field value
 // and a boolean to check if the value has been set.
-func (o *GroupResult) GetGroupIdOk() (*string, bool) {
+func (o *GroupResult) GetGroupIdOk() (*GroupId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,7 +95,7 @@ func (o *GroupResult) GetGroupIdOk() (*string, bool) {
 }
 
 // SetGroupId sets field value
-func (o *GroupResult) SetGroupId(v string) {
+func (o *GroupResult) SetGroupId(v GroupId) {
 	o.GroupId = v
 }
 

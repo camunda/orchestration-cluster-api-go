@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedJobKeyFilter{}
 // AdvancedJobKeyFilter Advanced JobKey filter.
 type AdvancedJobKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *ModelString `json:"$eq,omitempty"`
+	Eq *JobKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *ModelString `json:"$neq,omitempty"`
+	Neq *JobKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []ModelString `json:"$in,omitempty"`
+	In []JobKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []ModelString `json:"$notIn,omitempty"`
+	NotIn []JobKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedJobKeyFilter instantiates a new AdvancedJobKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedJobKeyFilterWithDefaults() *AdvancedJobKeyFilter {
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedJobKeyFilter) GetEq() ModelString {
+func (o *AdvancedJobKeyFilter) GetEq() JobKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedJobKeyFilter) GetEq() ModelString {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedJobKeyFilter) GetEqOk() (*ModelString, bool) {
+func (o *AdvancedJobKeyFilter) GetEqOk() (*JobKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedJobKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given ModelString and assigns it to the Eq field.
-func (o *AdvancedJobKeyFilter) SetEq(v ModelString) {
+// SetEq gets a reference to the given JobKey and assigns it to the Eq field.
+func (o *AdvancedJobKeyFilter) SetEq(v JobKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedJobKeyFilter) GetNeq() ModelString {
+func (o *AdvancedJobKeyFilter) GetNeq() JobKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret ModelString
+		var ret JobKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedJobKeyFilter) GetNeq() ModelString {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedJobKeyFilter) GetNeqOk() (*ModelString, bool) {
+func (o *AdvancedJobKeyFilter) GetNeqOk() (*JobKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedJobKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given ModelString and assigns it to the Neq field.
-func (o *AdvancedJobKeyFilter) SetNeq(v ModelString) {
+// SetNeq gets a reference to the given JobKey and assigns it to the Neq field.
+func (o *AdvancedJobKeyFilter) SetNeq(v JobKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedJobKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedJobKeyFilter) GetIn() []ModelString {
+func (o *AdvancedJobKeyFilter) GetIn() []JobKey {
 	if o == nil || IsNil(o.In) {
-		var ret []ModelString
+		var ret []JobKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedJobKeyFilter) GetIn() []ModelString {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedJobKeyFilter) GetInOk() ([]ModelString, bool) {
+func (o *AdvancedJobKeyFilter) GetInOk() ([]JobKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedJobKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []ModelString and assigns it to the In field.
-func (o *AdvancedJobKeyFilter) SetIn(v []ModelString) {
+// SetIn gets a reference to the given []JobKey and assigns it to the In field.
+func (o *AdvancedJobKeyFilter) SetIn(v []JobKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedJobKeyFilter) GetNotIn() []ModelString {
+func (o *AdvancedJobKeyFilter) GetNotIn() []JobKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []ModelString
+		var ret []JobKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedJobKeyFilter) GetNotIn() []ModelString {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedJobKeyFilter) GetNotInOk() ([]ModelString, bool) {
+func (o *AdvancedJobKeyFilter) GetNotInOk() ([]JobKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedJobKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []ModelString and assigns it to the NotIn field.
-func (o *AdvancedJobKeyFilter) SetNotIn(v []ModelString) {
+// SetNotIn gets a reference to the given []JobKey and assigns it to the NotIn field.
+func (o *AdvancedJobKeyFilter) SetNotIn(v []JobKey) {
 	o.NotIn = v
 }
 

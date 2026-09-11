@@ -22,7 +22,7 @@ var _ MappedNullable = &AuthorizationCreateResult{}
 // AuthorizationCreateResult struct for AuthorizationCreateResult
 type AuthorizationCreateResult struct {
 	// The key of the created authorization.
-	AuthorizationKey ModelString `json:"authorizationKey"`
+	AuthorizationKey AuthorizationKey `json:"authorizationKey"`
 }
 
 type _AuthorizationCreateResult AuthorizationCreateResult
@@ -31,7 +31,7 @@ type _AuthorizationCreateResult AuthorizationCreateResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAuthorizationCreateResult(authorizationKey ModelString) *AuthorizationCreateResult {
+func NewAuthorizationCreateResult(authorizationKey AuthorizationKey) *AuthorizationCreateResult {
 	this := AuthorizationCreateResult{}
 	this.AuthorizationKey = authorizationKey
 	return &this
@@ -46,9 +46,9 @@ func NewAuthorizationCreateResultWithDefaults() *AuthorizationCreateResult {
 }
 
 // GetAuthorizationKey returns the AuthorizationKey field value
-func (o *AuthorizationCreateResult) GetAuthorizationKey() ModelString {
+func (o *AuthorizationCreateResult) GetAuthorizationKey() AuthorizationKey {
 	if o == nil {
-		var ret ModelString
+		var ret AuthorizationKey
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *AuthorizationCreateResult) GetAuthorizationKey() ModelString {
 
 // GetAuthorizationKeyOk returns a tuple with the AuthorizationKey field value
 // and a boolean to check if the value has been set.
-func (o *AuthorizationCreateResult) GetAuthorizationKeyOk() (*ModelString, bool) {
+func (o *AuthorizationCreateResult) GetAuthorizationKeyOk() (*AuthorizationKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *AuthorizationCreateResult) GetAuthorizationKeyOk() (*ModelString, bool)
 }
 
 // SetAuthorizationKey sets field value
-func (o *AuthorizationCreateResult) SetAuthorizationKey(v ModelString) {
+func (o *AuthorizationCreateResult) SetAuthorizationKey(v AuthorizationKey) {
 	o.AuthorizationKey = v
 }
 

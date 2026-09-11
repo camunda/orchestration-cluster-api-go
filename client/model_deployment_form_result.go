@@ -22,15 +22,15 @@ var _ MappedNullable = &DeploymentFormResult{}
 // DeploymentFormResult A deployed form.
 type DeploymentFormResult struct {
 	// The form ID, as parsed during deployment, together with the version forms a unique identifier for a specific form.
-	FormId string `json:"formId"`
+	FormId FormId `json:"formId"`
 	// The version of the deployed form.
 	Version int32 `json:"version"`
 	// The name of the resource.
 	ResourceName string `json:"resourceName"`
 	// The unique identifier of the tenant.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned key, which acts as a unique identifier for this form.
-	FormKey ModelString `json:"formKey"`
+	FormKey FormKey `json:"formKey"`
 }
 
 type _DeploymentFormResult DeploymentFormResult
@@ -39,7 +39,7 @@ type _DeploymentFormResult DeploymentFormResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentFormResult(formId string, version int32, resourceName string, tenantId string, formKey ModelString) *DeploymentFormResult {
+func NewDeploymentFormResult(formId FormId, version int32, resourceName string, tenantId TenantId, formKey FormKey) *DeploymentFormResult {
 	this := DeploymentFormResult{}
 	this.FormId = formId
 	this.Version = version
@@ -58,9 +58,9 @@ func NewDeploymentFormResultWithDefaults() *DeploymentFormResult {
 }
 
 // GetFormId returns the FormId field value
-func (o *DeploymentFormResult) GetFormId() string {
+func (o *DeploymentFormResult) GetFormId() FormId {
 	if o == nil {
-		var ret string
+		var ret FormId
 		return ret
 	}
 
@@ -69,7 +69,7 @@ func (o *DeploymentFormResult) GetFormId() string {
 
 // GetFormIdOk returns a tuple with the FormId field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentFormResult) GetFormIdOk() (*string, bool) {
+func (o *DeploymentFormResult) GetFormIdOk() (*FormId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -77,7 +77,7 @@ func (o *DeploymentFormResult) GetFormIdOk() (*string, bool) {
 }
 
 // SetFormId sets field value
-func (o *DeploymentFormResult) SetFormId(v string) {
+func (o *DeploymentFormResult) SetFormId(v FormId) {
 	o.FormId = v
 }
 
@@ -130,9 +130,9 @@ func (o *DeploymentFormResult) SetResourceName(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *DeploymentFormResult) GetTenantId() string {
+func (o *DeploymentFormResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -141,7 +141,7 @@ func (o *DeploymentFormResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentFormResult) GetTenantIdOk() (*string, bool) {
+func (o *DeploymentFormResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -149,14 +149,14 @@ func (o *DeploymentFormResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *DeploymentFormResult) SetTenantId(v string) {
+func (o *DeploymentFormResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 
 // GetFormKey returns the FormKey field value
-func (o *DeploymentFormResult) GetFormKey() ModelString {
+func (o *DeploymentFormResult) GetFormKey() FormKey {
 	if o == nil {
-		var ret ModelString
+		var ret FormKey
 		return ret
 	}
 
@@ -165,7 +165,7 @@ func (o *DeploymentFormResult) GetFormKey() ModelString {
 
 // GetFormKeyOk returns a tuple with the FormKey field value
 // and a boolean to check if the value has been set.
-func (o *DeploymentFormResult) GetFormKeyOk() (*ModelString, bool) {
+func (o *DeploymentFormResult) GetFormKeyOk() (*FormKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -173,7 +173,7 @@ func (o *DeploymentFormResult) GetFormKeyOk() (*ModelString, bool) {
 }
 
 // SetFormKey sets field value
-func (o *DeploymentFormResult) SetFormKey(v ModelString) {
+func (o *DeploymentFormResult) SetFormKey(v FormKey) {
 	o.FormKey = v
 }
 

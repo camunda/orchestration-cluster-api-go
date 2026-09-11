@@ -22,7 +22,7 @@ var _ MappedNullable = &ProcessInstanceModificationTerminateByKeyInstruction{}
 // ProcessInstanceModificationTerminateByKeyInstruction Instruction providing the key of the element instance to terminate.
 type ProcessInstanceModificationTerminateByKeyInstruction struct {
 	// The key of the element instance to terminate.
-	ElementInstanceKey ModelString `json:"elementInstanceKey"`
+	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 }
 
 type _ProcessInstanceModificationTerminateByKeyInstruction ProcessInstanceModificationTerminateByKeyInstruction
@@ -31,7 +31,7 @@ type _ProcessInstanceModificationTerminateByKeyInstruction ProcessInstanceModifi
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceModificationTerminateByKeyInstruction(elementInstanceKey ModelString) *ProcessInstanceModificationTerminateByKeyInstruction {
+func NewProcessInstanceModificationTerminateByKeyInstruction(elementInstanceKey ElementInstanceKey) *ProcessInstanceModificationTerminateByKeyInstruction {
 	this := ProcessInstanceModificationTerminateByKeyInstruction{}
 	this.ElementInstanceKey = elementInstanceKey
 	return &this
@@ -46,9 +46,9 @@ func NewProcessInstanceModificationTerminateByKeyInstructionWithDefaults() *Proc
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
-func (o *ProcessInstanceModificationTerminateByKeyInstruction) GetElementInstanceKey() ModelString {
+func (o *ProcessInstanceModificationTerminateByKeyInstruction) GetElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *ProcessInstanceModificationTerminateByKeyInstruction) GetElementInstanc
 
 // GetElementInstanceKeyOk returns a tuple with the ElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceModificationTerminateByKeyInstruction) GetElementInstanceKeyOk() (*ModelString, bool) {
+func (o *ProcessInstanceModificationTerminateByKeyInstruction) GetElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *ProcessInstanceModificationTerminateByKeyInstruction) GetElementInstanc
 }
 
 // SetElementInstanceKey sets field value
-func (o *ProcessInstanceModificationTerminateByKeyInstruction) SetElementInstanceKey(v ModelString) {
+func (o *ProcessInstanceModificationTerminateByKeyInstruction) SetElementInstanceKey(v ElementInstanceKey) {
 	o.ElementInstanceKey = v
 }
 

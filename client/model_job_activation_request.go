@@ -34,7 +34,7 @@ type JobActivationRequest struct {
 	// The request will be completed when at least one job is activated or after the requestTimeout (in ms). If the requestTimeout = 0, a default timeout is used. If the requestTimeout < 0, long polling is disabled and the request is completed immediately, even when no job is activated.
 	RequestTimeout *int64 `json:"requestTimeout,omitempty"`
 	// A list of IDs of tenants for which to activate jobs.
-	TenantIds []string `json:"tenantIds,omitempty"`
+	TenantIds []TenantId `json:"tenantIds,omitempty"`
 	// The tenant filtering strategy - determines whether to use provided tenant IDs or assigned tenant IDs from the authenticated principal's authorized tenants.
 	TenantFilter *TenantFilterEnum `json:"tenantFilter,omitempty"`
 	// Whether to activate the jobs with a lease. When true, each activated job is assigned a distinct, opaque lease token, returned as ActivatedJobResult.leaseToken. The lease fences the complete, fail, and throw-error commands against a superseded activation of the same job (for example, after the job timed out or failed and was re-activated by another worker): a command carrying a stale lease token is rejected rather than racing with the newer activation. Once a job has been activated with a lease, it is served only to leasing workers of that job type; a homogeneous fleet per job type is recommended. Omit or set to false to activate jobs without a lease.
@@ -236,9 +236,9 @@ func (o *JobActivationRequest) SetRequestTimeout(v int64) {
 }
 
 // GetTenantIds returns the TenantIds field value if set, zero value otherwise.
-func (o *JobActivationRequest) GetTenantIds() []string {
+func (o *JobActivationRequest) GetTenantIds() []TenantId {
 	if o == nil || IsNil(o.TenantIds) {
-		var ret []string
+		var ret []TenantId
 		return ret
 	}
 	return o.TenantIds
@@ -246,7 +246,7 @@ func (o *JobActivationRequest) GetTenantIds() []string {
 
 // GetTenantIdsOk returns a tuple with the TenantIds field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *JobActivationRequest) GetTenantIdsOk() ([]string, bool) {
+func (o *JobActivationRequest) GetTenantIdsOk() ([]TenantId, bool) {
 	if o == nil || IsNil(o.TenantIds) {
 		return nil, false
 	}
@@ -262,8 +262,8 @@ func (o *JobActivationRequest) HasTenantIds() bool {
 	return false
 }
 
-// SetTenantIds gets a reference to the given []string and assigns it to the TenantIds field.
-func (o *JobActivationRequest) SetTenantIds(v []string) {
+// SetTenantIds gets a reference to the given []TenantId and assigns it to the TenantIds field.
+func (o *JobActivationRequest) SetTenantIds(v []TenantId) {
 	o.TenantIds = v
 }
 

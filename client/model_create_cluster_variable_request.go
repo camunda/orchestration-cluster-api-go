@@ -22,7 +22,7 @@ var _ MappedNullable = &CreateClusterVariableRequest{}
 // CreateClusterVariableRequest struct for CreateClusterVariableRequest
 type CreateClusterVariableRequest struct {
 	// The name of the cluster variable. Must be unique within its scope (global or tenant-specific).
-	Name string `json:"name" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	Name ClusterVariableName `json:"name" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The value of the cluster variable. Can be any JSON object or primitive value. Will be serialized as a JSON string in responses.
 	Value map[string]interface{} `json:"value"`
 	// A generic key-value metadata bag attached to the cluster variable. Values must be strings or numbers. Limited to 100 entries and a configurable maximum serialized size (default: 100 entries at max key length of a cluster variable name (256 chars) plus the maximum value length, 8192 characters).
@@ -37,7 +37,7 @@ type _CreateClusterVariableRequest CreateClusterVariableRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateClusterVariableRequest(name string, value map[string]interface{}) *CreateClusterVariableRequest {
+func NewCreateClusterVariableRequest(name ClusterVariableName, value map[string]interface{}) *CreateClusterVariableRequest {
 	this := CreateClusterVariableRequest{}
 	this.Name = name
 	this.Value = value
@@ -53,9 +53,9 @@ func NewCreateClusterVariableRequestWithDefaults() *CreateClusterVariableRequest
 }
 
 // GetName returns the Name field value
-func (o *CreateClusterVariableRequest) GetName() string {
+func (o *CreateClusterVariableRequest) GetName() ClusterVariableName {
 	if o == nil {
-		var ret string
+		var ret ClusterVariableName
 		return ret
 	}
 
@@ -64,7 +64,7 @@ func (o *CreateClusterVariableRequest) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *CreateClusterVariableRequest) GetNameOk() (*string, bool) {
+func (o *CreateClusterVariableRequest) GetNameOk() (*ClusterVariableName, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -72,7 +72,7 @@ func (o *CreateClusterVariableRequest) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *CreateClusterVariableRequest) SetName(v string) {
+func (o *CreateClusterVariableRequest) SetName(v ClusterVariableName) {
 	o.Name = v
 }
 

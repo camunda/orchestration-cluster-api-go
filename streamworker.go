@@ -320,7 +320,7 @@ func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]openapi.ActivatedJobR
 		req.SetFetchVariable(w.fetchVariables)
 	}
 	if len(w.tenantIDs) > 0 {
-		req.SetTenantIds(w.tenantIDs)
+		req.SetTenantIds(toTenantIDs(w.tenantIDs))
 	}
 	if w.withLease {
 		req.SetWithLease(true)

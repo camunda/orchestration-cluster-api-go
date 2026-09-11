@@ -24,13 +24,13 @@ type DecisionRequirementsResult struct {
 	// The DMN ID of the decision requirements.
 	DecisionRequirementsId string `json:"decisionRequirementsId"`
 	// The assigned key, which acts as a unique identifier for this decision requirements.
-	DecisionRequirementsKey ModelString `json:"decisionRequirementsKey"`
+	DecisionRequirementsKey DecisionRequirementsKey `json:"decisionRequirementsKey"`
 	// The DMN name of the decision requirements.
 	DecisionRequirementsName string `json:"decisionRequirementsName"`
 	// The name of the resource from which this decision requirements was parsed.
 	ResourceName string `json:"resourceName"`
 	// The tenant ID of the decision requirements.
-	TenantId string `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The assigned version of the decision requirements.
 	Version int32 `json:"version"`
 }
@@ -41,7 +41,7 @@ type _DecisionRequirementsResult DecisionRequirementsResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDecisionRequirementsResult(decisionRequirementsId string, decisionRequirementsKey ModelString, decisionRequirementsName string, resourceName string, tenantId string, version int32) *DecisionRequirementsResult {
+func NewDecisionRequirementsResult(decisionRequirementsId string, decisionRequirementsKey DecisionRequirementsKey, decisionRequirementsName string, resourceName string, tenantId TenantId, version int32) *DecisionRequirementsResult {
 	this := DecisionRequirementsResult{}
 	this.DecisionRequirementsId = decisionRequirementsId
 	this.DecisionRequirementsKey = decisionRequirementsKey
@@ -85,9 +85,9 @@ func (o *DecisionRequirementsResult) SetDecisionRequirementsId(v string) {
 }
 
 // GetDecisionRequirementsKey returns the DecisionRequirementsKey field value
-func (o *DecisionRequirementsResult) GetDecisionRequirementsKey() ModelString {
+func (o *DecisionRequirementsResult) GetDecisionRequirementsKey() DecisionRequirementsKey {
 	if o == nil {
-		var ret ModelString
+		var ret DecisionRequirementsKey
 		return ret
 	}
 
@@ -96,7 +96,7 @@ func (o *DecisionRequirementsResult) GetDecisionRequirementsKey() ModelString {
 
 // GetDecisionRequirementsKeyOk returns a tuple with the DecisionRequirementsKey field value
 // and a boolean to check if the value has been set.
-func (o *DecisionRequirementsResult) GetDecisionRequirementsKeyOk() (*ModelString, bool) {
+func (o *DecisionRequirementsResult) GetDecisionRequirementsKeyOk() (*DecisionRequirementsKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -104,7 +104,7 @@ func (o *DecisionRequirementsResult) GetDecisionRequirementsKeyOk() (*ModelStrin
 }
 
 // SetDecisionRequirementsKey sets field value
-func (o *DecisionRequirementsResult) SetDecisionRequirementsKey(v ModelString) {
+func (o *DecisionRequirementsResult) SetDecisionRequirementsKey(v DecisionRequirementsKey) {
 	o.DecisionRequirementsKey = v
 }
 
@@ -157,9 +157,9 @@ func (o *DecisionRequirementsResult) SetResourceName(v string) {
 }
 
 // GetTenantId returns the TenantId field value
-func (o *DecisionRequirementsResult) GetTenantId() string {
+func (o *DecisionRequirementsResult) GetTenantId() TenantId {
 	if o == nil {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 
@@ -168,7 +168,7 @@ func (o *DecisionRequirementsResult) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value
 // and a boolean to check if the value has been set.
-func (o *DecisionRequirementsResult) GetTenantIdOk() (*string, bool) {
+func (o *DecisionRequirementsResult) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -176,7 +176,7 @@ func (o *DecisionRequirementsResult) GetTenantIdOk() (*string, bool) {
 }
 
 // SetTenantId sets field value
-func (o *DecisionRequirementsResult) SetTenantId(v string) {
+func (o *DecisionRequirementsResult) SetTenantId(v TenantId) {
 	o.TenantId = v
 }
 

@@ -22,7 +22,7 @@ var _ MappedNullable = &UserUpdateResult{}
 // UserUpdateResult struct for UserUpdateResult
 type UserUpdateResult struct {
 	// The username of the updated user.
-	Username string `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	Username Username `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The name of the user.
 	Name NullableString `json:"name"`
 	// The email of the user.
@@ -35,7 +35,7 @@ type _UserUpdateResult UserUpdateResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserUpdateResult(username string, name NullableString, email NullableString) *UserUpdateResult {
+func NewUserUpdateResult(username Username, name NullableString, email NullableString) *UserUpdateResult {
 	this := UserUpdateResult{}
 	this.Username = username
 	this.Name = name
@@ -52,9 +52,9 @@ func NewUserUpdateResultWithDefaults() *UserUpdateResult {
 }
 
 // GetUsername returns the Username field value
-func (o *UserUpdateResult) GetUsername() string {
+func (o *UserUpdateResult) GetUsername() Username {
 	if o == nil {
-		var ret string
+		var ret Username
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *UserUpdateResult) GetUsername() string {
 
 // GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
-func (o *UserUpdateResult) GetUsernameOk() (*string, bool) {
+func (o *UserUpdateResult) GetUsernameOk() (*Username, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,7 +71,7 @@ func (o *UserUpdateResult) GetUsernameOk() (*string, bool) {
 }
 
 // SetUsername sets field value
-func (o *UserUpdateResult) SetUsername(v string) {
+func (o *UserUpdateResult) SetUsername(v Username) {
 	o.Username = v
 }
 

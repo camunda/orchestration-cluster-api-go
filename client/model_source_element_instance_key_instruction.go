@@ -24,7 +24,7 @@ type SourceElementInstanceKeyInstruction struct {
 	// The type of source element instruction.
 	SourceType string `json:"sourceType"`
 	// The source element instance key for the move instruction.
-	SourceElementInstanceKey ModelString `json:"sourceElementInstanceKey"`
+	SourceElementInstanceKey ElementInstanceKey `json:"sourceElementInstanceKey"`
 }
 
 type _SourceElementInstanceKeyInstruction SourceElementInstanceKeyInstruction
@@ -33,7 +33,7 @@ type _SourceElementInstanceKeyInstruction SourceElementInstanceKeyInstruction
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSourceElementInstanceKeyInstruction(sourceType string, sourceElementInstanceKey ModelString) *SourceElementInstanceKeyInstruction {
+func NewSourceElementInstanceKeyInstruction(sourceType string, sourceElementInstanceKey ElementInstanceKey) *SourceElementInstanceKeyInstruction {
 	this := SourceElementInstanceKeyInstruction{}
 	this.SourceType = sourceType
 	this.SourceElementInstanceKey = sourceElementInstanceKey
@@ -73,9 +73,9 @@ func (o *SourceElementInstanceKeyInstruction) SetSourceType(v string) {
 }
 
 // GetSourceElementInstanceKey returns the SourceElementInstanceKey field value
-func (o *SourceElementInstanceKeyInstruction) GetSourceElementInstanceKey() ModelString {
+func (o *SourceElementInstanceKeyInstruction) GetSourceElementInstanceKey() ElementInstanceKey {
 	if o == nil {
-		var ret ModelString
+		var ret ElementInstanceKey
 		return ret
 	}
 
@@ -84,7 +84,7 @@ func (o *SourceElementInstanceKeyInstruction) GetSourceElementInstanceKey() Mode
 
 // GetSourceElementInstanceKeyOk returns a tuple with the SourceElementInstanceKey field value
 // and a boolean to check if the value has been set.
-func (o *SourceElementInstanceKeyInstruction) GetSourceElementInstanceKeyOk() (*ModelString, bool) {
+func (o *SourceElementInstanceKeyInstruction) GetSourceElementInstanceKeyOk() (*ElementInstanceKey, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,7 +92,7 @@ func (o *SourceElementInstanceKeyInstruction) GetSourceElementInstanceKeyOk() (*
 }
 
 // SetSourceElementInstanceKey sets field value
-func (o *SourceElementInstanceKeyInstruction) SetSourceElementInstanceKey(v ModelString) {
+func (o *SourceElementInstanceKeyInstruction) SetSourceElementInstanceKey(v ElementInstanceKey) {
 	o.SourceElementInstanceKey = v
 }
 

@@ -20,15 +20,15 @@ var _ MappedNullable = &AdvancedAuditLogEntityKeyFilter{}
 // AdvancedAuditLogEntityKeyFilter Advanced entityKey filter.
 type AdvancedAuditLogEntityKeyFilter struct {
 	// Checks for equality with the provided value.
-	Eq *string `json:"$eq,omitempty"`
+	Eq *AuditLogEntityKey `json:"$eq,omitempty"`
 	// Checks for inequality with the provided value.
-	Neq *string `json:"$neq,omitempty"`
+	Neq *AuditLogEntityKey `json:"$neq,omitempty"`
 	// Checks if the current property exists.
 	Exists *bool `json:"$exists,omitempty"`
 	// Checks if the property matches any of the provided values.
-	In []string `json:"$in,omitempty"`
+	In []AuditLogEntityKey `json:"$in,omitempty"`
 	// Checks if the property matches none of the provided values.
-	NotIn []string `json:"$notIn,omitempty"`
+	NotIn []AuditLogEntityKey `json:"$notIn,omitempty"`
 }
 
 // NewAdvancedAuditLogEntityKeyFilter instantiates a new AdvancedAuditLogEntityKeyFilter object
@@ -49,9 +49,9 @@ func NewAdvancedAuditLogEntityKeyFilterWithDefaults() *AdvancedAuditLogEntityKey
 }
 
 // GetEq returns the Eq field value if set, zero value otherwise.
-func (o *AdvancedAuditLogEntityKeyFilter) GetEq() string {
+func (o *AdvancedAuditLogEntityKeyFilter) GetEq() AuditLogEntityKey {
 	if o == nil || IsNil(o.Eq) {
-		var ret string
+		var ret AuditLogEntityKey
 		return ret
 	}
 	return *o.Eq
@@ -59,7 +59,7 @@ func (o *AdvancedAuditLogEntityKeyFilter) GetEq() string {
 
 // GetEqOk returns a tuple with the Eq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAuditLogEntityKeyFilter) GetEqOk() (*string, bool) {
+func (o *AdvancedAuditLogEntityKeyFilter) GetEqOk() (*AuditLogEntityKey, bool) {
 	if o == nil || IsNil(o.Eq) {
 		return nil, false
 	}
@@ -75,15 +75,15 @@ func (o *AdvancedAuditLogEntityKeyFilter) HasEq() bool {
 	return false
 }
 
-// SetEq gets a reference to the given string and assigns it to the Eq field.
-func (o *AdvancedAuditLogEntityKeyFilter) SetEq(v string) {
+// SetEq gets a reference to the given AuditLogEntityKey and assigns it to the Eq field.
+func (o *AdvancedAuditLogEntityKeyFilter) SetEq(v AuditLogEntityKey) {
 	o.Eq = &v
 }
 
 // GetNeq returns the Neq field value if set, zero value otherwise.
-func (o *AdvancedAuditLogEntityKeyFilter) GetNeq() string {
+func (o *AdvancedAuditLogEntityKeyFilter) GetNeq() AuditLogEntityKey {
 	if o == nil || IsNil(o.Neq) {
-		var ret string
+		var ret AuditLogEntityKey
 		return ret
 	}
 	return *o.Neq
@@ -91,7 +91,7 @@ func (o *AdvancedAuditLogEntityKeyFilter) GetNeq() string {
 
 // GetNeqOk returns a tuple with the Neq field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAuditLogEntityKeyFilter) GetNeqOk() (*string, bool) {
+func (o *AdvancedAuditLogEntityKeyFilter) GetNeqOk() (*AuditLogEntityKey, bool) {
 	if o == nil || IsNil(o.Neq) {
 		return nil, false
 	}
@@ -107,8 +107,8 @@ func (o *AdvancedAuditLogEntityKeyFilter) HasNeq() bool {
 	return false
 }
 
-// SetNeq gets a reference to the given string and assigns it to the Neq field.
-func (o *AdvancedAuditLogEntityKeyFilter) SetNeq(v string) {
+// SetNeq gets a reference to the given AuditLogEntityKey and assigns it to the Neq field.
+func (o *AdvancedAuditLogEntityKeyFilter) SetNeq(v AuditLogEntityKey) {
 	o.Neq = &v
 }
 
@@ -145,9 +145,9 @@ func (o *AdvancedAuditLogEntityKeyFilter) SetExists(v bool) {
 }
 
 // GetIn returns the In field value if set, zero value otherwise.
-func (o *AdvancedAuditLogEntityKeyFilter) GetIn() []string {
+func (o *AdvancedAuditLogEntityKeyFilter) GetIn() []AuditLogEntityKey {
 	if o == nil || IsNil(o.In) {
-		var ret []string
+		var ret []AuditLogEntityKey
 		return ret
 	}
 	return o.In
@@ -155,7 +155,7 @@ func (o *AdvancedAuditLogEntityKeyFilter) GetIn() []string {
 
 // GetInOk returns a tuple with the In field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAuditLogEntityKeyFilter) GetInOk() ([]string, bool) {
+func (o *AdvancedAuditLogEntityKeyFilter) GetInOk() ([]AuditLogEntityKey, bool) {
 	if o == nil || IsNil(o.In) {
 		return nil, false
 	}
@@ -171,15 +171,15 @@ func (o *AdvancedAuditLogEntityKeyFilter) HasIn() bool {
 	return false
 }
 
-// SetIn gets a reference to the given []string and assigns it to the In field.
-func (o *AdvancedAuditLogEntityKeyFilter) SetIn(v []string) {
+// SetIn gets a reference to the given []AuditLogEntityKey and assigns it to the In field.
+func (o *AdvancedAuditLogEntityKeyFilter) SetIn(v []AuditLogEntityKey) {
 	o.In = v
 }
 
 // GetNotIn returns the NotIn field value if set, zero value otherwise.
-func (o *AdvancedAuditLogEntityKeyFilter) GetNotIn() []string {
+func (o *AdvancedAuditLogEntityKeyFilter) GetNotIn() []AuditLogEntityKey {
 	if o == nil || IsNil(o.NotIn) {
-		var ret []string
+		var ret []AuditLogEntityKey
 		return ret
 	}
 	return o.NotIn
@@ -187,7 +187,7 @@ func (o *AdvancedAuditLogEntityKeyFilter) GetNotIn() []string {
 
 // GetNotInOk returns a tuple with the NotIn field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *AdvancedAuditLogEntityKeyFilter) GetNotInOk() ([]string, bool) {
+func (o *AdvancedAuditLogEntityKeyFilter) GetNotInOk() ([]AuditLogEntityKey, bool) {
 	if o == nil || IsNil(o.NotIn) {
 		return nil, false
 	}
@@ -203,8 +203,8 @@ func (o *AdvancedAuditLogEntityKeyFilter) HasNotIn() bool {
 	return false
 }
 
-// SetNotIn gets a reference to the given []string and assigns it to the NotIn field.
-func (o *AdvancedAuditLogEntityKeyFilter) SetNotIn(v []string) {
+// SetNotIn gets a reference to the given []AuditLogEntityKey and assigns it to the NotIn field.
+func (o *AdvancedAuditLogEntityKeyFilter) SetNotIn(v []AuditLogEntityKey) {
 	o.NotIn = v
 }
 

@@ -22,9 +22,9 @@ var _ MappedNullable = &ConditionalEvaluationInstruction{}
 // ConditionalEvaluationInstruction struct for ConditionalEvaluationInstruction
 type ConditionalEvaluationInstruction struct {
 	// Used to evaluate root-level conditional start events for a tenant with the given ID. This will only evaluate root-level conditional start events of process definitions which belong to the tenant.
-	TenantId *string `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// Used to evaluate root-level conditional start events of the process definition with the given key.
-	ProcessDefinitionKey *ModelString `json:"processDefinitionKey,omitempty"`
+	ProcessDefinitionKey *ProcessDefinitionKey `json:"processDefinitionKey,omitempty"`
 	// JSON object representing the variables to use for evaluation of the conditions and to pass to the process instances that have been triggered.
 	Variables map[string]interface{} `json:"variables"`
 }
@@ -50,9 +50,9 @@ func NewConditionalEvaluationInstructionWithDefaults() *ConditionalEvaluationIns
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *ConditionalEvaluationInstruction) GetTenantId() string {
+func (o *ConditionalEvaluationInstruction) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -60,7 +60,7 @@ func (o *ConditionalEvaluationInstruction) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ConditionalEvaluationInstruction) GetTenantIdOk() (*string, bool) {
+func (o *ConditionalEvaluationInstruction) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -76,15 +76,15 @@ func (o *ConditionalEvaluationInstruction) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *ConditionalEvaluationInstruction) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *ConditionalEvaluationInstruction) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value if set, zero value otherwise.
-func (o *ConditionalEvaluationInstruction) GetProcessDefinitionKey() ModelString {
+func (o *ConditionalEvaluationInstruction) GetProcessDefinitionKey() ProcessDefinitionKey {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
-		var ret ModelString
+		var ret ProcessDefinitionKey
 		return ret
 	}
 	return *o.ProcessDefinitionKey
@@ -92,7 +92,7 @@ func (o *ConditionalEvaluationInstruction) GetProcessDefinitionKey() ModelString
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ConditionalEvaluationInstruction) GetProcessDefinitionKeyOk() (*ModelString, bool) {
+func (o *ConditionalEvaluationInstruction) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil || IsNil(o.ProcessDefinitionKey) {
 		return nil, false
 	}
@@ -108,8 +108,8 @@ func (o *ConditionalEvaluationInstruction) HasProcessDefinitionKey() bool {
 	return false
 }
 
-// SetProcessDefinitionKey gets a reference to the given ModelString and assigns it to the ProcessDefinitionKey field.
-func (o *ConditionalEvaluationInstruction) SetProcessDefinitionKey(v ModelString) {
+// SetProcessDefinitionKey gets a reference to the given ProcessDefinitionKey and assigns it to the ProcessDefinitionKey field.
+func (o *ConditionalEvaluationInstruction) SetProcessDefinitionKey(v ProcessDefinitionKey) {
 	o.ProcessDefinitionKey = &v
 }
 

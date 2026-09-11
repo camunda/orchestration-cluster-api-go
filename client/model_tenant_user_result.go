@@ -22,7 +22,7 @@ var _ MappedNullable = &TenantUserResult{}
 // TenantUserResult struct for TenantUserResult
 type TenantUserResult struct {
 	// The unique name of a user.
-	Username string `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	Username Username `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 }
 
 type _TenantUserResult TenantUserResult
@@ -31,7 +31,7 @@ type _TenantUserResult TenantUserResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTenantUserResult(username string) *TenantUserResult {
+func NewTenantUserResult(username Username) *TenantUserResult {
 	this := TenantUserResult{}
 	this.Username = username
 	return &this
@@ -46,9 +46,9 @@ func NewTenantUserResultWithDefaults() *TenantUserResult {
 }
 
 // GetUsername returns the Username field value
-func (o *TenantUserResult) GetUsername() string {
+func (o *TenantUserResult) GetUsername() Username {
 	if o == nil {
-		var ret string
+		var ret Username
 		return ret
 	}
 
@@ -57,7 +57,7 @@ func (o *TenantUserResult) GetUsername() string {
 
 // GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
-func (o *TenantUserResult) GetUsernameOk() (*string, bool) {
+func (o *TenantUserResult) GetUsernameOk() (*Username, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -65,7 +65,7 @@ func (o *TenantUserResult) GetUsernameOk() (*string, bool) {
 }
 
 // SetUsername sets field value
-func (o *TenantUserResult) SetUsername(v string) {
+func (o *TenantUserResult) SetUsername(v Username) {
 	o.Username = v
 }
 
