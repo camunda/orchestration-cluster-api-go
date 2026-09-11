@@ -4,12 +4,20 @@ package camunda
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	openapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 var _ = context.Background
+
+// LeasedActivatedJobResult projects ActivatedJobResult for a leased activation (withLease: true): its LeaseToken is a
+// guaranteed-present string. See (*CamundaClient).ActivateJobsWithLease.
+type LeasedActivatedJobResult struct {
+	openapi.ActivatedJobResult
+	LeaseToken string
+}
 
 // ActivateAdHocSubProcessActivities calls the ActivateAdHocSubProcessActivities operation.
 //
@@ -2317,6 +2325,31 @@ func (c *CamundaClient) ActivateJobs(ctx context.Context, body openapi.JobActiva
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
+}
+
+// ActivateJobsWithLease calls ActivateJobs with withLease forced to true and returns jobs whose
+// LeaseToken is guaranteed present. It errors if the server returns a job without one.
+func (c *CamundaClient) ActivateJobsWithLease(ctx context.Context, body openapi.JobActivationRequest, opts ...func(openapi.ApiActivateJobsRequest) openapi.ApiActivateJobsRequest) ([]LeasedActivatedJobResult, error) {
+	body.SetWithLease(true)
+	req := c.raw.JobAPI.ActivateJobs(ctx)
+	req = req.JobActivationRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	if werr := c.wrapError(resp, err); werr != nil {
+		return nil, werr
+	}
+	items := value.GetJobs()
+	leased := make([]LeasedActivatedJobResult, 0, len(items))
+	for i := range items {
+		v, ok := items[i].GetLeaseTokenOk()
+		if !ok || v == nil {
+			return nil, fmt.Errorf("ActivateJobsWithLease: response item %d has no LeaseToken; the server may not support this feature", i)
+		}
+		leased = append(leased, LeasedActivatedJobResult{ActivatedJobResult: items[i], LeaseToken: *v})
+	}
+	return leased, nil
 }
 
 // CompleteJob calls the CompleteJob operation.

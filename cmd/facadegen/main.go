@@ -58,6 +58,27 @@ type operation struct {
 	bodyType    string // qualified request-body type (e.g. "openapi.JobActivationRequest"), or ""
 	bodyBuilder string // request-body builder method on the ApiXxxRequest, or ""
 	example     string // dedented usage snippet from examples/, injected into the doc comment
+	pw          *presentWhenOp // marker-driven leased-variant descriptor, or nil
+}
+
+// presentWhenOp describes a conditional-presence ("x-present-when") response
+// field on a collection operation, derived from the bundled spec. It drives a
+// second, ergonomic facade method (e.g. ActivateJobsWithLease) that forces the
+// triggering request field, guards the conditionally-present field at runtime,
+// and projects each item into a type whose field is a guaranteed-present scalar.
+//
+// It is currently limited to the shape that exists in the spec: a boolean
+// request field with equals:true, gating a nullable scalar on the elements of a
+// single response array. Anything else is skipped (base method only).
+type presentWhenOp struct {
+	withMethod       string // second method name, e.g. "ActivateJobsWithLease"
+	requestSetter    string // body setter forcing the trigger, e.g. "SetWithLease"
+	collectionGetter string // result accessor for the array, e.g. "GetJobs"
+	elementType      string // unqualified element model, e.g. "ActivatedJobResult"
+	leasedType       string // emitted projected type, e.g. "LeasedActivatedJobResult"
+	property         string // conditionally-present field, e.g. "LeaseToken"
+	propertyOkGetter string // element two-value accessor, e.g. "GetLeaseTokenOk"
+	requestField     string // raw trigger field name, for doc comments, e.g. "withLease"
 }
 
 // bodyInfo describes an operation's JSON request body, derived from spec metadata.
@@ -124,6 +145,7 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 	fieldByService := collectAPIClientFields(files) // serviceType -> field name
 	constructors, executes := collectServiceMethods(files)
 	bodyByOp := loadBodyInfo(metadataPath, r.clientTypes)
+	pwByOp := loadPresentWhen(bundlePathFor(metadataPath), r.clientTypes)
 	exampleByOp := loadExamples(examplesDir)
 
 	var ops []operation
@@ -153,6 +175,9 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 		if ex, ok := exampleByOp[lowerFirst(op.name)]; ok {
 			op.example = ex
 		}
+		if pw, ok := pwByOp[op.name]; ok {
+			op.pw = pw
+		}
 		ops = append(ops, op)
 	}
 	sort.Slice(ops, func(i, j int) bool {
@@ -163,11 +188,24 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 	})
 
 	var extraStd []string
+	usesFmt := false
+	for _, op := range ops {
+		if op.pw != nil {
+			usesFmt = true
+			break
+		}
+	}
 	for pkg := range r.usedPkgs {
 		if pkg == "context" {
 			continue // always imported
 		}
+		if pkg == "fmt" {
+			usesFmt = false // already collected below; avoid duplicate
+		}
 		extraStd = append(extraStd, pkg)
+	}
+	if usesFmt {
+		extraStd = append(extraStd, "fmt")
 	}
 	sort.Strings(extraStd)
 	return emit(ops, extraStd), len(ops), nil
@@ -483,6 +521,16 @@ func emit(ops []operation, extraStd []string) string {
 	b.WriteString("\n\t" + clientAlias + " \"" + clientImportPath + "\"\n)\n\n")
 	b.WriteString("var _ = context.Background\n\n")
 
+	// Projected types for marker-driven leased variants (deduplicated).
+	seenLeased := map[string]bool{}
+	for _, op := range ops {
+		if op.pw == nil || seenLeased[op.pw.leasedType] {
+			continue
+		}
+		seenLeased[op.pw.leasedType] = true
+		emitLeasedType(&b, op.pw)
+	}
+
 	for _, op := range ops {
 		sig := "ctx context.Context"
 		call := "ctx"
@@ -531,8 +579,71 @@ func emit(ops []operation, extraStd []string) string {
 			b.WriteString("\tresp, err := req.Execute()\n")
 			b.WriteString("\treturn c.wrapError(resp, err)\n}\n\n")
 		}
+
+		if op.pw != nil {
+			emitWithLeaseMethod(&b, op)
+		}
 	}
 	return b.String()
+}
+
+// emitLeasedType writes the projected element type for a marker-driven leased
+// variant: it embeds the raw element model and shadows the conditionally-present
+// field with a guaranteed-present scalar of the underlying type.
+func emitLeasedType(b *strings.Builder, pw *presentWhenOp) {
+	fmt.Fprintf(b, "// %s projects %s for a leased activation (%s: true): its %s is a\n",
+		pw.leasedType, pw.elementType, pw.requestField, pw.property)
+	fmt.Fprintf(b, "// guaranteed-present string. See (*CamundaClient).%s.\n", pw.withMethod)
+	fmt.Fprintf(b, "type %s struct {\n", pw.leasedType)
+	fmt.Fprintf(b, "\t%s.%s\n", clientAlias, pw.elementType)
+	fmt.Fprintf(b, "\t%s string\n", pw.property)
+	b.WriteString("}\n\n")
+}
+
+// emitWithLeaseMethod writes the second facade method for a marker-driven op. It
+// forces the triggering request field, executes the base call, and projects each
+// element into the leased type — failing fast if the server (which may predate
+// the feature) omitted the conditionally-present field.
+func emitWithLeaseMethod(b *strings.Builder, op operation) {
+	pw := op.pw
+	sig := "ctx context.Context"
+	for _, p := range op.params {
+		sig += ", " + p.name + " " + p.typ
+	}
+	if op.bodyBuilder != "" {
+		sig += ", body " + op.bodyType
+	}
+	hasOpts := op.reqType != ""
+	if hasOpts {
+		sig += fmt.Sprintf(", opts ...func(%s) %s", op.reqType, op.reqType)
+	}
+
+	fmt.Fprintf(b, "// %s calls %s with %s forced to true and returns jobs whose\n",
+		pw.withMethod, op.name, pw.requestField)
+	fmt.Fprintf(b, "// %s is guaranteed present. It errors if the server returns a job without one.\n", pw.property)
+	fmt.Fprintf(b, "func (c *CamundaClient) %s(%s) ([]%s, error) {\n", pw.withMethod, sig, pw.leasedType)
+	fmt.Fprintf(b, "\tbody.%s(true)\n", pw.requestSetter)
+	fmt.Fprintf(b, "\treq := c.raw.%s.%s(ctx)\n", op.field, op.name)
+	if op.bodyBuilder != "" {
+		fmt.Fprintf(b, "\treq = req.%s(body)\n", op.bodyBuilder)
+	}
+	if hasOpts {
+		b.WriteString("\tfor _, opt := range opts {\n\t\treq = opt(req)\n\t}\n")
+	}
+	b.WriteString("\tvalue, resp, err := req.Execute()\n")
+	b.WriteString("\tif werr := c.wrapError(resp, err); werr != nil {\n\t\treturn nil, werr\n\t}\n")
+	fmt.Fprintf(b, "\titems := value.%s()\n", pw.collectionGetter)
+	fmt.Fprintf(b, "\tleased := make([]%s, 0, len(items))\n", pw.leasedType)
+	b.WriteString("\tfor i := range items {\n")
+	fmt.Fprintf(b, "\t\tv, ok := items[i].%s()\n", pw.propertyOkGetter)
+	b.WriteString("\t\tif !ok || v == nil {\n")
+	fmt.Fprintf(b, "\t\t\treturn nil, fmt.Errorf(\"%s: response item %%d has no %s; the server may not support this feature\", i)\n",
+		pw.withMethod, pw.property)
+	b.WriteString("\t\t}\n")
+	fmt.Fprintf(b, "\t\tleased = append(leased, %s{%s: items[i], %s: *v})\n",
+		pw.leasedType, pw.elementType, pw.property)
+	b.WriteString("\t}\n")
+	b.WriteString("\treturn leased, nil\n}\n\n")
 }
 
 // loadBodyInfo reads the spec metadata and returns, keyed by generated method
@@ -578,6 +689,117 @@ func hasJSONContent(cts []string) bool {
 		}
 	}
 	return false
+}
+
+// bundlePathFor derives the bundled-spec path from the metadata path — both are
+// written side by side by the schema bundler (rest-api.bundle.json next to
+// spec-metadata.json). Returns "" when no metadata path is configured.
+func bundlePathFor(metadataPath string) string {
+	if metadataPath == "" {
+		return ""
+	}
+	return filepath.Join(filepath.Dir(metadataPath), "rest-api.bundle.json")
+}
+
+// loadPresentWhen reads the bundled spec and returns, keyed by generated method
+// name (PascalCase operationId), the marker-driven leased variant to emit.
+//
+// The spec is the single source of truth: an "x-present-when" vendor extension
+// on a response field declares that the field is only populated when a named
+// request field equals a scalar. facadegen derives the ergonomic typed surface
+// from that marker rather than hardcoding it. Only the shape that exists today is
+// handled — a boolean trigger (equals:true) gating a nullable scalar on the
+// elements of a single response array; anything else is skipped.
+func loadPresentWhen(bundlePath string, clientTypes map[string]bool) map[string]*presentWhenOp {
+	if bundlePath == "" {
+		return nil
+	}
+	data, err := os.ReadFile(bundlePath)
+	if err != nil {
+		return nil
+	}
+	var spec map[string]any
+	if json.Unmarshal(data, &spec) != nil {
+		return nil
+	}
+	schemas, _ := dig(spec, "components", "schemas").(map[string]any)
+	paths, _ := spec["paths"].(map[string]any)
+	if schemas == nil || paths == nil {
+		return nil
+	}
+
+	out := map[string]*presentWhenOp{}
+	for _, item := range paths {
+		methods, _ := item.(map[string]any)
+		for _, opv := range methods {
+			op, _ := opv.(map[string]any)
+			opID, _ := op["operationId"].(string)
+			if opID == "" {
+				continue
+			}
+			resultName := refName(dig(op, "responses", "200", "content", "application/json", "schema"))
+			result, _ := schemas[resultName].(map[string]any)
+			props, _ := result["properties"].(map[string]any)
+			for arrayProp, pv := range props {
+				pm, _ := pv.(map[string]any)
+				if t, _ := pm["type"].(string); t != "array" {
+					continue
+				}
+				elemName := refName(dig(pm, "items"))
+				elem, _ := schemas[elemName].(map[string]any)
+				eprops, _ := elem["properties"].(map[string]any)
+				for markerProp, mv := range eprops {
+					mm, _ := mv.(map[string]any)
+					marker, _ := mm["x-present-when"].(map[string]any)
+					if marker == nil {
+						continue
+					}
+					// Only a boolean trigger (equals:true) gating a scalar is supported.
+					if eq, ok := marker["equals"].(bool); !ok || !eq {
+						continue
+					}
+					reqField, _ := marker["request"].(string)
+					if reqField == "" || !clientTypes[elemName] {
+						continue
+					}
+					method := upperFirst(opID)
+					out[method] = &presentWhenOp{
+						withMethod:       method + upperFirst(reqField),
+						requestSetter:    "Set" + upperFirst(reqField),
+						collectionGetter: "Get" + upperFirst(arrayProp),
+						elementType:      elemName,
+						leasedType:       "Leased" + elemName,
+						property:         upperFirst(markerProp),
+						propertyOkGetter: "Get" + upperFirst(markerProp) + "Ok",
+						requestField:     reqField,
+					}
+				}
+			}
+		}
+	}
+	return out
+}
+
+// refName returns the trailing schema name of a {"$ref": ".../Name"} node, or "".
+func refName(v any) string {
+	m, _ := v.(map[string]any)
+	r, _ := m["$ref"].(string)
+	if r == "" {
+		return ""
+	}
+	return r[strings.LastIndex(r, "/")+1:]
+}
+
+// dig walks nested JSON maps by key, returning nil at the first missing hop.
+func dig(v any, keys ...string) any {
+	for _, k := range keys {
+		m, ok := v.(map[string]any)
+		if !ok {
+			return nil
+		}
+		v = m[k]
+	}
+	return v
 }
 
 func upperFirst(s string) string {
