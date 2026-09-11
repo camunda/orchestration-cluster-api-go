@@ -289,7 +289,7 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 		ProcessDefinitionId:  openapi.ProcessDefinitionId(id),
 		ProcessDefinitionKey: openapi.ProcessDefinitionKey(key),
 		Tags:                 []string{},
-		BusinessId:           openapi.NullableBusinessId{},
+		BusinessId:           *openapi.NewNullableBusinessId(nil),
 	}
 	if rb.ProcessDefinitionID != nil && *rb.ProcessDefinitionID != "" {
 		result.ProcessDefinitionId = openapi.ProcessDefinitionId(*rb.ProcessDefinitionID)

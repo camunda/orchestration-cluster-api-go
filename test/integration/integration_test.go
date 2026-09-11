@@ -81,7 +81,7 @@ func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClie
 
 func startProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, processID, name string) openapi.ProcessInstanceKey {
 	t.Helper()
-	byID := openapi.NewProcessInstanceCreationInstructionById(processID)
+	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId(processID))
 	byID.SetVariables(map[string]any{"name": name})
 	instr := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
 	result, err := c.CreateProcessInstance(ctx, instr)

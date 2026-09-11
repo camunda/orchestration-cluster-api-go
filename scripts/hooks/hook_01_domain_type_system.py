@@ -73,6 +73,7 @@ _EXTRA_SCALAR_TYPES = {
         "constraints": {},
         "nullable": True,
         "props": ("leaseToken", "jobLease"),
+        "noun": "semantic token",
     },
 }
 
@@ -116,7 +117,7 @@ def _go_raw_string(pattern: str) -> str:
     return '"' + pattern.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def _key_block(name: str, constraints: dict) -> str:
+def _key_block(name: str, constraints: dict, noun: str = "semantic key") -> str:
     pattern = constraints.get("pattern")
     min_len = int(constraints.get("minLength", 0) or 0)
     max_len = int(constraints.get("maxLength", 0) or 0)
@@ -125,7 +126,7 @@ def _key_block(name: str, constraints: dict) -> str:
     else:
         pat_expr = "nil"
     return f"""
-// {name} is a Camunda semantic key. Construct it with New{name} (validated) or
+// {name} is a Camunda {noun}. Construct it with New{name} (validated) or
 // Must{name} (panics on invalid input).
 type {name} string
 
@@ -318,6 +319,53 @@ def _ref_name(node) -> str | None:
         if isinstance(ref, str):
             return ref.split("/")[-1]
     return None
+
+
+_CONSTRAINT_KEYS = ("pattern", "minLength", "maxLength", "minimum", "maximum")
+
+
+def _resolve_scalar_constraints(sc, schemas, seen=None) -> dict:
+    """Resolve the validation constraints for a scalar semantic schema, following
+    ``allOf``/``oneOf`` ``$ref`` composition when the schema declares none of its
+    own. A ``x-semantic-type`` scalar such as ``ScopeKey`` is modelled as a
+    ``oneOf`` of ``ProcessInstanceKey``/``ElementInstanceKey`` (both ``LongKey``)
+    and carries no constraints itself, so minting it verbatim would lose the
+    ``LongKey`` validation its members share. For ``oneOf`` the member constraints
+    are adopted only when every member resolves to the *same* set, so we never
+    invent a bound the union does not actually guarantee."""
+    if not isinstance(sc, dict):
+        return {}
+    seen = seen or set()
+    direct = {k: sc[k] for k in _CONSTRAINT_KEYS if k in sc}
+    if direct:
+        return direct
+    for frag in sc.get("allOf", []) or []:
+        ref = _ref_name(frag)
+        if ref and ref in seen:
+            continue
+        target = schemas.get(ref) if ref else (frag if isinstance(frag, dict) else None)
+        if target is not None:
+            c = _resolve_scalar_constraints(target, schemas, seen | ({ref} if ref else set()))
+            if c:
+                return c
+    members = sc.get("oneOf")
+    if isinstance(members, list) and members:
+        resolved = []
+        for frag in members:
+            ref = _ref_name(frag)
+            if ref and ref in seen:
+                resolved.append({})
+                continue
+            target = schemas.get(ref) if ref else (frag if isinstance(frag, dict) else None)
+            resolved.append(
+                _resolve_scalar_constraints(target, schemas, seen | ({ref} if ref else set()))
+                if target is not None
+                else {}
+            )
+        first = resolved[0]
+        if first and all(c == first for c in resolved):
+            return first
+    return {}
 
 
 def _semantic_schemas(spec: dict) -> dict[str, str]:
@@ -524,18 +572,33 @@ def _rewrite_model_file(text: str, schema: str, field_targets: dict[str, str]) -
         )
 
         # 3. accessor method bodies (Get / GetOk / Set) use the underlying base
-        #    token — replace it there with the branded type.
+        #    token — replace it there with the branded type. The generated doc
+        #    comments additionally name the field's *wrapper* type (e.g. "given
+        #    NullableString"), a single capitalized token the base-token pass
+        #    leaves stale for Nullable fields (whose base is the lowercase
+        #    primitive); rewrite that wrapper token too so the docs match the
+        #    regenerated signatures.
         base_word = re.compile(r"\b%s\b" % re.escape(base))
+        old_wrapper = go_type.lstrip("*[]")
+        new_wrapper = new_type.lstrip("*[]")
+        wrapper_word = (
+            re.compile(r"\b%s\b" % re.escape(old_wrapper))
+            if old_wrapper != new_wrapper
+            else None
+        )
+
+        def _rewrite_block(bm):
+            s = base_word.sub(target, bm.group(0))
+            if wrapper_word is not None:
+                s = wrapper_word.sub(new_wrapper, s)
+            return s
+
         for meth in (f"Get{go_name}", f"Get{go_name}Ok", f"Set{go_name}"):
             block_re = re.compile(
                 r"(?ms)^(?://[^\n]*\n)*func \(o \*?%s\) %s\(.*?\n\}\n"
                 % (re.escape(schema), re.escape(meth))
             )
-            text = block_re.sub(
-                lambda bm: base_word.sub(target, bm.group(0)),
-                text,
-                count=1,
-            )
+            text = block_re.sub(_rewrite_block, text, count=1)
 
     return text, changed
 
@@ -697,7 +760,13 @@ def run(ctx) -> None:
             continue
         cfg = _EXTRA_SCALAR_TYPES[name]
         if cfg.get("base", "string") == "string":
-            parts.append(_key_block(name, cfg.get("constraints", {}) or {}))
+            parts.append(
+                _key_block(
+                    name,
+                    cfg.get("constraints", {}) or {},
+                    noun=cfg.get("noun", "semantic key"),
+                )
+            )
         else:
             parts.append(_int_block(name, cfg["base"], cfg.get("constraints", {}) or {}))
         minted.add(name)
@@ -713,9 +782,7 @@ def run(ctx) -> None:
         if name in existing or name in minted:
             continue
         sc = spec["components"]["schemas"].get(name, {})
-        constraints = {
-            k: sc[k] for k in ("pattern", "minLength", "maxLength", "minimum", "maximum") if k in sc
-        }
+        constraints = _resolve_scalar_constraints(sc, spec["components"]["schemas"])
         gotype = semtypes[name]
         if gotype == "string":
             parts.append(_key_block(name, constraints))

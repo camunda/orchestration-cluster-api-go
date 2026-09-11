@@ -224,7 +224,7 @@ func TestBpmnErrorCompletesModeledExceptionPath(t *testing.T) {
 	workerDone := make(chan error, 1)
 	go func() { workerDone <- worker.Run(workerCtx) }()
 
-	byID := openapi.NewProcessInstanceCreationInstructionById(processID)
+	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId(processID))
 	created, err := c.CreateProcessInstance(ctx,
 		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
 	if err != nil {
@@ -254,7 +254,7 @@ func TestBpmnErrorCompletesModeledExceptionPath(t *testing.T) {
 	}
 
 	filter := openapi.NewElementInstanceFilter()
-	filter.SetProcessInstanceKey(openapi.ModelString(key))
+	filter.SetProcessInstanceKey(key)
 	query := openapi.NewElementInstanceSearchQuery()
 	query.SetFilter(*filter)
 	_, err = camunda.Poll(ctx, func(ctx context.Context) (*openapi.ElementInstanceSearchQueryResult, error) {
