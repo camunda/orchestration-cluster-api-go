@@ -224,11 +224,11 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 	switch {
 	case body.ProcessInstanceCreationInstructionById != nil:
 		b := body.ProcessInstanceCreationInstructionById
-		id = b.ProcessDefinitionId
+		id = b.ProcessDefinitionId.String()
 		version = b.ProcessDefinitionVersion
-		tenant = b.TenantId
+		tenant = tenantIDPtr(b.TenantId)
 		args = falcon.CreateArgs{
-			ProcessDefinitionID: b.ProcessDefinitionId,
+			ProcessDefinitionID: b.ProcessDefinitionId.String(),
 			Variables:           b.Variables,
 			AwaitCompletion:     b.AwaitCompletion != nil && *b.AwaitCompletion,
 			FetchVariables:      b.FetchVariables,
@@ -240,7 +240,7 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 		b := body.ProcessInstanceCreationInstructionByKey
 		key = string(b.ProcessDefinitionKey)
 		version = b.ProcessDefinitionVersion
-		tenant = b.TenantId
+		tenant = tenantIDPtr(b.TenantId)
 		args = falcon.CreateArgs{
 			ProcessDefinitionKey: key,
 			Variables:            b.Variables,
@@ -285,17 +285,17 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 	_ = json.Unmarshal(outcome.Body, &rb)
 
 	result := &openapi.CreateProcessInstanceResult{
-		ProcessInstanceKey:   openapi.ModelString(outcome.ProcessInstanceKey),
-		ProcessDefinitionId:  id,
-		ProcessDefinitionKey: openapi.ModelString(key),
+		ProcessInstanceKey:   openapi.ProcessInstanceKey(outcome.ProcessInstanceKey),
+		ProcessDefinitionId:  openapi.ProcessDefinitionId(id),
+		ProcessDefinitionKey: openapi.ProcessDefinitionKey(key),
 		Tags:                 []string{},
-		BusinessId:           *openapi.NewNullableString(nil),
+		BusinessId:           openapi.NullableBusinessId{},
 	}
 	if rb.ProcessDefinitionID != nil && *rb.ProcessDefinitionID != "" {
-		result.ProcessDefinitionId = *rb.ProcessDefinitionID
+		result.ProcessDefinitionId = openapi.ProcessDefinitionId(*rb.ProcessDefinitionID)
 	}
 	if rb.ProcessDefinitionKey != nil && *rb.ProcessDefinitionKey != "" {
-		result.ProcessDefinitionKey = openapi.ModelString(*rb.ProcessDefinitionKey)
+		result.ProcessDefinitionKey = openapi.ProcessDefinitionKey(*rb.ProcessDefinitionKey)
 	}
 	switch {
 	case rb.ProcessDefinitionVersion != nil:
@@ -305,9 +305,9 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 	}
 	switch {
 	case rb.TenantID != nil && *rb.TenantID != "":
-		result.TenantId = *rb.TenantID
+		result.TenantId = openapi.TenantId(*rb.TenantID)
 	default:
-		result.TenantId = c.resolveTenant(tenant)
+		result.TenantId = openapi.TenantId(c.resolveTenant(tenant))
 	}
 	switch {
 	case outcome.Variables != nil: // awaitCompletion output variables
@@ -321,9 +321,20 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 		result.Tags = rb.Tags
 	}
 	if rb.BusinessID != nil {
-		result.BusinessId = *openapi.NewNullableString(rb.BusinessID)
+		bid := openapi.BusinessId(*rb.BusinessID)
+		result.BusinessId = *openapi.NewNullableBusinessId(&bid)
 	}
 	return result, true, nil
+}
+
+// tenantIDPtr converts an optional branded TenantId into the plain *string the
+// falcon producer and resolveTenant operate on.
+func tenantIDPtr(t *openapi.TenantId) *string {
+	if t == nil {
+		return nil
+	}
+	s := string(*t)
+	return &s
 }
 
 // resolveTenant applies the configured default tenant when the instruction did not

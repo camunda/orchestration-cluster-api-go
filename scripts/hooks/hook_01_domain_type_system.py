@@ -13,13 +13,23 @@ This hook emits ``zz_generated_domain_keys.go`` defining:
     (``type ProcessInstanceKey string`` …), each with ``New*``/``Must*`` constructors
     that enforce the spec's pattern/length constraints, plus ``String`` and
     ``Validate`` methods.
+  * a distinct type for every other ``x-semantic-type`` scalar the metadata does not
+    classify as a key (e.g. the string ``ScopeKey`` and the integer
+    ``LoopIterationId``), so non-key semantic scalars are branded end-to-end.
+  * a ``Nullable<Type>`` wrapper for each semantic type that appears in a nullable
+    response/model field, mirroring the generator's ``NullableModelString`` pattern.
 
-A follow-up hook (semantic-field-types) can later rewrite individual struct fields
-from ``ModelString`` to their specific key type; defining the types here is the
-prerequisite and is what makes the generated client compile.
+It then **retypes response/model struct fields** (and their constructors and
+accessors) from the generic ``ModelString`` / ``string`` / ``int32`` back to their
+specific semantic type — e.g. ``ActivatedJobResult.JobKey`` becomes ``JobKey``
+instead of ``ModelString``. Without this, the generator applies the domain-type
+system asymmetrically: operation *inputs* (path parameters) keep the specific type
+while *response body* fields collapse to the shared base type, erasing the API's
+domain typing on the read side.
 """
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -47,8 +57,33 @@ _EXTRA_STRING_KEYS = {
     },
 }
 
+# Non-key semantic scalars the upstream spec carries only as inline `type: string`
+# properties — it neither declares a named schema nor tags them `x-semantic-type`,
+# so the bundler cannot classify them and there is no ref for the field resolver to
+# follow. We still want them branded end-to-end (see issue #57), so we mint a
+# newtype here and map the (unambiguous) json property names that carry the scalar
+# to it. `JobLeaseToken` is the opaque lease token minted on job activation and
+# echoed back on completion/fail/error/update and agent-instance history — every
+# `leaseToken` / `jobLease` property in the spec is this token and nothing else.
+# TODO: drop an entry once upstream adds a named `x-semantic-type` schema for it
+# (it will then arrive through the normal spec-driven path).
+_EXTRA_SCALAR_TYPES = {
+    "JobLeaseToken": {
+        "base": "string",
+        "constraints": {},
+        "nullable": True,
+        "props": ("leaseToken", "jobLease"),
+    },
+}
+
 _TYPE_DECL = re.compile(r"^type\s+(\w+)\s", re.MULTILINE)
 _PKG_DECL = re.compile(r"^package\s+(\w+)", re.MULTILINE)
+
+# Base Go tokens the generator emits for a semantic scalar before this hook rewrites
+# it, mapped to the underlying scalar used inside accessor method bodies. `string`
+# and `ModelString` cover every semantic string field; `int32`/`int64` cover the
+# (rare) integer semantic scalars.
+_BASE_TOKENS = {"ModelString", "string", "int32", "int64"}
 
 
 def _detect_package(client_dir: Path) -> str:
@@ -118,6 +153,46 @@ func (k {name}) String() string {{ return string(k) }}
 
 // Validate reports whether k satisfies the {name} constraints.
 func (k {name}) Validate() error {{ return spec{name}.validate(string(k)) }}
+"""
+
+
+def _int_block(name: str, gotype: str, constraints: dict) -> str:
+    minv = constraints.get("minimum")
+    maxv = constraints.get("maximum")
+    has_min = "true" if minv is not None else "false"
+    has_max = "true" if maxv is not None else "false"
+    min_lit = int(minv) if minv is not None else 0
+    max_lit = int(maxv) if maxv is not None else 0
+    conv = "Int32" if gotype == "int32" else "Int64"
+    return f"""
+// {name} is a Camunda semantic integer identifier. Construct it with New{name}
+// (validated) or Must{name} (panics on invalid input).
+type {name} {gotype}
+
+var spec{name} = intSpec{{name: "{name}", min: {min_lit}, hasMin: {has_min}, max: {max_lit}, hasMax: {has_max}}}
+
+// New{name} validates v against the {name} constraints and returns a {name}.
+func New{name}(v {gotype}) ({name}, error) {{
+\tif err := spec{name}.validate(int64(v)); err != nil {{
+\t\treturn 0, err
+\t}}
+\treturn {name}(v), nil
+}}
+
+// Must{name} is like New{name} but panics if v is invalid.
+func Must{name}(v {gotype}) {name} {{
+\tk, err := New{name}(v)
+\tif err != nil {{
+\t\tpanic(err)
+\t}}
+\treturn k
+}}
+
+// {conv} returns the underlying {gotype} value.
+func (k {name}) {conv}() {gotype} {{ return {gotype}(k) }}
+
+// Validate reports whether k satisfies the {name} constraints.
+func (k {name}) Validate() error {{ return spec{name}.validate(int64(k)) }}
 """
 
 
@@ -205,13 +280,345 @@ func (s keySpec) validate(v string) error {{
 \t}}
 \treturn nil
 }}
+
+// intSpec describes the validation constraints for a semantic integer identifier.
+type intSpec struct {{
+\tname   string
+\tmin    int64
+\thasMin bool
+\tmax    int64
+\thasMax bool
+}}
+
+func (s intSpec) validate(v int64) error {{
+\tif s.hasMin && v < s.min {{
+\t\treturn fmt.Errorf("%s: value %d is less than the minimum %d", s.name, v, s.min)
+\t}}
+\tif s.hasMax && v > s.max {{
+\t\treturn fmt.Errorf("%s: value %d is greater than the maximum %d", s.name, v, s.max)
+\t}}
+\treturn nil
+}}
 """
+
+
+# --- semantic field retyping -------------------------------------------------
+
+_INT_FORMAT_GOTYPE = {"int32": "int32", "int64": "int64"}
+
+
+def _load_spec(ctx) -> dict:
+    spec_path: Path = ctx["spec_path"]
+    return json.loads(spec_path.read_text(encoding="utf-8"))
+
+
+def _ref_name(node) -> str | None:
+    if isinstance(node, dict):
+        ref = node.get("$ref")
+        if isinstance(ref, str):
+            return ref.split("/")[-1]
+    return None
+
+
+def _semantic_schemas(spec: dict) -> dict[str, str]:
+    """Map every ``x-semantic-type`` schema name to its Go base token."""
+    out: dict[str, str] = {}
+    for name, sc in (spec.get("components", {}).get("schemas", {}) or {}).items():
+        if isinstance(sc, dict) and "x-semantic-type" in sc:
+            if sc.get("type") == "integer":
+                out[name] = _INT_FORMAT_GOTYPE.get(sc.get("format", "int32"), "int32")
+            else:
+                out[name] = "string"
+    return out
+
+
+def _resolve_property(pd, semtypes: dict[str, str]):
+    """Resolve a property schema to (target_type, kind) where kind is
+    ``scalar`` or ``array``; returns None when it is not a semantic scalar."""
+    if not isinstance(pd, dict):
+        return None
+    if pd.get("type") == "array":
+        items = pd.get("items", {}) or {}
+        it = _ref_name(items)
+        if not it and isinstance(items.get("allOf"), list) and len(items["allOf"]) == 1:
+            it = _ref_name(items["allOf"][0])
+        return (it, "array") if it in semtypes else None
+    tgt = _ref_name(pd)
+    if not tgt and isinstance(pd.get("allOf"), list) and len(pd["allOf"]) == 1:
+        tgt = _ref_name(pd["allOf"][0])
+    return (tgt, "scalar") if tgt in semtypes else None
+
+
+def _schema_effective_properties(name, schemas, semtypes, seen):
+    """Resolve a named schema's effective property→(target,kind,nullable) map,
+    merging ``allOf`` ``$ref`` base fragments recursively (openapi-generator
+    flattens ``allOf`` composition into a single Go struct, so an inherited key
+    field lands on the derived model just like a locally-declared one)."""
+    sc = schemas.get(name)
+    if not isinstance(sc, dict):
+        return {}
+    return _props_from_schema(sc, schemas, semtypes, seen | {name})
+
+
+def _props_from_schema(sc, schemas, semtypes, seen):
+    out: dict[str, tuple] = {}
+    for frag in sc.get("allOf", []) or []:
+        ref = _ref_name(frag)
+        if ref and ref not in seen:
+            out.update(_schema_effective_properties(ref, schemas, semtypes, seen))
+        elif isinstance(frag, dict):
+            out.update(_props_from_schema(frag, schemas, semtypes, seen))
+    for prop, pd in (sc.get("properties") or {}).items():
+        r = _resolve_property(pd, semtypes)
+        if r:
+            tgt, kind = r
+            nullable = bool(isinstance(pd, dict) and pd.get("nullable"))
+            out[prop] = (tgt, kind, nullable)
+    return out
+
+
+def _walk_semantic_properties(node, semtypes, acc, nullable_types, nonsemantic):
+    """Recursively collect every semantic property occurrence anywhere in the
+    spec (named schemas, ``allOf`` fragments, array ``items``, inline nested
+    objects) into ``acc: {prop: set[target]}`` and record nullable targets. Also
+    records into ``nonsemantic`` every property name that appears somewhere as a
+    plain (non-semantic) string/integer scalar — such names are unsafe for the
+    global fallback because the same name brands different, unrelated fields."""
+    if isinstance(node, dict):
+        props = node.get("properties")
+        if isinstance(props, dict):
+            for prop, pd in props.items():
+                r = _resolve_property(pd, semtypes)
+                if r:
+                    tgt, kind = r
+                    acc.setdefault(prop, set()).add(tgt)
+                    if kind == "scalar" and isinstance(pd, dict) and pd.get("nullable"):
+                        nullable_types.add(tgt)
+                elif _is_plain_scalar(pd):
+                    nonsemantic.add(prop)
+        for v in node.values():
+            _walk_semantic_properties(v, semtypes, acc, nullable_types, nonsemantic)
+    elif isinstance(node, list):
+        for v in node:
+            _walk_semantic_properties(v, semtypes, acc, nullable_types, nonsemantic)
+
+
+def _is_plain_scalar(pd) -> bool:
+    """A string/integer property that is NOT a semantic scalar (so it maps to a
+    bare Go ``string``/``int32``/``int64`` the global fallback must not touch)."""
+    if not isinstance(pd, dict):
+        return False
+    t = pd.get("type")
+    if t in ("string", "integer"):
+        return True
+    if t == "array":
+        items = pd.get("items")
+        return isinstance(items, dict) and items.get("type") in ("string", "integer")
+    return False
+
+
+def _semantic_fields(spec: dict, semtypes: dict[str, str]):
+    """Build the per-named-schema map ``{schema: {json_prop: target}}`` (with
+    ``allOf`` bases merged), a global unambiguous ``{json_prop: target}`` fallback
+    (for inline schemas the generator names itself), and the set of types used in
+    a nullable field (which need a ``Nullable<Type>`` wrapper)."""
+    schemas = spec.get("components", {}).get("schemas", {}) or {}
+
+    by_schema: dict[str, dict[str, str]] = {}
+    nullable_types: set[str] = set()
+    for sname, sc in schemas.items():
+        if not isinstance(sc, dict):
+            continue
+        eff = _schema_effective_properties(sname, schemas, semtypes, set())
+        for prop, (tgt, kind, nullable) in eff.items():
+            by_schema.setdefault(sname, {})[prop] = tgt
+            if kind == "scalar" and nullable:
+                nullable_types.add(tgt)
+
+    # Global fallback: a property name is safe to brand on any (possibly
+    # inline-named) model only when it resolves to exactly one semantic type
+    # everywhere it appears AND never appears as a plain non-semantic scalar
+    # (otherwise a generic name like ``id``/``name`` would mis-brand unrelated
+    # fields).
+    occurrences: dict[str, set] = {}
+    nonsemantic: set[str] = set()
+    _walk_semantic_properties(spec, semtypes, occurrences, nullable_types, nonsemantic)
+    global_prop: dict[str, str] = {
+        prop: next(iter(types))
+        for prop, types in occurrences.items()
+        if len(types) == 1 and prop not in nonsemantic
+    }
+
+    return by_schema, global_prop, nullable_types
+
+
+def _base_token(gotype: str) -> str | None:
+    t = gotype
+    if t.startswith("[]"):
+        t = t[2:]
+    if t.startswith("*"):
+        t = t[1:]
+    if t.startswith("Nullable"):
+        rest = t[len("Nullable"):]
+        if rest == "ModelString":
+            return "ModelString"
+        if rest in ("Int32", "Int64"):
+            return rest.lower()
+        return "string"
+    return t if t in _BASE_TOKENS else None
+
+
+def _new_field_type(gotype: str, target: str) -> str:
+    prefix = ""
+    t = gotype
+    if t.startswith("[]"):
+        prefix, t = "[]", t[2:]
+    elif t.startswith("*"):
+        prefix, t = "*", t[1:]
+    if t.startswith("Nullable"):
+        return prefix + "Nullable" + target
+    return prefix + target
+
+
+_STRUCT_FIELD = re.compile(
+    r'^\t(?P<name>\w+)\s+(?P<type>[\w.*\[\]]+)\s+`json:"(?P<json>[^,"]+)',
+    re.MULTILINE,
+)
+
+
+def _rewrite_model_file(text: str, schema: str, field_targets: dict[str, str]) -> tuple[str, int]:
+    struct_re = re.compile(r"(?ms)^type %s struct \{\n(?P<body>.*?)\n\}" % re.escape(schema))
+    m = struct_re.search(text)
+    if not m:
+        return text, 0
+    body = m.group("body")
+
+    changed = 0
+    for fm in _STRUCT_FIELD.finditer(body):
+        go_name = fm.group("name")
+        go_type = fm.group("type")
+        json_key = fm.group("json")
+        target = field_targets.get(json_key)
+        if not target:
+            continue
+        base = _base_token(go_type)
+        if base is None or base == target:
+            continue  # already branded or not a recognised base
+        new_type = _new_field_type(go_type, target)
+        changed += 1
+
+        # 1. struct field declaration
+        text = re.sub(
+            r"(?m)^(\t+%s\s+)%s(\s)" % (re.escape(go_name), re.escape(go_type)),
+            lambda mm: mm.group(1) + new_type + mm.group(2),
+            text,
+            count=1,
+        )
+
+        # 2. constructor parameter (required fields only appear here)
+        param = go_name[0].lower() + go_name[1:]
+        text = re.sub(
+            r"(\b%s )%s([,)])" % (re.escape(param), re.escape(go_type)),
+            lambda mm: mm.group(1) + new_type + mm.group(2),
+            text,
+        )
+
+        # 3. accessor method bodies (Get / GetOk / Set) use the underlying base
+        #    token — replace it there with the branded type.
+        base_word = re.compile(r"\b%s\b" % re.escape(base))
+        for meth in (f"Get{go_name}", f"Get{go_name}Ok", f"Set{go_name}"):
+            block_re = re.compile(
+                r"(?ms)^(?://[^\n]*\n)*func \(o \*?%s\) %s\(.*?\n\}\n"
+                % (re.escape(schema), re.escape(meth))
+            )
+            text = block_re.sub(
+                lambda bm: base_word.sub(target, bm.group(0)),
+                text,
+                count=1,
+            )
+
+    return text, changed
+
+
+def _scan_nullable_usage(client_dir: Path, by_schema, global_prop) -> set[str]:
+    """Scan the generated model files for struct fields whose json prop maps to a
+    semantic target AND whose generated Go type carries a ``Nullable`` prefix.
+    The openapi-generator decides on a per-field basis whether an optional field
+    becomes a ``Nullable`` wrapper (e.g. optional integer refs land as
+    ``NullableInt32``), which the spec ``nullable`` flag alone does not predict —
+    so the authoritative signal for which ``Nullable<Type>`` wrappers we must mint
+    is the generated token itself."""
+    needed: set[str] = set()
+    struct_hdr = re.compile(r"(?m)^type (\w+) struct \{")
+    field_struct = re.compile(r"(?ms)^type (?P<name>\w+) struct \{\n(?P<body>.*?)\n\}")
+    for f in sorted(client_dir.glob("model_*.go")):
+        try:
+            text = f.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        for sm in field_struct.finditer(text):
+            struct = sm.group("name")
+            targets = dict(global_prop)
+            targets.update(by_schema.get(struct, {}))
+            if not targets:
+                continue
+            for fm in _STRUCT_FIELD.finditer(sm.group("body")):
+                target = targets.get(fm.group("json"))
+                if not target:
+                    continue
+                go_type = fm.group("type")
+                bare = go_type.lstrip("[]*")
+                if bare.startswith("Nullable"):
+                    needed.add(target)
+    return needed
+
+
+def _rewrite_models(client_dir: Path, by_schema, global_prop) -> tuple[int, int]:
+    files_changed = 0
+    fields_changed = 0
+    struct_hdr = re.compile(r"(?m)^type (\w+) struct \{")
+    for f in sorted(client_dir.glob("model_*.go")):
+        try:
+            text = f.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        original = text
+        touched = 0
+        # A model file may declare more than one struct (the top-level model plus
+        # inline nested schemas the generator names itself). Rewrite each: prefer
+        # the named-schema map, falling back to the global unambiguous map for
+        # inline structs that have no matching component schema.
+        for struct in struct_hdr.findall(text):
+            targets = dict(global_prop)
+            targets.update(by_schema.get(struct, {}))
+            if not targets:
+                continue
+            text, n = _rewrite_model_file(text, struct, targets)
+            touched += n
+        if text != original:
+            f.write_text(text, encoding="utf-8")
+            files_changed += 1
+            fields_changed += touched
+    return files_changed, fields_changed
 
 
 def run(ctx) -> None:
     client_dir: Path = ctx["client_dir"]
     keys = ctx["metadata"].get("semanticKeys", [])
     pkg = _detect_package(client_dir)
+
+    spec = _load_spec(ctx)
+    semtypes = _semantic_schemas(spec)
+    by_schema, global_prop, nullable_types = _semantic_fields(spec, semtypes)
+
+    # Brand the hand-maintained non-key scalars the spec leaves as inline strings
+    # (see _EXTRA_SCALAR_TYPES). Their json property names are unambiguous, so a
+    # direct global mapping retypes every field that carries them. This override
+    # deliberately wins over the plain-string exclusion in the resolver (these
+    # names appear as bare strings precisely because upstream never tagged them).
+    for tname, cfg in _EXTRA_SCALAR_TYPES.items():
+        for prop in cfg.get("props", ()):
+            global_prop[prop] = tname
 
     # Remove the generator's mis-modelled structs for the extra string keys BEFORE
     # scanning existing types, so those names are free for our newtype definitions.
@@ -222,7 +629,36 @@ def run(ctx) -> None:
             model_file.unlink()
             removed_models.append(cfg["model_file"])
 
+    # x-semantic-type schemas the generator mis-models as an (empty) struct because
+    # they use oneOf/anyOf composition (e.g. ScopeKey, a oneOf supertype of
+    # ProcessInstanceKey / ElementInstanceKey). Delete the struct model so the name
+    # is free for the scalar newtype minted below — exactly as for the oneOf
+    # ResourceKey handled via _EXTRA_STRING_KEYS. Struct fields already reference
+    # these schemas by name, so minting them as the proper scalar retypes those
+    # fields for free.
+    schemas = spec.get("components", {}).get("schemas", {}) or {}
+    for name, sc in schemas.items():
+        if not (isinstance(sc, dict) and "x-semantic-type" in sc):
+            continue
+        if not any(k in sc for k in ("oneOf", "anyOf")):
+            continue
+        for mf in client_dir.glob("model_*.go"):
+            if mf.name in removed_models:
+                continue
+            try:
+                txt = mf.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            if re.search(r"(?m)^type %s struct \{" % re.escape(name), txt):
+                mf.unlink()
+                removed_models.append(mf.name)
+                break
+
     existing = _existing_types(client_dir)
+
+    # Track which semantic type names we mint here so we can emit the matching
+    # Nullable<Type> wrappers and know what the metadata scan already covers.
+    minted: set[str] = set()
 
     parts = [_header(pkg)]
     generated = 0
@@ -237,6 +673,7 @@ def run(ctx) -> None:
             skipped.append(name)
             continue
         parts.append(_key_block(name, key.get("constraints", {}) or {}))
+        minted.add(name)
         generated += 1
 
     # Extra string keys the metadata missed (see _EXTRA_STRING_KEYS).
@@ -246,14 +683,76 @@ def run(ctx) -> None:
             continue
         cfg = _EXTRA_STRING_KEYS[name]
         parts.append(_key_block(name, cfg.get("constraints", {}) or {}))
+        minted.add(name)
         if cfg.get("nullable"):
             parts.append(_nullable_block(name))
         generated += 1
 
+    # Hand-maintained non-key scalars the spec carries only as inline strings
+    # (see _EXTRA_SCALAR_TYPES, e.g. JobLeaseToken). Minted as validated newtypes
+    # so the fields branded above (via the global-prop override) resolve.
+    for name in sorted(_EXTRA_SCALAR_TYPES):
+        if name in existing:
+            skipped.append(name)
+            continue
+        cfg = _EXTRA_SCALAR_TYPES[name]
+        if cfg.get("base", "string") == "string":
+            parts.append(_key_block(name, cfg.get("constraints", {}) or {}))
+        else:
+            parts.append(_int_block(name, cfg["base"], cfg.get("constraints", {}) or {}))
+        minted.add(name)
+        if cfg.get("nullable"):
+            parts.append(_nullable_block(name))
+        generated += 1
+
+    # Non-key `x-semantic-type` scalars the bundler metadata does not classify as
+    # keys (e.g. the string ``ScopeKey`` and the integer ``LoopIterationId``). The
+    # metadata only tracks key kinds, so these would otherwise have no distinct
+    # type anywhere and consumers would get a bare ``string``/``int32``.
+    for name in sorted(semtypes):
+        if name in existing or name in minted:
+            continue
+        sc = spec["components"]["schemas"].get(name, {})
+        constraints = {
+            k: sc[k] for k in ("pattern", "minLength", "maxLength", "minimum", "maximum") if k in sc
+        }
+        gotype = semtypes[name]
+        if gotype == "string":
+            parts.append(_key_block(name, constraints))
+        else:
+            parts.append(_int_block(name, gotype, constraints))
+        minted.add(name)
+        generated += 1
+
+    # Nullable<Type> wrappers for every semantic type that appears in a nullable
+    # response/model field, mirroring NullableModelString. ModelString and the
+    # extra keys already have their wrappers emitted above.
+    already_nullable = (
+        {_BASE_TYPE}
+        | {n for n, c in _EXTRA_STRING_KEYS.items() if c.get("nullable")}
+        | {n for n, c in _EXTRA_SCALAR_TYPES.items() if c.get("nullable")}
+    )
+    nullable_types |= _scan_nullable_usage(client_dir, by_schema, global_prop)
+    nullable_generated = 0
+    for name in sorted(nullable_types):
+        if name in already_nullable:
+            continue
+        if name not in minted and name not in existing:
+            continue
+        parts.append(_nullable_block(name))
+        nullable_generated += 1
+
     out_path = client_dir / _OUT
     out_path.write_text("\n".join(parts), encoding="utf-8")
     print(f"    generated {generated} semantic key types + ModelString into {_OUT}")
+    if nullable_generated:
+        print(f"    generated {nullable_generated} Nullable<Type> wrapper(s) for nullable semantic fields")
     if removed_models:
         print(f"    removed {len(removed_models)} mis-modelled key struct(s): {', '.join(sorted(removed_models))}")
     if skipped:
         print(f"    skipped {len(skipped)} keys already declared by the generator: {', '.join(sorted(skipped))}")
+
+    # Retype the response/model struct fields (and their constructors/accessors)
+    # from the generic base tokens back to their specific semantic type.
+    files_changed, fields_changed = _rewrite_models(client_dir, by_schema, global_prop)
+    print(f"    retyped {fields_changed} semantic field(s) across {files_changed} model file(s)")

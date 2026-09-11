@@ -66,8 +66,8 @@ func StartProcess(
 	businessID string,
 	variables map[string]any,
 ) (openapi.ProcessInstanceKey, error) {
-	byID := openapi.NewProcessInstanceCreationInstructionById(processID)
-	byID.SetBusinessId(businessID)
+	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId(processID))
+	byID.SetBusinessId(openapi.BusinessId(businessID))
 	byID.SetTags([]string{"go-sdk-example"})
 	byID.SetVariables(variables)
 

@@ -189,7 +189,7 @@ func protect(
 		request.SetMessageId(messageID)
 		// A business ID identifies the workflow; the provider event ID identifies
 		// this delivery. They solve different idempotency problems.
-		request.SetBusinessId(orderID)
+		request.SetBusinessId(openapi.BusinessId(orderID))
 		request.SetTimeToLive((30 * time.Second).Milliseconds())
 		request.SetVariables(map[string]any{
 			"orderId":     orderID,
