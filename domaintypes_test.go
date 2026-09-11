@@ -104,6 +104,8 @@ func parseClientDecls(t *testing.T) (types map[string]bool, funcs map[string]boo
 //   - a property $ref to an array   -> branded slice     ([]Tag, from TagSet)
 //   - an inline oneOf union field   -> branded union     (ScopeKey)
 //   - a nullable/optional field     -> Nullable<Type>    (NullableProcessInstanceKey)
+//   - a property-override scalar    -> branded scalar    (JobLeaseToken)
+//   - a globally minted scalar      -> branded scalar    (LoopIterationId)
 //
 // It reads the concrete field types from client/ so a bare underlying type
 // surviving anywhere in these representative fields fails loudly.
@@ -113,13 +115,18 @@ func TestResponseFieldsAreBranded(t *testing.T) {
 		t.Skip("client/ not generated; skipping response-branding guard")
 	}
 
-	// (struct, json field) -> required branded Go type. These exercise the four
-	// resolution shapes the hook must handle. A bare string/int32/[]string here
-	// means the field was left outside the type system.
+	// (struct, json field) -> the EXACT branded Go type the hook must emit. These
+	// exercise every resolution shape the hook handles, including the two newly
+	// minted scalar paths (JobLeaseToken property override, LoopIterationId mint)
+	// whose regression would silently leave a bare NullableString/int32 field.
+	// Pinning the exact type — not merely "not a bare token" — also catches a
+	// field that is branded to the WRONG named type.
 	want := []struct{ typ, field, wantGo string }{
-		{"ElementInstanceFilterFields", "elementInstanceScopeKey", "ScopeKey"}, // inline oneOf -> union
-		{"ProcessInstanceResult", "tags", "[]Tag"},                             // $ref -> TagSet -> []Tag
-		{"AuditLogResult", "processInstanceKey", "NullableProcessInstanceKey"}, // nullable wrapper
+		{"ElementInstanceFilterFields", "elementInstanceScopeKey", "*ScopeKey"}, // inline oneOf -> union (optional -> pointer)
+		{"ProcessInstanceResult", "tags", "[]Tag"},                              // $ref -> TagSet -> []Tag
+		{"AuditLogResult", "processInstanceKey", "NullableProcessInstanceKey"},  // nullable wrapper
+		{"ActivatedJobResult", "leaseToken", "NullableJobLeaseToken"},           // JobLeaseToken property override (nullable)
+		{"AgentInstanceHistoryItem", "loopIteration", "LoopIterationId"},        // LoopIterationId scalar mint
 	}
 	for _, w := range want {
 		got, ok := fieldTypes[w.typ+"."+w.field]
@@ -128,12 +135,12 @@ func TestResponseFieldsAreBranded(t *testing.T) {
 			// pin to an exact schema shape that upstream may rename.
 			continue
 		}
-		// A branded type never equals a bare underlying token. NullableModelString
-		// is the un-branded wrapper a nullable semantic key regresses to, so it
-		// counts as bare here alongside the primitive tokens.
-		bare := strings.TrimPrefix(strings.TrimPrefix(got, "[]"), "*")
-		if bare == "string" || bare == "int32" || bare == "int64" || strings.HasPrefix(bare, "NullableInt") || bare == "NullableString" || bare == "NullableModelString" {
-			t.Errorf("%s.%s is %q (bare underlying type); expected branded %q — model rewrite (hook 01) did not retype it",
+		// Assert the exact branded type. A bare underlying token (string/int32/
+		// []string) or the un-branded NullableModelString/NullableString/NullableInt*
+		// wrapper are the regressions this guards, but any deviation — including
+		// branding to the wrong named type — fails here.
+		if got != w.wantGo {
+			t.Errorf("%s.%s is %q; expected exactly %q — model rewrite (hook 01) did not retype it correctly",
 				w.typ, w.field, got, w.wantGo)
 		}
 	}

@@ -139,7 +139,7 @@ func TestCreateAndReadProcessInstance(t *testing.T) {
 
 	deployGreet(ctx, t, c)
 
-	byID := openapi.NewProcessInstanceCreationInstructionById("demo-process")
+	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("demo-process"))
 	byID.SetVariables(map[string]any{"name": "reader"})
 	created, err := c.CreateProcessInstance(ctx,
 		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))

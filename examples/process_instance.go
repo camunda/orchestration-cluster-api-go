@@ -12,7 +12,7 @@ import (
 
 func createProcessInstanceByIdExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateProcessInstanceById
-	byID := openapi.NewProcessInstanceCreationInstructionById("order-process")
+	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("order-process"))
 	byID.SetVariables(map[string]any{"orderId": "order-42"})
 
 	result, err := client.CreateProcessInstance(ctx,
