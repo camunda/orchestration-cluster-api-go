@@ -56,7 +56,7 @@ type ActivatedJobResult struct {
 	// User task properties, if the job is a user task. This is `null` if the job is not a user task.
 	UserTask NullableUserTaskProperties `json:"userTask"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags"`
+	Tags []Tag `json:"tags"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The business ID of the owning process instance, inherited when the job was created. This is `null` for jobs created before version 8.10 and for jobs whose owning process instance has no business ID.
@@ -73,7 +73,7 @@ type _ActivatedJobResult ActivatedJobResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewActivatedJobResult(type_ string, processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, elementId ElementId, customHeaders map[string]interface{}, worker string, retries int32, deadline int64, variables map[string]interface{}, tenantId TenantId, physicalTenantId string, jobKey JobKey, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, elementInstanceKey ElementInstanceKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, userTask NullableUserTaskProperties, tags []string, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, priority int32, leaseToken NullableJobLeaseToken) *ActivatedJobResult {
+func NewActivatedJobResult(type_ string, processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, elementId ElementId, customHeaders map[string]interface{}, worker string, retries int32, deadline int64, variables map[string]interface{}, tenantId TenantId, physicalTenantId string, jobKey JobKey, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, elementInstanceKey ElementInstanceKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, userTask NullableUserTaskProperties, tags []Tag, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, priority int32, leaseToken NullableJobLeaseToken) *ActivatedJobResult {
 	this := ActivatedJobResult{}
 	this.Type = type_
 	this.ProcessDefinitionId = processDefinitionId
@@ -544,9 +544,9 @@ func (o *ActivatedJobResult) SetUserTask(v UserTaskProperties) {
 }
 
 // GetTags returns the Tags field value
-func (o *ActivatedJobResult) GetTags() []string {
+func (o *ActivatedJobResult) GetTags() []Tag {
 	if o == nil {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 
@@ -555,7 +555,7 @@ func (o *ActivatedJobResult) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value
 // and a boolean to check if the value has been set.
-func (o *ActivatedJobResult) GetTagsOk() ([]string, bool) {
+func (o *ActivatedJobResult) GetTagsOk() ([]Tag, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -563,7 +563,7 @@ func (o *ActivatedJobResult) GetTagsOk() ([]string, bool) {
 }
 
 // SetTags sets field value
-func (o *ActivatedJobResult) SetTags(v []string) {
+func (o *ActivatedJobResult) SetTags(v []Tag) {
 	o.Tags = v
 }
 

@@ -52,7 +52,7 @@ type ProcessInstanceResult struct {
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags"`
+	Tags []Tag `json:"tags"`
 	// The business id associated with this process instance.
 	BusinessId NullableBusinessId `json:"businessId"`
 }
@@ -63,7 +63,7 @@ type _ProcessInstanceResult ProcessInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId TenantId, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, parentProcessInstanceKey NullableProcessInstanceKey, parentElementInstanceKey NullableElementInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, tags []string, businessId NullableBusinessId) *ProcessInstanceResult {
+func NewProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId TenantId, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, parentProcessInstanceKey NullableProcessInstanceKey, parentElementInstanceKey NullableElementInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, tags []Tag, businessId NullableBusinessId) *ProcessInstanceResult {
 	this := ProcessInstanceResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionName = processDefinitionName
@@ -468,9 +468,9 @@ func (o *ProcessInstanceResult) SetRootProcessInstanceKey(v ProcessInstanceKey) 
 }
 
 // GetTags returns the Tags field value
-func (o *ProcessInstanceResult) GetTags() []string {
+func (o *ProcessInstanceResult) GetTags() []Tag {
 	if o == nil {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 
@@ -479,7 +479,7 @@ func (o *ProcessInstanceResult) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceResult) GetTagsOk() ([]string, bool) {
+func (o *ProcessInstanceResult) GetTagsOk() ([]Tag, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -487,7 +487,7 @@ func (o *ProcessInstanceResult) GetTagsOk() ([]string, bool) {
 }
 
 // SetTags sets field value
-func (o *ProcessInstanceResult) SetTags(v []string) {
+func (o *ProcessInstanceResult) SetTags(v []Tag) {
 	o.Tags = v
 }
 

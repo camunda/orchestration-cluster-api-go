@@ -60,7 +60,7 @@ type UserTaskFilter struct {
 	// The key of the element instance.
 	ElementInstanceKey *ElementInstanceKey `json:"elementInstanceKey,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags,omitempty"`
+	Tags []Tag `json:"tags,omitempty"`
 	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"assignee\": \"user1\",   \"$or\": [     { \"candidateGroup\": \"groupA\" },     { \"candidateUser\": \"user2\" }   ] } ``` This matches user tasks that:  <ul style=\"padding-left: 20px; margin-left: 20px;\">   <li style=\"list-style-type: disc;\">are assigned to <em>user1</em></li>   <li style=\"list-style-type: disc;\">and match either:     <ul style=\"padding-left: 20px; margin-left: 20px;\">       <li style=\"list-style-type: circle;\"><code>candidateGroup</code> is <em>groupA</em>, or</li>       <li style=\"list-style-type: circle;\"><code>candidateUser</code> is <em>user2</em></li>     </ul>   </li> </ul> <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
 	Or []UserTaskFilterFields `json:"$or,omitempty"`
 }
@@ -723,9 +723,9 @@ func (o *UserTaskFilter) SetElementInstanceKey(v ElementInstanceKey) {
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
-func (o *UserTaskFilter) GetTags() []string {
+func (o *UserTaskFilter) GetTags() []Tag {
 	if o == nil || IsNil(o.Tags) {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 	return o.Tags
@@ -733,7 +733,7 @@ func (o *UserTaskFilter) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilter) GetTagsOk() ([]string, bool) {
+func (o *UserTaskFilter) GetTagsOk() ([]Tag, bool) {
 	if o == nil || IsNil(o.Tags) {
 		return nil, false
 	}
@@ -749,8 +749,8 @@ func (o *UserTaskFilter) HasTags() bool {
 	return false
 }
 
-// SetTags gets a reference to the given []string and assigns it to the Tags field.
-func (o *UserTaskFilter) SetTags(v []string) {
+// SetTags gets a reference to the given []Tag and assigns it to the Tags field.
+func (o *UserTaskFilter) SetTags(v []Tag) {
 	o.Tags = v
 }
 

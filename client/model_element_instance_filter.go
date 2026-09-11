@@ -46,7 +46,7 @@ type ElementInstanceFilter struct {
 	// The end date of this element instance.
 	EndDate *DateTimeFilterProperty `json:"endDate,omitempty"`
 	// The scope key of this element instance. If provided with a process instance key it will return element instances that are immediate children of the process instance. If provided with an element instance key it will return element instances that are immediate children of the element instance.
-	ElementInstanceScopeKey *string `json:"elementInstanceScopeKey,omitempty"`
+	ElementInstanceScopeKey *ScopeKey `json:"elementInstanceScopeKey,omitempty"`
 	// Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.  Top-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match. <br> <em>Example:</em>  ```json {   \"processInstanceKey\": \"2251799813685323\",   \"$or\": [     { \"elementName\": { \"$like\": \"*Order*\" } },     { \"elementId\":   { \"$like\": \"*Order*\" } }   ] } ``` This matches element instances scoped to the given process instance whose:  <ul style=\"padding-left: 20px; margin-left: 20px;\">   <li style=\"list-style-type: disc;\"><code>elementName</code> contains <em>Order</em>, or</li>   <li style=\"list-style-type: disc;\"><code>elementId</code> contains <em>Order</em></li> </ul> <br> <p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.
 	Or []ElementInstanceFilterFields `json:"$or,omitempty"`
 }
@@ -485,9 +485,9 @@ func (o *ElementInstanceFilter) SetEndDate(v DateTimeFilterProperty) {
 }
 
 // GetElementInstanceScopeKey returns the ElementInstanceScopeKey field value if set, zero value otherwise.
-func (o *ElementInstanceFilter) GetElementInstanceScopeKey() string {
+func (o *ElementInstanceFilter) GetElementInstanceScopeKey() ScopeKey {
 	if o == nil || IsNil(o.ElementInstanceScopeKey) {
-		var ret string
+		var ret ScopeKey
 		return ret
 	}
 	return *o.ElementInstanceScopeKey
@@ -495,7 +495,7 @@ func (o *ElementInstanceFilter) GetElementInstanceScopeKey() string {
 
 // GetElementInstanceScopeKeyOk returns a tuple with the ElementInstanceScopeKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceFilter) GetElementInstanceScopeKeyOk() (*string, bool) {
+func (o *ElementInstanceFilter) GetElementInstanceScopeKeyOk() (*ScopeKey, bool) {
 	if o == nil || IsNil(o.ElementInstanceScopeKey) {
 		return nil, false
 	}
@@ -511,8 +511,8 @@ func (o *ElementInstanceFilter) HasElementInstanceScopeKey() bool {
 	return false
 }
 
-// SetElementInstanceScopeKey gets a reference to the given string and assigns it to the ElementInstanceScopeKey field.
-func (o *ElementInstanceFilter) SetElementInstanceScopeKey(v string) {
+// SetElementInstanceScopeKey gets a reference to the given ScopeKey and assigns it to the ElementInstanceScopeKey field.
+func (o *ElementInstanceFilter) SetElementInstanceScopeKey(v ScopeKey) {
 	o.ElementInstanceScopeKey = &v
 }
 

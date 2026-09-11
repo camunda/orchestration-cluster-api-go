@@ -46,7 +46,7 @@ type ElementInstanceFilterFields struct {
 	// The end date of this element instance.
 	EndDate *DateTimeFilterProperty `json:"endDate,omitempty"`
 	// The scope key of this element instance. If provided with a process instance key it will return element instances that are immediate children of the process instance. If provided with an element instance key it will return element instances that are immediate children of the element instance.
-	ElementInstanceScopeKey *string `json:"elementInstanceScopeKey,omitempty"`
+	ElementInstanceScopeKey *ScopeKey `json:"elementInstanceScopeKey,omitempty"`
 }
 
 // NewElementInstanceFilterFields instantiates a new ElementInstanceFilterFields object
@@ -483,9 +483,9 @@ func (o *ElementInstanceFilterFields) SetEndDate(v DateTimeFilterProperty) {
 }
 
 // GetElementInstanceScopeKey returns the ElementInstanceScopeKey field value if set, zero value otherwise.
-func (o *ElementInstanceFilterFields) GetElementInstanceScopeKey() string {
+func (o *ElementInstanceFilterFields) GetElementInstanceScopeKey() ScopeKey {
 	if o == nil || IsNil(o.ElementInstanceScopeKey) {
-		var ret string
+		var ret ScopeKey
 		return ret
 	}
 	return *o.ElementInstanceScopeKey
@@ -493,7 +493,7 @@ func (o *ElementInstanceFilterFields) GetElementInstanceScopeKey() string {
 
 // GetElementInstanceScopeKeyOk returns a tuple with the ElementInstanceScopeKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ElementInstanceFilterFields) GetElementInstanceScopeKeyOk() (*string, bool) {
+func (o *ElementInstanceFilterFields) GetElementInstanceScopeKeyOk() (*ScopeKey, bool) {
 	if o == nil || IsNil(o.ElementInstanceScopeKey) {
 		return nil, false
 	}
@@ -509,8 +509,8 @@ func (o *ElementInstanceFilterFields) HasElementInstanceScopeKey() bool {
 	return false
 }
 
-// SetElementInstanceScopeKey gets a reference to the given string and assigns it to the ElementInstanceScopeKey field.
-func (o *ElementInstanceFilterFields) SetElementInstanceScopeKey(v string) {
+// SetElementInstanceScopeKey gets a reference to the given ScopeKey and assigns it to the ElementInstanceScopeKey field.
+func (o *ElementInstanceFilterFields) SetElementInstanceScopeKey(v ScopeKey) {
 	o.ElementInstanceScopeKey = &v
 }
 

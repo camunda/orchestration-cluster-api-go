@@ -42,7 +42,7 @@ type ProcessInstanceCreationInstructionById struct {
 	// Timeout (in ms) the request waits for the process to complete. By default or when set to 0, the generic request timeout configured in the cluster is applied.
 	RequestTimeout *int64 `json:"requestTimeout,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags,omitempty"`
+	Tags []Tag `json:"tags,omitempty"`
 	// An optional, user-defined string identifier that identifies the process instance within the scope of a process definition (scoped by tenant). If provided and uniqueness enforcement is enabled, the engine will reject creation if another root process instance with the same business id is already active for the same process definition. Note that any active child process instances with the same business id are not taken into account.
 	BusinessId *BusinessId `json:"businessId,omitempty"`
 }
@@ -392,9 +392,9 @@ func (o *ProcessInstanceCreationInstructionById) SetRequestTimeout(v int64) {
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionById) GetTags() []string {
+func (o *ProcessInstanceCreationInstructionById) GetTags() []Tag {
 	if o == nil || IsNil(o.Tags) {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 	return o.Tags
@@ -402,7 +402,7 @@ func (o *ProcessInstanceCreationInstructionById) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionById) GetTagsOk() ([]string, bool) {
+func (o *ProcessInstanceCreationInstructionById) GetTagsOk() ([]Tag, bool) {
 	if o == nil || IsNil(o.Tags) {
 		return nil, false
 	}
@@ -418,8 +418,8 @@ func (o *ProcessInstanceCreationInstructionById) HasTags() bool {
 	return false
 }
 
-// SetTags gets a reference to the given []string and assigns it to the Tags field.
-func (o *ProcessInstanceCreationInstructionById) SetTags(v []string) {
+// SetTags gets a reference to the given []Tag and assigns it to the Tags field.
+func (o *ProcessInstanceCreationInstructionById) SetTags(v []Tag) {
 	o.Tags = v
 }
 

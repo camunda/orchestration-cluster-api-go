@@ -1822,29 +1822,6 @@ func (v *NullableJobKey) UnmarshalJSON(src []byte) error {
 	return json.Unmarshal(src, &v.value)
 }
 
-// NullableLoopIterationId is the generator's Nullable wrapper for LoopIterationId (referenced by
-// generated models such as AuditLogResult).
-type NullableLoopIterationId struct {
-	value *LoopIterationId
-	isSet bool
-}
-
-func (v NullableLoopIterationId) Get() *LoopIterationId     { return v.value }
-func (v *NullableLoopIterationId) Set(val *LoopIterationId) { v.value = val; v.isSet = true }
-func (v NullableLoopIterationId) IsSet() bool               { return v.isSet }
-func (v *NullableLoopIterationId) Unset()                   { v.value = nil; v.isSet = false }
-
-// NewNullableLoopIterationId returns a set NullableLoopIterationId wrapping val.
-func NewNullableLoopIterationId(val *LoopIterationId) *NullableLoopIterationId {
-	return &NullableLoopIterationId{value: val, isSet: true}
-}
-
-func (v NullableLoopIterationId) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
-func (v *NullableLoopIterationId) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
-}
-
 // NullableProcessDefinitionId is the generator's Nullable wrapper for ProcessDefinitionId (referenced by
 // generated models such as AuditLogResult).
 type NullableProcessDefinitionId struct {

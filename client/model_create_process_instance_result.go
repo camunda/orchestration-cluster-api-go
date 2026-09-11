@@ -34,7 +34,7 @@ type CreateProcessInstanceResult struct {
 	// The unique identifier of the created process instance; to be used wherever a request needs a process instance key (e.g. CancelProcessInstanceRequest).
 	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags"`
+	Tags []Tag `json:"tags"`
 	// Business id as provided on creation.
 	BusinessId NullableBusinessId `json:"businessId"`
 }
@@ -45,7 +45,7 @@ type _CreateProcessInstanceResult CreateProcessInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, tenantId TenantId, variables map[string]interface{}, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, tags []string, businessId NullableBusinessId) *CreateProcessInstanceResult {
+func NewCreateProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, tenantId TenantId, variables map[string]interface{}, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, tags []Tag, businessId NullableBusinessId) *CreateProcessInstanceResult {
 	this := CreateProcessInstanceResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionVersion = processDefinitionVersion
@@ -211,9 +211,9 @@ func (o *CreateProcessInstanceResult) SetProcessInstanceKey(v ProcessInstanceKey
 }
 
 // GetTags returns the Tags field value
-func (o *CreateProcessInstanceResult) GetTags() []string {
+func (o *CreateProcessInstanceResult) GetTags() []Tag {
 	if o == nil {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 
@@ -222,7 +222,7 @@ func (o *CreateProcessInstanceResult) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value
 // and a boolean to check if the value has been set.
-func (o *CreateProcessInstanceResult) GetTagsOk() ([]string, bool) {
+func (o *CreateProcessInstanceResult) GetTagsOk() ([]Tag, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -230,7 +230,7 @@ func (o *CreateProcessInstanceResult) GetTagsOk() ([]string, bool) {
 }
 
 // SetTags sets field value
-func (o *CreateProcessInstanceResult) SetTags(v []string) {
+func (o *CreateProcessInstanceResult) SetTags(v []Tag) {
 	o.Tags = v
 }
 

@@ -57,7 +57,7 @@ type BaseProcessInstanceFilterFields struct {
 	// The incident error hash code, associated with this process.
 	IncidentErrorHashCode *IntegerFilterProperty `json:"incidentErrorHashCode,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags,omitempty"`
+	Tags []Tag `json:"tags,omitempty"`
 	// The business id associated with the process instance.
 	BusinessId *StringFilterProperty `json:"businessId,omitempty"`
 }
@@ -659,9 +659,9 @@ func (o *BaseProcessInstanceFilterFields) SetIncidentErrorHashCode(v IntegerFilt
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
-func (o *BaseProcessInstanceFilterFields) GetTags() []string {
+func (o *BaseProcessInstanceFilterFields) GetTags() []Tag {
 	if o == nil || IsNil(o.Tags) {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 	return o.Tags
@@ -669,7 +669,7 @@ func (o *BaseProcessInstanceFilterFields) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *BaseProcessInstanceFilterFields) GetTagsOk() ([]string, bool) {
+func (o *BaseProcessInstanceFilterFields) GetTagsOk() ([]Tag, bool) {
 	if o == nil || IsNil(o.Tags) {
 		return nil, false
 	}
@@ -685,8 +685,8 @@ func (o *BaseProcessInstanceFilterFields) HasTags() bool {
 	return false
 }
 
-// SetTags gets a reference to the given []string and assigns it to the Tags field.
-func (o *BaseProcessInstanceFilterFields) SetTags(v []string) {
+// SetTags gets a reference to the given []Tag and assigns it to the Tags field.
+func (o *BaseProcessInstanceFilterFields) SetTags(v []Tag) {
 	o.Tags = v
 }
 

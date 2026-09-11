@@ -60,7 +60,7 @@ type UserTaskFilterFields struct {
 	// The key of the element instance.
 	ElementInstanceKey *ElementInstanceKey `json:"elementInstanceKey,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags,omitempty"`
+	Tags []Tag `json:"tags,omitempty"`
 }
 
 // NewUserTaskFilterFields instantiates a new UserTaskFilterFields object
@@ -721,9 +721,9 @@ func (o *UserTaskFilterFields) SetElementInstanceKey(v ElementInstanceKey) {
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
-func (o *UserTaskFilterFields) GetTags() []string {
+func (o *UserTaskFilterFields) GetTags() []Tag {
 	if o == nil || IsNil(o.Tags) {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 	return o.Tags
@@ -731,7 +731,7 @@ func (o *UserTaskFilterFields) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserTaskFilterFields) GetTagsOk() ([]string, bool) {
+func (o *UserTaskFilterFields) GetTagsOk() ([]Tag, bool) {
 	if o == nil || IsNil(o.Tags) {
 		return nil, false
 	}
@@ -747,8 +747,8 @@ func (o *UserTaskFilterFields) HasTags() bool {
 	return false
 }
 
-// SetTags gets a reference to the given []string and assigns it to the Tags field.
-func (o *UserTaskFilterFields) SetTags(v []string) {
+// SetTags gets a reference to the given []Tag and assigns it to the Tags field.
+func (o *UserTaskFilterFields) SetTags(v []Tag) {
 	o.Tags = v
 }
 

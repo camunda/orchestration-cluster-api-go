@@ -70,7 +70,7 @@ type UserTaskResult struct {
 	// The key of the form.
 	FormKey NullableFormKey `json:"formKey"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
-	Tags []string `json:"tags"`
+	Tags []Tag `json:"tags"`
 }
 
 type _UserTaskResult UserTaskResult
@@ -79,7 +79,7 @@ type _UserTaskResult UserTaskResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee NullableString, elementId ElementId, candidateGroups []string, candidateUsers []string, processDefinitionId ProcessDefinitionId, creationDate time.Time, completionDate NullableTime, followUpDate NullableTime, dueDate NullableTime, tenantId TenantId, externalFormReference NullableString, processDefinitionVersion int32, customHeaders map[string]string, priority int32, userTaskKey UserTaskKey, elementInstanceKey ElementInstanceKey, processName NullableString, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, formKey NullableFormKey, tags []string) *UserTaskResult {
+func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee NullableString, elementId ElementId, candidateGroups []string, candidateUsers []string, processDefinitionId ProcessDefinitionId, creationDate time.Time, completionDate NullableTime, followUpDate NullableTime, dueDate NullableTime, tenantId TenantId, externalFormReference NullableString, processDefinitionVersion int32, customHeaders map[string]string, priority int32, userTaskKey UserTaskKey, elementInstanceKey ElementInstanceKey, processName NullableString, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, formKey NullableFormKey, tags []Tag) *UserTaskResult {
 	this := UserTaskResult{}
 	this.Name = name
 	this.State = state
@@ -716,9 +716,9 @@ func (o *UserTaskResult) SetFormKey(v FormKey) {
 }
 
 // GetTags returns the Tags field value
-func (o *UserTaskResult) GetTags() []string {
+func (o *UserTaskResult) GetTags() []Tag {
 	if o == nil {
-		var ret []string
+		var ret []Tag
 		return ret
 	}
 
@@ -727,7 +727,7 @@ func (o *UserTaskResult) GetTags() []string {
 
 // GetTagsOk returns a tuple with the Tags field value
 // and a boolean to check if the value has been set.
-func (o *UserTaskResult) GetTagsOk() ([]string, bool) {
+func (o *UserTaskResult) GetTagsOk() ([]Tag, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -735,7 +735,7 @@ func (o *UserTaskResult) GetTagsOk() ([]string, bool) {
 }
 
 // SetTags sets field value
-func (o *UserTaskResult) SetTags(v []string) {
+func (o *UserTaskResult) SetTags(v []Tag) {
 	o.Tags = v
 }
 
