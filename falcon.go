@@ -288,7 +288,7 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 		ProcessInstanceKey:   openapi.ProcessInstanceKey(outcome.ProcessInstanceKey),
 		ProcessDefinitionId:  openapi.ProcessDefinitionId(id),
 		ProcessDefinitionKey: openapi.ProcessDefinitionKey(key),
-		Tags:                 []string{},
+		Tags:                 []openapi.Tag{},
 		BusinessId:           *openapi.NewNullableBusinessId(nil),
 	}
 	if rb.ProcessDefinitionID != nil && *rb.ProcessDefinitionID != "" {
@@ -318,7 +318,11 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body op
 		result.Variables = map[string]interface{}{}
 	}
 	if rb.Tags != nil {
-		result.Tags = rb.Tags
+		tags := make([]openapi.Tag, len(rb.Tags))
+		for i, tg := range rb.Tags {
+			tags[i] = openapi.Tag(tg)
+		}
+		result.Tags = tags
 	}
 	if rb.BusinessID != nil {
 		bid := openapi.BusinessId(*rb.BusinessID)

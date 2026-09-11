@@ -582,7 +582,12 @@ RUNTIME_TYPES = [
 # newly generated key type appears on the page without any change here. The
 # generated ``Nullable<Type>`` wrappers are likewise plumbing and are filtered out
 # generically (see ``load`` below), so they need not be listed individually.
-NON_KEY_TYPES = {"ModelString"}
+#
+# ``JobLeaseToken`` is a semantic *scalar* the hook mints alongside the keys, but
+# it is an opaque lease token, not a validated key/identifier, so it must not be
+# counted or presented on the Domain keys page (mirrors the ``noun`` override in
+# scripts/hooks/hook_01_domain_type_system.py's ``_EXTRA_SCALAR_TYPES``).
+NON_KEY_TYPES = {"ModelString", "JobLeaseToken"}
 
 # Package-level var groups, keyed by their first declared name.
 VAR_BUCKETS = {

@@ -380,24 +380,79 @@ def _semantic_schemas(spec: dict) -> dict[str, str]:
     return out
 
 
-def _resolve_property(pd, semtypes: dict[str, str]):
+def _array_item_target(arr_schema, semtypes: dict[str, str]):
+    """Return the semantic item type of an ``type: array`` schema, or None.
+
+    An array's ``items`` may reference the semantic scalar directly (``$ref``)
+    or via a single-element ``allOf`` wrapper."""
+    items = (arr_schema.get("items") or {}) if isinstance(arr_schema, dict) else {}
+    it = _ref_name(items)
+    if not it and isinstance(items.get("allOf"), list) and len(items["allOf"]) == 1:
+        it = _ref_name(items["allOf"][0])
+    return it if it in semtypes else None
+
+
+def _union_map(schemas: dict, semtypes: dict[str, str]) -> dict[frozenset, str]:
+    """Map ``frozenset(member schema names) -> union schema name`` for every
+    semantic schema that is itself a ``oneOf`` union (e.g. ``ScopeKey`` =
+    ``ProcessInstanceKey | ElementInstanceKey``). Lets an inline ``oneOf``
+    property resolve to the branded union type regardless of member order."""
+    out: dict[frozenset, str] = {}
+    for name in semtypes:
+        sc = schemas.get(name)
+        if isinstance(sc, dict) and isinstance(sc.get("oneOf"), list):
+            members = frozenset(r for r in (_ref_name(x) for x in sc["oneOf"]) if r)
+            if members:
+                out[members] = name
+    return out
+
+
+def _resolve_property(pd, semtypes: dict[str, str], schemas: dict | None = None,
+                      union_map: dict | None = None):
     """Resolve a property schema to (target_type, kind) where kind is
-    ``scalar`` or ``array``; returns None when it is not a semantic scalar."""
+    ``scalar`` or ``array``; returns None when it is not a semantic scalar.
+
+    Handles: an inline ``type: array`` with semantic items; a property ``$ref``
+    to a *named array* schema (e.g. ``tags`` -> ``TagSet`` -> ``[]Tag``); an
+    inline ``oneOf`` whose members match a semantic union schema (e.g.
+    ``ElementInstanceKey | ProcessInstanceKey`` -> ``ScopeKey``); and a scalar
+    ``$ref`` / single-``allOf`` reference."""
     if not isinstance(pd, dict):
         return None
+    schemas = schemas or {}
+    union_map = union_map or {}
+
+    # Inline array with semantic items.
     if pd.get("type") == "array":
-        items = pd.get("items", {}) or {}
-        it = _ref_name(items)
-        if not it and isinstance(items.get("allOf"), list) and len(items["allOf"]) == 1:
-            it = _ref_name(items["allOf"][0])
-        return (it, "array") if it in semtypes else None
+        it = _array_item_target(pd, semtypes)
+        return (it, "array") if it else None
+
+    # Inline ``oneOf`` matching a semantic union schema (e.g. ScopeKey). Checked
+    # before the plain-scalar path because such a schema also carries
+    # ``type: string``, which would otherwise look like a bare scalar.
+    if isinstance(pd.get("oneOf"), list):
+        members = frozenset(r for r in (_ref_name(x) for x in pd["oneOf"]) if r)
+        u = union_map.get(members)
+        if u in semtypes:
+            return (u, "scalar")
+
+    # Scalar ``$ref`` / single-``allOf`` reference.
     tgt = _ref_name(pd)
     if not tgt and isinstance(pd.get("allOf"), list) and len(pd["allOf"]) == 1:
         tgt = _ref_name(pd["allOf"][0])
-    return (tgt, "scalar") if tgt in semtypes else None
+    if tgt in semtypes:
+        return (tgt, "scalar")
+
+    # Property ``$ref`` to a *named array* schema (e.g. tags -> TagSet -> []Tag).
+    if tgt and isinstance(schemas.get(tgt), dict) and schemas[tgt].get("type") == "array":
+        it = _array_item_target(schemas[tgt], semtypes)
+        if it:
+            return (it, "array")
+
+    return None
 
 
-def _schema_effective_properties(name, schemas, semtypes, seen):
+def _schema_effective_properties(name, schemas, semtypes, seen, union_map=None):
     """Resolve a named schema's effective property→(target,kind,nullable) map,
     merging ``allOf`` ``$ref`` base fragments recursively (openapi-generator
     flattens ``allOf`` composition into a single Go struct, so an inherited key
@@ -405,19 +460,19 @@ def _schema_effective_properties(name, schemas, semtypes, seen):
     sc = schemas.get(name)
     if not isinstance(sc, dict):
         return {}
-    return _props_from_schema(sc, schemas, semtypes, seen | {name})
+    return _props_from_schema(sc, schemas, semtypes, seen | {name}, union_map)
 
 
-def _props_from_schema(sc, schemas, semtypes, seen):
+def _props_from_schema(sc, schemas, semtypes, seen, union_map=None):
     out: dict[str, tuple] = {}
     for frag in sc.get("allOf", []) or []:
         ref = _ref_name(frag)
         if ref and ref not in seen:
-            out.update(_schema_effective_properties(ref, schemas, semtypes, seen))
+            out.update(_schema_effective_properties(ref, schemas, semtypes, seen, union_map))
         elif isinstance(frag, dict):
-            out.update(_props_from_schema(frag, schemas, semtypes, seen))
+            out.update(_props_from_schema(frag, schemas, semtypes, seen, union_map))
     for prop, pd in (sc.get("properties") or {}).items():
-        r = _resolve_property(pd, semtypes)
+        r = _resolve_property(pd, semtypes, schemas, union_map)
         if r:
             tgt, kind = r
             nullable = bool(isinstance(pd, dict) and pd.get("nullable"))
@@ -425,7 +480,8 @@ def _props_from_schema(sc, schemas, semtypes, seen):
     return out
 
 
-def _walk_semantic_properties(node, semtypes, acc, nullable_types, nonsemantic):
+def _walk_semantic_properties(node, semtypes, acc, nullable_types, nonsemantic,
+                              schemas=None, union_map=None):
     """Recursively collect every semantic property occurrence anywhere in the
     spec (named schemas, ``allOf`` fragments, array ``items``, inline nested
     objects) into ``acc: {prop: set[target]}`` and record nullable targets. Also
@@ -436,7 +492,7 @@ def _walk_semantic_properties(node, semtypes, acc, nullable_types, nonsemantic):
         props = node.get("properties")
         if isinstance(props, dict):
             for prop, pd in props.items():
-                r = _resolve_property(pd, semtypes)
+                r = _resolve_property(pd, semtypes, schemas, union_map)
                 if r:
                     tgt, kind = r
                     acc.setdefault(prop, set()).add(tgt)
@@ -445,10 +501,12 @@ def _walk_semantic_properties(node, semtypes, acc, nullable_types, nonsemantic):
                 elif _is_plain_scalar(pd):
                     nonsemantic.add(prop)
         for v in node.values():
-            _walk_semantic_properties(v, semtypes, acc, nullable_types, nonsemantic)
+            _walk_semantic_properties(v, semtypes, acc, nullable_types, nonsemantic,
+                                      schemas, union_map)
     elif isinstance(node, list):
         for v in node:
-            _walk_semantic_properties(v, semtypes, acc, nullable_types, nonsemantic)
+            _walk_semantic_properties(v, semtypes, acc, nullable_types, nonsemantic,
+                                      schemas, union_map)
 
 
 def _is_plain_scalar(pd) -> bool:
@@ -471,13 +529,14 @@ def _semantic_fields(spec: dict, semtypes: dict[str, str]):
     (for inline schemas the generator names itself), and the set of types used in
     a nullable field (which need a ``Nullable<Type>`` wrapper)."""
     schemas = spec.get("components", {}).get("schemas", {}) or {}
+    union_map = _union_map(schemas, semtypes)
 
     by_schema: dict[str, dict[str, str]] = {}
     nullable_types: set[str] = set()
     for sname, sc in schemas.items():
         if not isinstance(sc, dict):
             continue
-        eff = _schema_effective_properties(sname, schemas, semtypes, set())
+        eff = _schema_effective_properties(sname, schemas, semtypes, set(), union_map)
         for prop, (tgt, kind, nullable) in eff.items():
             by_schema.setdefault(sname, {})[prop] = tgt
             if kind == "scalar" and nullable:
@@ -490,7 +549,8 @@ def _semantic_fields(spec: dict, semtypes: dict[str, str]):
     # fields).
     occurrences: dict[str, set] = {}
     nonsemantic: set[str] = set()
-    _walk_semantic_properties(spec, semtypes, occurrences, nullable_types, nonsemantic)
+    _walk_semantic_properties(spec, semtypes, occurrences, nullable_types, nonsemantic,
+                              schemas, union_map)
     global_prop: dict[str, str] = {
         prop: next(iter(types))
         for prop, types in occurrences.items()
