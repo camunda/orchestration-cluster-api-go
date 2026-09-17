@@ -29,7 +29,7 @@ type CorrelatedMessageSubscriptionResult struct {
 	// The time when the message was correlated.
 	CorrelationTime time.Time `json:"correlationTime"`
 	// The element ID that received the message.
-	ElementId string `json:"elementId"`
+	ElementId ElementId `json:"elementId"`
 	// The element instance key that received the message. It is `null` for start event subscriptions.
 	ElementInstanceKey NullableElementInstanceKey `json:"elementInstanceKey"`
 	// The message key.
@@ -58,7 +58,7 @@ type _CorrelatedMessageSubscriptionResult CorrelatedMessageSubscriptionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCorrelatedMessageSubscriptionResult(businessId NullableBusinessId, correlationKey NullableString, correlationTime time.Time, elementId string, elementInstanceKey NullableElementInstanceKey, messageKey MessageKey, messageName string, partitionId int32, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, subscriptionKey MessageSubscriptionKey, tenantId TenantId) *CorrelatedMessageSubscriptionResult {
+func NewCorrelatedMessageSubscriptionResult(businessId NullableBusinessId, correlationKey NullableString, correlationTime time.Time, elementId ElementId, elementInstanceKey NullableElementInstanceKey, messageKey MessageKey, messageName string, partitionId int32, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, subscriptionKey MessageSubscriptionKey, tenantId TenantId) *CorrelatedMessageSubscriptionResult {
 	this := CorrelatedMessageSubscriptionResult{}
 	this.BusinessId = businessId
 	this.CorrelationKey = correlationKey
@@ -162,9 +162,9 @@ func (o *CorrelatedMessageSubscriptionResult) SetCorrelationTime(v time.Time) {
 }
 
 // GetElementId returns the ElementId field value
-func (o *CorrelatedMessageSubscriptionResult) GetElementId() string {
+func (o *CorrelatedMessageSubscriptionResult) GetElementId() ElementId {
 	if o == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -173,7 +173,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetElementId() string {
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-func (o *CorrelatedMessageSubscriptionResult) GetElementIdOk() (*string, bool) {
+func (o *CorrelatedMessageSubscriptionResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -181,7 +181,7 @@ func (o *CorrelatedMessageSubscriptionResult) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *CorrelatedMessageSubscriptionResult) SetElementId(v string) {
+func (o *CorrelatedMessageSubscriptionResult) SetElementId(v ElementId) {
 	o.ElementId = v
 }
 

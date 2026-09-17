@@ -9702,7 +9702,7 @@
           }
         ],
         "summary": "Cancel process instances (batch)",
-        "description": "Cancels multiple running process instances.\nSince only ACTIVE root instances can be cancelled, any given filters for state and\nparentProcessInstanceKey are ignored and overridden during this batch operation.\nThis is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).\n",
+        "description": "Cancels multiple active or suspended process instances.\nSince only ACTIVE and SUSPENDED root instances can be cancelled, any given filters for state and\nparentProcessInstanceKey are ignored and overridden during this batch operation.\nThis is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).\n",
         "requestBody": {
           "required": true,
           "content": {
@@ -19450,9 +19450,13 @@
             "description": "A human-readable description of the tool."
           },
           "elementId": {
-            "type": "string",
+            "description": "The BPMN element ID of the tool element within the ad-hoc sub-process.",
             "nullable": true,
-            "description": "The BPMN element ID of the tool element within the ad-hoc sub-process."
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ElementId"
+              }
+            ]
           }
         }
       },
@@ -19562,7 +19566,7 @@
           "elementInstanceKey",
           "history",
           "jobKey",
-          "jobLease"
+          "jobLeaseToken"
         ],
         "properties": {
           "elementInstanceKey": {
@@ -19581,9 +19585,13 @@
               }
             ]
           },
-          "jobLease": {
+          "jobLeaseToken": {
             "description": "Opaque lease token received from the job activation response. Disambiguates\nthis activation from any other activation of the same job: if the job is\nlater retried, history items submitted under a superseded lease are discarded\nrather than committed.\n",
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobLeaseToken"
+              }
+            ]
           },
           "history": {
             "description": "A batch of history items to append to the agent instance's conversation\nhistory, in request order. Each created item is echoed back in the\nresponse's createdHistory, positionally correlated. Must include a\nCONFIGURATION item establishing model, provider, and systemPrompt (and,\nif needed, limits). Every item's role must be CONFIGURATION or USER, and\nno item may carry non-zero usage-token metrics (inputTokens, outputTokens,\nreasoningTokenCount, cacheCreationTokenCount, cacheReadTokenCount);\ndurationMs is exempt and may be non-zero.\n",
@@ -19629,7 +19637,7 @@
         "required": [
           "elementInstanceKey",
           "jobKey",
-          "jobLease"
+          "jobLeaseToken"
         ],
         "properties": {
           "elementInstanceKey": {
@@ -19657,9 +19665,13 @@
               }
             ]
           },
-          "jobLease": {
+          "jobLeaseToken": {
             "description": "Opaque lease token received from the job activation response. Disambiguates\nthis activation from any other activation of the same job: if the job is\nlater retried, history items submitted under a superseded lease are discarded\nrather than committed.\n",
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobLeaseToken"
+              }
+            ]
           },
           "history": {
             "description": "A batch of history items to append to the agent instance's conversation\nhistory, in request order. Each created item is echoed back in the\nresponse's createdHistory, positionally correlated.\n",
@@ -20005,7 +20017,7 @@
           "historyItemId",
           "historyItemKey",
           "jobKey",
-          "jobLease",
+          "jobLeaseToken",
           "limits",
           "loopIteration",
           "metrics",
@@ -20058,9 +20070,13 @@
               }
             ]
           },
-          "jobLease": {
+          "jobLeaseToken": {
             "description": "The lease token of the activation that produced this item.",
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobLeaseToken"
+              }
+            ]
           },
           "loopIteration": {
             "description": "The loop iteration this item belongs to.",
@@ -20285,8 +20301,12 @@
           },
           "elementId": {
             "description": "The BPMN element ID handling this tool.",
-            "type": "string",
-            "nullable": true
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ElementId"
+              }
+            ]
           },
           "arguments": {
             "description": "The tool call arguments as provided by the LLM. May be null or populated on\nany item, including TOOL_RESULT.\n",
@@ -24302,7 +24322,8 @@
               "NO_LEADER",
               "NO_RESPONSE",
               "CANCELLED",
-              "PHYSICAL_TENANT_DISABLED"
+              "PHYSICAL_TENANT_DISABLED",
+              "PHYSICAL_TENANT_RECOVERING"
             ]
           }
         }
@@ -30365,6 +30386,7 @@
               "$or": {
                 "description": "Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.\n\nTop-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match.\n<br>\n<em>Example:</em>\n\n```json\n{\n  \"$or\": [\n    { \"groupId\": \"group-1\" },\n    { \"groupId\": \"group-2\" }\n  ]\n}\n```\nThis matches groups whose <code>groupId</code> is <em>group-1</em> or <em>group-2</em>.\n<br>\n<p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.\n",
                 "type": "array",
+                "nullable": true,
                 "items": {
                   "$ref": "#/components/schemas/GroupFilterFields"
                 }
@@ -30746,6 +30768,14 @@
         "minLength": 1,
         "maxLength": 256,
         "example": "item-1"
+      },
+      "JobLeaseToken": {
+        "description": "An opaque, engine-minted fencing token identifying a single activation of a job.\nReturned by Activate Jobs as `ActivatedJobResult.jobLeaseToken` when the job is\nactivated with a lease, and passed back under the same name on fenced job\ncommands and on agent-instance creation/updates, to prove the caller holds the\ncurrent lease. The token is opaque: clients may rely on its presence and equality\nonly, and must never construct, parse, or otherwise interpret it beyond equality\nchecks. It cannot be minted client-side; only the engine produces it, exactly once\nper leased activation, and clients must not depend on any particular internal format.\n",
+        "type": "string",
+        "format": "JobLeaseToken",
+        "x-semantic-type": "JobLeaseToken",
+        "minLength": 1,
+        "example": "550e8400-e29b-41d4-a716-446655440000"
       },
       "ElementIdFilterProperty": {
         "description": "ElementId property with full advanced search capabilities.",
@@ -32226,7 +32256,7 @@
             "default": "PROVIDED"
           },
           "withLease": {
-            "description": "Whether to activate the jobs with a lease. When true, each activated job is assigned a distinct, opaque lease token, returned as ActivatedJobResult.leaseToken. The lease fences the complete, fail, and throw-error commands against a superseded activation of the same job (for example, after the job timed out or failed and was re-activated by another worker): a command carrying a stale lease token is rejected rather than racing with the newer activation. Once a job has been activated with a lease, it is served only to leasing workers of that job type; a homogeneous fleet per job type is recommended. Omit or set to false to activate jobs without a lease.\n",
+            "description": "Whether to activate the jobs with a lease. When true, each activated job is assigned a distinct, opaque lease token, returned as ActivatedJobResult.jobLeaseToken. The lease fences the complete, fail, and throw-error commands against a superseded activation of the same job (for example, after the job timed out or failed and was re-activated by another worker): a command carrying a stale lease token is rejected rather than racing with the newer activation. Once a job has been activated with a lease, it is served only to leasing workers of that job type; a homogeneous fleet per job type is recommended. Omit or set to false to activate jobs without a lease.\n",
             "type": "boolean",
             "nullable": true
           }
@@ -32267,7 +32297,8 @@
         "x-semantic-provider": [
           "elementId",
           "jobKey",
-          "elementInstanceKey"
+          "elementInstanceKey",
+          "jobLeaseToken"
         ],
         "type": "object",
         "required": [
@@ -32277,8 +32308,8 @@
           "elementId",
           "elementInstanceKey",
           "jobKey",
+          "jobLeaseToken",
           "kind",
-          "leaseToken",
           "listenerEventType",
           "physicalTenantId",
           "priority",
@@ -32436,10 +32467,18 @@
             "type": "integer",
             "format": "int32"
           },
-          "leaseToken": {
+          "jobLeaseToken": {
             "description": "The lease token identifying this activation. This is `null` when the job was activated without a lease.\n",
             "nullable": true,
-            "type": "string"
+            "x-present-when": {
+              "request": "withLease",
+              "equals": true
+            },
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobLeaseToken"
+              }
+            ]
           }
         },
         "x-properties-added-in-version": [
@@ -32476,7 +32515,7 @@
             "addedInVersion": "8.10"
           },
           {
-            "propertyName": "leaseToken",
+            "propertyName": "jobLeaseToken",
             "addedInVersion": "8.10"
           },
           {
@@ -33166,15 +33205,19 @@
             "type": "object",
             "additionalProperties": true
           },
-          "leaseToken": {
-            "description": "The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`.\nFor a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker).\nA job that was activated without a lease requires no token.\n",
-            "type": "string",
-            "nullable": true
+          "jobLeaseToken": {
+            "description": "The token identifying a leased job's activation, obtained from `ActivatedJobResult.jobLeaseToken`.\nFor a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker).\nA job that was activated without a lease requires no token.\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobLeaseToken"
+              }
+            ]
           }
         },
         "x-properties-added-in-version": [
           {
-            "propertyName": "leaseToken",
+            "propertyName": "jobLeaseToken",
             "addedInVersion": "8.10"
           }
         ]
@@ -33198,10 +33241,14 @@
             "type": "object",
             "nullable": true
           },
-          "leaseToken": {
-            "description": "The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`.\nFor a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker).\nA job that was activated without a lease requires no token.\n",
-            "type": "string",
-            "nullable": true
+          "jobLeaseToken": {
+            "description": "The token identifying a leased job's activation, obtained from `ActivatedJobResult.jobLeaseToken`.\nFor a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker).\nA job that was activated without a lease requires no token.\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobLeaseToken"
+              }
+            ]
           }
         },
         "required": [
@@ -33209,7 +33256,7 @@
         ],
         "x-properties-added-in-version": [
           {
-            "propertyName": "leaseToken",
+            "propertyName": "jobLeaseToken",
             "addedInVersion": "8.10"
           }
         ]
@@ -33227,10 +33274,14 @@
           "result": {
             "$ref": "#/components/schemas/JobResult"
           },
-          "leaseToken": {
-            "description": "The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`.\nFor a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker).\nA job that was activated without a lease requires no token.\n",
-            "type": "string",
-            "nullable": true
+          "jobLeaseToken": {
+            "description": "The token identifying a leased job's activation, obtained from `ActivatedJobResult.jobLeaseToken`.\nFor a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker).\nA job that was activated without a lease requires no token.\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobLeaseToken"
+              }
+            ]
           },
           "businessId": {
             "nullable": true,
@@ -33248,7 +33299,7 @@
             "addedInVersion": "8.8"
           },
           {
-            "propertyName": "leaseToken",
+            "propertyName": "jobLeaseToken",
             "addedInVersion": "8.10"
           },
           {
@@ -33409,10 +33460,14 @@
           "operationReference": {
             "$ref": "#/components/schemas/OperationReference"
           },
-          "leaseToken": {
-            "description": "The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`.\nFor a leased job, a supplied token is validated to prove the command comes from the worker that holds the current lease; a command carrying a stale token is rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker).\nAn update without a token always applies to support operator and bulk updates of leased jobs. Note that this is different from lifecycle requests like complete, fail, and throw-error that always require a token for leased jobs.\nA job that was activated without a lease requires no token.\n",
-            "type": "string",
-            "nullable": true
+          "jobLeaseToken": {
+            "description": "The token identifying a leased job's activation, obtained from `ActivatedJobResult.jobLeaseToken`.\nFor a leased job, a supplied token is validated to prove the command comes from the worker that holds the current lease; a command carrying a stale token is rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker).\nAn update without a token always applies to support operator and bulk updates of leased jobs. Note that this is different from lifecycle requests like complete, fail, and throw-error that always require a token for leased jobs.\nA job that was activated without a lease requires no token.\n",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/JobLeaseToken"
+              }
+            ]
           }
         },
         "required": [
@@ -33424,7 +33479,7 @@
             "addedInVersion": "8.8"
           },
           {
-            "propertyName": "leaseToken",
+            "propertyName": "jobLeaseToken",
             "addedInVersion": "8.10"
           }
         ]
@@ -35122,6 +35177,7 @@
               "$or": {
                 "description": "Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.\n\nTop-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match.\n<br>\n<em>Example:</em>\n\n```json\n{\n  \"$or\": [\n    { \"mappingRuleId\": \"rule-1\" },\n    { \"mappingRuleId\": \"rule-2\" }\n  ]\n}\n```\nThis matches mapping rules whose <code>mappingRuleId</code> is <em>rule-1</em> or <em>rule-2</em>.\n<br>\n<p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.\n",
                 "type": "array",
+                "nullable": true,
                 "items": {
                   "$ref": "#/components/schemas/MappingRuleFilterFields"
                 }
@@ -35836,7 +35892,11 @@
           },
           "elementId": {
             "description": "The element ID that received the message.",
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ElementId"
+              }
+            ]
           },
           "elementInstanceKey": {
             "allOf": [
@@ -38865,6 +38925,7 @@
               "$or": {
                 "description": "Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.\n\nTop-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match.\n<br>\n<em>Example:</em>\n\n```json\n{\n  \"name\": \"Admin\",\n  \"$or\": [\n    { \"roleId\": \"role-1\" },\n    { \"roleId\": \"role-2\" }\n  ]\n}\n```\nThis matches roles that:\n\n<ul style=\"padding-left: 20px; margin-left: 20px;\">\n  <li style=\"list-style-type: disc;\">have name equal to <em>Admin</em></li>\n  <li style=\"list-style-type: disc;\">and match either:\n    <ul style=\"padding-left: 20px; margin-left: 20px;\">\n      <li style=\"list-style-type: circle;\"><code>roleId</code> is <em>role-1</em>, or</li>\n      <li style=\"list-style-type: circle;\"><code>roleId</code> is <em>role-2</em></li>\n    </ul>\n  </li>\n</ul>\n<br>\n<p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.\n",
                 "type": "array",
+                "nullable": true,
                 "items": {
                   "$ref": "#/components/schemas/RoleFilterFields"
                 }
@@ -41497,6 +41558,7 @@
               "$or": {
                 "description": "Defines a list of alternative filter groups combined using OR logic. Each object in the array is evaluated independently, and the filter matches if any one of them is satisfied.\n\nTop-level fields and the `$or` clause are combined using AND logic — meaning: (top-level filters) AND (any of the `$or` filters) must match.\n<br>\n<em>Example:</em>\n\n```json\n{\n  \"$or\": [\n    { \"username\": \"user-1\" },\n    { \"username\": \"user-2\" }\n  ]\n}\n```\nThis matches users whose <code>username</code> is <em>user-1</em> or <em>user-2</em>.\n<br>\n<p>Note: Using complex <code>$or</code> conditions may impact performance, use with caution in high-volume environments.\n",
                 "type": "array",
+                "nullable": true,
                 "items": {
                   "$ref": "#/components/schemas/UserFilterFields"
                 }

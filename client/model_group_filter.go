@@ -108,9 +108,9 @@ func (o *GroupFilter) SetName(v StringFilterProperty) {
 	o.Name = &v
 }
 
-// GetOr returns the Or field value if set, zero value otherwise.
+// GetOr returns the Or field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *GroupFilter) GetOr() []GroupFilterFields {
-	if o == nil || IsNil(o.Or) {
+	if o == nil {
 		var ret []GroupFilterFields
 		return ret
 	}
@@ -119,6 +119,7 @@ func (o *GroupFilter) GetOr() []GroupFilterFields {
 
 // GetOrOk returns a tuple with the Or field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *GroupFilter) GetOrOk() ([]GroupFilterFields, bool) {
 	if o == nil || IsNil(o.Or) {
 		return nil, false
@@ -156,7 +157,7 @@ func (o GroupFilter) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
-	if !IsNil(o.Or) {
+	if o.Or != nil {
 		toSerialize["$or"] = o.Or
 	}
 	return toSerialize, nil

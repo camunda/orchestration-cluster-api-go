@@ -27,8 +27,8 @@ type JobErrorRequest struct {
 	ErrorMessage NullableString `json:"errorMessage,omitempty"`
 	// JSON object that will instantiate the variables at the local scope of the error catch event that catches the thrown error.
 	Variables map[string]interface{} `json:"variables,omitempty"`
-	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`. For a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). A job that was activated without a lease requires no token.
-	LeaseToken NullableJobLeaseToken `json:"leaseToken,omitempty"`
+	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.jobLeaseToken`. For a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). A job that was activated without a lease requires no token.
+	JobLeaseToken NullableJobLeaseToken `json:"jobLeaseToken,omitempty"`
 }
 
 type _JobErrorRequest JobErrorRequest
@@ -151,47 +151,47 @@ func (o *JobErrorRequest) SetVariables(v map[string]interface{}) {
 	o.Variables = v
 }
 
-// GetLeaseToken returns the LeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobErrorRequest) GetLeaseToken() JobLeaseToken {
-	if o == nil || IsNil(o.LeaseToken.Get()) {
+// GetJobLeaseToken returns the JobLeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *JobErrorRequest) GetJobLeaseToken() JobLeaseToken {
+	if o == nil || IsNil(o.JobLeaseToken.Get()) {
 		var ret JobLeaseToken
 		return ret
 	}
-	return *o.LeaseToken.Get()
+	return *o.JobLeaseToken.Get()
 }
 
-// GetLeaseTokenOk returns a tuple with the LeaseToken field value if set, nil otherwise
+// GetJobLeaseTokenOk returns a tuple with the JobLeaseToken field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobErrorRequest) GetLeaseTokenOk() (*JobLeaseToken, bool) {
+func (o *JobErrorRequest) GetJobLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.LeaseToken.Get(), o.LeaseToken.IsSet()
+	return o.JobLeaseToken.Get(), o.JobLeaseToken.IsSet()
 }
 
-// HasLeaseToken returns a boolean if a field has been set.
-func (o *JobErrorRequest) HasLeaseToken() bool {
-	if o != nil && o.LeaseToken.IsSet() {
+// HasJobLeaseToken returns a boolean if a field has been set.
+func (o *JobErrorRequest) HasJobLeaseToken() bool {
+	if o != nil && o.JobLeaseToken.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the LeaseToken field.
-func (o *JobErrorRequest) SetLeaseToken(v JobLeaseToken) {
-	o.LeaseToken.Set(&v)
+// SetJobLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the JobLeaseToken field.
+func (o *JobErrorRequest) SetJobLeaseToken(v JobLeaseToken) {
+	o.JobLeaseToken.Set(&v)
 }
 
-// SetLeaseTokenNil sets the value for LeaseToken to be an explicit nil
-func (o *JobErrorRequest) SetLeaseTokenNil() {
-	o.LeaseToken.Set(nil)
+// SetJobLeaseTokenNil sets the value for JobLeaseToken to be an explicit nil
+func (o *JobErrorRequest) SetJobLeaseTokenNil() {
+	o.JobLeaseToken.Set(nil)
 }
 
-// UnsetLeaseToken ensures that no value is present for LeaseToken, not even an explicit nil
-func (o *JobErrorRequest) UnsetLeaseToken() {
-	o.LeaseToken.Unset()
+// UnsetJobLeaseToken ensures that no value is present for JobLeaseToken, not even an explicit nil
+func (o *JobErrorRequest) UnsetJobLeaseToken() {
+	o.JobLeaseToken.Unset()
 }
 
 func (o JobErrorRequest) MarshalJSON() ([]byte, error) {
@@ -211,8 +211,8 @@ func (o JobErrorRequest) ToMap() (map[string]interface{}, error) {
 	if o.Variables != nil {
 		toSerialize["variables"] = o.Variables
 	}
-	if o.LeaseToken.IsSet() {
-		toSerialize["leaseToken"] = o.LeaseToken.Get()
+	if o.JobLeaseToken.IsSet() {
+		toSerialize["jobLeaseToken"] = o.JobLeaseToken.Get()
 	}
 	return toSerialize, nil
 }

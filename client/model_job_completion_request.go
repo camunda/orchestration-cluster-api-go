@@ -22,8 +22,8 @@ type JobCompletionRequest struct {
 	// The variables to complete the job with.
 	Variables map[string]interface{} `json:"variables,omitempty"`
 	Result    *JobResult             `json:"result,omitempty"`
-	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`. For a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). A job that was activated without a lease requires no token.
-	LeaseToken NullableJobLeaseToken `json:"leaseToken,omitempty"`
+	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.jobLeaseToken`. For a leased job, the matching token must be supplied to prove the command comes from the worker that holds the current lease; a command with no token is rejected. A command carrying a stale token is likewise rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). A job that was activated without a lease requires no token.
+	JobLeaseToken NullableJobLeaseToken `json:"jobLeaseToken,omitempty"`
 	// An optional business id to assign to the process instance the job belongs to, as part of completing the job, letting a worker set the identifier from work it just performed. The business id can only be assigned to a root process instance: if the job belongs to a child process instance (one started by a call activity), the completion is rejected. An empty business id is likewise rejected. The assignment is single and irreversible and is only accepted while business id uniqueness is disabled. Only artifacts created after the assignment carry the business id; already-existing ones are not enriched. Completing with a business id that differs from one already assigned rejects the whole completion, leaving the job open; re-sending the identical business id is an idempotent no-op.
 	BusinessId NullableBusinessId `json:"businessId,omitempty"`
 }
@@ -110,47 +110,47 @@ func (o *JobCompletionRequest) SetResult(v JobResult) {
 	o.Result = &v
 }
 
-// GetLeaseToken returns the LeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobCompletionRequest) GetLeaseToken() JobLeaseToken {
-	if o == nil || IsNil(o.LeaseToken.Get()) {
+// GetJobLeaseToken returns the JobLeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *JobCompletionRequest) GetJobLeaseToken() JobLeaseToken {
+	if o == nil || IsNil(o.JobLeaseToken.Get()) {
 		var ret JobLeaseToken
 		return ret
 	}
-	return *o.LeaseToken.Get()
+	return *o.JobLeaseToken.Get()
 }
 
-// GetLeaseTokenOk returns a tuple with the LeaseToken field value if set, nil otherwise
+// GetJobLeaseTokenOk returns a tuple with the JobLeaseToken field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobCompletionRequest) GetLeaseTokenOk() (*JobLeaseToken, bool) {
+func (o *JobCompletionRequest) GetJobLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.LeaseToken.Get(), o.LeaseToken.IsSet()
+	return o.JobLeaseToken.Get(), o.JobLeaseToken.IsSet()
 }
 
-// HasLeaseToken returns a boolean if a field has been set.
-func (o *JobCompletionRequest) HasLeaseToken() bool {
-	if o != nil && o.LeaseToken.IsSet() {
+// HasJobLeaseToken returns a boolean if a field has been set.
+func (o *JobCompletionRequest) HasJobLeaseToken() bool {
+	if o != nil && o.JobLeaseToken.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the LeaseToken field.
-func (o *JobCompletionRequest) SetLeaseToken(v JobLeaseToken) {
-	o.LeaseToken.Set(&v)
+// SetJobLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the JobLeaseToken field.
+func (o *JobCompletionRequest) SetJobLeaseToken(v JobLeaseToken) {
+	o.JobLeaseToken.Set(&v)
 }
 
-// SetLeaseTokenNil sets the value for LeaseToken to be an explicit nil
-func (o *JobCompletionRequest) SetLeaseTokenNil() {
-	o.LeaseToken.Set(nil)
+// SetJobLeaseTokenNil sets the value for JobLeaseToken to be an explicit nil
+func (o *JobCompletionRequest) SetJobLeaseTokenNil() {
+	o.JobLeaseToken.Set(nil)
 }
 
-// UnsetLeaseToken ensures that no value is present for LeaseToken, not even an explicit nil
-func (o *JobCompletionRequest) UnsetLeaseToken() {
-	o.LeaseToken.Unset()
+// UnsetJobLeaseToken ensures that no value is present for JobLeaseToken, not even an explicit nil
+func (o *JobCompletionRequest) UnsetJobLeaseToken() {
+	o.JobLeaseToken.Unset()
 }
 
 // GetBusinessId returns the BusinessId field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -212,8 +212,8 @@ func (o JobCompletionRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Result) {
 		toSerialize["result"] = o.Result
 	}
-	if o.LeaseToken.IsSet() {
-		toSerialize["leaseToken"] = o.LeaseToken.Get()
+	if o.JobLeaseToken.IsSet() {
+		toSerialize["jobLeaseToken"] = o.JobLeaseToken.Get()
 	}
 	if o.BusinessId.IsSet() {
 		toSerialize["businessId"] = o.BusinessId.Get()

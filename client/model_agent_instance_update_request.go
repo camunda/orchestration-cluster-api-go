@@ -28,7 +28,7 @@ type AgentInstanceUpdateRequest struct {
 	// The key of the job activation during which this update is being made. An update must always be attributed to the active job that produced it.
 	JobKey JobKey `json:"jobKey"`
 	// Opaque lease token received from the job activation response. Disambiguates this activation from any other activation of the same job: if the job is later retried, history items submitted under a superseded lease are discarded rather than committed.
-	JobLease JobLeaseToken `json:"jobLease"`
+	JobLeaseToken JobLeaseToken `json:"jobLeaseToken"`
 	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated.
 	History []AgentInstanceHistoryItem `json:"history,omitempty"`
 }
@@ -39,11 +39,11 @@ type _AgentInstanceUpdateRequest AgentInstanceUpdateRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceUpdateRequest(elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLease JobLeaseToken) *AgentInstanceUpdateRequest {
+func NewAgentInstanceUpdateRequest(elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLeaseToken JobLeaseToken) *AgentInstanceUpdateRequest {
 	this := AgentInstanceUpdateRequest{}
 	this.ElementInstanceKey = elementInstanceKey
 	this.JobKey = jobKey
-	this.JobLease = jobLease
+	this.JobLeaseToken = jobLeaseToken
 	return &this
 }
 
@@ -135,28 +135,28 @@ func (o *AgentInstanceUpdateRequest) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
-// GetJobLease returns the JobLease field value
-func (o *AgentInstanceUpdateRequest) GetJobLease() JobLeaseToken {
+// GetJobLeaseToken returns the JobLeaseToken field value
+func (o *AgentInstanceUpdateRequest) GetJobLeaseToken() JobLeaseToken {
 	if o == nil {
 		var ret JobLeaseToken
 		return ret
 	}
 
-	return o.JobLease
+	return o.JobLeaseToken
 }
 
-// GetJobLeaseOk returns a tuple with the JobLease field value
+// GetJobLeaseTokenOk returns a tuple with the JobLeaseToken field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceUpdateRequest) GetJobLeaseOk() (*JobLeaseToken, bool) {
+func (o *AgentInstanceUpdateRequest) GetJobLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.JobLease, true
+	return &o.JobLeaseToken, true
 }
 
-// SetJobLease sets field value
-func (o *AgentInstanceUpdateRequest) SetJobLease(v JobLeaseToken) {
-	o.JobLease = v
+// SetJobLeaseToken sets field value
+func (o *AgentInstanceUpdateRequest) SetJobLeaseToken(v JobLeaseToken) {
+	o.JobLeaseToken = v
 }
 
 // GetHistory returns the History field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -207,7 +207,7 @@ func (o AgentInstanceUpdateRequest) ToMap() (map[string]interface{}, error) {
 		toSerialize["status"] = o.Status
 	}
 	toSerialize["jobKey"] = o.JobKey
-	toSerialize["jobLease"] = o.JobLease
+	toSerialize["jobLeaseToken"] = o.JobLeaseToken
 	if o.History != nil {
 		toSerialize["history"] = o.History
 	}
@@ -221,7 +221,6 @@ func (o *AgentInstanceUpdateRequest) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"elementInstanceKey",
 		"jobKey",
-		"jobLease",
 	}
 
 	allProperties := make(map[string]interface{})

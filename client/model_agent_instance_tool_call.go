@@ -26,7 +26,7 @@ type AgentInstanceToolCall struct {
 	// The LLM-visible tool name.
 	ToolName string `json:"toolName"`
 	// The BPMN element ID handling this tool.
-	ElementId NullableString `json:"elementId"`
+	ElementId NullableElementId `json:"elementId"`
 	// The tool call arguments as provided by the LLM. May be null or populated on any item, including TOOL_RESULT.
 	Arguments map[string]interface{} `json:"arguments"`
 }
@@ -37,7 +37,7 @@ type _AgentInstanceToolCall AgentInstanceToolCall
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceToolCall(toolCallId string, toolName string, elementId NullableString, arguments map[string]interface{}) *AgentInstanceToolCall {
+func NewAgentInstanceToolCall(toolCallId string, toolName string, elementId NullableElementId, arguments map[string]interface{}) *AgentInstanceToolCall {
 	this := AgentInstanceToolCall{}
 	this.ToolCallId = toolCallId
 	this.ToolName = toolName
@@ -103,10 +103,10 @@ func (o *AgentInstanceToolCall) SetToolName(v string) {
 }
 
 // GetElementId returns the ElementId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *AgentInstanceToolCall) GetElementId() string {
+// If the value is explicit nil, the zero value for ElementId will be returned
+func (o *AgentInstanceToolCall) GetElementId() ElementId {
 	if o == nil || o.ElementId.Get() == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -116,7 +116,7 @@ func (o *AgentInstanceToolCall) GetElementId() string {
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AgentInstanceToolCall) GetElementIdOk() (*string, bool) {
+func (o *AgentInstanceToolCall) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -124,7 +124,7 @@ func (o *AgentInstanceToolCall) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *AgentInstanceToolCall) SetElementId(v string) {
+func (o *AgentInstanceToolCall) SetElementId(v ElementId) {
 	o.ElementId.Set(&v)
 }
 
