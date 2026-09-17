@@ -62,22 +62,13 @@ _EXTRA_STRING_KEYS = {
 # so the bundler cannot classify them and there is no ref for the field resolver to
 # follow. We still want them branded end-to-end (see issue #57), so we mint a
 # newtype here and map the (unambiguous) json property names that carry the scalar
-# to it. `JobLeaseToken` is the opaque lease token minted on job activation and
-# echoed back on completion/fail/error/update and agent-instance history.
+# to it.
 # TODO: drop an entry once the *committed* spec has upstream's named
 # `x-semantic-type` schema for it. Until then the entry is still load-bearing for
 # regeneration from the committed spec. The minted-name guard below makes an entry
 # that upstream has already superseded a no-op rather than a duplicate definition,
 # so the two can be reconciled in the regeneration PR instead of in lockstep.
-_EXTRA_SCALAR_TYPES = {
-    "JobLeaseToken": {
-        "base": "string",
-        "constraints": {},
-        "nullable": True,
-        "props": ("leaseToken", "jobLease"),
-        "noun": "semantic token",
-    },
-}
+_EXTRA_SCALAR_TYPES: dict[str, dict] = {}
 
 _TYPE_DECL = re.compile(r"^type\s+(\w+)\s", re.MULTILINE)
 _PKG_DECL = re.compile(r"^package\s+(\w+)", re.MULTILINE)
