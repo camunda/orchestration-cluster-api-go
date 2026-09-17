@@ -40,7 +40,7 @@ const jobTemplate = `{
   "rootProcessInstanceKey": "2251799813685417",
   "businessId": null,
   "priority": 0,
-  "leaseToken": null
+  "jobLeaseToken": null
 }`
 
 // oneJobResponse is a JobActivationResult carrying a single job (key 123, type
@@ -69,7 +69,7 @@ const oneJobResponse = `{
       "rootProcessInstanceKey": "2251799813685417",
       "businessId": null,
       "priority": 0,
-      "leaseToken": null
+      "jobLeaseToken": null
     }
   ]
 }`
@@ -544,7 +544,7 @@ func TestJobWorkerRequestsLease(t *testing.T) {
 // the token would have its command rejected for a leased job.
 func TestRESTAckForwardsLeaseToken(t *testing.T) {
 	const lease = "lease-abc"
-	leasedJobResponse := strings.Replace(oneJobResponse, `"leaseToken": null`, `"leaseToken": "`+lease+`"`, 1)
+	leasedJobResponse := strings.Replace(oneJobResponse, `"jobLeaseToken": null`, `"jobLeaseToken": "`+lease+`"`, 1)
 
 	tests := []struct {
 		name    string
@@ -585,7 +585,7 @@ func TestRESTAckForwardsLeaseToken(t *testing.T) {
 					}
 				case strings.HasSuffix(r.URL.Path, tc.ackPath):
 					var body struct {
-						LeaseToken string `json:"leaseToken"`
+						LeaseToken string `json:"jobLeaseToken"`
 					}
 					_ = json.NewDecoder(r.Body).Decode(&body)
 					select {

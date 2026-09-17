@@ -19,7 +19,7 @@ func TestNewGRPCJobDecodesFields(t *testing.T) {
 		ElementId:          "task-1",
 		CustomHeaders:      `{"h":"v"}`,
 		Variables:          `{"amount":42,"name":"x"}`,
-		LeaseToken:         &lease,
+		JobLeaseToken:      &lease,
 	}
 	j := newGRPCJob(aj, LiveClock{})
 
