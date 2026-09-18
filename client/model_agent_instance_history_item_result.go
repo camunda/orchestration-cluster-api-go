@@ -33,7 +33,7 @@ type AgentInstanceHistoryItemResult struct {
 	// The key of the job activation during which this item was produced.
 	JobKey JobKey `json:"jobKey"`
 	// The lease token of the activation that produced this item.
-	JobLease JobLeaseToken `json:"jobLease"`
+	JobLeaseToken JobLeaseToken `json:"jobLeaseToken"`
 	// The loop iteration this item belongs to.
 	LoopIteration LoopIterationId `json:"loopIteration"`
 	// The role of this history item in the conversation.
@@ -66,14 +66,14 @@ type _AgentInstanceHistoryItemResult AgentInstanceHistoryItemResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceHistoryItemResult(historyItemKey AgentHistoryItemKey, historyItemId HistoryItemId, agentInstanceKey AgentInstanceKey, elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLease JobLeaseToken, loopIteration LoopIterationId, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time, tools []AgentTool, model NullableString, provider NullableString, limits AgentInstanceLimits, systemPrompt []AgentInstanceMessageContent) *AgentInstanceHistoryItemResult {
+func NewAgentInstanceHistoryItemResult(historyItemKey AgentHistoryItemKey, historyItemId HistoryItemId, agentInstanceKey AgentInstanceKey, elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLeaseToken JobLeaseToken, loopIteration LoopIterationId, role AgentInstanceHistoryRoleEnum, content []AgentInstanceMessageContent, toolCalls []AgentInstanceToolCall, metrics NullableAgentInstanceHistoryItemMetrics, commitStatus AgentInstanceHistoryCommitStatusEnum, producedAt time.Time, tools []AgentTool, model NullableString, provider NullableString, limits AgentInstanceLimits, systemPrompt []AgentInstanceMessageContent) *AgentInstanceHistoryItemResult {
 	this := AgentInstanceHistoryItemResult{}
 	this.HistoryItemKey = historyItemKey
 	this.HistoryItemId = historyItemId
 	this.AgentInstanceKey = agentInstanceKey
 	this.ElementInstanceKey = elementInstanceKey
 	this.JobKey = jobKey
-	this.JobLease = jobLease
+	this.JobLeaseToken = jobLeaseToken
 	this.LoopIteration = loopIteration
 	this.Role = role
 	this.Content = content
@@ -217,28 +217,28 @@ func (o *AgentInstanceHistoryItemResult) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
-// GetJobLease returns the JobLease field value
-func (o *AgentInstanceHistoryItemResult) GetJobLease() JobLeaseToken {
+// GetJobLeaseToken returns the JobLeaseToken field value
+func (o *AgentInstanceHistoryItemResult) GetJobLeaseToken() JobLeaseToken {
 	if o == nil {
 		var ret JobLeaseToken
 		return ret
 	}
 
-	return o.JobLease
+	return o.JobLeaseToken
 }
 
-// GetJobLeaseOk returns a tuple with the JobLease field value
+// GetJobLeaseTokenOk returns a tuple with the JobLeaseToken field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceHistoryItemResult) GetJobLeaseOk() (*JobLeaseToken, bool) {
+func (o *AgentInstanceHistoryItemResult) GetJobLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.JobLease, true
+	return &o.JobLeaseToken, true
 }
 
-// SetJobLease sets field value
-func (o *AgentInstanceHistoryItemResult) SetJobLease(v JobLeaseToken) {
-	o.JobLease = v
+// SetJobLeaseToken sets field value
+func (o *AgentInstanceHistoryItemResult) SetJobLeaseToken(v JobLeaseToken) {
+	o.JobLeaseToken = v
 }
 
 // GetLoopIteration returns the LoopIteration field value
@@ -550,7 +550,7 @@ func (o AgentInstanceHistoryItemResult) ToMap() (map[string]interface{}, error) 
 	toSerialize["agentInstanceKey"] = o.AgentInstanceKey
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
 	toSerialize["jobKey"] = o.JobKey
-	toSerialize["jobLease"] = o.JobLease
+	toSerialize["jobLeaseToken"] = o.JobLeaseToken
 	toSerialize["loopIteration"] = o.LoopIteration
 	toSerialize["role"] = o.Role
 	toSerialize["content"] = o.Content
@@ -576,7 +576,6 @@ func (o *AgentInstanceHistoryItemResult) UnmarshalJSON(data []byte) (err error) 
 		"agentInstanceKey",
 		"elementInstanceKey",
 		"jobKey",
-		"jobLease",
 		"loopIteration",
 		"role",
 		"content",

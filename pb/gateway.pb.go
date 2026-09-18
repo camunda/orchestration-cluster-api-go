@@ -386,7 +386,7 @@ type StreamActivatedJobsRequest struct {
 	// the tenant filtering strategy - determines whether to use provided tenant IDs or assigned tenant IDs
 	TenantFilter TenantFilter `protobuf:"varint,7,opt,name=tenantFilter,proto3,enum=gateway_protocol.TenantFilter" json:"tenantFilter,omitempty"`
 	// whether to stream jobs with a lease; when true, each job pushed on this stream is
-	// assigned a distinct, opaque lease token, returned as ActivatedJob.leaseToken. The lease
+	// assigned a distinct, opaque lease token, returned as ActivatedJob.jobLeaseToken. The lease
 	// fences the complete, fail, and throw-error commands against a superseded activation of
 	// the same job (e.g. after the job timed out or failed and was re-activated by another
 	// worker): a command carrying a stale lease token is rejected rather than racing with the
@@ -499,7 +499,7 @@ type ActivateJobsRequest struct {
 	// the tenant filtering strategy - determines whether to use provided tenant IDs or assigned tenant IDs
 	TenantFilter TenantFilter `protobuf:"varint,8,opt,name=tenantFilter,proto3,enum=gateway_protocol.TenantFilter" json:"tenantFilter,omitempty"`
 	// whether to activate the jobs with a lease; when true, each activated job is assigned a
-	// distinct, opaque lease token, returned as ActivatedJob.leaseToken. The lease fences the
+	// distinct, opaque lease token, returned as ActivatedJob.jobLeaseToken. The lease fences the
 	// complete, fail, and throw-error commands against a superseded activation of the same job
 	// (e.g. after the job timed out or failed and was re-activated by another worker): a command
 	// carrying a stale lease token is rejected rather than racing with the newer activation. Once
@@ -696,7 +696,7 @@ type ActivatedJob struct {
 	BusinessId string `protobuf:"bytes,20,opt,name=businessId,proto3" json:"businessId,omitempty"`
 	// the lease token identifying this activation; unset when the job was activated without a
 	// lease
-	LeaseToken *string `protobuf:"bytes,21,opt,name=leaseToken,proto3,oneof" json:"leaseToken,omitempty"`
+	JobLeaseToken *string `protobuf:"bytes,21,opt,name=jobLeaseToken,proto3,oneof" json:"jobLeaseToken,omitempty"`
 	// the id of the physical tenant that the job-activation request was routed to;
 	// the default physical tenant when the request did not specify one
 	PhysicalTenantId string `protobuf:"bytes,22,opt,name=physicalTenantId,proto3" json:"physicalTenantId,omitempty"`
@@ -874,9 +874,9 @@ func (x *ActivatedJob) GetBusinessId() string {
 	return ""
 }
 
-func (x *ActivatedJob) GetLeaseToken() string {
-	if x != nil && x.LeaseToken != nil {
-		return *x.LeaseToken
+func (x *ActivatedJob) GetJobLeaseToken() string {
+	if x != nil && x.JobLeaseToken != nil {
+		return *x.JobLeaseToken
 	}
 	return ""
 }
@@ -1114,13 +1114,13 @@ type CompleteJobRequest struct {
 	// The result of the completed job as determined by the worker.
 	// This functionality is currently supported only by user task listeners.
 	Result *JobResult `protobuf:"bytes,3,opt,name=result,proto3,oneof" json:"result,omitempty"`
-	// the token identifying a leased job's activation, obtained from ActivatedJob.leaseToken.
+	// the token identifying a leased job's activation, obtained from ActivatedJob.jobLeaseToken.
 	// For a leased job, the matching token must be supplied to prove the command comes from the
 	// worker that holds the current lease; a command with no token is rejected. A command carrying
 	// a stale token is likewise rejected, fencing the job against a superseded activation (e.g.
 	// after the job timed out or failed and was re-activated by another worker). A job that was
 	// activated without a lease requires no token.
-	LeaseToken *string `protobuf:"bytes,4,opt,name=leaseToken,proto3,oneof" json:"leaseToken,omitempty"`
+	JobLeaseToken *string `protobuf:"bytes,4,opt,name=jobLeaseToken,proto3,oneof" json:"jobLeaseToken,omitempty"`
 	// an optional business id to assign to the process instance the job belongs to, as part of
 	// completing the job. The business id can only be assigned to a root process instance: if the
 	// job belongs to a child process instance (one started by a call activity), the completion is
@@ -1185,9 +1185,9 @@ func (x *CompleteJobRequest) GetResult() *JobResult {
 	return nil
 }
 
-func (x *CompleteJobRequest) GetLeaseToken() string {
-	if x != nil && x.LeaseToken != nil {
-		return *x.LeaseToken
+func (x *CompleteJobRequest) GetJobLeaseToken() string {
+	if x != nil && x.JobLeaseToken != nil {
+		return *x.JobLeaseToken
 	}
 	return ""
 }
@@ -3493,13 +3493,13 @@ type FailJobRequest struct {
 	// "b" respectively, with their associated values. [{ "a": 1, "b": 2 }] would not be a
 	// valid argument, as the root of the JSON document is an array and not an object.
 	Variables string `protobuf:"bytes,5,opt,name=variables,proto3" json:"variables,omitempty"`
-	// the token identifying a leased job's activation, obtained from ActivatedJob.leaseToken.
+	// the token identifying a leased job's activation, obtained from ActivatedJob.jobLeaseToken.
 	// For a leased job, the matching token must be supplied to prove the command comes from the
 	// worker that holds the current lease; a command with no token is rejected. A command carrying
 	// a stale token is likewise rejected, fencing the job against a superseded activation (e.g.
 	// after the job timed out or failed and was re-activated by another worker). A job that was
 	// activated without a lease requires no token.
-	LeaseToken    *string `protobuf:"bytes,6,opt,name=leaseToken,proto3,oneof" json:"leaseToken,omitempty"`
+	JobLeaseToken *string `protobuf:"bytes,6,opt,name=jobLeaseToken,proto3,oneof" json:"jobLeaseToken,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3569,9 +3569,9 @@ func (x *FailJobRequest) GetVariables() string {
 	return ""
 }
 
-func (x *FailJobRequest) GetLeaseToken() string {
-	if x != nil && x.LeaseToken != nil {
-		return *x.LeaseToken
+func (x *FailJobRequest) GetJobLeaseToken() string {
+	if x != nil && x.JobLeaseToken != nil {
+		return *x.JobLeaseToken
 	}
 	return ""
 }
@@ -3626,13 +3626,13 @@ type ThrowErrorRequest struct {
 	// "b" respectively, with their associated values. [{ "a": 1, "b": 2 }] would not be a
 	// valid argument, as the root of the JSON document is an array and not an object.
 	Variables string `protobuf:"bytes,4,opt,name=variables,proto3" json:"variables,omitempty"`
-	// the token identifying a leased job's activation, obtained from ActivatedJob.leaseToken.
+	// the token identifying a leased job's activation, obtained from ActivatedJob.jobLeaseToken.
 	// For a leased job, the matching token must be supplied to prove the command comes from the
 	// worker that holds the current lease; a command with no token is rejected. A command carrying
 	// a stale token is likewise rejected, fencing the job against a superseded activation (e.g.
 	// after the job timed out or failed and was re-activated by another worker). A job that was
 	// activated without a lease requires no token.
-	LeaseToken    *string `protobuf:"bytes,5,opt,name=leaseToken,proto3,oneof" json:"leaseToken,omitempty"`
+	JobLeaseToken *string `protobuf:"bytes,5,opt,name=jobLeaseToken,proto3,oneof" json:"jobLeaseToken,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3695,9 +3695,9 @@ func (x *ThrowErrorRequest) GetVariables() string {
 	return ""
 }
 
-func (x *ThrowErrorRequest) GetLeaseToken() string {
-	if x != nil && x.LeaseToken != nil {
-		return *x.LeaseToken
+func (x *ThrowErrorRequest) GetJobLeaseToken() string {
+	if x != nil && x.JobLeaseToken != nil {
+		return *x.JobLeaseToken
 	}
 	return ""
 }
@@ -4288,7 +4288,7 @@ type UpdateJobRetriesRequest struct {
 	Retries int32 `protobuf:"varint,2,opt,name=retries,proto3" json:"retries,omitempty"`
 	// a reference key chosen by the user and will be part of all records resulted from this operation
 	OperationReference *uint64 `protobuf:"varint,3,opt,name=operationReference,proto3,oneof" json:"operationReference,omitempty"`
-	// the token identifying a leased job's activation, obtained from ActivatedJob.leaseToken.
+	// the token identifying a leased job's activation, obtained from ActivatedJob.jobLeaseToken.
 	// For a leased job, a supplied token is validated to prove the command comes from the worker
 	// that holds the current lease; a command carrying a stale token is rejected, fencing the job
 	// against a superseded activation (e.g. after the job timed out or failed and was re-activated
@@ -4296,7 +4296,7 @@ type UpdateJobRetriesRequest struct {
 	// updates of leased jobs; this differs from lifecycle commands like complete, fail, and
 	// throw-error, which always require a token for leased jobs. A job that was activated without a
 	// lease requires no token.
-	LeaseToken    *string `protobuf:"bytes,4,opt,name=leaseToken,proto3,oneof" json:"leaseToken,omitempty"`
+	JobLeaseToken *string `protobuf:"bytes,4,opt,name=jobLeaseToken,proto3,oneof" json:"jobLeaseToken,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4352,9 +4352,9 @@ func (x *UpdateJobRetriesRequest) GetOperationReference() uint64 {
 	return 0
 }
 
-func (x *UpdateJobRetriesRequest) GetLeaseToken() string {
-	if x != nil && x.LeaseToken != nil {
-		return *x.LeaseToken
+func (x *UpdateJobRetriesRequest) GetJobLeaseToken() string {
+	if x != nil && x.JobLeaseToken != nil {
+		return *x.JobLeaseToken
 	}
 	return ""
 }
@@ -4403,7 +4403,7 @@ type UpdateJobTimeoutRequest struct {
 	Timeout int64 `protobuf:"varint,2,opt,name=timeout,proto3" json:"timeout,omitempty"`
 	// a reference key chosen by the user and will be part of all records resulted from this operation
 	OperationReference *uint64 `protobuf:"varint,3,opt,name=operationReference,proto3,oneof" json:"operationReference,omitempty"`
-	// the token identifying a leased job's activation, obtained from ActivatedJob.leaseToken.
+	// the token identifying a leased job's activation, obtained from ActivatedJob.jobLeaseToken.
 	// For a leased job, a supplied token is validated to prove the command comes from the worker
 	// that holds the current lease; a command carrying a stale token is rejected, fencing the job
 	// against a superseded activation (e.g. after the job timed out or failed and was re-activated
@@ -4411,7 +4411,7 @@ type UpdateJobTimeoutRequest struct {
 	// updates of leased jobs; this differs from lifecycle commands like complete, fail, and
 	// throw-error, which always require a token for leased jobs. A job that was activated without a
 	// lease requires no token.
-	LeaseToken    *string `protobuf:"bytes,4,opt,name=leaseToken,proto3,oneof" json:"leaseToken,omitempty"`
+	JobLeaseToken *string `protobuf:"bytes,4,opt,name=jobLeaseToken,proto3,oneof" json:"jobLeaseToken,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4467,9 +4467,9 @@ func (x *UpdateJobTimeoutRequest) GetOperationReference() uint64 {
 	return 0
 }
 
-func (x *UpdateJobTimeoutRequest) GetLeaseToken() string {
-	if x != nil && x.LeaseToken != nil {
-		return *x.LeaseToken
+func (x *UpdateJobTimeoutRequest) GetJobLeaseToken() string {
+	if x != nil && x.JobLeaseToken != nil {
+		return *x.JobLeaseToken
 	}
 	return ""
 }
@@ -4518,7 +4518,7 @@ type UpdateJobPriorityRequest struct {
 	Priority *int32 `protobuf:"varint,2,opt,name=priority,proto3,oneof" json:"priority,omitempty"`
 	// a reference key chosen by the user and will be part of all records resulted from this operation
 	OperationReference *uint64 `protobuf:"varint,3,opt,name=operationReference,proto3,oneof" json:"operationReference,omitempty"`
-	// the token identifying a leased job's activation, obtained from ActivatedJob.leaseToken.
+	// the token identifying a leased job's activation, obtained from ActivatedJob.jobLeaseToken.
 	// For a leased job, a supplied token is validated to prove the command comes from the worker
 	// that holds the current lease; a command carrying a stale token is rejected, fencing the job
 	// against a superseded activation (e.g. after the job timed out or failed and was re-activated
@@ -4526,7 +4526,7 @@ type UpdateJobPriorityRequest struct {
 	// updates of leased jobs; this differs from lifecycle commands like complete, fail, and
 	// throw-error, which always require a token for leased jobs. A job that was activated without a
 	// lease requires no token.
-	LeaseToken    *string `protobuf:"bytes,4,opt,name=leaseToken,proto3,oneof" json:"leaseToken,omitempty"`
+	JobLeaseToken *string `protobuf:"bytes,4,opt,name=jobLeaseToken,proto3,oneof" json:"jobLeaseToken,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -4582,9 +4582,9 @@ func (x *UpdateJobPriorityRequest) GetOperationReference() uint64 {
 	return 0
 }
 
-func (x *UpdateJobPriorityRequest) GetLeaseToken() string {
-	if x != nil && x.LeaseToken != nil {
-		return *x.LeaseToken
+func (x *UpdateJobPriorityRequest) GetJobLeaseToken() string {
+	if x != nil && x.JobLeaseToken != nil {
+		return *x.JobLeaseToken
 	}
 	return ""
 }
@@ -5952,7 +5952,7 @@ const file_gateway_proto_rawDesc = "" +
 	"\ftenantFilter\x18\b \x01(\x0e2\x1e.gateway_protocol.TenantFilterR\ftenantFilter\x12\x1c\n" +
 	"\twithLease\x18\t \x01(\bR\twithLease\"J\n" +
 	"\x14ActivateJobsResponse\x122\n" +
-	"\x04jobs\x18\x01 \x03(\v2\x1e.gateway_protocol.ActivatedJobR\x04jobs\"\x97\t\n" +
+	"\x04jobs\x18\x01 \x03(\v2\x1e.gateway_protocol.ActivatedJobR\x04jobs\"\xa0\t\n" +
 	"\fActivatedJob\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x03R\x03key\x12\x12\n" +
 	"\x04type\x18\x02 \x01(\tR\x04type\x12.\n" +
@@ -5976,10 +5976,8 @@ const file_gateway_proto_rawDesc = "" +
 	"\bpriority\x18\x13 \x01(\x05R\bpriority\x12\x1e\n" +
 	"\n" +
 	"businessId\x18\x14 \x01(\tR\n" +
-	"businessId\x12#\n" +
-	"\n" +
-	"leaseToken\x18\x15 \x01(\tH\x01R\n" +
-	"leaseToken\x88\x01\x01\x12*\n" +
+	"businessId\x12)\n" +
+	"\rjobLeaseToken\x18\x15 \x01(\tH\x01R\rjobLeaseToken\x88\x01\x01\x12*\n" +
 	"\x10physicalTenantId\x18\x16 \x01(\tR\x10physicalTenantId\"^\n" +
 	"\aJobKind\x12\x10\n" +
 	"\fBPMN_ELEMENT\x10\x00\x12\x16\n" +
@@ -6000,8 +5998,8 @@ const file_gateway_proto_rawDesc = "" +
 	"BEFORE_ALL\x10\b\x12\n" +
 	"\n" +
 	"\x06CANCEL\x10\tB\v\n" +
-	"\t_userTaskB\r\n" +
-	"\v_leaseToken\"\xdf\x03\n" +
+	"\t_userTaskB\x10\n" +
+	"\x0e_jobLeaseToken\"\xdf\x03\n" +
 	"\x12UserTaskProperties\x12\x1b\n" +
 	"\x06action\x18\x01 \x01(\tH\x00R\x06action\x88\x01\x01\x12\x1f\n" +
 	"\bassignee\x18\x02 \x01(\tH\x01R\bassignee\x88\x01\x01\x12(\n" +
@@ -6027,19 +6025,17 @@ const file_gateway_proto_rawDesc = "" +
 	"\x12processInstanceKey\x18\x01 \x01(\x03R\x12processInstanceKey\x123\n" +
 	"\x12operationReference\x18\x02 \x01(\x04H\x00R\x12operationReference\x88\x01\x01B\x15\n" +
 	"\x13_operationReference\"\x1f\n" +
-	"\x1dCancelProcessInstanceResponse\"\xf7\x01\n" +
+	"\x1dCancelProcessInstanceResponse\"\x80\x02\n" +
 	"\x12CompleteJobRequest\x12\x16\n" +
 	"\x06jobKey\x18\x01 \x01(\x03R\x06jobKey\x12\x1c\n" +
 	"\tvariables\x18\x02 \x01(\tR\tvariables\x128\n" +
-	"\x06result\x18\x03 \x01(\v2\x1b.gateway_protocol.JobResultH\x00R\x06result\x88\x01\x01\x12#\n" +
-	"\n" +
-	"leaseToken\x18\x04 \x01(\tH\x01R\n" +
-	"leaseToken\x88\x01\x01\x12#\n" +
+	"\x06result\x18\x03 \x01(\v2\x1b.gateway_protocol.JobResultH\x00R\x06result\x88\x01\x01\x12)\n" +
+	"\rjobLeaseToken\x18\x04 \x01(\tH\x01R\rjobLeaseToken\x88\x01\x01\x12#\n" +
 	"\n" +
 	"businessId\x18\x05 \x01(\tH\x02R\n" +
 	"businessId\x88\x01\x01B\t\n" +
-	"\a_resultB\r\n" +
-	"\v_leaseTokenB\r\n" +
+	"\a_resultB\x10\n" +
+	"\x0e_jobLeaseTokenB\r\n" +
 	"\v_businessId\"\x9a\x04\n" +
 	"\tJobResult\x12\x1b\n" +
 	"\x06denied\x18\x01 \x01(\bH\x00R\x06denied\x88\x01\x01\x12M\n" +
@@ -6234,27 +6230,23 @@ const file_gateway_proto_rawDesc = "" +
 	"\aversion\x18\x02 \x01(\x05R\aversion\x12\x18\n" +
 	"\aformKey\x18\x03 \x01(\x03R\aformKey\x12\"\n" +
 	"\fresourceName\x18\x04 \x01(\tR\fresourceName\x12\x1a\n" +
-	"\btenantId\x18\x05 \x01(\tR\btenantId\"\xdc\x01\n" +
+	"\btenantId\x18\x05 \x01(\tR\btenantId\"\xe5\x01\n" +
 	"\x0eFailJobRequest\x12\x16\n" +
 	"\x06jobKey\x18\x01 \x01(\x03R\x06jobKey\x12\x18\n" +
 	"\aretries\x18\x02 \x01(\x05R\aretries\x12\"\n" +
 	"\ferrorMessage\x18\x03 \x01(\tR\ferrorMessage\x12\"\n" +
 	"\fretryBackOff\x18\x04 \x01(\x03R\fretryBackOff\x12\x1c\n" +
-	"\tvariables\x18\x05 \x01(\tR\tvariables\x12#\n" +
-	"\n" +
-	"leaseToken\x18\x06 \x01(\tH\x00R\n" +
-	"leaseToken\x88\x01\x01B\r\n" +
-	"\v_leaseToken\"\x11\n" +
-	"\x0fFailJobResponse\"\xbf\x01\n" +
+	"\tvariables\x18\x05 \x01(\tR\tvariables\x12)\n" +
+	"\rjobLeaseToken\x18\x06 \x01(\tH\x00R\rjobLeaseToken\x88\x01\x01B\x10\n" +
+	"\x0e_jobLeaseToken\"\x11\n" +
+	"\x0fFailJobResponse\"\xc8\x01\n" +
 	"\x11ThrowErrorRequest\x12\x16\n" +
 	"\x06jobKey\x18\x01 \x01(\x03R\x06jobKey\x12\x1c\n" +
 	"\terrorCode\x18\x02 \x01(\tR\terrorCode\x12\"\n" +
 	"\ferrorMessage\x18\x03 \x01(\tR\ferrorMessage\x12\x1c\n" +
-	"\tvariables\x18\x04 \x01(\tR\tvariables\x12#\n" +
-	"\n" +
-	"leaseToken\x18\x05 \x01(\tH\x00R\n" +
-	"leaseToken\x88\x01\x01B\r\n" +
-	"\v_leaseToken\"\x14\n" +
+	"\tvariables\x18\x04 \x01(\tR\tvariables\x12)\n" +
+	"\rjobLeaseToken\x18\x05 \x01(\tH\x00R\rjobLeaseToken\x88\x01\x01B\x10\n" +
+	"\x0e_jobLeaseToken\"\x14\n" +
 	"\x12ThrowErrorResponse\"\xff\x01\n" +
 	"\x15PublishMessageRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12&\n" +
@@ -6308,37 +6300,31 @@ const file_gateway_proto_rawDesc = "" +
 	"\x15PartitionBrokerHealth\x12\v\n" +
 	"\aHEALTHY\x10\x00\x12\r\n" +
 	"\tUNHEALTHY\x10\x01\x12\b\n" +
-	"\x04DEAD\x10\x02\"\xcb\x01\n" +
+	"\x04DEAD\x10\x02\"\xd4\x01\n" +
 	"\x17UpdateJobRetriesRequest\x12\x16\n" +
 	"\x06jobKey\x18\x01 \x01(\x03R\x06jobKey\x12\x18\n" +
 	"\aretries\x18\x02 \x01(\x05R\aretries\x123\n" +
-	"\x12operationReference\x18\x03 \x01(\x04H\x00R\x12operationReference\x88\x01\x01\x12#\n" +
-	"\n" +
-	"leaseToken\x18\x04 \x01(\tH\x01R\n" +
-	"leaseToken\x88\x01\x01B\x15\n" +
-	"\x13_operationReferenceB\r\n" +
-	"\v_leaseToken\"\x1a\n" +
-	"\x18UpdateJobRetriesResponse\"\xcb\x01\n" +
+	"\x12operationReference\x18\x03 \x01(\x04H\x00R\x12operationReference\x88\x01\x01\x12)\n" +
+	"\rjobLeaseToken\x18\x04 \x01(\tH\x01R\rjobLeaseToken\x88\x01\x01B\x15\n" +
+	"\x13_operationReferenceB\x10\n" +
+	"\x0e_jobLeaseToken\"\x1a\n" +
+	"\x18UpdateJobRetriesResponse\"\xd4\x01\n" +
 	"\x17UpdateJobTimeoutRequest\x12\x16\n" +
 	"\x06jobKey\x18\x01 \x01(\x03R\x06jobKey\x12\x18\n" +
 	"\atimeout\x18\x02 \x01(\x03R\atimeout\x123\n" +
-	"\x12operationReference\x18\x03 \x01(\x04H\x00R\x12operationReference\x88\x01\x01\x12#\n" +
-	"\n" +
-	"leaseToken\x18\x04 \x01(\tH\x01R\n" +
-	"leaseToken\x88\x01\x01B\x15\n" +
-	"\x13_operationReferenceB\r\n" +
-	"\v_leaseToken\"\x1a\n" +
-	"\x18UpdateJobTimeoutResponse\"\xe0\x01\n" +
+	"\x12operationReference\x18\x03 \x01(\x04H\x00R\x12operationReference\x88\x01\x01\x12)\n" +
+	"\rjobLeaseToken\x18\x04 \x01(\tH\x01R\rjobLeaseToken\x88\x01\x01B\x15\n" +
+	"\x13_operationReferenceB\x10\n" +
+	"\x0e_jobLeaseToken\"\x1a\n" +
+	"\x18UpdateJobTimeoutResponse\"\xe9\x01\n" +
 	"\x18UpdateJobPriorityRequest\x12\x16\n" +
 	"\x06jobKey\x18\x01 \x01(\x03R\x06jobKey\x12\x1f\n" +
 	"\bpriority\x18\x02 \x01(\x05H\x00R\bpriority\x88\x01\x01\x123\n" +
-	"\x12operationReference\x18\x03 \x01(\x04H\x01R\x12operationReference\x88\x01\x01\x12#\n" +
-	"\n" +
-	"leaseToken\x18\x04 \x01(\tH\x02R\n" +
-	"leaseToken\x88\x01\x01B\v\n" +
+	"\x12operationReference\x18\x03 \x01(\x04H\x01R\x12operationReference\x88\x01\x01\x12)\n" +
+	"\rjobLeaseToken\x18\x04 \x01(\tH\x02R\rjobLeaseToken\x88\x01\x01B\v\n" +
 	"\t_priorityB\x15\n" +
-	"\x13_operationReferenceB\r\n" +
-	"\v_leaseToken\"\x1b\n" +
+	"\x13_operationReferenceB\x10\n" +
+	"\x0e_jobLeaseToken\"\x1b\n" +
 	"\x19UpdateJobPriorityResponse\"\xc5\x01\n" +
 	"\x13SetVariablesRequest\x12.\n" +
 	"\x12elementInstanceKey\x18\x01 \x01(\x03R\x12elementInstanceKey\x12\x1c\n" +

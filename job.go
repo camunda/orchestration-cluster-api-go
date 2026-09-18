@@ -78,7 +78,7 @@ func newRESTJob(aj openapi.ActivatedJobResult, clock Clock) *Job {
 		elementID:          string(aj.GetElementId()),
 		customHeaders:      aj.GetCustomHeaders(),
 		variables:          aj.GetVariables(),
-		leaseToken:         string(aj.GetLeaseToken()),
+		leaseToken:         string(aj.GetJobLeaseToken()),
 		clock:              clock,
 	}
 }
@@ -94,7 +94,7 @@ func newGRPCJob(aj *pb.ActivatedJob, clock Clock) *Job {
 		elementID:          aj.GetElementId(),
 		customHeaders:      parseJSONObject(aj.GetCustomHeaders()),
 		variables:          parseJSONObject(aj.GetVariables()),
-		leaseToken:         aj.GetLeaseToken(),
+		leaseToken:         aj.GetJobLeaseToken(),
 		clock:              clock,
 	}
 }

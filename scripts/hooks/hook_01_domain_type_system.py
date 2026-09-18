@@ -62,20 +62,13 @@ _EXTRA_STRING_KEYS = {
 # so the bundler cannot classify them and there is no ref for the field resolver to
 # follow. We still want them branded end-to-end (see issue #57), so we mint a
 # newtype here and map the (unambiguous) json property names that carry the scalar
-# to it. `JobLeaseToken` is the opaque lease token minted on job activation and
-# echoed back on completion/fail/error/update and agent-instance history — every
-# `leaseToken` / `jobLease` property in the spec is this token and nothing else.
-# TODO: drop an entry once upstream adds a named `x-semantic-type` schema for it
-# (it will then arrive through the normal spec-driven path).
-_EXTRA_SCALAR_TYPES = {
-    "JobLeaseToken": {
-        "base": "string",
-        "constraints": {},
-        "nullable": True,
-        "props": ("leaseToken", "jobLease"),
-        "noun": "semantic token",
-    },
-}
+# to it.
+# TODO: drop an entry once the *committed* spec has upstream's named
+# `x-semantic-type` schema for it. Until then the entry is still load-bearing for
+# regeneration from the committed spec. The minted-name guard below makes an entry
+# that upstream has already superseded a no-op rather than a duplicate definition,
+# so the two can be reconciled in the regeneration PR instead of in lockstep.
+_EXTRA_SCALAR_TYPES: dict[str, dict] = {}
 
 _TYPE_DECL = re.compile(r"^type\s+(\w+)\s", re.MULTILINE)
 _PKG_DECL = re.compile(r"^package\s+(\w+)", re.MULTILINE)
@@ -786,6 +779,14 @@ def run(ctx) -> None:
     parts = [_header(pkg)]
     generated = 0
     skipped = []
+    # Hand-maintained _EXTRA_* entries upstream has since superseded with a real
+    # x-semantic-type schema, so they now arrive via the spec-driven path too.
+    redundant: list[str] = []
+    # Names whose Nullable<Type> wrapper an _EXTRA_* entry emitted itself. Derived
+    # from what was actually written, not from the entry declaring `nullable`: a
+    # superseded entry emits nothing, and must not suppress the wrapper the
+    # spec-driven scan below would otherwise generate.
+    emitted_nullable: set[str] = set()
     # Sort by name so the generated output is stable regardless of the order in
     # which semanticKeys appear in the (re-bundled) spec metadata.
     for key in sorted(keys, key=lambda k: (k.get("name") or "")):
@@ -804,19 +805,26 @@ def run(ctx) -> None:
         if name in existing:
             skipped.append(name)
             continue
+        if name in minted:
+            redundant.append(name)
+            continue
         cfg = _EXTRA_STRING_KEYS[name]
         parts.append(_key_block(name, cfg.get("constraints", {}) or {}))
         minted.add(name)
         if cfg.get("nullable"):
             parts.append(_nullable_block(name))
+            emitted_nullable.add(name)
         generated += 1
 
     # Hand-maintained non-key scalars the spec carries only as inline strings
-    # (see _EXTRA_SCALAR_TYPES, e.g. JobLeaseToken). Minted as validated newtypes
+    # (see _EXTRA_SCALAR_TYPES). Minted as validated newtypes
     # so the fields branded above (via the global-prop override) resolve.
     for name in sorted(_EXTRA_SCALAR_TYPES):
         if name in existing:
             skipped.append(name)
+            continue
+        if name in minted:
+            redundant.append(name)
             continue
         cfg = _EXTRA_SCALAR_TYPES[name]
         if cfg.get("base", "string") == "string":
@@ -832,6 +840,7 @@ def run(ctx) -> None:
         minted.add(name)
         if cfg.get("nullable"):
             parts.append(_nullable_block(name))
+            emitted_nullable.add(name)
         generated += 1
 
     # Non-key `x-semantic-type` scalars the bundler metadata does not classify as
@@ -854,11 +863,7 @@ def run(ctx) -> None:
     # Nullable<Type> wrappers for every semantic type that appears in a nullable
     # response/model field, mirroring NullableModelString. ModelString and the
     # extra keys already have their wrappers emitted above.
-    already_nullable = (
-        {_BASE_TYPE}
-        | {n for n, c in _EXTRA_STRING_KEYS.items() if c.get("nullable")}
-        | {n for n, c in _EXTRA_SCALAR_TYPES.items() if c.get("nullable")}
-    )
+    already_nullable = {_BASE_TYPE} | emitted_nullable
     nullable_types |= _scan_nullable_usage(client_dir, by_schema, global_prop)
     nullable_generated = 0
     for name in sorted(nullable_types):
@@ -878,6 +883,12 @@ def run(ctx) -> None:
         print(f"    removed {len(removed_models)} mis-modelled key struct(s): {', '.join(sorted(removed_models))}")
     if skipped:
         print(f"    skipped {len(skipped)} keys already declared by the generator: {', '.join(sorted(skipped))}")
+    if redundant:
+        print(
+            f"    WARNING: {len(redundant)} hand-maintained entr(y/ies) now supersed"
+            f"ed by upstream x-semantic-type schemas: {', '.join(sorted(redundant))}"
+            " — delete them from _EXTRA_STRING_KEYS/_EXTRA_SCALAR_TYPES"
+        )
 
     # Retype the response/model struct fields (and their constructors/accessors)
     # from the generic base tokens back to their specific semantic type.

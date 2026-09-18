@@ -26,7 +26,7 @@ type AgentTool struct {
 	// A human-readable description of the tool.
 	Description NullableString `json:"description"`
 	// The BPMN element ID of the tool element within the ad-hoc sub-process.
-	ElementId NullableString `json:"elementId"`
+	ElementId NullableElementId `json:"elementId"`
 }
 
 type _AgentTool AgentTool
@@ -35,7 +35,7 @@ type _AgentTool AgentTool
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentTool(name string, description NullableString, elementId NullableString) *AgentTool {
+func NewAgentTool(name string, description NullableString, elementId NullableElementId) *AgentTool {
 	this := AgentTool{}
 	this.Name = name
 	this.Description = description
@@ -102,10 +102,10 @@ func (o *AgentTool) SetDescription(v string) {
 }
 
 // GetElementId returns the ElementId field value
-// If the value is explicit nil, the zero value for string will be returned
-func (o *AgentTool) GetElementId() string {
+// If the value is explicit nil, the zero value for ElementId will be returned
+func (o *AgentTool) GetElementId() ElementId {
 	if o == nil || o.ElementId.Get() == nil {
-		var ret string
+		var ret ElementId
 		return ret
 	}
 
@@ -115,7 +115,7 @@ func (o *AgentTool) GetElementId() string {
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *AgentTool) GetElementIdOk() (*string, bool) {
+func (o *AgentTool) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -123,7 +123,7 @@ func (o *AgentTool) GetElementIdOk() (*string, bool) {
 }
 
 // SetElementId sets field value
-func (o *AgentTool) SetElementId(v string) {
+func (o *AgentTool) SetElementId(v ElementId) {
 	o.ElementId.Set(&v)
 }
 

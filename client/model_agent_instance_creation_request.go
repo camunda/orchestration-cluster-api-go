@@ -26,7 +26,7 @@ type AgentInstanceCreationRequest struct {
 	// The key of the job activation during which this creation is being made. A creation must always be attributed to the active job that produced it.
 	JobKey JobKey `json:"jobKey"`
 	// Opaque lease token received from the job activation response. Disambiguates this activation from any other activation of the same job: if the job is later retried, history items submitted under a superseded lease are discarded rather than committed.
-	JobLease JobLeaseToken `json:"jobLease"`
+	JobLeaseToken JobLeaseToken `json:"jobLeaseToken"`
 	// A batch of history items to append to the agent instance's conversation history, in request order. Each created item is echoed back in the response's createdHistory, positionally correlated. Must include a CONFIGURATION item establishing model, provider, and systemPrompt (and, if needed, limits). Every item's role must be CONFIGURATION or USER, and no item may carry non-zero usage-token metrics (inputTokens, outputTokens, reasoningTokenCount, cacheCreationTokenCount, cacheReadTokenCount); durationMs is exempt and may be non-zero.
 	History []AgentInstanceHistoryItem `json:"history"`
 }
@@ -37,11 +37,11 @@ type _AgentInstanceCreationRequest AgentInstanceCreationRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAgentInstanceCreationRequest(elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLease JobLeaseToken, history []AgentInstanceHistoryItem) *AgentInstanceCreationRequest {
+func NewAgentInstanceCreationRequest(elementInstanceKey ElementInstanceKey, jobKey JobKey, jobLeaseToken JobLeaseToken, history []AgentInstanceHistoryItem) *AgentInstanceCreationRequest {
 	this := AgentInstanceCreationRequest{}
 	this.ElementInstanceKey = elementInstanceKey
 	this.JobKey = jobKey
-	this.JobLease = jobLease
+	this.JobLeaseToken = jobLeaseToken
 	this.History = history
 	return &this
 }
@@ -102,28 +102,28 @@ func (o *AgentInstanceCreationRequest) SetJobKey(v JobKey) {
 	o.JobKey = v
 }
 
-// GetJobLease returns the JobLease field value
-func (o *AgentInstanceCreationRequest) GetJobLease() JobLeaseToken {
+// GetJobLeaseToken returns the JobLeaseToken field value
+func (o *AgentInstanceCreationRequest) GetJobLeaseToken() JobLeaseToken {
 	if o == nil {
 		var ret JobLeaseToken
 		return ret
 	}
 
-	return o.JobLease
+	return o.JobLeaseToken
 }
 
-// GetJobLeaseOk returns a tuple with the JobLease field value
+// GetJobLeaseTokenOk returns a tuple with the JobLeaseToken field value
 // and a boolean to check if the value has been set.
-func (o *AgentInstanceCreationRequest) GetJobLeaseOk() (*JobLeaseToken, bool) {
+func (o *AgentInstanceCreationRequest) GetJobLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.JobLease, true
+	return &o.JobLeaseToken, true
 }
 
-// SetJobLease sets field value
-func (o *AgentInstanceCreationRequest) SetJobLease(v JobLeaseToken) {
-	o.JobLease = v
+// SetJobLeaseToken sets field value
+func (o *AgentInstanceCreationRequest) SetJobLeaseToken(v JobLeaseToken) {
+	o.JobLeaseToken = v
 }
 
 // GetHistory returns the History field value
@@ -162,7 +162,7 @@ func (o AgentInstanceCreationRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
 	toSerialize["jobKey"] = o.JobKey
-	toSerialize["jobLease"] = o.JobLease
+	toSerialize["jobLeaseToken"] = o.JobLeaseToken
 	toSerialize["history"] = o.History
 	return toSerialize, nil
 }
@@ -174,7 +174,6 @@ func (o *AgentInstanceCreationRequest) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"elementInstanceKey",
 		"jobKey",
-		"jobLease",
 		"history",
 	}
 

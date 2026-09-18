@@ -365,7 +365,7 @@ func (w *StreamJobWorker) completeJob(ctx context.Context, gw pb.GatewayClient, 
 		}
 	}
 	if job.leaseToken != "" {
-		req.LeaseToken = &job.leaseToken
+		req.JobLeaseToken = &job.leaseToken
 	}
 	if _, err := gw.CompleteJob(ctx, req); err != nil {
 		w.client.logger.Error("complete job failed", "job", job.key, "error", err)
@@ -387,7 +387,7 @@ func (w *StreamJobWorker) failJob(ctx context.Context, gw pb.GatewayClient, job 
 		req.ErrorMessage = cause.Error()
 	}
 	if job.leaseToken != "" {
-		req.LeaseToken = &job.leaseToken
+		req.JobLeaseToken = &job.leaseToken
 	}
 	if _, err := gw.FailJob(ctx, req); err != nil {
 		w.client.logger.Error("fail job failed", "job", job.key, "error", err)
@@ -407,7 +407,7 @@ func (w *StreamJobWorker) throwError(ctx context.Context, gw pb.GatewayClient, j
 		}
 	}
 	if job.leaseToken != "" {
-		req.LeaseToken = &job.leaseToken
+		req.JobLeaseToken = &job.leaseToken
 	}
 	if _, err := gw.ThrowError(ctx, req); err != nil {
 		w.client.logger.Error("throw job error failed", "job", job.key, "error", err)

@@ -188,7 +188,7 @@ func TestStreamJobWorkerForwardsLeaseToken(t *testing.T) {
 	lis := bufconn.Listen(1024 * 1024)
 	lease := "lease-xyz"
 	fake := &fakeGateway{
-		jobs:      []*pb.ActivatedJob{{Key: 999, Type: "greet", LeaseToken: &lease}},
+		jobs:      []*pb.ActivatedJob{{Key: 999, Type: "greet", JobLeaseToken: &lease}},
 		completes: make(chan *pb.CompleteJobRequest, 1),
 		fails:     make(chan *pb.FailJobRequest, 1),
 		throws:    make(chan *pb.ThrowErrorRequest, 1),
@@ -212,8 +212,8 @@ func TestStreamJobWorkerForwardsLeaseToken(t *testing.T) {
 	go func() { _ = w.Run(ctx) }()
 
 	comp := waitFor(t, fake.completes)
-	if comp.LeaseToken == nil || *comp.LeaseToken != lease {
-		t.Errorf("complete LeaseToken = %v, want %q", comp.LeaseToken, lease)
+	if comp.JobLeaseToken == nil || *comp.JobLeaseToken != lease {
+		t.Errorf("complete LeaseToken = %v, want %q", comp.JobLeaseToken, lease)
 	}
 }
 
@@ -281,7 +281,7 @@ const sidecarJobResponse = `{
       "rootProcessInstanceKey": "2251799813685417",
       "businessId": null,
       "priority": 0,
-      "leaseToken": null
+      "jobLeaseToken": null
     }
   ]
 }`

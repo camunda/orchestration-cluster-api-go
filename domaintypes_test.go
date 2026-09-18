@@ -125,7 +125,7 @@ func TestResponseFieldsAreBranded(t *testing.T) {
 		{"ElementInstanceFilterFields", "elementInstanceScopeKey", "*ScopeKey"}, // inline oneOf -> union (optional -> pointer)
 		{"ProcessInstanceResult", "tags", "[]Tag"},                              // $ref -> TagSet -> []Tag
 		{"AuditLogResult", "processInstanceKey", "NullableProcessInstanceKey"},  // nullable wrapper
-		{"ActivatedJobResult", "leaseToken", "NullableJobLeaseToken"},           // JobLeaseToken property override (nullable)
+		{"ActivatedJobResult", "jobLeaseToken", "NullableJobLeaseToken"},        // JobLeaseToken property override (nullable)
 		{"AgentInstanceHistoryItem", "loopIteration", "LoopIterationId"},        // LoopIterationId scalar mint
 	}
 	for _, w := range want {

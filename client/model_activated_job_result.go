@@ -64,7 +64,7 @@ type ActivatedJobResult struct {
 	// The priority of the job. Higher values indicate higher priority. Jobs created before 8.10 have no stored priority; the API returns 0 for such jobs.
 	Priority int32 `json:"priority"`
 	// The lease token identifying this activation. This is `null` when the job was activated without a lease.
-	LeaseToken NullableJobLeaseToken `json:"leaseToken"`
+	JobLeaseToken NullableJobLeaseToken `json:"jobLeaseToken"`
 }
 
 type _ActivatedJobResult ActivatedJobResult
@@ -73,7 +73,7 @@ type _ActivatedJobResult ActivatedJobResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewActivatedJobResult(type_ string, processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, elementId ElementId, customHeaders map[string]interface{}, worker string, retries int32, deadline int64, variables map[string]interface{}, tenantId TenantId, physicalTenantId string, jobKey JobKey, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, elementInstanceKey ElementInstanceKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, userTask NullableUserTaskProperties, tags []Tag, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, priority int32, leaseToken NullableJobLeaseToken) *ActivatedJobResult {
+func NewActivatedJobResult(type_ string, processDefinitionId ProcessDefinitionId, processDefinitionVersion int32, elementId ElementId, customHeaders map[string]interface{}, worker string, retries int32, deadline int64, variables map[string]interface{}, tenantId TenantId, physicalTenantId string, jobKey JobKey, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, elementInstanceKey ElementInstanceKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, userTask NullableUserTaskProperties, tags []Tag, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, priority int32, jobLeaseToken NullableJobLeaseToken) *ActivatedJobResult {
 	this := ActivatedJobResult{}
 	this.Type = type_
 	this.ProcessDefinitionId = processDefinitionId
@@ -97,7 +97,7 @@ func NewActivatedJobResult(type_ string, processDefinitionId ProcessDefinitionId
 	this.RootProcessInstanceKey = rootProcessInstanceKey
 	this.BusinessId = businessId
 	this.Priority = priority
-	this.LeaseToken = leaseToken
+	this.JobLeaseToken = jobLeaseToken
 	return &this
 }
 
@@ -643,30 +643,30 @@ func (o *ActivatedJobResult) SetPriority(v int32) {
 	o.Priority = v
 }
 
-// GetLeaseToken returns the LeaseToken field value
+// GetJobLeaseToken returns the JobLeaseToken field value
 // If the value is explicit nil, the zero value for JobLeaseToken will be returned
-func (o *ActivatedJobResult) GetLeaseToken() JobLeaseToken {
-	if o == nil || o.LeaseToken.Get() == nil {
+func (o *ActivatedJobResult) GetJobLeaseToken() JobLeaseToken {
+	if o == nil || o.JobLeaseToken.Get() == nil {
 		var ret JobLeaseToken
 		return ret
 	}
 
-	return *o.LeaseToken.Get()
+	return *o.JobLeaseToken.Get()
 }
 
-// GetLeaseTokenOk returns a tuple with the LeaseToken field value
+// GetJobLeaseTokenOk returns a tuple with the JobLeaseToken field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *ActivatedJobResult) GetLeaseTokenOk() (*JobLeaseToken, bool) {
+func (o *ActivatedJobResult) GetJobLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.LeaseToken.Get(), o.LeaseToken.IsSet()
+	return o.JobLeaseToken.Get(), o.JobLeaseToken.IsSet()
 }
 
-// SetLeaseToken sets field value
-func (o *ActivatedJobResult) SetLeaseToken(v JobLeaseToken) {
-	o.LeaseToken.Set(&v)
+// SetJobLeaseToken sets field value
+func (o *ActivatedJobResult) SetJobLeaseToken(v JobLeaseToken) {
+	o.JobLeaseToken.Set(&v)
 }
 
 func (o ActivatedJobResult) MarshalJSON() ([]byte, error) {
@@ -701,7 +701,7 @@ func (o ActivatedJobResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
 	toSerialize["businessId"] = o.BusinessId.Get()
 	toSerialize["priority"] = o.Priority
-	toSerialize["leaseToken"] = o.LeaseToken.Get()
+	toSerialize["jobLeaseToken"] = o.JobLeaseToken.Get()
 	return toSerialize, nil
 }
 

@@ -24,8 +24,8 @@ type JobUpdateRequest struct {
 	Changeset JobChangeset `json:"changeset"`
 	// A reference key chosen by the user that will be part of all records resulting from this operation. Must be > 0 if provided.
 	OperationReference *int64 `json:"operationReference,omitempty"`
-	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.leaseToken`. For a leased job, a supplied token is validated to prove the command comes from the worker that holds the current lease; a command carrying a stale token is rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). An update without a token always applies to support operator and bulk updates of leased jobs. Note that this is different from lifecycle requests like complete, fail, and throw-error that always require a token for leased jobs. A job that was activated without a lease requires no token.
-	LeaseToken NullableJobLeaseToken `json:"leaseToken,omitempty"`
+	// The token identifying a leased job's activation, obtained from `ActivatedJobResult.jobLeaseToken`. For a leased job, a supplied token is validated to prove the command comes from the worker that holds the current lease; a command carrying a stale token is rejected, fencing the job against a superseded activation (for example, after the job timed out or failed and was re-activated by another worker). An update without a token always applies to support operator and bulk updates of leased jobs. Note that this is different from lifecycle requests like complete, fail, and throw-error that always require a token for leased jobs. A job that was activated without a lease requires no token.
+	JobLeaseToken NullableJobLeaseToken `json:"jobLeaseToken,omitempty"`
 }
 
 type _JobUpdateRequest JobUpdateRequest
@@ -104,47 +104,47 @@ func (o *JobUpdateRequest) SetOperationReference(v int64) {
 	o.OperationReference = &v
 }
 
-// GetLeaseToken returns the LeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobUpdateRequest) GetLeaseToken() JobLeaseToken {
-	if o == nil || IsNil(o.LeaseToken.Get()) {
+// GetJobLeaseToken returns the JobLeaseToken field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *JobUpdateRequest) GetJobLeaseToken() JobLeaseToken {
+	if o == nil || IsNil(o.JobLeaseToken.Get()) {
 		var ret JobLeaseToken
 		return ret
 	}
-	return *o.LeaseToken.Get()
+	return *o.JobLeaseToken.Get()
 }
 
-// GetLeaseTokenOk returns a tuple with the LeaseToken field value if set, nil otherwise
+// GetJobLeaseTokenOk returns a tuple with the JobLeaseToken field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobUpdateRequest) GetLeaseTokenOk() (*JobLeaseToken, bool) {
+func (o *JobUpdateRequest) GetJobLeaseTokenOk() (*JobLeaseToken, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.LeaseToken.Get(), o.LeaseToken.IsSet()
+	return o.JobLeaseToken.Get(), o.JobLeaseToken.IsSet()
 }
 
-// HasLeaseToken returns a boolean if a field has been set.
-func (o *JobUpdateRequest) HasLeaseToken() bool {
-	if o != nil && o.LeaseToken.IsSet() {
+// HasJobLeaseToken returns a boolean if a field has been set.
+func (o *JobUpdateRequest) HasJobLeaseToken() bool {
+	if o != nil && o.JobLeaseToken.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the LeaseToken field.
-func (o *JobUpdateRequest) SetLeaseToken(v JobLeaseToken) {
-	o.LeaseToken.Set(&v)
+// SetJobLeaseToken gets a reference to the given NullableJobLeaseToken and assigns it to the JobLeaseToken field.
+func (o *JobUpdateRequest) SetJobLeaseToken(v JobLeaseToken) {
+	o.JobLeaseToken.Set(&v)
 }
 
-// SetLeaseTokenNil sets the value for LeaseToken to be an explicit nil
-func (o *JobUpdateRequest) SetLeaseTokenNil() {
-	o.LeaseToken.Set(nil)
+// SetJobLeaseTokenNil sets the value for JobLeaseToken to be an explicit nil
+func (o *JobUpdateRequest) SetJobLeaseTokenNil() {
+	o.JobLeaseToken.Set(nil)
 }
 
-// UnsetLeaseToken ensures that no value is present for LeaseToken, not even an explicit nil
-func (o *JobUpdateRequest) UnsetLeaseToken() {
-	o.LeaseToken.Unset()
+// UnsetJobLeaseToken ensures that no value is present for JobLeaseToken, not even an explicit nil
+func (o *JobUpdateRequest) UnsetJobLeaseToken() {
+	o.JobLeaseToken.Unset()
 }
 
 func (o JobUpdateRequest) MarshalJSON() ([]byte, error) {
@@ -161,8 +161,8 @@ func (o JobUpdateRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.OperationReference) {
 		toSerialize["operationReference"] = o.OperationReference
 	}
-	if o.LeaseToken.IsSet() {
-		toSerialize["leaseToken"] = o.LeaseToken.Get()
+	if o.JobLeaseToken.IsSet() {
+		toSerialize["jobLeaseToken"] = o.JobLeaseToken.Get()
 	}
 	return toSerialize, nil
 }

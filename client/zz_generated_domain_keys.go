@@ -921,6 +921,35 @@ func (k JobKey) String() string { return string(k) }
 // Validate reports whether k satisfies the JobKey constraints.
 func (k JobKey) Validate() error { return specJobKey.validate(string(k)) }
 
+// JobLeaseToken is a Camunda semantic key. Construct it with NewJobLeaseToken (validated) or
+// MustJobLeaseToken (panics on invalid input).
+type JobLeaseToken string
+
+var specJobLeaseToken = keySpec{name: "JobLeaseToken", pattern: nil, min: 1, max: 0}
+
+// NewJobLeaseToken validates s against the JobLeaseToken constraints and returns a JobLeaseToken.
+func NewJobLeaseToken(s string) (JobLeaseToken, error) {
+	if err := specJobLeaseToken.validate(s); err != nil {
+		return "", err
+	}
+	return JobLeaseToken(s), nil
+}
+
+// MustJobLeaseToken is like NewJobLeaseToken but panics if s is invalid.
+func MustJobLeaseToken(s string) JobLeaseToken {
+	k, err := NewJobLeaseToken(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k JobLeaseToken) String() string { return string(k) }
+
+// Validate reports whether k satisfies the JobLeaseToken constraints.
+func (k JobLeaseToken) Validate() error { return specJobLeaseToken.validate(string(k)) }
+
 // MappingRuleId is a Camunda semantic key. Construct it with NewMappingRuleId (validated) or
 // MustMappingRuleId (panics on invalid input).
 type MappingRuleId string
@@ -1381,58 +1410,6 @@ func (v *NullableResourceKey) UnmarshalJSON(src []byte) error {
 	return json.Unmarshal(src, &v.value)
 }
 
-// JobLeaseToken is a Camunda semantic token. Construct it with NewJobLeaseToken (validated) or
-// MustJobLeaseToken (panics on invalid input).
-type JobLeaseToken string
-
-var specJobLeaseToken = keySpec{name: "JobLeaseToken", pattern: nil, min: 0, max: 0}
-
-// NewJobLeaseToken validates s against the JobLeaseToken constraints and returns a JobLeaseToken.
-func NewJobLeaseToken(s string) (JobLeaseToken, error) {
-	if err := specJobLeaseToken.validate(s); err != nil {
-		return "", err
-	}
-	return JobLeaseToken(s), nil
-}
-
-// MustJobLeaseToken is like NewJobLeaseToken but panics if s is invalid.
-func MustJobLeaseToken(s string) JobLeaseToken {
-	k, err := NewJobLeaseToken(s)
-	if err != nil {
-		panic(err)
-	}
-	return k
-}
-
-// String returns the underlying string value.
-func (k JobLeaseToken) String() string { return string(k) }
-
-// Validate reports whether k satisfies the JobLeaseToken constraints.
-func (k JobLeaseToken) Validate() error { return specJobLeaseToken.validate(string(k)) }
-
-// NullableJobLeaseToken is the generator's Nullable wrapper for JobLeaseToken (referenced by
-// generated models such as AuditLogResult).
-type NullableJobLeaseToken struct {
-	value *JobLeaseToken
-	isSet bool
-}
-
-func (v NullableJobLeaseToken) Get() *JobLeaseToken     { return v.value }
-func (v *NullableJobLeaseToken) Set(val *JobLeaseToken) { v.value = val; v.isSet = true }
-func (v NullableJobLeaseToken) IsSet() bool             { return v.isSet }
-func (v *NullableJobLeaseToken) Unset()                 { v.value = nil; v.isSet = false }
-
-// NewNullableJobLeaseToken returns a set NullableJobLeaseToken wrapping val.
-func NewNullableJobLeaseToken(val *JobLeaseToken) *NullableJobLeaseToken {
-	return &NullableJobLeaseToken{value: val, isSet: true}
-}
-
-func (v NullableJobLeaseToken) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
-func (v *NullableJobLeaseToken) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
-}
-
 // LoopIterationId is a Camunda semantic integer identifier. Construct it with NewLoopIterationId
 // (validated) or MustLoopIterationId (panics on invalid input).
 type LoopIterationId int32
@@ -1818,6 +1795,29 @@ func NewNullableJobKey(val *JobKey) *NullableJobKey {
 
 func (v NullableJobKey) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
 func (v *NullableJobKey) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
+
+// NullableJobLeaseToken is the generator's Nullable wrapper for JobLeaseToken (referenced by
+// generated models such as AuditLogResult).
+type NullableJobLeaseToken struct {
+	value *JobLeaseToken
+	isSet bool
+}
+
+func (v NullableJobLeaseToken) Get() *JobLeaseToken     { return v.value }
+func (v *NullableJobLeaseToken) Set(val *JobLeaseToken) { v.value = val; v.isSet = true }
+func (v NullableJobLeaseToken) IsSet() bool             { return v.isSet }
+func (v *NullableJobLeaseToken) Unset()                 { v.value = nil; v.isSet = false }
+
+// NewNullableJobLeaseToken returns a set NullableJobLeaseToken wrapping val.
+func NewNullableJobLeaseToken(val *JobLeaseToken) *NullableJobLeaseToken {
+	return &NullableJobLeaseToken{value: val, isSet: true}
+}
+
+func (v NullableJobLeaseToken) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableJobLeaseToken) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -35,7 +35,7 @@ from pathlib import Path
 VERSION_SKEW_OPTIONAL = [
     # TEMPORARY: not emitted by 8.10.0-alpha3 (ActivatedJobResult). Blocks the
     # job worker. Drop when the pinned server emits it.
-    "leaseToken",
+    "jobLeaseToken",
     # TEMPORARY: required across 8 result schemas (CreateProcessInstanceResult,
     # ProcessInstanceResult, ActivatedJobResult, JobSearchResult, UserTaskResult,
     # DecisionInstanceResult, DecisionInstanceGetQueryResult,
