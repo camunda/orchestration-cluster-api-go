@@ -1322,6 +1322,13 @@
       "label": "Get the status of the whole cluster"
     }
   ],
+  "getClusterUpgradeStatus": [
+    {
+      "file": "cluster.go",
+      "region": "GetClusterUpgradeStatus",
+      "label": "Get the upgrade-readiness status of the whole cluster"
+    }
+  ],
   "changeClusterMode": [
     {
       "file": "recovery.go",
