@@ -19,7 +19,7 @@ import (
 // checks if the SecretListResult type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &SecretListResult{}
 
-// SecretListResult The secret references the caller is authorized to see.  Unbounded for now: the response carries the configured stores' full enumeration for the physical tenant. Pagination is expected to land here before GA. This is an alpha endpoint, so that is not yet a breaking-contract concern.
+// SecretListResult The secret references the caller is authorized to see.  Unbounded: the response carries the configured stores' full enumeration for the physical tenant.
 type SecretListResult struct {
 	// The secret references, each of the form `camunda.secrets.<name>`.
 	References []string `json:"references"`

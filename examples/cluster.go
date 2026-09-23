@@ -59,6 +59,19 @@ func getClusterTopologyExample(ctx context.Context, client *camunda.CamundaClien
 	return nil
 }
 
+func getClusterUpgradeStatusExample(ctx context.Context, client *camunda.CamundaClient) error {
+	// region GetClusterUpgradeStatus
+	// One overall status folded over every physical tenant and condition:
+	// MIGRATED, MIGRATION_IN_PROGRESS, or UNKNOWN before anything has been reported yet.
+	status, err := client.GetClusterUpgradeStatus(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("cluster upgrade status: %s\n", status.GetStatus())
+	// endregion GetClusterUpgradeStatus
+	return nil
+}
+
 func triggerClusterRebalanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region TriggerClusterRebalance
 	// Starts a cluster rebalance, redistributing partition leadership to the preferred nodes.

@@ -37,7 +37,7 @@ func (r ApiListSecretsRequest) Execute() (*SecretListResult, *http.Response, err
 }
 
 /*
-ListSecrets List secrets (alpha)
+ListSecrets List secrets
 
 List the `camunda.secrets.*` references known for the caller's physical tenant.
 
@@ -53,8 +53,6 @@ A returned reference is usable verbatim with `/secrets/resolve`. In a FEEL expre
 however, a name that is not a bare identifier has to be backtick-escaped, since FEEL reads
 a bare dash as the minus operator: a listed `camunda.secrets.db-password` is written
 “ =camunda.secrets.`db-password` “ in a BPMN input mapping.
-
-This endpoint is an alpha feature and may be subject to change in future releases.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiListSecretsRequest
@@ -160,7 +158,7 @@ func (r ApiResolveSecretsRequest) Execute() (*SecretResolveResult, *http.Respons
 }
 
 /*
-ResolveSecrets Resolve secrets (alpha)
+ResolveSecrets Resolve secrets
 
 Resolve a deduplicated batch of `camunda.secrets.*` references for the caller's
 physical tenant in a single round-trip.
@@ -175,8 +173,6 @@ HTTP 400: a missing or non-array `references` field, more than 20 references, or
 References are resolved against the secret stores configured for the caller's physical
 tenant, served from the gateway's secret cache when the value is already cached and read
 from the store otherwise.
-
-This endpoint is an alpha feature and may be subject to change in future releases.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiResolveSecretsRequest
