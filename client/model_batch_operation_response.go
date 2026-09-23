@@ -23,9 +23,10 @@ var _ MappedNullable = &BatchOperationResponse{}
 // BatchOperationResponse struct for BatchOperationResponse
 type BatchOperationResponse struct {
 	// Key or (Operate Legacy ID = UUID) of the batch operation.
-	BatchOperationKey  BatchOperationKey       `json:"batchOperationKey"`
-	State              BatchOperationStateEnum `json:"state"`
-	BatchOperationType BatchOperationTypeEnum  `json:"batchOperationType"`
+	BatchOperationKey BatchOperationKey       `json:"batchOperationKey"`
+	State             BatchOperationStateEnum `json:"state"`
+	// The type of the batch operation. This is `null` for batch operations whose type was never recorded in secondary storage, such as legacy Operate batch operations.
+	BatchOperationType NullableBatchOperationTypeEnum `json:"batchOperationType"`
 	// The start date of the batch operation. This is `null` if the batch operation has not yet started.
 	StartDate NullableTime `json:"startDate"`
 	// The end date of the batch operation. This is `null` if the batch operation is still running.
@@ -50,7 +51,7 @@ type _BatchOperationResponse BatchOperationResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBatchOperationResponse(batchOperationKey BatchOperationKey, state BatchOperationStateEnum, batchOperationType BatchOperationTypeEnum, startDate NullableTime, endDate NullableTime, actorType NullableAuditLogActorTypeEnum, actorId NullableString, operationsTotalCount int32, operationsFailedCount int32, operationsCompletedCount int32, errors []BatchOperationError) *BatchOperationResponse {
+func NewBatchOperationResponse(batchOperationKey BatchOperationKey, state BatchOperationStateEnum, batchOperationType NullableBatchOperationTypeEnum, startDate NullableTime, endDate NullableTime, actorType NullableAuditLogActorTypeEnum, actorId NullableString, operationsTotalCount int32, operationsFailedCount int32, operationsCompletedCount int32, errors []BatchOperationError) *BatchOperationResponse {
 	this := BatchOperationResponse{}
 	this.BatchOperationKey = batchOperationKey
 	this.State = state
@@ -123,27 +124,29 @@ func (o *BatchOperationResponse) SetState(v BatchOperationStateEnum) {
 }
 
 // GetBatchOperationType returns the BatchOperationType field value
+// If the value is explicit nil, the zero value for BatchOperationTypeEnum will be returned
 func (o *BatchOperationResponse) GetBatchOperationType() BatchOperationTypeEnum {
-	if o == nil {
+	if o == nil || o.BatchOperationType.Get() == nil {
 		var ret BatchOperationTypeEnum
 		return ret
 	}
 
-	return o.BatchOperationType
+	return *o.BatchOperationType.Get()
 }
 
 // GetBatchOperationTypeOk returns a tuple with the BatchOperationType field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *BatchOperationResponse) GetBatchOperationTypeOk() (*BatchOperationTypeEnum, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.BatchOperationType, true
+	return o.BatchOperationType.Get(), o.BatchOperationType.IsSet()
 }
 
 // SetBatchOperationType sets field value
 func (o *BatchOperationResponse) SetBatchOperationType(v BatchOperationTypeEnum) {
-	o.BatchOperationType = v
+	o.BatchOperationType.Set(&v)
 }
 
 // GetStartDate returns the StartDate field value
@@ -358,7 +361,7 @@ func (o BatchOperationResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["batchOperationKey"] = o.BatchOperationKey
 	toSerialize["state"] = o.State
-	toSerialize["batchOperationType"] = o.BatchOperationType
+	toSerialize["batchOperationType"] = o.BatchOperationType.Get()
 	toSerialize["startDate"] = o.StartDate.Get()
 	toSerialize["endDate"] = o.EndDate.Get()
 	toSerialize["actorType"] = o.ActorType.Get()

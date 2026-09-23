@@ -1046,6 +1046,16 @@ func (c *CamundaClient) GetClusterTopology(ctx context.Context, opts ...func(ope
 	return value, c.wrapError(resp, err)
 }
 
+// GetClusterUpgradeStatus calls the GetClusterUpgradeStatus operation.
+func (c *CamundaClient) GetClusterUpgradeStatus(ctx context.Context, opts ...func(openapi.ApiGetClusterUpgradeStatusRequest) openapi.ApiGetClusterUpgradeStatusRequest) (*openapi.ClusterUpgradeStatusResponse, error) {
+	req := c.raw.ClusterAPI.GetClusterUpgradeStatus(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // GetStatus calls the GetStatus operation.
 //
 // Example:
