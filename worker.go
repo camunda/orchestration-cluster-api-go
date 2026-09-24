@@ -80,8 +80,11 @@ func WithWorkerTenantIDs(ids ...string) WorkerOption {
 // up.
 //
 // Off by default, matching the engine's own default. Enabling it requires an
-// engine that supports job leases. It has no effect when jobs arrive over the
-// FALCON command stream, which activates them outside the REST activation API.
+// engine that supports job leases: a server that ignores the flag would leave
+// every acknowledgement unfenced, so a job arriving without a token fails the
+// activation with ErrLeaseNotHonored rather than being handled unfenced. It has
+// no effect when jobs arrive over the FALCON command stream, which activates them
+// outside the REST activation API.
 func WithJobLease(enabled bool) WorkerOption {
 	return func(w *JobWorker) { w.withLease = enabled }
 }
@@ -274,7 +277,13 @@ func (w *JobWorker) activate(ctx context.Context, maxJobs int) ([]openapi.Activa
 	if err != nil {
 		return nil, w.client.wrapError(resp, err)
 	}
-	return result.GetJobs(), nil
+	jobs := result.GetJobs()
+	for i := range jobs {
+		if err := requireLeasePresence(w.withLease, string(jobs[i].GetJobLeaseToken())); err != nil {
+			return nil, err
+		}
+	}
+	return jobs, nil
 }
 
 func (w *JobWorker) handle(ctx context.Context, job *Job) {

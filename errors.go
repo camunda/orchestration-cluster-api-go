@@ -26,6 +26,16 @@ var (
 	// ErrEventualConsistencyTimeout indicates an eventual-consistency polling
 	// helper timed out before its predicate was met.
 	ErrEventualConsistencyTimeout = errors.New("camunda: eventual consistency timeout")
+	// ErrLeaseNotHonored indicates a worker activated jobs with a lease but the
+	// server returned a job carrying no lease token.
+	//
+	// The specification declares the token present exactly when the activation sets
+	// the lease flag (see presentwhen.go). A server that predates job leases, or one
+	// that ignores the flag, breaks that quietly: the worker would go on to complete,
+	// fail, or throw an error for the job with no token, so the engine could not fence
+	// the command against a superseded activation. The caller asked for fencing and
+	// would not be getting it, which is worth failing over rather than logging.
+	ErrLeaseNotHonored = errors.New("camunda: activation requested a job lease but the server returned no lease token")
 )
 
 // APIError is returned when the server responds with a non-success HTTP status.

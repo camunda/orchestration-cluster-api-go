@@ -624,3 +624,72 @@ func TestRESTAckForwardsLeaseToken(t *testing.T) {
 		})
 	}
 }
+
+// TestJobWorkerRejectsUnhonoredLease covers the runtime half of the x-present-when
+// contract: the spec says a lease token is present exactly when the activation asked
+// for one, and a server that ignores the flag breaks that silently. Dispatching such a
+// job would send unfenced commands while the caller believed the job was fenced, so the
+// worker must refuse it instead.
+func TestJobWorkerRejectsUnhonoredLease(t *testing.T) {
+	// oneJobResponse carries "jobLeaseToken": null -- a server that does not honor the flag.
+	var activations atomic.Int32
+	acks := make(chan string, 4)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/jobs/activation") {
+			activations.Add(1)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, oneJobResponse)
+			return
+		}
+		// Job commands only -- the worker also probes /v2/topology for FALCON support.
+		if strings.Contains(r.URL.Path, "/jobs/") {
+			select {
+			case acks <- r.URL.Path:
+			default:
+			}
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer srv.Close()
+
+	client, err := camunda.New(camunda.WithRestAddress(srv.URL), camunda.WithLogLevel(camunda.LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	var handled atomic.Int32
+	worker := client.NewJobWorker("demo-task",
+		func(context.Context, *camunda.Job) (map[string]any, error) {
+			handled.Add(1)
+			return nil, nil
+		},
+		camunda.WithJobLease(true),
+		camunda.WithRequestTimeout(50*time.Millisecond),
+		camunda.WithPollInterval(10*time.Millisecond),
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = worker.Run(ctx) }()
+
+	// Wait for several activation round trips, so the absence of an ack below is the
+	// worker refusing the job rather than the loop not having got there yet.
+	deadline := time.After(5 * time.Second)
+	for activations.Load() < 3 {
+		select {
+		case path := <-acks:
+			t.Fatalf("worker acknowledged an unfenced job at %s", path)
+		case <-deadline:
+			t.Fatalf("worker made %d activation attempts, want at least 3", activations.Load())
+		case <-time.After(5 * time.Millisecond):
+		}
+	}
+
+	select {
+	case path := <-acks:
+		t.Fatalf("worker acknowledged an unfenced job at %s", path)
+	default:
+	}
+	if n := handled.Load(); n != 0 {
+		t.Errorf("handler ran %d time(s) for a job whose lease was not honored, want 0", n)
+	}
+}

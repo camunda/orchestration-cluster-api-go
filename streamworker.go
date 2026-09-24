@@ -153,9 +153,11 @@ func WithStreamTenantIDs(ids ...string) StreamWorkerOption {
 // picked it up.
 //
 // Off by default, matching the gateway's own default. Enabling it requires an
-// engine that supports job leases; older gateways ignore the field and keep
-// pushing unleased jobs. It covers both channels: the gRPC stream and the REST
-// sidecar poll (see WithStreamPollInterval).
+// engine that supports job leases: a gateway that ignores the field would leave
+// every acknowledgement unfenced, so a job arriving without a token fails the
+// activation with ErrLeaseNotHonored rather than being handled unfenced. It
+// covers both channels: the gRPC stream and the REST sidecar poll (see
+// WithStreamPollInterval).
 func WithStreamJobLease(enabled bool) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.withLease = enabled }
 }
@@ -252,7 +254,14 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 		req.TenantIds = w.tenantIDs
 	}
 
-	stream, err := gw.StreamActivatedJobs(ctx, req)
+	// The RPC outlives this call unless its context is canceled: returning while the
+	// stream is still healthy (a rejected lease) would leave the gateway holding it
+	// open and delivering onto it while Run reconnects. Handlers keep the worker's
+	// ctx, so canceling this one does not disturb jobs already dispatched.
+	streamCtx, cancelStream := context.WithCancel(ctx)
+	defer cancelStream()
+
+	stream, err := gw.StreamActivatedJobs(streamCtx, req)
 	if err != nil {
 		return err
 	}
@@ -260,6 +269,11 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	for {
 		aj, err := stream.Recv()
 		if err != nil {
+			return err
+		}
+		// Ending the stream rather than skipping the job: the reconnect loop logs and
+		// backs off, where skipping would spin silently on every job the server sends.
+		if err := requireLeasePresence(w.withLease, aj.GetJobLeaseToken()); err != nil {
 			return err
 		}
 		job := newGRPCJob(aj, w.client.clock)
@@ -285,7 +299,16 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 	for ctx.Err() == nil {
 		jobs, err := w.pollOnce(ctx)
 		if err != nil && ctx.Err() == nil {
-			w.client.logger.Debug("sidecar poll failed", "type", w.jobType, "error", err)
+			if errors.Is(err, ErrLeaseNotHonored) {
+				// The documented fail-loud path. An ordinary sidecar failure stays at
+				// Debug because the stream is the primary channel and the next cycle
+				// retries, but a lease-incompatible server rejects every poll forever,
+				// so it must be visible at the default level like the other two paths.
+				w.client.logger.Warn("sidecar poll rejected: server does not honor job leases",
+					"type", w.jobType, "error", err)
+			} else {
+				w.client.logger.Debug("sidecar poll failed", "type", w.jobType, "error", err)
+			}
 		}
 		for i := range jobs {
 			job := newRESTJob(jobs[i], w.client.clock)
@@ -329,7 +352,13 @@ func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]openapi.ActivatedJobR
 	if err != nil {
 		return nil, w.client.wrapError(resp, err)
 	}
-	return result.GetJobs(), nil
+	jobs := result.GetJobs()
+	for i := range jobs {
+		if err := requireLeasePresence(w.withLease, string(jobs[i].GetJobLeaseToken())); err != nil {
+			return nil, err
+		}
+	}
+	return jobs, nil
 }
 
 func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *Job) {

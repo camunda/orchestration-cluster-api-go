@@ -1,6 +1,7 @@
 package camunda
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -14,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/camunda/orchestration-cluster-api-go/internal/diag"
 	"github.com/camunda/orchestration-cluster-api-go/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -39,9 +41,16 @@ type fakeGateway struct {
 	// how many stream attempts the server has seen.
 	failFirstStream int32
 	streamAttempts  atomic.Int32
+
+	// openStreams counts server-side StreamActivatedJobs handlers currently in
+	// flight. A client that returns without canceling its stream leaves the
+	// handler parked here, so this is how a leaked stream becomes visible.
+	openStreams atomic.Int32
 }
 
 func (f *fakeGateway) StreamActivatedJobs(req *pb.StreamActivatedJobsRequest, stream grpc.ServerStreamingServer[pb.ActivatedJob]) error {
+	f.openStreams.Add(1)
+	defer f.openStreams.Add(-1)
 	if f.streamReqs != nil {
 		select {
 		case f.streamReqs <- req:
@@ -628,5 +637,282 @@ func TestStreamJobWorkerSidecarPollRequestsLease(t *testing.T) {
 		}
 	case <-time.After(5 * time.Second):
 		t.Fatal("sidecar poll did not activate jobs")
+	}
+}
+
+// TestStreamJobWorkerRejectsUnhonoredLease covers the gRPC half of the
+// x-present-when contract. A streamed job with no token, after the worker asked for
+// one, means the gateway does not support leases; dispatching it would send unfenced
+// commands while the caller believed the job was fenced. The worker must end the
+// stream instead, so the existing reconnect backoff applies rather than a silent spin.
+func TestStreamJobWorkerRejectsUnhonoredLease(t *testing.T) {
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		jobs:      []*pb.ActivatedJob{{Key: 999, Type: "greet"}}, // no JobLeaseToken
+		completes: make(chan *pb.CompleteJobRequest, 1),
+		fails:     make(chan *pb.FailJobRequest, 1),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	var handled atomic.Int32
+	w := client.NewStreamJobWorker("greet",
+		func(context.Context, *Job) (map[string]any, error) {
+			handled.Add(1)
+			return nil, nil
+		},
+		WithStreamPollInterval(-1),
+		WithStreamReconnectBackoff(time.Millisecond),
+		WithStreamJobLease(true))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	// Wait for the worker to reopen the stream a few times. Reconnecting is what
+	// proves it rejected the job and tore the stream down, rather than simply not
+	// having reached it yet.
+	deadline := time.After(5 * time.Second)
+	for fake.streamAttempts.Load() < 3 {
+		select {
+		case c := <-fake.completes:
+			t.Fatalf("worker acknowledged an unfenced job: %v", c)
+		case <-deadline:
+			t.Fatalf("stream was attempted %d time(s), want at least 3", fake.streamAttempts.Load())
+		case <-time.After(time.Millisecond):
+		}
+	}
+
+	select {
+	case c := <-fake.completes:
+		t.Fatalf("worker acknowledged an unfenced job: %v", c)
+	default:
+	}
+	if n := handled.Load(); n != 0 {
+		t.Errorf("handler ran %d time(s) for a job whose lease was not honored, want 0", n)
+	}
+}
+
+// TestStreamJobWorkerSidecarRejectsUnhonoredLease covers the third activation path.
+// The sidecar poll activates over REST, so it can reach a lease-unaware server even
+// when the gRPC stream is idle, and must refuse an unfenced job on the same terms as
+// the other two rather than backfilling one the caller thinks is fenced.
+func TestStreamJobWorkerSidecarRejectsUnhonoredLease(t *testing.T) {
+	var activations atomic.Int32
+	acks := make(chan string, 4)
+	rest := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/jobs/activation") {
+			activations.Add(1)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, sidecarJobResponse) // "jobLeaseToken": null
+			return
+		}
+		if strings.Contains(r.URL.Path, "/jobs/") {
+			select {
+			case acks <- r.URL.Path:
+			default:
+			}
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer rest.Close()
+
+	// A gRPC stream that never delivers, so anything observed here came from the poll.
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		completes: make(chan *pb.CompleteJobRequest, 1),
+		fails:     make(chan *pb.FailJobRequest, 1),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	var handled atomic.Int32
+	w := client.NewStreamJobWorker("demo-task",
+		func(context.Context, *Job) (map[string]any, error) {
+			handled.Add(1)
+			return nil, nil
+		},
+		WithStreamPollInterval(10*time.Millisecond),
+		WithStreamJobLease(true))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	deadline := time.After(5 * time.Second)
+	for activations.Load() < 3 {
+		select {
+		case path := <-acks:
+			t.Fatalf("sidecar acknowledged an unfenced job at %s", path)
+		case <-deadline:
+			t.Fatalf("sidecar polled %d time(s), want at least 3", activations.Load())
+		case <-time.After(time.Millisecond):
+		}
+	}
+
+	select {
+	case path := <-acks:
+		t.Fatalf("sidecar acknowledged an unfenced job at %s", path)
+	default:
+	}
+	if n := handled.Load(); n != 0 {
+		t.Errorf("handler ran %d time(s) for a job whose lease was not honored, want 0", n)
+	}
+}
+
+// TestStreamJobWorkerCancelsRejectedStream verifies the worker closes a stream it
+// walks away from. Rejecting a job is the first local return that leaves the loop
+// while the stream is still healthy, and StreamActivatedJobs outlives streamOnce
+// unless its context is canceled -- so without cancellation each reconnect would
+// strand another server-side stream, still able to deliver jobs the worker has
+// stopped reading.
+func TestStreamJobWorkerCancelsRejectedStream(t *testing.T) {
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		jobs:      []*pb.ActivatedJob{{Key: 999, Type: "greet"}}, // no JobLeaseToken
+		completes: make(chan *pb.CompleteJobRequest, 1),
+		fails:     make(chan *pb.FailJobRequest, 1),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	w := client.NewStreamJobWorker("greet",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+		WithStreamPollInterval(-1),
+		WithStreamReconnectBackoff(time.Millisecond),
+		WithStreamJobLease(true))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	attemptDeadline := time.After(5 * time.Second)
+	for fake.streamAttempts.Load() < 4 {
+		select {
+		case <-attemptDeadline:
+			t.Fatalf("stream was attempted %d time(s), want at least 4", fake.streamAttempts.Load())
+		case <-time.After(time.Millisecond):
+		}
+	}
+
+	// A stranded stream never closes, so the count only climbs; the deadline is a
+	// safety net for a slow runner, not the correctness signal.
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		open := fake.openStreams.Load()
+		if open <= 1 {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf("%d server streams still open after %d attempts; rejected streams are being leaked",
+				open, fake.streamAttempts.Load())
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
+
+// syncBuffer is a concurrency-safe io.Writer so a test can read the SDK log while
+// the worker's goroutines write to it.
+type syncBuffer struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (s *syncBuffer) Write(p []byte) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.buf.Write(p)
+}
+
+func (s *syncBuffer) String() string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.buf.String()
+}
+
+// TestStreamJobWorkerSidecarLogsUnhonoredLeaseLoudly verifies the sidecar's lease
+// rejection is visible at the default log level. The sidecar swallows ordinary poll
+// failures at Debug because the stream is the primary channel, but a lease-unaware
+// server rejects every poll forever, so that one error must surface like the stream
+// and REST-worker paths do — otherwise the documented fail-loud behaviour is silent
+// on exactly this path.
+func TestStreamJobWorkerSidecarLogsUnhonoredLeaseLoudly(t *testing.T) {
+	rest := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/jobs/activation") {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, sidecarJobResponse) // "jobLeaseToken": null
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer rest.Close()
+
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		completes: make(chan *pb.CompleteJobRequest, 1),
+		fails:     make(chan *pb.FailJobRequest, 1),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithRestAddress(rest.URL), WithNoAuth())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	// Default level is Info; a Debug record would not show, so a captured line proves
+	// the rejection was raised above Debug rather than merely emitted somewhere.
+	logs := &syncBuffer{}
+	client.logger = diag.New(diag.LevelInfo, logs, client.clock)
+
+	w := client.NewStreamJobWorker("demo-task",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+		WithStreamPollInterval(10*time.Millisecond),
+		WithStreamJobLease(true))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	deadline := time.After(5 * time.Second)
+	for {
+		if s := logs.String(); strings.Contains(s, "lease") && strings.Contains(s, "WARN") {
+			return
+		}
+		select {
+		case <-deadline:
+			t.Fatalf("no lease-rejection warning at default log level; captured:\n%s", logs.String())
+		case <-time.After(5 * time.Millisecond):
+		}
 	}
 }
