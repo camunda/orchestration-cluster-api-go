@@ -76,7 +76,7 @@ echo "==> Formatting generated code..."
 # gofmt is not idempotent over the generated API doc comments: a single pass leaves some
 # files unformatted, which then surfaces as phantom generation drift in CI. Run to a fixed
 # point and fail loudly if it does not converge — never silence this step.
-GOFMT_TARGETS=(client pb facade_generated.go consistency_generated.go)
+GOFMT_TARGETS=(client pb facade_generated.go consistency_generated.go presentwhen_generated.go)
 unformatted=""
 for attempt in 1 2 3; do
   gofmt -w "${GOFMT_TARGETS[@]}"
