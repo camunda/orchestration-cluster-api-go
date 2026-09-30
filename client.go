@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
 	"github.com/camunda/orchestration-cluster-api-go/internal/backpressure"
 	"github.com/camunda/orchestration-cluster-api-go/internal/diag"
@@ -25,7 +25,7 @@ import (
 // methods are generated in facade_generated.go.
 type CamundaClient struct {
 	cfg    *Config
-	raw    *openapi.APIClient
+	raw    *camundaapi.APIClient
 	logger *diag.Logger
 	bp     *backpressure.Manager
 	clock  Clock
@@ -80,13 +80,13 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 		Exempt:       exemptDrainOps,
 	}, clk)
 
-	oc := openapi.NewConfiguration()
+	oc := camundaapi.NewConfiguration()
 	oc.HTTPClient = &http.Client{Transport: rt}
-	oc.Servers = openapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress)}}
+	oc.Servers = camundaapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress)}}
 
 	return &CamundaClient{
 		cfg:    cfg,
-		raw:    openapi.NewAPIClient(oc),
+		raw:    camundaapi.NewAPIClient(oc),
 		logger: diag.New(logLevel(cfg.LogLevel), nil, clk),
 		bp:     bp,
 		clock:  clk,
@@ -98,7 +98,7 @@ func (c *CamundaClient) Clock() Clock { return c.clock }
 
 // Raw returns the underlying generated client for operations or options not yet
 // surfaced on the ergonomic facade.
-func (c *CamundaClient) Raw() *openapi.APIClient { return c.raw }
+func (c *CamundaClient) Raw() *camundaapi.APIClient { return c.raw }
 
 // Config returns the resolved configuration.
 func (c *CamundaClient) Config() *Config { return c.cfg }
@@ -116,7 +116,7 @@ func (c *CamundaClient) wrapError(resp *http.Response, err error) error {
 	}
 	if status >= 400 {
 		body := ""
-		var apiErr *openapi.GenericOpenAPIError
+		var apiErr *camundaapi.GenericOpenAPIError
 		if errors.As(err, &apiErr) {
 			body = string(apiErr.Body())
 		}

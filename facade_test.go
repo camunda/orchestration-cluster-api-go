@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 // TestFacadeAppliesOptsTransform verifies that a facade method applies the
@@ -29,7 +29,7 @@ func TestFacadeAppliesOptsTransform(t *testing.T) {
 
 	called := false
 	_, _ = client.GetTopology(context.Background(),
-		func(r openapi.ApiGetTopologyRequest) openapi.ApiGetTopologyRequest {
+		func(r camundaapi.ApiGetTopologyRequest) camundaapi.ApiGetTopologyRequest {
 			called = true
 			return r
 		})

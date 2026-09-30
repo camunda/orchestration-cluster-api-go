@@ -1,8 +1,9 @@
-"""Hook 90 — ergonomic facade generation.
+"""Hook 90 — ergonomic facade and re-export generation.
 
 Delegates to ``cmd/facadegen``, which AST-parses the generated client and emits
 ``facade_generated.go`` (one ergonomic method per REST operation on
-``*CamundaClient``).
+``*CamundaClient``) and ``reexport_generated.go`` (every client name except the
+HTTP-client plumbing, re-exported from package ``camunda``).
 
 The facade references the hand-written client wiring (``c.raw`` and
 ``c.wrapError``). Until that wiring exists in the root package, this hook skips
@@ -32,8 +33,9 @@ def run(ctx) -> None:
         return
     metadata_path = str(ctx.get("metadata_path", ""))
     subprocess.run(
-        ["go", "run", "./cmd/facadegen", "client", "facade_generated.go", metadata_path, "examples"],
+        ["go", "run", "./cmd/facadegen", "client", "facade_generated.go", metadata_path, "examples",
+         "reexport_generated.go"],
         cwd=str(root),
         check=True,
     )
-    print("    generated facade_generated.go")
+    print("    generated facade_generated.go and reexport_generated.go")

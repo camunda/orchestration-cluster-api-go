@@ -10,6 +10,7 @@ Input:
     README.md                       - guide content (split by H2)
     docs-json/camunda.json          - exported surface of the root SDK package
     docs-json/domain-keys.json      - exported surface of the generated key types
+    reexport_generated.go           - generated client types re-exported by camunda
     examples/operation-map.json     - operationId -> example region map
     examples/*.go                   - compilable examples with region tags
 
@@ -44,6 +45,7 @@ OPERATION_MAP_PATH = EXAMPLES_DIR / "operation-map.json"
 DOCS_JSON_DIR = REPO_ROOT / "docs-json"
 SDK_JSON_PATH = DOCS_JSON_DIR / "camunda.json"
 KEYS_JSON_PATH = DOCS_JSON_DIR / "domain-keys.json"
+REEXPORT_PATH = REPO_ROOT / "reexport_generated.go"
 
 DOCS_MD_DIR = REPO_ROOT / "docs-md"
 SECTION_DIR = DOCS_MD_DIR / "go-sdk"
@@ -457,6 +459,43 @@ def _md_signature(sig: str) -> str:
     return f"```go\n{sig}\n```\n\n"
 
 
+_REEXPORTED_TYPE_RE = re.compile(r"^type (\w+) = camundaapi\.\1$", re.MULTILINE)
+# The declared name (and receiver) of a signature, which is not a type reference.
+_SIGNATURE_NAME_RE = re.compile(r"^func (\([^)]*\) )?\w+")
+# An exported identifier that is not package-qualified (e.g. not context.Context).
+_SIGNATURE_IDENT_RE = re.compile(r"(?<![.\w])([A-Z]\w*)\b")
+
+
+def load_generated_types() -> set[str]:
+    """The generated client types that package camunda re-exports.
+
+    The reference pages leave these out (see docgen -exclude), so signatures link
+    them to their pkg.go.dev entry instead. Fails when none are found, which
+    would otherwise silently drop every link.
+    """
+    try:
+        names = set(_REEXPORTED_TYPE_RE.findall(REEXPORT_PATH.read_text(encoding="utf-8")))
+    except FileNotFoundError:
+        names = set()
+    if not names:
+        raise SystemExit(
+            f"No re-exported client types found in {REEXPORT_PATH.name}; "
+            "run `make generate` first."
+        )
+    return names
+
+
+def _md_signature_type_links(sig: str, generated: set[str]) -> str:
+    seen: list[str] = []
+    for name in _SIGNATURE_IDENT_RE.findall(_SIGNATURE_NAME_RE.sub("", sig)):
+        if name in generated and name not in seen:
+            seen.append(name)
+    if not seen:
+        return ""
+    links = ", ".join(f"[`{n}`]({PKG_GO_DEV_CLIENT}#{n})" for n in seen)
+    return f"**Types:** {links}\n\n"
+
+
 def _md_table(headers: list[str], rows: list[list[str]]) -> str:
     if not rows:
         return ""
@@ -497,12 +536,15 @@ def _render_value(v: Value, level: int, depth: int) -> str:
     return out
 
 
-def _render_funcs_detail(funcs: list[Func], level: int, examples: dict[str, str]) -> str:
+def _render_funcs_detail(
+    funcs: list[Func], level: int, examples: dict[str, str], generated: set[str]
+) -> str:
     h = "#" * level
     out = ""
     for f in funcs:
         out += f"\n{h} {f.name}\n\n"
         out += _md_signature(f.signature)
+        out += _md_signature_type_links(f.signature, generated)
         body = _normalize_docs(f.docs, _API_REFERENCE_DEPTH, level)
         if body:
             out += body + "\n\n"
@@ -514,7 +556,9 @@ def _render_funcs_detail(funcs: list[Func], level: int, examples: dict[str, str]
     return out
 
 
-def _render_type_section(t: TypeItem, level: int, examples: dict[str, str]) -> str:
+def _render_type_section(
+    t: TypeItem, level: int, examples: dict[str, str], generated: set[str]
+) -> str:
     h = "#" * level
     out = f"\n{h} {t.name}\n\n"
     if t.decl:
@@ -534,10 +578,10 @@ def _render_type_section(t: TypeItem, level: int, examples: dict[str, str]) -> s
                 out += cbody + "\n\n"
     if t.funcs:
         out += f"{h}# Functions\n"
-        out += _render_funcs_detail(t.funcs, level + 2, examples)
+        out += _render_funcs_detail(t.funcs, level + 2, examples, generated)
     if t.methods:
         out += f"{h}# Methods\n"
-        out += _render_funcs_detail(t.methods, level + 2, examples)
+        out += _render_funcs_detail(t.methods, level + 2, examples, generated)
     return out
 
 
@@ -658,7 +702,7 @@ def classify_vars(values: list[Value]) -> dict[str, list[Value]]:
 
 
 def generate_camunda_client(
-    types: list[TypeItem], examples: dict[str, str], import_path: str
+    types: list[TypeItem], examples: dict[str, str], import_path: str, generated: set[str]
 ) -> str:
     client = next((t for t in types if t.name == "CamundaClient"), None)
     out = frontmatter("CamundaClient", "CamundaClient")
@@ -676,7 +720,7 @@ def generate_camunda_client(
     out += f"```go\nimport camunda \"{import_path}\"\n```\n\n"
     if client.funcs:
         out += "## Constructors\n"
-        out += _render_funcs_detail(client.funcs, 3, examples)
+        out += _render_funcs_detail(client.funcs, 3, examples, generated)
     out += "## Methods\n\n"
     out += _md_table(
         ["Method", "Description"],
@@ -686,7 +730,7 @@ def generate_camunda_client(
         ],
     )
     out += "## Method details\n"
-    out += _render_funcs_detail(client.methods, 3, examples)
+    out += _render_funcs_detail(client.methods, 3, examples, generated)
     return out
 
 
@@ -697,16 +741,17 @@ def generate_section_page(
     values: list[Value],
     funcs: list[Func],
     examples: dict[str, str],
+    generated: set[str],
 ) -> str:
     out = frontmatter(title, title)
     out += f"\n# {title}\n\n"
     if intro:
         out += intro + "\n\n"
     for t in sorted(types, key=lambda t: t.name):
-        out += _render_type_section(t, 2, examples)
+        out += _render_type_section(t, 2, examples, generated)
     if funcs:
         out += "\n## Package functions\n"
-        out += _render_funcs_detail(funcs, 3, examples)
+        out += _render_funcs_detail(funcs, 3, examples, generated)
     for v in values:
         out += _render_value(v, 2, _API_REFERENCE_DEPTH)
     return out
@@ -722,7 +767,7 @@ def generate_domain_keys(keys: list[TypeItem]) -> str:
         "classes of identifier mix-ups are caught before the request is sent.\n\n"
     )
     out += (
-        '```go\nimport openapi "github.com/camunda/orchestration-cluster-api-go/client"'
+        '```go\nimport camunda "github.com/camunda/orchestration-cluster-api-go"'
         "\n```\n\n"
     )
 
@@ -831,9 +876,13 @@ def generate_index(counts: dict[str, int]) -> str:
         ],
     )
     out += (
-        "The generated request and response models are not reproduced here — there are "
-        f"several hundred of them. Browse them on [pkg.go.dev]({PKG_GO_DEV_CLIENT}), or "
-        "use your editor's go-to-definition on any method signature.\n"
+        "The generated request and response models, enums and builders are not "
+        "reproduced here — there are several hundred of them. Import them from the "
+        "`camunda` package like everything else (for example "
+        "`camunda.ProcessInstanceResult`); their fields and methods are documented "
+        f"on [pkg.go.dev]({PKG_GO_DEV_CLIENT}). Each method on the "
+        "[CamundaClient](camunda-client.md) page links the generated types in its "
+        "signature to that documentation.\n"
     )
     return out
 
@@ -1081,6 +1130,7 @@ def generate_api_reference() -> None:
     buckets = classify_types(sdk.types)
     var_buckets = classify_vars(sdk.vars)
     examples = load_examples()
+    generated = load_generated_types()
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -1098,7 +1148,9 @@ def generate_api_reference() -> None:
     pages: list[tuple[str, str]] = [
         (
             "camunda-client.md",
-            generate_camunda_client(buckets["camunda-client"], examples, sdk.import_path),
+            generate_camunda_client(
+                buckets["camunda-client"], examples, sdk.import_path, generated
+            ),
         ),
         (
             "configuration.md",
@@ -1111,6 +1163,7 @@ def generate_api_reference() -> None:
                 var_buckets["configuration"],
                 [],
                 examples,
+                generated,
             ),
         ),
         (
@@ -1124,6 +1177,7 @@ def generate_api_reference() -> None:
                 var_buckets["job-workers"],
                 [],
                 examples,
+                generated,
             ),
         ),
         (
@@ -1136,6 +1190,7 @@ def generate_api_reference() -> None:
                 var_buckets["runtime"],
                 sdk.funcs,
                 examples,
+                generated,
             ),
         ),
     ]

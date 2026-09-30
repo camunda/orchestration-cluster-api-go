@@ -10,7 +10,7 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/coder/websocket"
 )
 
@@ -124,8 +124,8 @@ func TestCreateProcessInstanceRoutesOverFalcon(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	instr := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
-		openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("order-process")))
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+		camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process")))
 	res, err := c.CreateProcessInstance(context.Background(), instr)
 	if err != nil {
 		t.Fatalf("CreateProcessInstance: %v", err)
@@ -168,8 +168,8 @@ func TestCreateProcessInstanceForceRESTBypassesFalcon(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	instr := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
-		openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("order-process")))
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+		camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process")))
 	if _, err := c.CreateProcessInstance(context.Background(), instr); err != nil {
 		t.Fatalf("CreateProcessInstance: %v", err)
 	}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/pb"
 )
 
@@ -69,7 +69,7 @@ func (j *Job) Variables(v any) error {
 
 // newRESTJob builds a Job from a REST activate-jobs result. clock is positional so
 // the compiler rejects a delivery path that forgets to pass the worker's clock.
-func newRESTJob(aj openapi.ActivatedJobResult, clock Clock) *Job {
+func newRESTJob(aj camundaapi.ActivatedJobResult, clock Clock) *Job {
 	return &Job{
 		key:                string(aj.GetJobKey()),
 		jobType:            aj.GetType(),

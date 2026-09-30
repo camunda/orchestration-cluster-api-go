@@ -87,7 +87,7 @@ def _detect_package(client_dir: Path) -> str:
             m = _PKG_DECL.search(p.read_text(encoding="utf-8"))
             if m:
                 return m.group(1)
-    return "openapi"
+    return "camundaapi"
 
 
 def _existing_types(client_dir: Path) -> set[str]:

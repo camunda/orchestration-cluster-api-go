@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func TestNewBasicAuthBuildsClient(t *testing.T) {
@@ -75,7 +75,7 @@ func TestWrapError(t *testing.T) {
 	}
 
 	// A non-success HTTP response maps to *APIError carrying the status.
-	mapped := c.wrapError(&http.Response{StatusCode: 404}, &openapi.GenericOpenAPIError{})
+	mapped := c.wrapError(&http.Response{StatusCode: 404}, &camundaapi.GenericOpenAPIError{})
 	var apiErr *APIError
 	if !errors.As(mapped, &apiErr) {
 		t.Fatalf("expected *APIError, got %T (%v)", mapped, mapped)

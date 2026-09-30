@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 // ClockController is the engine-side clock an [EngineClock] drives.
@@ -22,7 +22,7 @@ type ClockController interface {
 
 // PinAt moves the engine clock to t.
 func (c *CamundaClient) PinAt(ctx context.Context, t time.Time) error {
-	return c.PinClock(ctx, *openapi.NewClockPinRequest(t.UnixMilli()))
+	return c.PinClock(ctx, *camundaapi.NewClockPinRequest(t.UnixMilli()))
 }
 
 // ResetToLive returns the engine clock to real time.

@@ -10,7 +10,6 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/examples/advanced/internal/exampleutil"
 )
 
@@ -108,7 +107,7 @@ func run() error {
 		{ID: "order-1002", SKU: "limited-mug", OutOfStock: true},
 		{ID: "order-1003", SKU: "coffee-beans", FailFirstIO: true},
 	}
-	keys := make([]openapi.ProcessInstanceKey, 0, len(orders))
+	keys := make([]camunda.ProcessInstanceKey, 0, len(orders))
 	for _, item := range orders {
 		key, err := exampleutil.StartProcess(ctx, client, processID, item.ID, map[string]any{
 			"orderId":     item.ID,

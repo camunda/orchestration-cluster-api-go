@@ -1,16 +1,12 @@
 // This is a test fixture for cmd/facadegen (a minimal stand-in for the generated
-// openapi client). It lives under testdata/ so the Go toolchain ignores it; only
+// camundaapi client). It lives under testdata/ so the Go toolchain ignores it; only
 // facadegen's AST parser reads it.
-package openapi
+package camundaapi
 
 import (
 	"context"
 	"net/http"
 )
-
-type APIClient struct {
-	WidgetAPI *WidgetAPIService
-}
 
 type WidgetAPIService struct{}
 

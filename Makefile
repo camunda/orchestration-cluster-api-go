@@ -88,7 +88,7 @@ coverage:
 # types. This is the Go analogue of rustdoc JSON in the Rust SDK.
 docs-json:
 	@mkdir -p docs-json
-	$(GO) run ./cmd/docgen -dir . \
+	$(GO) run ./cmd/docgen -dir . -exclude reexport_generated.go \
 		-import-path github.com/camunda/orchestration-cluster-api-go \
 		-out docs-json/camunda.json
 	$(GO) run ./cmd/docgen -dir ./client -include zz_generated_domain_keys.go \

@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
 )
 
@@ -158,7 +158,7 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 		if !ok {
 			continue
 		}
-		var ajr openapi.ActivatedJobResult
+		var ajr camundaapi.ActivatedJobResult
 		if err := json.Unmarshal(raw, &ajr); err != nil {
 			// Undecodable push (protocol drift or a gateway bug): log a diagnostic,
 			// replenish the consumed credit, and skip rather than losing the slot
@@ -246,18 +246,18 @@ func (w *JobWorker) runRESTPoll(ctx context.Context) error {
 	return ctx.Err()
 }
 
-// toTenantIDs brands a slice of plain tenant-id strings as []openapi.TenantId for
+// toTenantIDs brands a slice of plain tenant-id strings as []camundaapi.TenantId for
 // the generated request setters.
-func toTenantIDs(ids []string) []openapi.TenantId {
-	out := make([]openapi.TenantId, len(ids))
+func toTenantIDs(ids []string) []camundaapi.TenantId {
+	out := make([]camundaapi.TenantId, len(ids))
 	for i, id := range ids {
-		out[i] = openapi.TenantId(id)
+		out[i] = camundaapi.TenantId(id)
 	}
 	return out
 }
 
-func (w *JobWorker) activate(ctx context.Context, maxJobs int) ([]openapi.ActivatedJobResult, error) {
-	req := openapi.NewJobActivationRequest(w.jobType, w.timeout.Milliseconds(), int32(maxJobs))
+func (w *JobWorker) activate(ctx context.Context, maxJobs int) ([]camundaapi.ActivatedJobResult, error) {
+	req := camundaapi.NewJobActivationRequest(w.jobType, w.timeout.Milliseconds(), int32(maxJobs))
 	if w.name != "" {
 		req.SetWorker(w.name)
 	}
@@ -315,14 +315,14 @@ func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]a
 }
 
 func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any) {
-	req := openapi.NewJobCompletionRequest()
+	req := camundaapi.NewJobCompletionRequest()
 	if len(vars) > 0 {
 		req.SetVariables(vars)
 	}
 	if job.leaseToken != "" {
-		req.SetJobLeaseToken(openapi.JobLeaseToken(job.leaseToken))
+		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
 	}
-	_, err := c.raw.JobAPI.CompleteJob(ctx, openapi.JobKey(job.key)).
+	_, err := c.raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
 		JobCompletionRequest(*req).Execute()
 	if err != nil {
 		c.logger.Error("complete job failed", "job", job.Key(), "error", err)
@@ -330,7 +330,7 @@ func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[
 }
 
 func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) {
-	req := openapi.NewJobFailRequest()
+	req := camundaapi.NewJobFailRequest()
 	retries := job.Retries() - 1
 	if retries < 0 {
 		retries = 0
@@ -340,9 +340,9 @@ func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) 
 		req.SetErrorMessage(cause.Error())
 	}
 	if job.leaseToken != "" {
-		req.SetJobLeaseToken(openapi.JobLeaseToken(job.leaseToken))
+		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
 	}
-	_, err := c.raw.JobAPI.FailJob(ctx, openapi.JobKey(job.key)).
+	_, err := c.raw.JobAPI.FailJob(ctx, camundaapi.JobKey(job.key)).
 		JobFailRequest(*req).Execute()
 	if err != nil {
 		c.logger.Error("fail job failed", "job", job.Key(), "error", err)
@@ -350,7 +350,7 @@ func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) 
 }
 
 func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *BpmnError) {
-	req := openapi.NewJobErrorRequest(bpmn.Code)
+	req := camundaapi.NewJobErrorRequest(bpmn.Code)
 	if bpmn.Message != "" {
 		req.SetErrorMessage(bpmn.Message)
 	}
@@ -358,9 +358,9 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 		req.SetVariables(bpmn.Variables)
 	}
 	if job.leaseToken != "" {
-		req.SetJobLeaseToken(openapi.JobLeaseToken(job.leaseToken))
+		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
 	}
-	_, err := c.raw.JobAPI.ThrowJobError(ctx, openapi.JobKey(job.key)).
+	_, err := c.raw.JobAPI.ThrowJobError(ctx, camundaapi.JobKey(job.key)).
 		JobErrorRequest(*req).Execute()
 	if err != nil {
 		c.logger.Error("throw job error failed", "job", job.Key(), "error", err)

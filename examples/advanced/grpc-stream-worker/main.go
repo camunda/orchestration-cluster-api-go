@@ -12,7 +12,6 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/examples/advanced/internal/exampleutil"
 )
 
@@ -127,7 +126,7 @@ func run() error {
 		},
 	}
 
-	keys := make([]openapi.ProcessInstanceKey, 0, len(parcels))
+	keys := make([]camunda.ProcessInstanceKey, 0, len(parcels))
 	for _, item := range parcels {
 		key, err := exampleutil.StartProcess(ctx, client, processID, item.ID, map[string]any{
 			"parcelId":         item.ID,

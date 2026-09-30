@@ -28,11 +28,12 @@ them here:
 | --- | --- |
 | `camunda.go`, `config.go`, `options.go`, `errors.go` | Public root package `camunda` — hand-written facade surface, configuration, options, error taxonomy. Primary edit surface. |
 | `facade_generated.go` | **Generated** by `./cmd/facadegen` (AST-parses `client/`). One method per REST operation on `*CamundaClient`, routed through `guarded()`. Never hand-edit. |
+| `reexport_generated.go` | **Generated** by `./cmd/facadegen`. Re-exports every `client/` name except the HTTP-client plumbing (`plumbingFiles`/`plumbingNames` in `cmd/facadegen/reexport.go`), so callers import only `camunda`. Name client types by their `camunda` name in exported API. Never hand-edit. |
 | `internal/config`, `internal/auth`, `internal/backpressure`, `internal/retry`, `internal/eventual`, `internal/transport`, `internal/diag` | Hand-written runtime. Cross-cutting concerns as an `http.RoundTripper` chain. Primary edit surface. |
 | `internal/worker` | REST job worker + gRPC streaming worker. |
 | `client/` | **Generated.** REST client from `openapi-generator`. Never hand-edit. |
 | `pb/` | **Generated.** gRPC stubs from `buf`. Never hand-edit. |
-| `cmd/facadegen/` | The AST-based facade generator. Primary edit surface for facade output. |
+| `cmd/facadegen/` | The AST-based facade and re-export generator. Primary edit surface for facade and re-export output. |
 | `scripts/generate.sh` | Pipeline orchestrator: bundle → fetch-proto → openapi-generator → buf → post-process → gofmt → build. |
 | `scripts/bundle-spec.sh`, `scripts/fetch-proto.sh` | Fetch the OpenAPI spec and `gateway.proto` (pinned to `$SPEC_REF`). |
 | `scripts/postprocess.py`, `scripts/hooks/` | Numbered post-processing hooks: Domain Type System, semantic field types, generator-quirk fixes, version-skew tolerance, then the facade (delegates to `cmd/facadegen`). Primary edit surface for fixing generated output. |

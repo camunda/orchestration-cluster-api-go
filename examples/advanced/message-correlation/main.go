@@ -8,7 +8,6 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/examples/advanced/internal/exampleutil"
 )
 
@@ -44,7 +43,7 @@ func run() error {
 		"payment-2002-" + runID,
 		"payment-2003-" + runID,
 	}
-	keys := make([]openapi.ProcessInstanceKey, 0, len(orderIDs))
+	keys := make([]camunda.ProcessInstanceKey, 0, len(orderIDs))
 	for _, orderID := range orderIDs {
 		// Publish immediately after starting the process on purpose. The message TTL
 		// must cover the interval before the subscription becomes available.
@@ -87,7 +86,7 @@ func publishPayment(
 	orderID string,
 	messageID string,
 ) error {
-	request := openapi.NewMessagePublicationRequest("payment-received")
+	request := camunda.NewMessagePublicationRequest("payment-received")
 	request.SetCorrelationKey(orderID)
 	request.SetMessageId(messageID)
 	// TTL defines both the buffering window and duplicate-ID protection window.

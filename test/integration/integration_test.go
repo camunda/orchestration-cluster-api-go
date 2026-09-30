@@ -22,7 +22,7 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 //go:embed testdata/greet.bpmn
@@ -74,21 +74,21 @@ func deployModel(ctx context.Context, t *testing.T, c *camunda.CamundaClient, na
 	}
 }
 
-func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string) openapi.ProcessInstanceKey {
+func startGreetProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, name string) camundaapi.ProcessInstanceKey {
 	t.Helper()
 	return startProcess(ctx, t, c, "demo-process", name)
 }
 
-func startProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, processID, name string) openapi.ProcessInstanceKey {
+func startProcess(ctx context.Context, t *testing.T, c *camunda.CamundaClient, processID, name string) camundaapi.ProcessInstanceKey {
 	t.Helper()
-	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId(processID))
+	byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId(processID))
 	byID.SetVariables(map[string]any{"name": name})
-	instr := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
 	result, err := c.CreateProcessInstance(ctx, instr)
 	if err != nil {
 		t.Fatalf("create process instance: %v", err)
 	}
-	return openapi.MustProcessInstanceKey(string(result.GetProcessInstanceKey()))
+	return camundaapi.MustProcessInstanceKey(string(result.GetProcessInstanceKey()))
 }
 
 func TestTopology(t *testing.T) {
