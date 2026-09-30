@@ -7,12 +7,12 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func createGroupExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateGroup
-	result, err := client.CreateGroup(ctx, *openapi.NewGroupCreateRequest("finance", "Finance"))
+	result, err := client.CreateGroup(ctx, *camundaapi.NewGroupCreateRequest("finance", "Finance"))
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func createGroupExample(ctx context.Context, client *camunda.CamundaClient) erro
 
 func searchGroupsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchGroups
-	result, err := client.SearchGroups(ctx, *openapi.NewGroupSearchQueryRequest())
+	result, err := client.SearchGroups(ctx, *camundaapi.NewGroupSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func getGroupExample(ctx context.Context, client *camunda.CamundaClient) error {
 
 func updateGroupExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateGroup
-	result, err := client.UpdateGroup(ctx, "finance", *openapi.NewGroupUpdateRequest("Finance & Accounting"))
+	result, err := client.UpdateGroup(ctx, "finance", *camundaapi.NewGroupUpdateRequest("Finance & Accounting"))
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func deleteGroupExample(ctx context.Context, client *camunda.CamundaClient) erro
 
 func searchUsersForGroupExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchUsersForGroup
-	result, err := client.SearchUsersForGroup(ctx, "finance", *openapi.NewGroupUserSearchQueryRequest())
+	result, err := client.SearchUsersForGroup(ctx, "finance", *camundaapi.NewGroupUserSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func unassignUserFromGroupExample(ctx context.Context, client *camunda.CamundaCl
 
 func searchClientsForGroupExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchClientsForGroup
-	result, err := client.SearchClientsForGroup(ctx, "finance", *openapi.NewGroupClientSearchQueryRequest())
+	result, err := client.SearchClientsForGroup(ctx, "finance", *camundaapi.NewGroupClientSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func unassignClientFromGroupExample(ctx context.Context, client *camunda.Camunda
 
 func searchRolesForGroupExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchRolesForGroup
-	result, err := client.SearchRolesForGroup(ctx, "finance", *openapi.NewRoleSearchQueryRequest())
+	result, err := client.SearchRolesForGroup(ctx, "finance", *camundaapi.NewRoleSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func searchRolesForGroupExample(ctx context.Context, client *camunda.CamundaClie
 
 func searchMappingRulesForGroupExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchMappingRulesForGroup
-	result, err := client.SearchMappingRulesForGroup(ctx, "finance", *openapi.NewMappingRuleSearchQueryRequest())
+	result, err := client.SearchMappingRulesForGroup(ctx, "finance", *camundaapi.NewMappingRuleSearchQueryRequest())
 	if err != nil {
 		return err
 	}

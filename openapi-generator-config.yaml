@@ -13,7 +13,7 @@ generatorName: go
 inputSpec: external-spec/bundled/rest-api.bundle.json
 outputDir: client
 additionalProperties:
-  packageName: openapi
+  packageName: camundaapi
   isGoSubmodule: false
   withGoMod: false
   generateInterfaces: false

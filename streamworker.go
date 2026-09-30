@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
 	"github.com/camunda/orchestration-cluster-api-go/pb"
 	"google.golang.org/grpc"
@@ -334,8 +334,8 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 }
 
 // pollOnce activates up to pollMaxJobs jobs over REST.
-func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]openapi.ActivatedJobResult, error) {
-	req := openapi.NewJobActivationRequest(w.jobType, w.timeout.Milliseconds(), int32(w.pollMaxJobs))
+func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]camundaapi.ActivatedJobResult, error) {
+	req := camundaapi.NewJobActivationRequest(w.jobType, w.timeout.Milliseconds(), int32(w.pollMaxJobs))
 	if w.name != "" {
 		req.SetWorker(w.name)
 	}

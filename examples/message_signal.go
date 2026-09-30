@@ -6,12 +6,12 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func correlateMessageExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CorrelateMessage
-	req := openapi.NewMessageCorrelationRequest("order-confirmed")
+	req := camundaapi.NewMessageCorrelationRequest("order-confirmed")
 	req.SetCorrelationKey("order-42")
 	req.SetVariables(map[string]any{"confirmedBy": "payment-service"})
 
@@ -26,7 +26,7 @@ func correlateMessageExample(ctx context.Context, client *camunda.CamundaClient)
 
 func publishMessageExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region PublishMessage
-	req := openapi.NewMessagePublicationRequest("order-confirmed")
+	req := camundaapi.NewMessagePublicationRequest("order-confirmed")
 	req.SetCorrelationKey("order-42")
 	req.SetVariables(map[string]any{"confirmedBy": "payment-service"})
 
@@ -41,7 +41,7 @@ func publishMessageExample(ctx context.Context, client *camunda.CamundaClient) e
 
 func broadcastSignalExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region BroadcastSignal
-	req := openapi.NewSignalBroadcastRequest("cancel-all-orders")
+	req := camundaapi.NewSignalBroadcastRequest("cancel-all-orders")
 	req.SetVariables(map[string]any{"reason": "maintenance"})
 
 	result, err := client.BroadcastSignal(ctx, *req)
@@ -55,7 +55,7 @@ func broadcastSignalExample(ctx context.Context, client *camunda.CamundaClient) 
 
 func searchMessageSubscriptionsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchMessageSubscriptions
-	result, err := client.SearchMessageSubscriptions(ctx, *openapi.NewMessageSubscriptionSearchQuery())
+	result, err := client.SearchMessageSubscriptions(ctx, *camundaapi.NewMessageSubscriptionSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func searchMessageSubscriptionsExample(ctx context.Context, client *camunda.Camu
 func searchCorrelatedMessageSubscriptionsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchCorrelatedMessageSubscriptions
 	result, err := client.SearchCorrelatedMessageSubscriptions(ctx,
-		*openapi.NewCorrelatedMessageSubscriptionSearchQuery())
+		*camundaapi.NewCorrelatedMessageSubscriptionSearchQuery())
 	if err != nil {
 		return err
 	}

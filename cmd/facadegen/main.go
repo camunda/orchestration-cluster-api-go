@@ -12,7 +12,7 @@
 //	type APIClient struct { <Field> *<Svc>APIService ... }
 //
 // The generated facade is package `camunda` and references the raw client through
-// the alias `openapi`, the client field `c.raw`, and the error mapper `c.wrapError`,
+// the alias `camundaapi`, the client field `c.raw`, and the error mapper `c.wrapError`,
 // which are provided by the hand-written client wiring.
 package main
 
@@ -33,7 +33,7 @@ import (
 
 const (
 	clientImportPath = "github.com/camunda/orchestration-cluster-api-go/client"
-	clientAlias      = "openapi"
+	clientAlias      = "camundaapi"
 )
 
 // handwrittenOps are operations excluded from generation because the SDK ships a
@@ -54,8 +54,8 @@ type operation struct {
 	name        string // operation, e.g. "GetTopology"
 	params      []param
 	retType     string // qualified value return type, or "" when the op returns no value
-	reqType     string // qualified request-builder type, e.g. "openapi.ApiGetTopologyRequest"
-	bodyType    string // qualified request-body type (e.g. "openapi.JobActivationRequest"), or ""
+	reqType     string // qualified request-builder type, e.g. "camundaapi.ApiGetTopologyRequest"
+	bodyType    string // qualified request-body type (e.g. "camundaapi.JobActivationRequest"), or ""
 	bodyBuilder string // request-body builder method on the ApiXxxRequest, or ""
 	example     string // dedented usage snippet from examples/, injected into the doc comment
 }
@@ -63,7 +63,7 @@ type operation struct {
 // bodyInfo describes an operation's JSON request body, derived from spec metadata.
 type bodyInfo struct {
 	builder string // builder method name on ApiXxxRequest (== the body model name)
-	typ     string // qualified Go type, e.g. "openapi.JobActivationRequest"
+	typ     string // qualified Go type, e.g. "camundaapi.JobActivationRequest"
 }
 
 func main() {
@@ -435,7 +435,7 @@ func (r *renderer) resultType(fn *ast.FuncDecl) string {
 }
 
 // typeString renders a type expression, qualifying client-package types with the
-// `openapi.` alias.
+// `camundaapi.` alias.
 func (r *renderer) typeString(expr ast.Expr) string {
 	switch e := expr.(type) {
 	case *ast.Ident:

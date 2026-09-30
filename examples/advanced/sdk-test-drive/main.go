@@ -11,7 +11,7 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/examples/advanced/internal/exampleutil"
 )
 
@@ -46,7 +46,7 @@ func run() (runErr error) {
 	fmt.Printf("connected to Camunda %s with %d broker(s)\n",
 		topology.GetGatewayVersion(), len(topology.GetBrokers()))
 
-	evaluation, err := client.EvaluateExpression(ctx, *openapi.NewExpressionEvaluationRequest("=21 * 2"))
+	evaluation, err := client.EvaluateExpression(ctx, *camundaapi.NewExpressionEvaluationRequest("=21 * 2"))
 	if err != nil {
 		return fmt.Errorf("evaluate FEEL expression: %w", err)
 	}
@@ -90,7 +90,7 @@ func run() (runErr error) {
 		cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cleanupCancel()
 		if err := client.CancelProcessInstance(
-			cleanupCtx, key, *openapi.NewCancelProcessInstanceRequest(),
+			cleanupCtx, key, *camundaapi.NewCancelProcessInstanceRequest(),
 		); err != nil {
 			runErr = errors.Join(runErr, fmt.Errorf("cancel incomplete process instance %s: %w", key, err))
 		}

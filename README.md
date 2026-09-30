@@ -314,9 +314,9 @@ if _, _, err := client.Raw().ResourceAPI.CreateDeployment(ctx).
 
 // Start an instance by process id. The request body is a first-class facade
 // parameter — no Raw() needed.
-byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("demo-process"))
+byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("demo-process"))
 byID.SetVariables(map[string]any{"name": "Camunda"})
-instruction := openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
+instruction := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
 
 instance, err := client.CreateProcessInstance(ctx, instruction)
 if err != nil {
@@ -382,9 +382,9 @@ entity is visible or a timeout elapses:
 ```go
 // Reads are eventually consistent: a just-created entity may briefly 404.
 // Poll retries 404s until the entity is visible or the timeout elapses.
-key := openapi.MustProcessInstanceKey("2251799813685249")
+key := camundaapi.MustProcessInstanceKey("2251799813685249")
 
-instance, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
+instance, err := camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ProcessInstanceResult, error) {
 	return client.GetProcessInstance(ctx, key)
 }, camunda.WithPollTimeout(10*time.Second))
 if err != nil {
@@ -483,14 +483,14 @@ types rather than bare strings:
 <!-- snippet-source: examples/readme.go | regions: SemanticKeys -->
 ```go
 // Semantic key types validate their format at construction.
-key, err := openapi.NewJobKey("2251799813685424") // validates pattern & length
+key, err := camundaapi.NewJobKey("2251799813685424") // validates pattern & length
 if err != nil {
 	return err
 }
 fmt.Println(key.String())
 
 // Side-load a key you already trust, without validation:
-loose := openapi.MustJobKey("2251799813685424")
+loose := camundaapi.MustJobKey("2251799813685424")
 _ = loose
 ```
 
@@ -516,7 +516,7 @@ Two helpers cover the common classifications without unwrapping by hand:
 
 <!-- snippet-source: examples/readme.go | regions: ErrorClassification -->
 ```go
-key := openapi.MustProcessInstanceKey("2251799813685249")
+key := camundaapi.MustProcessInstanceKey("2251799813685249")
 
 _, err := client.GetProcessInstance(ctx, key)
 

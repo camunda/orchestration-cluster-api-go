@@ -9,13 +9,13 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func activateJobsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ActivateJobs
 	// Activate up to 10 "greet" jobs with a 60s activation timeout.
-	req := openapi.NewJobActivationRequest("greet", 60_000, 10)
+	req := camundaapi.NewJobActivationRequest("greet", 60_000, 10)
 	req.SetWorker("greet-worker")
 
 	result, err := client.ActivateJobs(ctx, *req)
@@ -31,44 +31,44 @@ func activateJobsExample(ctx context.Context, client *camunda.CamundaClient) err
 
 func completeJobExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CompleteJob
-	req := openapi.NewJobCompletionRequest()
+	req := camundaapi.NewJobCompletionRequest()
 	req.SetVariables(map[string]any{"greeting": "Hello!"})
 
-	return client.CompleteJob(ctx, openapi.MustJobKey("2251799813685424"), *req)
+	return client.CompleteJob(ctx, camundaapi.MustJobKey("2251799813685424"), *req)
 	// endregion CompleteJob
 }
 
 func failJobExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region FailJob
-	req := openapi.NewJobFailRequest()
+	req := camundaapi.NewJobFailRequest()
 	req.SetRetries(2)
 	req.SetErrorMessage("inventory service unavailable")
 
-	return client.FailJob(ctx, openapi.MustJobKey("2251799813685424"), *req)
+	return client.FailJob(ctx, camundaapi.MustJobKey("2251799813685424"), *req)
 	// endregion FailJob
 }
 
 func throwJobErrorExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ThrowJobError
-	req := openapi.NewJobErrorRequest("OUT_OF_STOCK")
+	req := camundaapi.NewJobErrorRequest("OUT_OF_STOCK")
 	req.SetErrorMessage("item is out of stock")
 
-	return client.ThrowJobError(ctx, openapi.MustJobKey("2251799813685424"), *req)
+	return client.ThrowJobError(ctx, camundaapi.MustJobKey("2251799813685424"), *req)
 	// endregion ThrowJobError
 }
 
 func updateJobExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateJob
-	changeset := openapi.NewJobChangeset()
+	changeset := camundaapi.NewJobChangeset()
 	changeset.SetRetries(3)
 
-	return client.UpdateJob(ctx, openapi.MustJobKey("2251799813685424"), *openapi.NewJobUpdateRequest(*changeset))
+	return client.UpdateJob(ctx, camundaapi.MustJobKey("2251799813685424"), *camundaapi.NewJobUpdateRequest(*changeset))
 	// endregion UpdateJob
 }
 
 func searchJobsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchJobs
-	result, err := client.SearchJobs(ctx, *openapi.NewJobSearchQuery())
+	result, err := client.SearchJobs(ctx, *camundaapi.NewJobSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -81,9 +81,9 @@ func searchJobsExample(ctx context.Context, client *camunda.CamundaClient) error
 
 func updateJobsBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateJobsBatchOperation
-	changeset := openapi.NewJobChangeset()
+	changeset := camundaapi.NewJobChangeset()
 	changeset.SetRetries(3)
-	req := openapi.NewJobBatchUpdateRequest(*openapi.NewJobFilter(), *changeset)
+	req := camundaapi.NewJobBatchUpdateRequest(*camundaapi.NewJobFilter(), *changeset)
 
 	result, err := client.UpdateJobsBatchOperation(ctx, *req)
 	if err != nil {
@@ -107,7 +107,7 @@ func getGlobalJobStatisticsExample(ctx context.Context, client *camunda.CamundaC
 
 func getJobTypeStatisticsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetJobTypeStatistics
-	result, err := client.GetJobTypeStatistics(ctx, *openapi.NewJobTypeStatisticsQuery())
+	result, err := client.GetJobTypeStatistics(ctx, *camundaapi.NewJobTypeStatisticsQuery())
 	if err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func getJobTypeStatisticsExample(ctx context.Context, client *camunda.CamundaCli
 func getJobWorkerStatisticsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetJobWorkerStatistics
 	from, to := time.Now().Add(-24*time.Hour), time.Now()
-	query := openapi.NewJobWorkerStatisticsQuery(*openapi.NewJobWorkerStatisticsFilter(from, to, "greet"))
+	query := camundaapi.NewJobWorkerStatisticsQuery(*camundaapi.NewJobWorkerStatisticsFilter(from, to, "greet"))
 
 	result, err := client.GetJobWorkerStatistics(ctx, *query)
 	if err != nil {
@@ -133,7 +133,7 @@ func getJobWorkerStatisticsExample(ctx context.Context, client *camunda.CamundaC
 func getJobTimeSeriesStatisticsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetJobTimeSeriesStatistics
 	from, to := time.Now().Add(-24*time.Hour), time.Now()
-	query := openapi.NewJobTimeSeriesStatisticsQuery(*openapi.NewJobTimeSeriesStatisticsFilter(from, to, "greet"))
+	query := camundaapi.NewJobTimeSeriesStatisticsQuery(*camundaapi.NewJobTimeSeriesStatisticsFilter(from, to, "greet"))
 
 	result, err := client.GetJobTimeSeriesStatistics(ctx, *query)
 	if err != nil {
@@ -147,7 +147,7 @@ func getJobTimeSeriesStatisticsExample(ctx context.Context, client *camunda.Camu
 func getJobErrorStatisticsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetJobErrorStatistics
 	from, to := time.Now().Add(-24*time.Hour), time.Now()
-	query := openapi.NewJobErrorStatisticsQuery(*openapi.NewJobErrorStatisticsFilter(from, to, "greet"))
+	query := camundaapi.NewJobErrorStatisticsQuery(*camundaapi.NewJobErrorStatisticsFilter(from, to, "greet"))
 
 	result, err := client.GetJobErrorStatistics(ctx, *query)
 	if err != nil {

@@ -7,12 +7,12 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func createRoleExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateRole
-	result, err := client.CreateRole(ctx, *openapi.NewRoleCreateRequest("auditor", "Auditor"))
+	result, err := client.CreateRole(ctx, *camundaapi.NewRoleCreateRequest("auditor", "Auditor"))
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func createRoleExample(ctx context.Context, client *camunda.CamundaClient) error
 
 func searchRolesExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchRoles
-	result, err := client.SearchRoles(ctx, *openapi.NewRoleSearchQueryRequest())
+	result, err := client.SearchRoles(ctx, *camundaapi.NewRoleSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func getRoleExample(ctx context.Context, client *camunda.CamundaClient) error {
 
 func updateRoleExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateRole
-	result, err := client.UpdateRole(ctx, "auditor", *openapi.NewRoleUpdateRequest("Senior Auditor"))
+	result, err := client.UpdateRole(ctx, "auditor", *camundaapi.NewRoleUpdateRequest("Senior Auditor"))
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func deleteRoleExample(ctx context.Context, client *camunda.CamundaClient) error
 
 func searchUsersForRoleExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchUsersForRole
-	result, err := client.SearchUsersForRole(ctx, "auditor", *openapi.NewRoleUserSearchQueryRequest())
+	result, err := client.SearchUsersForRole(ctx, "auditor", *camundaapi.NewRoleUserSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func unassignRoleFromUserExample(ctx context.Context, client *camunda.CamundaCli
 
 func searchGroupsForRoleExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchGroupsForRole
-	result, err := client.SearchGroupsForRole(ctx, "auditor", *openapi.NewRoleGroupSearchQueryRequest())
+	result, err := client.SearchGroupsForRole(ctx, "auditor", *camundaapi.NewRoleGroupSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func unassignRoleFromGroupExample(ctx context.Context, client *camunda.CamundaCl
 
 func searchClientsForRoleExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchClientsForRole
-	result, err := client.SearchClientsForRole(ctx, "auditor", *openapi.NewRoleClientSearchQueryRequest())
+	result, err := client.SearchClientsForRole(ctx, "auditor", *camundaapi.NewRoleClientSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func unassignRoleFromClientExample(ctx context.Context, client *camunda.CamundaC
 
 func searchMappingRulesForRoleExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchMappingRulesForRole
-	result, err := client.SearchMappingRulesForRole(ctx, "auditor", *openapi.NewMappingRuleSearchQueryRequest())
+	result, err := client.SearchMappingRulesForRole(ctx, "auditor", *camundaapi.NewMappingRuleSearchQueryRequest())
 	if err != nil {
 		return err
 	}

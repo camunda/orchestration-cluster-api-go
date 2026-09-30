@@ -9,7 +9,7 @@ import (
 
 // TestGenerateFacade locks the AST-based facade generator against a fixture
 // client package: it must emit one ergonomic *CamundaClient method per operation,
-// qualify client types with the openapi alias, and handle both value-returning
+// qualify client types with the camundaapi alias, and handle both value-returning
 // and no-value operations.
 func TestGenerateFacade(t *testing.T) {
 	src, count, err := generateFacade("testdata/client", "", "")
@@ -22,15 +22,15 @@ func TestGenerateFacade(t *testing.T) {
 
 	want := []string{
 		"package camunda",
-		`openapi "github.com/camunda/orchestration-cluster-api-go/client"`,
+		`camundaapi "github.com/camunda/orchestration-cluster-api-go/client"`,
 		// Value-returning op: exposes required params + an opts transform, returns (value, error).
-		"func (c *CamundaClient) GetWidget(ctx context.Context, id openapi.WidgetKey, opts ...func(openapi.ApiGetWidgetRequest) openapi.ApiGetWidgetRequest) (*openapi.Widget, error) {",
+		"func (c *CamundaClient) GetWidget(ctx context.Context, id camundaapi.WidgetKey, opts ...func(camundaapi.ApiGetWidgetRequest) camundaapi.ApiGetWidgetRequest) (*camundaapi.Widget, error) {",
 		"req := c.raw.WidgetAPI.GetWidget(ctx, id)",
 		"req = opt(req)",
 		"value, resp, err := req.Execute()",
 		"return value, c.wrapError(resp, err)",
 		// No-value op: returns error only.
-		"func (c *CamundaClient) DeleteWidget(ctx context.Context, id openapi.WidgetKey, opts ...func(openapi.ApiDeleteWidgetRequest) openapi.ApiDeleteWidgetRequest) error {",
+		"func (c *CamundaClient) DeleteWidget(ctx context.Context, id camundaapi.WidgetKey, opts ...func(camundaapi.ApiDeleteWidgetRequest) camundaapi.ApiDeleteWidgetRequest) error {",
 		"return c.wrapError(resp, err)",
 	}
 	for _, w := range want {
@@ -91,7 +91,7 @@ func TestLoadBodyInfoIncludesOnlyJSONClientModels(t *testing.T) {
 
 	got := loadBodyInfo(path, map[string]bool{"WidgetRequest": true})
 	info, ok := got["CreateWidget"]
-	if !ok || info.builder != "WidgetRequest" || info.typ != "openapi.WidgetRequest" {
+	if !ok || info.builder != "WidgetRequest" || info.typ != "camundaapi.WidgetRequest" {
 		t.Fatalf("CreateWidget body info = %+v, present=%v", info, ok)
 	}
 	if _, ok := got["UploadWidget"]; ok {

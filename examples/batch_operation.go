@@ -6,12 +6,12 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func searchBatchOperationsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchBatchOperations
-	result, err := client.SearchBatchOperations(ctx, *openapi.NewBatchOperationSearchQuery())
+	result, err := client.SearchBatchOperations(ctx, *camundaapi.NewBatchOperationSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -24,7 +24,7 @@ func searchBatchOperationsExample(ctx context.Context, client *camunda.CamundaCl
 
 func searchBatchOperationItemsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchBatchOperationItems
-	result, err := client.SearchBatchOperationItems(ctx, *openapi.NewBatchOperationItemSearchQuery())
+	result, err := client.SearchBatchOperationItems(ctx, *camundaapi.NewBatchOperationItemSearchQuery())
 	if err != nil {
 		return err
 	}

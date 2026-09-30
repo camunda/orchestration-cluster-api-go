@@ -9,7 +9,7 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 var errProcessActive = errors.New("process instance is still active")
@@ -65,34 +65,34 @@ func StartProcess(
 	processID string,
 	businessID string,
 	variables map[string]any,
-) (openapi.ProcessInstanceKey, error) {
-	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId(processID))
-	byID.SetBusinessId(openapi.BusinessId(businessID))
-	byID.SetTags([]openapi.Tag{"go-sdk-example"})
+) (camundaapi.ProcessInstanceKey, error) {
+	byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId(processID))
+	byID.SetBusinessId(camundaapi.BusinessId(businessID))
+	byID.SetTags([]camundaapi.Tag{"go-sdk-example"})
 	byID.SetVariables(variables)
 
 	result, err := client.CreateProcessInstance(ctx,
-		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
+		camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
 	if err != nil {
 		return "", fmt.Errorf("start process %q for %q: %w", processID, businessID, err)
 	}
-	return openapi.MustProcessInstanceKey(string(result.GetProcessInstanceKey())), nil
+	return camundaapi.MustProcessInstanceKey(string(result.GetProcessInstanceKey())), nil
 }
 
 func WaitForCompletion(
 	ctx context.Context,
 	client *camunda.CamundaClient,
-	key openapi.ProcessInstanceKey,
-) (*openapi.ProcessInstanceResult, error) {
-	result, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
+	key camundaapi.ProcessInstanceKey,
+) (*camundaapi.ProcessInstanceResult, error) {
+	result, err := camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ProcessInstanceResult, error) {
 		instance, err := client.GetProcessInstance(ctx, key)
 		if err != nil {
 			return nil, err
 		}
 		switch instance.GetState() {
-		case openapi.PROCESSINSTANCESTATEENUM_COMPLETED:
+		case camundaapi.PROCESSINSTANCESTATEENUM_COMPLETED:
 			return instance, nil
-		case openapi.PROCESSINSTANCESTATEENUM_TERMINATED:
+		case camundaapi.PROCESSINSTANCESTATEENUM_TERMINATED:
 			return nil, fmt.Errorf("process instance %s was terminated", key)
 		default:
 			return nil, errProcessActive

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 // TestActivatedJobDecodesWithoutPhysicalTenantId is a regression guard for
@@ -45,7 +45,7 @@ func TestActivatedJobDecodesWithMissingVersionSkewFields(t *testing.T) {
   ]
 }`
 
-	var result openapi.JobActivationResult
+	var result camundaapi.JobActivationResult
 	if err := json.Unmarshal([]byte(realResponse), &result); err != nil {
 		t.Fatalf("a real activate-jobs response must decode despite a missing spec-required field: %v", err)
 	}
@@ -80,7 +80,7 @@ func TestDeploymentMetadataDecodesWithOnlyProcessDefinition(t *testing.T) {
   }
 }`
 
-	var meta openapi.DeploymentMetadataResult
+	var meta camundaapi.DeploymentMetadataResult
 	if err := json.Unmarshal([]byte(realItem), &meta); err != nil {
 		t.Fatalf("a BPMN-only deployment item must decode despite the other union members being absent: %v", err)
 	}
@@ -113,7 +113,7 @@ func TestCreateProcessInstanceResultDecodesWithoutBusinessId(t *testing.T) {
   "tags": []
 }`
 
-	var result openapi.CreateProcessInstanceResult
+	var result camundaapi.CreateProcessInstanceResult
 	if err := json.Unmarshal([]byte(realResponse), &result); err != nil {
 		t.Fatalf("a create-process-instance response must decode despite a missing spec-required businessId: %v", err)
 	}
@@ -145,7 +145,7 @@ func TestProcessDefinitionResultDecodesWithState(t *testing.T) {
   "state": "ACTIVE"
 }`
 
-	var result openapi.ProcessDefinitionResult
+	var result camundaapi.ProcessDefinitionResult
 	if err := json.Unmarshal([]byte(realResponse), &result); err != nil {
 		t.Fatalf("a process-definition response must decode: %v", err)
 	}
@@ -181,7 +181,7 @@ func TestProcessInstanceResultDecodesWithoutSuspendedDate(t *testing.T) {
   "tags": []
 }`
 
-	var result openapi.ProcessInstanceResult
+	var result camundaapi.ProcessInstanceResult
 	if err := json.Unmarshal([]byte(realResponse), &result); err != nil {
 		t.Fatalf("a process-instance response must decode despite a missing spec-required suspendedDate: %v", err)
 	}

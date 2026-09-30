@@ -7,16 +7,16 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func createProcessInstanceByIdExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateProcessInstanceById
-	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("order-process"))
+	byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process"))
 	byID.SetVariables(map[string]any{"orderId": "order-42"})
 
 	result, err := client.CreateProcessInstance(ctx,
-		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
+		camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
 	if err != nil {
 		return err
 	}
@@ -28,11 +28,11 @@ func createProcessInstanceByIdExample(ctx context.Context, client *camunda.Camun
 func createProcessInstanceByKeyExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateProcessInstanceByKey
 	// Use a specific process definition version by its key.
-	byKey := openapi.NewProcessInstanceCreationInstructionByKey(openapi.ProcessDefinitionKey("2251799813685330"))
+	byKey := camundaapi.NewProcessInstanceCreationInstructionByKey(camundaapi.ProcessDefinitionKey("2251799813685330"))
 	byKey.SetVariables(map[string]any{"orderId": "order-42"})
 
 	result, err := client.CreateProcessInstance(ctx,
-		openapi.ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction(byKey))
+		camundaapi.ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction(byKey))
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func createProcessInstanceByKeyExample(ctx context.Context, client *camunda.Camu
 
 func searchProcessInstancesExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchProcessInstances
-	result, err := client.SearchProcessInstances(ctx, *openapi.NewProcessInstanceSearchQuery())
+	result, err := client.SearchProcessInstances(ctx, *camundaapi.NewProcessInstanceSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func searchProcessInstancesExample(ctx context.Context, client *camunda.CamundaC
 
 func getProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetProcessInstance
-	instance, err := client.GetProcessInstance(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+	instance, err := client.GetProcessInstance(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 	if err != nil {
 		return err
 	}
@@ -68,22 +68,22 @@ func getProcessInstanceExample(ctx context.Context, client *camunda.CamundaClien
 func cancelProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CancelProcessInstance
 	return client.CancelProcessInstance(ctx,
-		openapi.MustProcessInstanceKey("2251799813685340"),
-		*openapi.NewCancelProcessInstanceRequest())
+		camundaapi.MustProcessInstanceKey("2251799813685340"),
+		*camundaapi.NewCancelProcessInstanceRequest())
 	// endregion CancelProcessInstance
 }
 
 func deleteProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region DeleteProcessInstance
 	return client.DeleteProcessInstance(ctx,
-		openapi.MustProcessInstanceKey("2251799813685340"),
-		*openapi.NewDeleteProcessInstanceRequest())
+		camundaapi.MustProcessInstanceKey("2251799813685340"),
+		*camundaapi.NewDeleteProcessInstanceRequest())
 	// endregion DeleteProcessInstance
 }
 
 func getProcessInstanceCallHierarchyExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetProcessInstanceCallHierarchy
-	hierarchy, err := client.GetProcessInstanceCallHierarchy(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+	hierarchy, err := client.GetProcessInstanceCallHierarchy(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func getProcessInstanceCallHierarchyExample(ctx context.Context, client *camunda
 
 func getProcessInstanceSequenceFlowsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetProcessInstanceSequenceFlows
-	result, err := client.GetProcessInstanceSequenceFlows(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+	result, err := client.GetProcessInstanceSequenceFlows(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,7 @@ func getProcessInstanceSequenceFlowsExample(ctx context.Context, client *camunda
 
 func getProcessInstanceStatisticsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetProcessInstanceStatistics
-	result, err := client.GetProcessInstanceStatistics(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+	result, err := client.GetProcessInstanceStatistics(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func getProcessInstanceStatisticsExample(ctx context.Context, client *camunda.Ca
 
 func getProcessInstanceWaitStateStatisticsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetProcessInstanceWaitStateStatistics
-	result, err := client.GetProcessInstanceWaitStateStatistics(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+	result, err := client.GetProcessInstanceWaitStateStatistics(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 	if err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func getProcessInstanceWaitStateStatisticsExample(ctx context.Context, client *c
 
 func resolveProcessInstanceIncidentsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ResolveProcessInstanceIncidents
-	result, err := client.ResolveProcessInstanceIncidents(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+	result, err := client.ResolveProcessInstanceIncidents(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 	if err != nil {
 		return err
 	}
@@ -141,8 +141,8 @@ func resolveProcessInstanceIncidentsExample(ctx context.Context, client *camunda
 func searchProcessInstanceIncidentsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchProcessInstanceIncidents
 	result, err := client.SearchProcessInstanceIncidents(ctx,
-		openapi.MustProcessInstanceKey("2251799813685340"),
-		*openapi.NewIncidentSearchQuery())
+		camundaapi.MustProcessInstanceKey("2251799813685340"),
+		*camundaapi.NewIncidentSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -155,28 +155,28 @@ func searchProcessInstanceIncidentsExample(ctx context.Context, client *camunda.
 
 func migrateProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region MigrateProcessInstance
-	instruction := openapi.NewProcessInstanceMigrationInstruction(
-		openapi.ProcessDefinitionKey("2251799813685399"),
-		[]openapi.MigrateProcessInstanceMappingInstruction{
-			*openapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
+	instruction := camundaapi.NewProcessInstanceMigrationInstruction(
+		camundaapi.ProcessDefinitionKey("2251799813685399"),
+		[]camundaapi.MigrateProcessInstanceMappingInstruction{
+			*camundaapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
 		})
 
-	return client.MigrateProcessInstance(ctx, openapi.MustProcessInstanceKey("2251799813685340"), *instruction)
+	return client.MigrateProcessInstance(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"), *instruction)
 	// endregion MigrateProcessInstance
 }
 
 func modifyProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ModifyProcessInstance
 	return client.ModifyProcessInstance(ctx,
-		openapi.MustProcessInstanceKey("2251799813685340"),
-		*openapi.NewProcessInstanceModificationInstruction())
+		camundaapi.MustProcessInstanceKey("2251799813685340"),
+		*camundaapi.NewProcessInstanceModificationInstruction())
 	// endregion ModifyProcessInstance
 }
 
 func cancelProcessInstancesBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CancelProcessInstancesBatchOperation
 	// Cancel every instance matching a filter in a single batch operation.
-	req := openapi.NewProcessInstanceCancellationBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+	req := camundaapi.NewProcessInstanceCancellationBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 
 	result, err := client.CancelProcessInstancesBatchOperation(ctx, *req)
 	if err != nil {
@@ -189,7 +189,7 @@ func cancelProcessInstancesBatchOperationExample(ctx context.Context, client *ca
 
 func deleteProcessInstancesBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region DeleteProcessInstancesBatchOperation
-	req := openapi.NewProcessInstanceDeletionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+	req := camundaapi.NewProcessInstanceDeletionBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 
 	result, err := client.DeleteProcessInstancesBatchOperation(ctx, *req)
 	if err != nil {
@@ -202,7 +202,7 @@ func deleteProcessInstancesBatchOperationExample(ctx context.Context, client *ca
 
 func resolveIncidentsBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ResolveIncidentsBatchOperation
-	req := openapi.NewProcessInstanceIncidentResolutionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+	req := camundaapi.NewProcessInstanceIncidentResolutionBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 
 	result, err := client.ResolveIncidentsBatchOperation(ctx, *req)
 	if err != nil {
@@ -215,12 +215,12 @@ func resolveIncidentsBatchOperationExample(ctx context.Context, client *camunda.
 
 func migrateProcessInstancesBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region MigrateProcessInstancesBatchOperation
-	plan := openapi.NewProcessInstanceMigrationBatchOperationPlan(
-		openapi.ProcessDefinitionKey("2251799813685399"),
-		[]openapi.MigrateProcessInstanceMappingInstruction{
-			*openapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
+	plan := camundaapi.NewProcessInstanceMigrationBatchOperationPlan(
+		camundaapi.ProcessDefinitionKey("2251799813685399"),
+		[]camundaapi.MigrateProcessInstanceMappingInstruction{
+			*camundaapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
 		})
-	req := openapi.NewProcessInstanceMigrationBatchOperationRequest(*openapi.NewProcessInstanceFilter(), *plan)
+	req := camundaapi.NewProcessInstanceMigrationBatchOperationRequest(*camundaapi.NewProcessInstanceFilter(), *plan)
 
 	result, err := client.MigrateProcessInstancesBatchOperation(ctx, *req)
 	if err != nil {
@@ -233,10 +233,10 @@ func migrateProcessInstancesBatchOperationExample(ctx context.Context, client *c
 
 func modifyProcessInstancesBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ModifyProcessInstancesBatchOperation
-	req := openapi.NewProcessInstanceModificationBatchOperationRequest(
-		*openapi.NewProcessInstanceFilter(),
-		[]openapi.ProcessInstanceModificationMoveBatchOperationInstruction{
-			*openapi.NewProcessInstanceModificationMoveBatchOperationInstruction("review", "approve"),
+	req := camundaapi.NewProcessInstanceModificationBatchOperationRequest(
+		*camundaapi.NewProcessInstanceFilter(),
+		[]camundaapi.ProcessInstanceModificationMoveBatchOperationInstruction{
+			*camundaapi.NewProcessInstanceModificationMoveBatchOperationInstruction("review", "approve"),
 		})
 
 	result, err := client.ModifyProcessInstancesBatchOperation(ctx, *req)
@@ -251,31 +251,31 @@ func modifyProcessInstancesBatchOperationExample(ctx context.Context, client *ca
 func suspendProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SuspendProcessInstance
 	return client.SuspendProcessInstance(ctx,
-		openapi.MustProcessInstanceKey("2251799813685340"),
-		*openapi.NewSuspendProcessInstanceRequest())
+		camundaapi.MustProcessInstanceKey("2251799813685340"),
+		*camundaapi.NewSuspendProcessInstanceRequest())
 	// endregion SuspendProcessInstance
 }
 
 func resumeProcessInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ResumeProcessInstance
 	return client.ResumeProcessInstance(ctx,
-		openapi.MustProcessInstanceKey("2251799813685340"),
-		*openapi.NewResumeProcessInstanceRequest())
+		camundaapi.MustProcessInstanceKey("2251799813685340"),
+		*camundaapi.NewResumeProcessInstanceRequest())
 	// endregion ResumeProcessInstance
 }
 
 func assignProcessInstanceBusinessIdExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region AssignProcessInstanceBusinessId
 	return client.AssignProcessInstanceBusinessId(ctx,
-		openapi.MustProcessInstanceKey("2251799813685340"),
-		*openapi.NewProcessInstanceBusinessIdAssignmentInstruction("order-42"))
+		camundaapi.MustProcessInstanceKey("2251799813685340"),
+		*camundaapi.NewProcessInstanceBusinessIdAssignmentInstruction("order-42"))
 	// endregion AssignProcessInstanceBusinessId
 }
 
 func suspendProcessInstancesBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SuspendProcessInstancesBatchOperation
 	// Suspend every instance matching a filter in a single batch operation.
-	req := openapi.NewProcessInstanceSuspensionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+	req := camundaapi.NewProcessInstanceSuspensionBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 
 	result, err := client.SuspendProcessInstancesBatchOperation(ctx, *req)
 	if err != nil {
@@ -289,7 +289,7 @@ func suspendProcessInstancesBatchOperationExample(ctx context.Context, client *c
 func resumeProcessInstancesBatchOperationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region ResumeProcessInstancesBatchOperation
 	// Resume every previously-suspended instance matching a filter.
-	req := openapi.NewProcessInstanceResumptionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+	req := camundaapi.NewProcessInstanceResumptionBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 
 	result, err := client.ResumeProcessInstancesBatchOperation(ctx, *req)
 	if err != nil {

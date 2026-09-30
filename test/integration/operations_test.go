@@ -14,7 +14,7 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 // errNotYetIndexed signals that an eventually-consistent search has not yet
@@ -40,7 +40,7 @@ func stopIntegrationWorker(stop context.CancelFunc, done <-chan error) error {
 }
 
 // deployGreetResult deploys the greet process and returns its process definition key.
-func deployGreetResult(ctx context.Context, t *testing.T, c *camunda.CamundaClient) openapi.ProcessDefinitionKey {
+func deployGreetResult(ctx context.Context, t *testing.T, c *camunda.CamundaClient) camundaapi.ProcessDefinitionKey {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "greet.bpmn")
 	if err := os.WriteFile(path, greetBPMN, 0o644); err != nil {
@@ -58,7 +58,7 @@ func deployGreetResult(ctx context.Context, t *testing.T, c *camunda.CamundaClie
 	for _, d := range dep.GetDeployments() {
 		proc := d.GetProcessDefinition()
 		if key := proc.GetProcessDefinitionKey(); string(key) != "" {
-			return openapi.ProcessDefinitionKey(string(key))
+			return camundaapi.ProcessDefinitionKey(string(key))
 		}
 	}
 	t.Fatal("deployment response contained no process definition")
@@ -72,7 +72,7 @@ func TestEvaluateExpressionEndToEnd(t *testing.T) {
 
 	// The FEEL `=` prefix marks the value as an expression to evaluate (rather
 	// than a literal string).
-	req := openapi.NewExpressionEvaluationRequest("=2 + 3")
+	req := camundaapi.NewExpressionEvaluationRequest("=2 + 3")
 	result, err := c.EvaluateExpression(ctx, *req)
 	if err != nil {
 		t.Fatalf("EvaluateExpression: %v", err)
@@ -88,7 +88,7 @@ func TestPublishMessageEndToEnd(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	req := openapi.NewMessagePublicationRequest("integration-msg")
+	req := camundaapi.NewMessagePublicationRequest("integration-msg")
 	req.SetCorrelationKey("integration-key")
 	if _, err := c.PublishMessage(ctx, *req); err != nil {
 		t.Fatalf("PublishMessage: %v", err)
@@ -100,7 +100,7 @@ func TestBroadcastSignalEndToEnd(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if _, err := c.BroadcastSignal(ctx, *openapi.NewSignalBroadcastRequest("integration-signal")); err != nil {
+	if _, err := c.BroadcastSignal(ctx, *camundaapi.NewSignalBroadcastRequest("integration-signal")); err != nil {
 		t.Fatalf("BroadcastSignal: %v", err)
 	}
 }
@@ -113,7 +113,7 @@ func TestDeployAndReadProcessDefinition(t *testing.T) {
 	key := deployGreetResult(ctx, t, c)
 
 	// Reads are eventually consistent: poll until the definition is queryable.
-	def, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessDefinitionResult, error) {
+	def, err := camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ProcessDefinitionResult, error) {
 		return c.GetProcessDefinition(ctx, key)
 	}, camunda.WithPollTimeout(30*time.Second))
 	if err != nil {
@@ -139,17 +139,17 @@ func TestCreateAndReadProcessInstance(t *testing.T) {
 
 	deployGreet(ctx, t, c)
 
-	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId("demo-process"))
+	byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("demo-process"))
 	byID.SetVariables(map[string]any{"name": "reader"})
 	created, err := c.CreateProcessInstance(ctx,
-		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
+		camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
 	if err != nil {
 		t.Fatalf("CreateProcessInstance: %v", err)
 	}
-	key := openapi.MustProcessInstanceKey(string(created.GetProcessInstanceKey()))
+	key := camundaapi.MustProcessInstanceKey(string(created.GetProcessInstanceKey()))
 
 	// The instance is visible in secondary storage only after export; poll for it.
-	instance, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
+	instance, err := camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ProcessInstanceResult, error) {
 		return c.GetProcessInstance(ctx, key)
 	}, camunda.WithPollTimeout(30*time.Second))
 	if err != nil {
@@ -173,14 +173,14 @@ func TestSearchProcessInstancesEndToEnd(t *testing.T) {
 	defer func() {
 		cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cleanupCancel()
-		if err := c.CancelProcessInstance(cleanupCtx, key, *openapi.NewCancelProcessInstanceRequest()); err != nil {
+		if err := c.CancelProcessInstance(cleanupCtx, key, *camundaapi.NewCancelProcessInstanceRequest()); err != nil {
 			t.Errorf("cancel search process instance %s: %v", key, err)
 		}
 	}()
 
 	// Search hits secondary storage; poll until at least one instance is indexed.
-	result, err := camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceSearchQueryResult, error) {
-		res, err := c.SearchProcessInstances(ctx, *openapi.NewProcessInstanceSearchQuery())
+	result, err := camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ProcessInstanceSearchQueryResult, error) {
+		res, err := c.SearchProcessInstances(ctx, *camundaapi.NewProcessInstanceSearchQuery())
 		if err != nil {
 			return nil, err
 		}
@@ -224,21 +224,21 @@ func TestBpmnErrorCompletesModeledExceptionPath(t *testing.T) {
 	workerDone := make(chan error, 1)
 	go func() { workerDone <- worker.Run(workerCtx) }()
 
-	byID := openapi.NewProcessInstanceCreationInstructionById(openapi.ProcessDefinitionId(processID))
+	byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId(processID))
 	created, err := c.CreateProcessInstance(ctx,
-		openapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
+		camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID))
 	if err != nil {
 		workerErr := stopIntegrationWorker(stopWorker, workerDone)
 		t.Fatalf("CreateProcessInstance: %v", errors.Join(err, workerErr))
 	}
 
-	key := openapi.MustProcessInstanceKey(string(created.GetProcessInstanceKey()))
-	_, err = camunda.Poll(ctx, func(ctx context.Context) (*openapi.ProcessInstanceResult, error) {
+	key := camundaapi.MustProcessInstanceKey(string(created.GetProcessInstanceKey()))
+	_, err = camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ProcessInstanceResult, error) {
 		instance, err := c.GetProcessInstance(ctx, key)
 		if err != nil {
 			return nil, err
 		}
-		if instance.GetState() != openapi.PROCESSINSTANCESTATEENUM_COMPLETED {
+		if instance.GetState() != camundaapi.PROCESSINSTANCESTATEENUM_COMPLETED {
 			return nil, errNotYetIndexed
 		}
 		return instance, nil
@@ -253,11 +253,11 @@ func TestBpmnErrorCompletesModeledExceptionPath(t *testing.T) {
 		t.Fatalf("modeled BPMN error path did not complete: %v", errors.Join(err, workerErr))
 	}
 
-	filter := openapi.NewElementInstanceFilter()
+	filter := camundaapi.NewElementInstanceFilter()
 	filter.SetProcessInstanceKey(key)
-	query := openapi.NewElementInstanceSearchQuery()
+	query := camundaapi.NewElementInstanceSearchQuery()
 	query.SetFilter(*filter)
-	_, err = camunda.Poll(ctx, func(ctx context.Context) (*openapi.ElementInstanceSearchQueryResult, error) {
+	_, err = camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ElementInstanceSearchQueryResult, error) {
 		result, err := c.SearchElementInstances(ctx, *query)
 		if err != nil {
 			return nil, err

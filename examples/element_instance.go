@@ -7,12 +7,12 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func searchElementInstancesExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchElementInstances
-	result, err := client.SearchElementInstances(ctx, *openapi.NewElementInstanceSearchQuery())
+	result, err := client.SearchElementInstances(ctx, *camundaapi.NewElementInstanceSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func searchElementInstancesExample(ctx context.Context, client *camunda.CamundaC
 
 func getElementInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetElementInstance
-	element, err := client.GetElementInstance(ctx, openapi.MustElementInstanceKey("2251799813685360"))
+	element, err := client.GetElementInstance(ctx, camundaapi.MustElementInstanceKey("2251799813685360"))
 	if err != nil {
 		return err
 	}
@@ -37,8 +37,8 @@ func getElementInstanceExample(ctx context.Context, client *camunda.CamundaClien
 func searchElementInstanceIncidentsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchElementInstanceIncidents
 	result, err := client.SearchElementInstanceIncidents(ctx,
-		openapi.MustElementInstanceKey("2251799813685360"),
-		*openapi.NewIncidentSearchQuery())
+		camundaapi.MustElementInstanceKey("2251799813685360"),
+		*camundaapi.NewIncidentSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func searchElementInstanceIncidentsExample(ctx context.Context, client *camunda.
 
 func searchElementInstanceWaitStatesExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchElementInstanceWaitStates
-	result, err := client.SearchElementInstanceWaitStates(ctx, *openapi.NewElementInstanceWaitStateQuery())
+	result, err := client.SearchElementInstanceWaitStates(ctx, *camundaapi.NewElementInstanceWaitStateQuery())
 	if err != nil {
 		return err
 	}
@@ -63,8 +63,8 @@ func searchElementInstanceWaitStatesExample(ctx context.Context, client *camunda
 func createElementInstanceVariablesExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateElementInstanceVariables
 	// Set local variables on a specific element instance scope.
-	req := openapi.NewSetVariableRequest(map[string]any{"approved": true})
+	req := camundaapi.NewSetVariableRequest(map[string]any{"approved": true})
 
-	return client.CreateElementInstanceVariables(ctx, openapi.MustElementInstanceKey("2251799813685360"), *req)
+	return client.CreateElementInstanceVariables(ctx, camundaapi.MustElementInstanceKey("2251799813685360"), *req)
 	// endregion CreateElementInstanceVariables
 }
