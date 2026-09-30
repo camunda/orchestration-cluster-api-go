@@ -36,8 +36,24 @@ func TestV2BaseURL(t *testing.T) {
 		"https://cluster.example/v2/": "https://cluster.example/v2",
 	}
 	for in, want := range cases {
-		if got := v2BaseURL(in); got != want {
-			t.Errorf("v2BaseURL(%q) = %q, want %q", in, got, want)
+		if got := v2BaseURL(in, false); got != want {
+			t.Errorf("v2BaseURL(%q, false) = %q, want %q", in, got, want)
+		}
+	}
+}
+
+func TestV2BaseURLExact(t *testing.T) {
+	cases := map[string]string{
+		"http://localhost:8080":        "http://localhost:8080",
+		"http://localhost:8080/":       "http://localhost:8080",
+		"https://gw.example/camunda":   "https://gw.example/camunda",
+		"https://gw.example/camunda/":  "https://gw.example/camunda",
+		"https://gw.example/api/rest/": "https://gw.example/api/rest",
+		"https://cluster.example/v2":   "https://cluster.example/v2",
+	}
+	for in, want := range cases {
+		if got := v2BaseURL(in, true); got != want {
+			t.Errorf("v2BaseURL(%q, true) = %q, want %q", in, got, want)
 		}
 	}
 }

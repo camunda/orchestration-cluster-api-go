@@ -9,6 +9,15 @@ func WithRestAddress(addr string) Option {
 	return func(c *Config) { c.RestAddress = normalizeRestAddress(addr) }
 }
 
+// WithExactRestAddress controls whether the SDK uses RestAddress exactly as
+// provided. When exact is true, the automatic /v2 suffix is not appended — the
+// address is used verbatim. This is intended for deployments behind an API
+// gateway / reverse proxy whose base path does not follow the .../v2 convention.
+// It maps to the CAMUNDA_REST_ADDRESS_EXACT environment variable.
+func WithExactRestAddress(exact bool) Option {
+	return func(c *Config) { c.ExactRestAddress = exact }
+}
+
 // WithGrpcAddress sets the Zeebe gRPC gateway address (host:port) used by the
 // gRPC streaming job worker.
 func WithGrpcAddress(addr string) Option {
