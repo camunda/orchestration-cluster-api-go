@@ -6,7 +6,7 @@ import (
 	"context"
 	"os"
 
-	openapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 var _ = context.Background
@@ -15,14 +15,14 @@ var _ = context.Background
 //
 // Example:
 //
-//	instruction := openapi.NewAdHocSubProcessActivateActivitiesInstruction(
-//		[]openapi.AdHocSubProcessActivateActivityReference{
-//			*openapi.NewAdHocSubProcessActivateActivityReference("review-task"),
+//	instruction := camundaapi.NewAdHocSubProcessActivateActivitiesInstruction(
+//		[]camundaapi.AdHocSubProcessActivateActivityReference{
+//			*camundaapi.NewAdHocSubProcessActivateActivityReference("review-task"),
 //		})
 //
 //	return client.ActivateAdHocSubProcessActivities(ctx,
-//		openapi.MustElementInstanceKey("2251799813685360"), *instruction)
-func (c *CamundaClient) ActivateAdHocSubProcessActivities(ctx context.Context, adHocSubProcessInstanceKey openapi.ElementInstanceKey, body openapi.AdHocSubProcessActivateActivitiesInstruction, opts ...func(openapi.ApiActivateAdHocSubProcessActivitiesRequest) openapi.ApiActivateAdHocSubProcessActivitiesRequest) error {
+//		camundaapi.MustElementInstanceKey("2251799813685360"), *instruction)
+func (c *CamundaClient) ActivateAdHocSubProcessActivities(ctx context.Context, adHocSubProcessInstanceKey camundaapi.ElementInstanceKey, body camundaapi.AdHocSubProcessActivateActivitiesInstruction, opts ...func(camundaapi.ApiActivateAdHocSubProcessActivitiesRequest) camundaapi.ApiActivateAdHocSubProcessActivitiesRequest) error {
 	req := c.raw.AdHocSubProcessAPI.ActivateAdHocSubProcessActivities(ctx, adHocSubProcessInstanceKey)
 	req = req.AdHocSubProcessActivateActivitiesInstruction(body)
 	for _, opt := range opts {
@@ -36,12 +36,12 @@ func (c *CamundaClient) ActivateAdHocSubProcessActivities(ctx context.Context, a
 //
 // Example:
 //
-//	definition, err := client.GetAgentDefinition(ctx, openapi.MustAgentDefinitionKey("2251799813691958"))
+//	definition, err := client.GetAgentDefinition(ctx, camundaapi.MustAgentDefinitionKey("2251799813691958"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", definition)
-func (c *CamundaClient) GetAgentDefinition(ctx context.Context, agentDefinitionKey openapi.AgentDefinitionKey, opts ...func(openapi.ApiGetAgentDefinitionRequest) openapi.ApiGetAgentDefinitionRequest) (*openapi.AgentDefinitionResult, error) {
+func (c *CamundaClient) GetAgentDefinition(ctx context.Context, agentDefinitionKey camundaapi.AgentDefinitionKey, opts ...func(camundaapi.ApiGetAgentDefinitionRequest) camundaapi.ApiGetAgentDefinitionRequest) (*camundaapi.AgentDefinitionResult, error) {
 	req := c.raw.AgentDefinitionAPI.GetAgentDefinition(ctx, agentDefinitionKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -54,14 +54,14 @@ func (c *CamundaClient) GetAgentDefinition(ctx context.Context, agentDefinitionK
 //
 // Example:
 //
-//	result, err := client.SearchAgentDefinitions(ctx, *openapi.NewAgentDefinitionSearchQuery())
+//	result, err := client.SearchAgentDefinitions(ctx, *camundaapi.NewAgentDefinitionSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, d := range result.GetItems() {
 //		fmt.Printf("%v\n", d)
 //	}
-func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body openapi.AgentDefinitionSearchQuery, opts ...func(openapi.ApiSearchAgentDefinitionsRequest) openapi.ApiSearchAgentDefinitionsRequest) (*openapi.AgentDefinitionSearchQueryResult, error) {
+func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body camundaapi.AgentDefinitionSearchQuery, opts ...func(camundaapi.ApiSearchAgentDefinitionsRequest) camundaapi.ApiSearchAgentDefinitionsRequest) (*camundaapi.AgentDefinitionSearchQueryResult, error) {
 	req := c.raw.AgentDefinitionAPI.SearchAgentDefinitions(ctx)
 	req = req.AgentDefinitionSearchQuery(body)
 	for _, opt := range opts {
@@ -75,21 +75,21 @@ func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body openapi
 //
 // Example:
 //
-//	systemPrompt := []openapi.AgentInstanceMessageContent{
-//		openapi.AgentInstanceTextContentAsAgentInstanceMessageContent(
-//			openapi.NewAgentInstanceTextContent("TEXT", "You are a helpful assistant.")),
+//	systemPrompt := []camundaapi.AgentInstanceMessageContent{
+//		camundaapi.AgentInstanceTextContentAsAgentInstanceMessageContent(
+//			camundaapi.NewAgentInstanceTextContent("TEXT", "You are a helpful assistant.")),
 //	}
-//	configItem := openapi.NewAgentInstanceHistoryItem(
-//		"config-1", openapi.MustLoopIterationId(1), openapi.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
+//	configItem := camundaapi.NewAgentInstanceHistoryItem(
+//		"config-1", camundaapi.MustLoopIterationId(1), camundaapi.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
 //	configItem.SetModel("gpt-4o")
 //	configItem.SetProvider("openai")
 //	configItem.SetSystemPrompt(systemPrompt)
 //
-//	req := openapi.NewAgentInstanceCreationRequest(
-//		openapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
-//		openapi.JobKey("2251799813685424"),             // jobKey
+//	req := camundaapi.NewAgentInstanceCreationRequest(
+//		camundaapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
+//		camundaapi.JobKey("2251799813685424"),             // jobKey
 //		"lease-token",
-//		[]openapi.AgentInstanceHistoryItem{*configItem}, // history
+//		[]camundaapi.AgentInstanceHistoryItem{*configItem}, // history
 //	)
 //
 //	result, err := client.CreateAgentInstance(ctx, *req)
@@ -97,7 +97,7 @@ func (c *CamundaClient) SearchAgentDefinitions(ctx context.Context, body openapi
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateAgentInstance(ctx context.Context, body openapi.AgentInstanceCreationRequest, opts ...func(openapi.ApiCreateAgentInstanceRequest) openapi.ApiCreateAgentInstanceRequest) (*openapi.AgentInstanceCreationResult, error) {
+func (c *CamundaClient) CreateAgentInstance(ctx context.Context, body camundaapi.AgentInstanceCreationRequest, opts ...func(camundaapi.ApiCreateAgentInstanceRequest) camundaapi.ApiCreateAgentInstanceRequest) (*camundaapi.AgentInstanceCreationResult, error) {
 	req := c.raw.AgentInstanceAPI.CreateAgentInstance(ctx)
 	req = req.AgentInstanceCreationRequest(body)
 	for _, opt := range opts {
@@ -111,12 +111,12 @@ func (c *CamundaClient) CreateAgentInstance(ctx context.Context, body openapi.Ag
 //
 // Example:
 //
-//	agent, err := client.GetAgentInstance(ctx, openapi.MustAgentInstanceKey("2251799813685370"))
+//	agent, err := client.GetAgentInstance(ctx, camundaapi.MustAgentInstanceKey("2251799813685370"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", agent)
-func (c *CamundaClient) GetAgentInstance(ctx context.Context, agentInstanceKey openapi.AgentInstanceKey, opts ...func(openapi.ApiGetAgentInstanceRequest) openapi.ApiGetAgentInstanceRequest) (*openapi.AgentInstanceResult, error) {
+func (c *CamundaClient) GetAgentInstance(ctx context.Context, agentInstanceKey camundaapi.AgentInstanceKey, opts ...func(camundaapi.ApiGetAgentInstanceRequest) camundaapi.ApiGetAgentInstanceRequest) (*camundaapi.AgentInstanceResult, error) {
 	req := c.raw.AgentInstanceAPI.GetAgentInstance(ctx, agentInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -130,13 +130,13 @@ func (c *CamundaClient) GetAgentInstance(ctx context.Context, agentInstanceKey o
 // Example:
 //
 //	result, err := client.SearchAgentInstanceHistory(ctx,
-//		openapi.MustAgentInstanceKey("2251799813685370"),
-//		*openapi.NewAgentInstanceHistorySearchQuery())
+//		camundaapi.MustAgentInstanceKey("2251799813685370"),
+//		*camundaapi.NewAgentInstanceHistorySearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchAgentInstanceHistory(ctx context.Context, agentInstanceKey openapi.AgentInstanceKey, body openapi.AgentInstanceHistorySearchQuery, opts ...func(openapi.ApiSearchAgentInstanceHistoryRequest) openapi.ApiSearchAgentInstanceHistoryRequest) (*openapi.AgentInstanceHistorySearchQueryResult, error) {
+func (c *CamundaClient) SearchAgentInstanceHistory(ctx context.Context, agentInstanceKey camundaapi.AgentInstanceKey, body camundaapi.AgentInstanceHistorySearchQuery, opts ...func(camundaapi.ApiSearchAgentInstanceHistoryRequest) camundaapi.ApiSearchAgentInstanceHistoryRequest) (*camundaapi.AgentInstanceHistorySearchQueryResult, error) {
 	req := c.raw.AgentInstanceAPI.SearchAgentInstanceHistory(ctx, agentInstanceKey)
 	req = req.AgentInstanceHistorySearchQuery(body)
 	for _, opt := range opts {
@@ -150,14 +150,14 @@ func (c *CamundaClient) SearchAgentInstanceHistory(ctx context.Context, agentIns
 //
 // Example:
 //
-//	result, err := client.SearchAgentInstances(ctx, *openapi.NewAgentInstanceSearchQuery())
+//	result, err := client.SearchAgentInstances(ctx, *camundaapi.NewAgentInstanceSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, a := range result.GetItems() {
 //		fmt.Printf("%v\n", a)
 //	}
-func (c *CamundaClient) SearchAgentInstances(ctx context.Context, body openapi.AgentInstanceSearchQuery, opts ...func(openapi.ApiSearchAgentInstancesRequest) openapi.ApiSearchAgentInstancesRequest) (*openapi.AgentInstanceSearchQueryResult, error) {
+func (c *CamundaClient) SearchAgentInstances(ctx context.Context, body camundaapi.AgentInstanceSearchQuery, opts ...func(camundaapi.ApiSearchAgentInstancesRequest) camundaapi.ApiSearchAgentInstancesRequest) (*camundaapi.AgentInstanceSearchQueryResult, error) {
 	req := c.raw.AgentInstanceAPI.SearchAgentInstances(ctx)
 	req = req.AgentInstanceSearchQuery(body)
 	for _, opt := range opts {
@@ -171,18 +171,18 @@ func (c *CamundaClient) SearchAgentInstances(ctx context.Context, body openapi.A
 //
 // Example:
 //
-//	req := openapi.NewAgentInstanceUpdateRequest(
-//		openapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
-//		openapi.JobKey("2251799813685424"),             // jobKey
+//	req := camundaapi.NewAgentInstanceUpdateRequest(
+//		camundaapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
+//		camundaapi.JobKey("2251799813685424"),             // jobKey
 //		"lease-token",
 //	)
 //
-//	result, err := client.UpdateAgentInstance(ctx, openapi.MustAgentInstanceKey("2251799813685370"), *req)
+//	result, err := client.UpdateAgentInstance(ctx, camundaapi.MustAgentInstanceKey("2251799813685370"), *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateAgentInstance(ctx context.Context, agentInstanceKey openapi.AgentInstanceKey, body openapi.AgentInstanceUpdateRequest, opts ...func(openapi.ApiUpdateAgentInstanceRequest) openapi.ApiUpdateAgentInstanceRequest) (*openapi.AgentInstanceUpdateResult, error) {
+func (c *CamundaClient) UpdateAgentInstance(ctx context.Context, agentInstanceKey camundaapi.AgentInstanceKey, body camundaapi.AgentInstanceUpdateRequest, opts ...func(camundaapi.ApiUpdateAgentInstanceRequest) camundaapi.ApiUpdateAgentInstanceRequest) (*camundaapi.AgentInstanceUpdateResult, error) {
 	req := c.raw.AgentInstanceAPI.UpdateAgentInstance(ctx, agentInstanceKey)
 	req = req.AgentInstanceUpdateRequest(body)
 	for _, opt := range opts {
@@ -196,12 +196,12 @@ func (c *CamundaClient) UpdateAgentInstance(ctx context.Context, agentInstanceKe
 //
 // Example:
 //
-//	entry, err := client.GetAuditLog(ctx, openapi.MustAuditLogKey("2251799813685270"))
+//	entry, err := client.GetAuditLog(ctx, camundaapi.MustAuditLogKey("2251799813685270"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", entry)
-func (c *CamundaClient) GetAuditLog(ctx context.Context, auditLogKey openapi.AuditLogKey, opts ...func(openapi.ApiGetAuditLogRequest) openapi.ApiGetAuditLogRequest) (*openapi.AuditLogResult, error) {
+func (c *CamundaClient) GetAuditLog(ctx context.Context, auditLogKey camundaapi.AuditLogKey, opts ...func(camundaapi.ApiGetAuditLogRequest) camundaapi.ApiGetAuditLogRequest) (*camundaapi.AuditLogResult, error) {
 	req := c.raw.AuditLogAPI.GetAuditLog(ctx, auditLogKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -214,14 +214,14 @@ func (c *CamundaClient) GetAuditLog(ctx context.Context, auditLogKey openapi.Aud
 //
 // Example:
 //
-//	result, err := client.SearchAuditLogs(ctx, *openapi.NewAuditLogSearchQueryRequest())
+//	result, err := client.SearchAuditLogs(ctx, *camundaapi.NewAuditLogSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	for _, entry := range result.GetItems() {
 //		fmt.Printf("%v\n", entry)
 //	}
-func (c *CamundaClient) SearchAuditLogs(ctx context.Context, body openapi.AuditLogSearchQueryRequest, opts ...func(openapi.ApiSearchAuditLogsRequest) openapi.ApiSearchAuditLogsRequest) (*openapi.AuditLogSearchQueryResult, error) {
+func (c *CamundaClient) SearchAuditLogs(ctx context.Context, body camundaapi.AuditLogSearchQueryRequest, opts ...func(camundaapi.ApiSearchAuditLogsRequest) camundaapi.ApiSearchAuditLogsRequest) (*camundaapi.AuditLogSearchQueryResult, error) {
 	req := c.raw.AuditLogAPI.SearchAuditLogs(ctx)
 	req = req.AuditLogSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -241,7 +241,7 @@ func (c *CamundaClient) SearchAuditLogs(ctx context.Context, body openapi.AuditL
 //		return err
 //	}
 //	fmt.Printf("authenticated as %s\n", me.GetUsername())
-func (c *CamundaClient) GetAuthentication(ctx context.Context, opts ...func(openapi.ApiGetAuthenticationRequest) openapi.ApiGetAuthenticationRequest) (*openapi.CamundaUserResult, error) {
+func (c *CamundaClient) GetAuthentication(ctx context.Context, opts ...func(camundaapi.ApiGetAuthenticationRequest) camundaapi.ApiGetAuthenticationRequest) (*camundaapi.CamundaUserResult, error) {
 	req := c.raw.AuthenticationAPI.GetAuthentication(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -256,14 +256,14 @@ func (c *CamundaClient) GetAuthentication(ctx context.Context, opts ...func(open
 //
 //	// Scoped to the authenticated principal: direct grants plus those inherited
 //	// from a group, role, or mapping rule.
-//	result, err := client.SearchOwnAuthorizations(ctx, *openapi.NewAuthorizationSearchQuery())
+//	result, err := client.SearchOwnAuthorizations(ctx, *camundaapi.NewAuthorizationSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, a := range result.GetItems() {
 //		fmt.Printf("%v\n", a)
 //	}
-func (c *CamundaClient) SearchOwnAuthorizations(ctx context.Context, body openapi.AuthorizationSearchQuery, opts ...func(openapi.ApiSearchOwnAuthorizationsRequest) openapi.ApiSearchOwnAuthorizationsRequest) (*openapi.OwnAuthorizationSearchResult, error) {
+func (c *CamundaClient) SearchOwnAuthorizations(ctx context.Context, body camundaapi.AuthorizationSearchQuery, opts ...func(camundaapi.ApiSearchOwnAuthorizationsRequest) camundaapi.ApiSearchOwnAuthorizationsRequest) (*camundaapi.OwnAuthorizationSearchResult, error) {
 	req := c.raw.AuthenticationAPI.SearchOwnAuthorizations(ctx)
 	req = req.AuthorizationSearchQuery(body)
 	for _, opt := range opts {
@@ -278,24 +278,24 @@ func (c *CamundaClient) SearchOwnAuthorizations(ctx context.Context, body openap
 // Example:
 //
 //	// AuthorizationRequest is a union; grant an id-based authorization here.
-//	grant := openapi.NewAuthorizationIdBasedRequest(
+//	grant := camundaapi.NewAuthorizationIdBasedRequest(
 //		"user@example.com",
-//		openapi.OWNERTYPEENUM_USER,
+//		camundaapi.OWNERTYPEENUM_USER,
 //		"order-process",
-//		openapi.RESOURCETYPEENUM_PROCESS_DEFINITION,
-//		[]openapi.PermissionTypeEnum{
-//			openapi.PERMISSIONTYPEENUM_READ_PROCESS_DEFINITION,
-//			openapi.PERMISSIONTYPEENUM_CREATE_PROCESS_INSTANCE,
+//		camundaapi.RESOURCETYPEENUM_PROCESS_DEFINITION,
+//		[]camundaapi.PermissionTypeEnum{
+//			camundaapi.PERMISSIONTYPEENUM_READ_PROCESS_DEFINITION,
+//			camundaapi.PERMISSIONTYPEENUM_CREATE_PROCESS_INSTANCE,
 //		},
 //	)
 //
 //	result, err := client.CreateAuthorization(ctx,
-//		openapi.AuthorizationIdBasedRequestAsAuthorizationRequest(grant))
+//		camundaapi.AuthorizationIdBasedRequestAsAuthorizationRequest(grant))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created authorization %v\n", result.GetAuthorizationKey())
-func (c *CamundaClient) CreateAuthorization(ctx context.Context, body openapi.AuthorizationRequest, opts ...func(openapi.ApiCreateAuthorizationRequest) openapi.ApiCreateAuthorizationRequest) (*openapi.AuthorizationCreateResult, error) {
+func (c *CamundaClient) CreateAuthorization(ctx context.Context, body camundaapi.AuthorizationRequest, opts ...func(camundaapi.ApiCreateAuthorizationRequest) camundaapi.ApiCreateAuthorizationRequest) (*camundaapi.AuthorizationCreateResult, error) {
 	req := c.raw.AuthorizationAPI.CreateAuthorization(ctx)
 	req = req.AuthorizationRequest(body)
 	for _, opt := range opts {
@@ -309,8 +309,8 @@ func (c *CamundaClient) CreateAuthorization(ctx context.Context, body openapi.Au
 //
 // Example:
 //
-//	return client.DeleteAuthorization(ctx, openapi.MustAuthorizationKey("2251799813685280"))
-func (c *CamundaClient) DeleteAuthorization(ctx context.Context, authorizationKey openapi.AuthorizationKey, opts ...func(openapi.ApiDeleteAuthorizationRequest) openapi.ApiDeleteAuthorizationRequest) error {
+//	return client.DeleteAuthorization(ctx, camundaapi.MustAuthorizationKey("2251799813685280"))
+func (c *CamundaClient) DeleteAuthorization(ctx context.Context, authorizationKey camundaapi.AuthorizationKey, opts ...func(camundaapi.ApiDeleteAuthorizationRequest) camundaapi.ApiDeleteAuthorizationRequest) error {
 	req := c.raw.AuthorizationAPI.DeleteAuthorization(ctx, authorizationKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -323,12 +323,12 @@ func (c *CamundaClient) DeleteAuthorization(ctx context.Context, authorizationKe
 //
 // Example:
 //
-//	auth, err := client.GetAuthorization(ctx, openapi.MustAuthorizationKey("2251799813685280"))
+//	auth, err := client.GetAuthorization(ctx, camundaapi.MustAuthorizationKey("2251799813685280"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", auth)
-func (c *CamundaClient) GetAuthorization(ctx context.Context, authorizationKey openapi.AuthorizationKey, opts ...func(openapi.ApiGetAuthorizationRequest) openapi.ApiGetAuthorizationRequest) (*openapi.AuthorizationResult, error) {
+func (c *CamundaClient) GetAuthorization(ctx context.Context, authorizationKey camundaapi.AuthorizationKey, opts ...func(camundaapi.ApiGetAuthorizationRequest) camundaapi.ApiGetAuthorizationRequest) (*camundaapi.AuthorizationResult, error) {
 	req := c.raw.AuthorizationAPI.GetAuthorization(ctx, authorizationKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -341,14 +341,14 @@ func (c *CamundaClient) GetAuthorization(ctx context.Context, authorizationKey o
 //
 // Example:
 //
-//	result, err := client.SearchAuthorizations(ctx, *openapi.NewAuthorizationSearchQuery())
+//	result, err := client.SearchAuthorizations(ctx, *camundaapi.NewAuthorizationSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, a := range result.GetItems() {
 //		fmt.Printf("%v\n", a)
 //	}
-func (c *CamundaClient) SearchAuthorizations(ctx context.Context, body openapi.AuthorizationSearchQuery, opts ...func(openapi.ApiSearchAuthorizationsRequest) openapi.ApiSearchAuthorizationsRequest) (*openapi.AuthorizationSearchResult, error) {
+func (c *CamundaClient) SearchAuthorizations(ctx context.Context, body camundaapi.AuthorizationSearchQuery, opts ...func(camundaapi.ApiSearchAuthorizationsRequest) camundaapi.ApiSearchAuthorizationsRequest) (*camundaapi.AuthorizationSearchResult, error) {
 	req := c.raw.AuthorizationAPI.SearchAuthorizations(ctx)
 	req = req.AuthorizationSearchQuery(body)
 	for _, opt := range opts {
@@ -362,18 +362,18 @@ func (c *CamundaClient) SearchAuthorizations(ctx context.Context, body openapi.A
 //
 // Example:
 //
-//	updated := openapi.NewAuthorizationIdBasedRequest(
+//	updated := camundaapi.NewAuthorizationIdBasedRequest(
 //		"user@example.com",
-//		openapi.OWNERTYPEENUM_USER,
+//		camundaapi.OWNERTYPEENUM_USER,
 //		"order-process",
-//		openapi.RESOURCETYPEENUM_PROCESS_DEFINITION,
-//		[]openapi.PermissionTypeEnum{openapi.PERMISSIONTYPEENUM_READ_PROCESS_DEFINITION},
+//		camundaapi.RESOURCETYPEENUM_PROCESS_DEFINITION,
+//		[]camundaapi.PermissionTypeEnum{camundaapi.PERMISSIONTYPEENUM_READ_PROCESS_DEFINITION},
 //	)
 //
 //	return client.UpdateAuthorization(ctx,
-//		openapi.MustAuthorizationKey("2251799813685280"),
-//		openapi.AuthorizationIdBasedRequestAsAuthorizationRequest(updated))
-func (c *CamundaClient) UpdateAuthorization(ctx context.Context, authorizationKey openapi.AuthorizationKey, body openapi.AuthorizationRequest, opts ...func(openapi.ApiUpdateAuthorizationRequest) openapi.ApiUpdateAuthorizationRequest) error {
+//		camundaapi.MustAuthorizationKey("2251799813685280"),
+//		camundaapi.AuthorizationIdBasedRequestAsAuthorizationRequest(updated))
+func (c *CamundaClient) UpdateAuthorization(ctx context.Context, authorizationKey camundaapi.AuthorizationKey, body camundaapi.AuthorizationRequest, opts ...func(camundaapi.ApiUpdateAuthorizationRequest) camundaapi.ApiUpdateAuthorizationRequest) error {
 	req := c.raw.AuthorizationAPI.UpdateAuthorization(ctx, authorizationKey)
 	req = req.AuthorizationRequest(body)
 	for _, opt := range opts {
@@ -390,7 +390,7 @@ func (c *CamundaClient) UpdateAuthorization(ctx context.Context, authorizationKe
 //	if err := client.DeleteHistoryBackup(ctx, 42); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) DeleteHistoryBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteHistoryBackupRequest) openapi.ApiDeleteHistoryBackupRequest) error {
+func (c *CamundaClient) DeleteHistoryBackup(ctx context.Context, backupId int64, opts ...func(camundaapi.ApiDeleteHistoryBackupRequest) camundaapi.ApiDeleteHistoryBackupRequest) error {
 	req := c.raw.BackupAPI.DeleteHistoryBackup(ctx, backupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -406,7 +406,7 @@ func (c *CamundaClient) DeleteHistoryBackup(ctx context.Context, backupId int64,
 //	if err := client.DeleteHistoryBackupAsClusterAdmin(ctx, 42); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) DeleteHistoryBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteHistoryBackupAsClusterAdminRequest) openapi.ApiDeleteHistoryBackupAsClusterAdminRequest) error {
+func (c *CamundaClient) DeleteHistoryBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(camundaapi.ApiDeleteHistoryBackupAsClusterAdminRequest) camundaapi.ApiDeleteHistoryBackupAsClusterAdminRequest) error {
 	req := c.raw.BackupAPI.DeleteHistoryBackupAsClusterAdmin(ctx, backupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -422,7 +422,7 @@ func (c *CamundaClient) DeleteHistoryBackupAsClusterAdmin(ctx context.Context, b
 //	if err := client.DeleteRuntimeBackup(ctx, 42); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteRuntimeBackupRequest) openapi.ApiDeleteRuntimeBackupRequest) error {
+func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64, opts ...func(camundaapi.ApiDeleteRuntimeBackupRequest) camundaapi.ApiDeleteRuntimeBackupRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackup(ctx, backupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -439,7 +439,7 @@ func (c *CamundaClient) DeleteRuntimeBackup(ctx context.Context, backupId int64,
 //	if err := client.DeleteRuntimeBackupAsClusterAdmin(ctx, 42); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) DeleteRuntimeBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiDeleteRuntimeBackupAsClusterAdminRequest) openapi.ApiDeleteRuntimeBackupAsClusterAdminRequest) error {
+func (c *CamundaClient) DeleteRuntimeBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(camundaapi.ApiDeleteRuntimeBackupAsClusterAdminRequest) camundaapi.ApiDeleteRuntimeBackupAsClusterAdminRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackupAsClusterAdmin(ctx, backupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -455,7 +455,7 @@ func (c *CamundaClient) DeleteRuntimeBackupAsClusterAdmin(ctx context.Context, b
 //	if err := client.DeleteRuntimeBackupState(ctx); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiDeleteRuntimeBackupStateRequest) openapi.ApiDeleteRuntimeBackupStateRequest) error {
+func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...func(camundaapi.ApiDeleteRuntimeBackupStateRequest) camundaapi.ApiDeleteRuntimeBackupStateRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackupState(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -472,7 +472,7 @@ func (c *CamundaClient) DeleteRuntimeBackupState(ctx context.Context, opts ...fu
 //	if err := client.DeleteRuntimeBackupStateAsClusterAdmin(ctx); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) DeleteRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiDeleteRuntimeBackupStateAsClusterAdminRequest) openapi.ApiDeleteRuntimeBackupStateAsClusterAdminRequest) error {
+func (c *CamundaClient) DeleteRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(camundaapi.ApiDeleteRuntimeBackupStateAsClusterAdminRequest) camundaapi.ApiDeleteRuntimeBackupStateAsClusterAdminRequest) error {
 	req := c.raw.BackupAPI.DeleteRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -493,7 +493,7 @@ func (c *CamundaClient) DeleteRuntimeBackupStateAsClusterAdmin(ctx context.Conte
 //	for _, snapshot := range backup.GetDetails() {
 //		fmt.Printf("  snapshot %v\n", snapshot)
 //	}
-func (c *CamundaClient) GetHistoryBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetHistoryBackupRequest) openapi.ApiGetHistoryBackupRequest) (*openapi.HistoryBackupInfo, error) {
+func (c *CamundaClient) GetHistoryBackup(ctx context.Context, backupId int64, opts ...func(camundaapi.ApiGetHistoryBackupRequest) camundaapi.ApiGetHistoryBackupRequest) (*camundaapi.HistoryBackupInfo, error) {
 	req := c.raw.BackupAPI.GetHistoryBackup(ctx, backupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -513,7 +513,7 @@ func (c *CamundaClient) GetHistoryBackup(ctx context.Context, backupId int64, op
 //	for _, tenant := range backup.GetPhysicalTenants() {
 //		fmt.Printf("tenant %s: state=%v\n", tenant.GetPhysicalTenantId(), tenant.GetState())
 //	}
-func (c *CamundaClient) GetHistoryBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetHistoryBackupAsClusterAdminRequest) openapi.ApiGetHistoryBackupAsClusterAdminRequest) (*openapi.ClusterHistoryBackupInfo, error) {
+func (c *CamundaClient) GetHistoryBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(camundaapi.ApiGetHistoryBackupAsClusterAdminRequest) camundaapi.ApiGetHistoryBackupAsClusterAdminRequest) (*camundaapi.ClusterHistoryBackupInfo, error) {
 	req := c.raw.BackupAPI.GetHistoryBackupAsClusterAdmin(ctx, backupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -534,7 +534,7 @@ func (c *CamundaClient) GetHistoryBackupAsClusterAdmin(ctx context.Context, back
 //	for _, partition := range backup.GetDetails() {
 //		fmt.Printf("%v\n", partition)
 //	}
-func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetRuntimeBackupRequest) openapi.ApiGetRuntimeBackupRequest) (*openapi.BackupInfo, error) {
+func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, opts ...func(camundaapi.ApiGetRuntimeBackupRequest) camundaapi.ApiGetRuntimeBackupRequest) (*camundaapi.BackupInfo, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackup(ctx, backupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -555,7 +555,7 @@ func (c *CamundaClient) GetRuntimeBackup(ctx context.Context, backupId int64, op
 //	for _, tenant := range backup.GetPhysicalTenants() {
 //		fmt.Printf("  tenant %v\n", tenant)
 //	}
-func (c *CamundaClient) GetRuntimeBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(openapi.ApiGetRuntimeBackupAsClusterAdminRequest) openapi.ApiGetRuntimeBackupAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupInfo, error) {
+func (c *CamundaClient) GetRuntimeBackupAsClusterAdmin(ctx context.Context, backupId int64, opts ...func(camundaapi.ApiGetRuntimeBackupAsClusterAdminRequest) camundaapi.ApiGetRuntimeBackupAsClusterAdminRequest) (*camundaapi.ClusterRuntimeBackupInfo, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackupAsClusterAdmin(ctx, backupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -575,7 +575,7 @@ func (c *CamundaClient) GetRuntimeBackupAsClusterAdmin(ctx context.Context, back
 //	for _, checkpoint := range state.GetCheckpointStates() {
 //		fmt.Printf("%v\n", checkpoint)
 //	}
-func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiGetRuntimeBackupStateRequest) openapi.ApiGetRuntimeBackupStateRequest) (*openapi.RuntimeBackupState, error) {
+func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(camundaapi.ApiGetRuntimeBackupStateRequest) camundaapi.ApiGetRuntimeBackupStateRequest) (*camundaapi.RuntimeBackupState, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackupState(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -596,7 +596,7 @@ func (c *CamundaClient) GetRuntimeBackupState(ctx context.Context, opts ...func(
 //	for _, tenant := range state.GetPhysicalTenants() {
 //		fmt.Printf("%v\n", tenant)
 //	}
-func (c *CamundaClient) GetRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiGetRuntimeBackupStateAsClusterAdminRequest) openapi.ApiGetRuntimeBackupStateAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupState, error) {
+func (c *CamundaClient) GetRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(camundaapi.ApiGetRuntimeBackupStateAsClusterAdminRequest) camundaapi.ApiGetRuntimeBackupStateAsClusterAdminRequest) (*camundaapi.ClusterRuntimeBackupState, error) {
 	req := c.raw.BackupAPI.GetRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -616,7 +616,7 @@ func (c *CamundaClient) GetRuntimeBackupStateAsClusterAdmin(ctx context.Context,
 //	for _, backup := range backups {
 //		fmt.Printf("history backup %d is %v\n", backup.GetBackupId(), backup.GetState())
 //	}
-func (c *CamundaClient) ListHistoryBackups(ctx context.Context, opts ...func(openapi.ApiListHistoryBackupsRequest) openapi.ApiListHistoryBackupsRequest) ([]openapi.HistoryBackupInfo, error) {
+func (c *CamundaClient) ListHistoryBackups(ctx context.Context, opts ...func(camundaapi.ApiListHistoryBackupsRequest) camundaapi.ApiListHistoryBackupsRequest) ([]camundaapi.HistoryBackupInfo, error) {
 	req := c.raw.BackupAPI.ListHistoryBackups(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -637,7 +637,7 @@ func (c *CamundaClient) ListHistoryBackups(ctx context.Context, opts ...func(ope
 //	for _, backup := range backups {
 //		fmt.Printf("cluster history backup %d: %d tenant(s)\n", backup.GetBackupId(), len(backup.GetPhysicalTenants()))
 //	}
-func (c *CamundaClient) ListHistoryBackupsAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiListHistoryBackupsAsClusterAdminRequest) openapi.ApiListHistoryBackupsAsClusterAdminRequest) ([]openapi.ClusterHistoryBackupInfo, error) {
+func (c *CamundaClient) ListHistoryBackupsAsClusterAdmin(ctx context.Context, opts ...func(camundaapi.ApiListHistoryBackupsAsClusterAdminRequest) camundaapi.ApiListHistoryBackupsAsClusterAdminRequest) ([]camundaapi.ClusterHistoryBackupInfo, error) {
 	req := c.raw.BackupAPI.ListHistoryBackupsAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -657,7 +657,7 @@ func (c *CamundaClient) ListHistoryBackupsAsClusterAdmin(ctx context.Context, op
 //	for _, backup := range backups {
 //		fmt.Printf("backup %v is %v\n", backup.GetBackupId(), backup.GetState())
 //	}
-func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(openapi.ApiListRuntimeBackupsRequest) openapi.ApiListRuntimeBackupsRequest) ([]openapi.BackupInfo, error) {
+func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(camundaapi.ApiListRuntimeBackupsRequest) camundaapi.ApiListRuntimeBackupsRequest) ([]camundaapi.BackupInfo, error) {
 	req := c.raw.BackupAPI.ListRuntimeBackups(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -679,7 +679,7 @@ func (c *CamundaClient) ListRuntimeBackups(ctx context.Context, opts ...func(ope
 //		fmt.Printf("cluster runtime backup %d: state=%v, %d tenant(s)\n",
 //			backup.GetBackupId(), backup.GetState(), len(backup.GetPhysicalTenants()))
 //	}
-func (c *CamundaClient) ListRuntimeBackupsAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiListRuntimeBackupsAsClusterAdminRequest) openapi.ApiListRuntimeBackupsAsClusterAdminRequest) ([]openapi.ClusterRuntimeBackupInfo, error) {
+func (c *CamundaClient) ListRuntimeBackupsAsClusterAdmin(ctx context.Context, opts ...func(camundaapi.ApiListRuntimeBackupsAsClusterAdminRequest) camundaapi.ApiListRuntimeBackupsAsClusterAdminRequest) ([]camundaapi.ClusterRuntimeBackupInfo, error) {
 	req := c.raw.BackupAPI.ListRuntimeBackupsAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -700,7 +700,7 @@ func (c *CamundaClient) ListRuntimeBackupsAsClusterAdmin(ctx context.Context, op
 //	for _, backup := range state.GetBackupStates() {
 //		fmt.Printf("%v\n", backup)
 //	}
-func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func(openapi.ApiSyncRuntimeBackupStateRequest) openapi.ApiSyncRuntimeBackupStateRequest) (*openapi.RuntimeBackupState, error) {
+func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func(camundaapi.ApiSyncRuntimeBackupStateRequest) camundaapi.ApiSyncRuntimeBackupStateRequest) (*camundaapi.RuntimeBackupState, error) {
 	req := c.raw.BackupAPI.SyncRuntimeBackupState(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -723,7 +723,7 @@ func (c *CamundaClient) SyncRuntimeBackupState(ctx context.Context, opts ...func
 //	for _, tenant := range state.GetPhysicalTenants() {
 //		fmt.Printf("%v\n", tenant)
 //	}
-func (c *CamundaClient) SyncRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiSyncRuntimeBackupStateAsClusterAdminRequest) openapi.ApiSyncRuntimeBackupStateAsClusterAdminRequest) (*openapi.ClusterRuntimeBackupState, error) {
+func (c *CamundaClient) SyncRuntimeBackupStateAsClusterAdmin(ctx context.Context, opts ...func(camundaapi.ApiSyncRuntimeBackupStateAsClusterAdminRequest) camundaapi.ApiSyncRuntimeBackupStateAsClusterAdminRequest) (*camundaapi.ClusterRuntimeBackupState, error) {
 	req := c.raw.BackupAPI.SyncRuntimeBackupStateAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -736,12 +736,12 @@ func (c *CamundaClient) SyncRuntimeBackupStateAsClusterAdmin(ctx context.Context
 //
 // Example:
 //
-//	result, err := client.TakeHistoryBackup(ctx, *openapi.NewTakeHistoryBackupRequest(42))
+//	result, err := client.TakeHistoryBackup(ctx, *camundaapi.NewTakeHistoryBackupRequest(42))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("backup %d scheduled %d snapshot(s)\n", result.GetBackupId(), len(result.GetScheduledSnapshots()))
-func (c *CamundaClient) TakeHistoryBackup(ctx context.Context, body openapi.TakeHistoryBackupRequest, opts ...func(openapi.ApiTakeHistoryBackupRequest) openapi.ApiTakeHistoryBackupRequest) (*openapi.TakeHistoryBackupResponse, error) {
+func (c *CamundaClient) TakeHistoryBackup(ctx context.Context, body camundaapi.TakeHistoryBackupRequest, opts ...func(camundaapi.ApiTakeHistoryBackupRequest) camundaapi.ApiTakeHistoryBackupRequest) (*camundaapi.TakeHistoryBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeHistoryBackup(ctx)
 	req = req.TakeHistoryBackupRequest(body)
 	for _, opt := range opts {
@@ -756,12 +756,12 @@ func (c *CamundaClient) TakeHistoryBackup(ctx context.Context, body openapi.Take
 // Example:
 //
 //	// Takes a history backup for every physical tenant in the cluster simultaneously.
-//	result, err := client.TakeHistoryBackupAsClusterAdmin(ctx, *openapi.NewTakeHistoryBackupRequest(42))
+//	result, err := client.TakeHistoryBackupAsClusterAdmin(ctx, *camundaapi.NewTakeHistoryBackupRequest(42))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("cluster history backup %d across %d tenant(s)\n", result.GetBackupId(), len(result.GetPhysicalTenants()))
-func (c *CamundaClient) TakeHistoryBackupAsClusterAdmin(ctx context.Context, body openapi.TakeHistoryBackupRequest, opts ...func(openapi.ApiTakeHistoryBackupAsClusterAdminRequest) openapi.ApiTakeHistoryBackupAsClusterAdminRequest) (*openapi.ClusterTakeHistoryBackupResponse, error) {
+func (c *CamundaClient) TakeHistoryBackupAsClusterAdmin(ctx context.Context, body camundaapi.TakeHistoryBackupRequest, opts ...func(camundaapi.ApiTakeHistoryBackupAsClusterAdminRequest) camundaapi.ApiTakeHistoryBackupAsClusterAdminRequest) (*camundaapi.ClusterTakeHistoryBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeHistoryBackupAsClusterAdmin(ctx)
 	req = req.TakeHistoryBackupRequest(body)
 	for _, opt := range opts {
@@ -775,7 +775,7 @@ func (c *CamundaClient) TakeHistoryBackupAsClusterAdmin(ctx context.Context, bod
 //
 // Example:
 //
-//	req := openapi.NewTakeRuntimeBackupRequest()
+//	req := camundaapi.NewTakeRuntimeBackupRequest()
 //	// The id is required here, and must be omitted instead when continuous backups
 //	// or a backup/checkpoint schedule is enabled for the tenant — the server
 //	// generates it in that case.
@@ -786,7 +786,7 @@ func (c *CamundaClient) TakeHistoryBackupAsClusterAdmin(ctx context.Context, bod
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) TakeRuntimeBackup(ctx context.Context, body openapi.TakeRuntimeBackupRequest, opts ...func(openapi.ApiTakeRuntimeBackupRequest) openapi.ApiTakeRuntimeBackupRequest) (*openapi.TakeRuntimeBackupResponse, error) {
+func (c *CamundaClient) TakeRuntimeBackup(ctx context.Context, body camundaapi.TakeRuntimeBackupRequest, opts ...func(camundaapi.ApiTakeRuntimeBackupRequest) camundaapi.ApiTakeRuntimeBackupRequest) (*camundaapi.TakeRuntimeBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeRuntimeBackup(ctx)
 	req = req.TakeRuntimeBackupRequest(body)
 	for _, opt := range opts {
@@ -804,7 +804,7 @@ func (c *CamundaClient) TakeRuntimeBackup(ctx context.Context, body openapi.Take
 //	// Pass SetBackupId to use an explicit backup ID; omit it to let the cluster
 //	// generate one automatically (generated-id mode). Do not mix modes: sending a
 //	// backup ID when the cluster is configured for generated IDs will be rejected.
-//	req := openapi.NewTakeRuntimeBackupRequest()
+//	req := camundaapi.NewTakeRuntimeBackupRequest()
 //	req.SetBackupId(42)
 //
 //	result, err := client.TakeRuntimeBackupAsClusterAdmin(ctx, *req)
@@ -814,7 +814,7 @@ func (c *CamundaClient) TakeRuntimeBackup(ctx context.Context, body openapi.Take
 //	for _, tenant := range result.GetPhysicalTenants() {
 //		fmt.Printf("%v\n", tenant)
 //	}
-func (c *CamundaClient) TakeRuntimeBackupAsClusterAdmin(ctx context.Context, body openapi.TakeRuntimeBackupRequest, opts ...func(openapi.ApiTakeRuntimeBackupAsClusterAdminRequest) openapi.ApiTakeRuntimeBackupAsClusterAdminRequest) (*openapi.ClusterTakeRuntimeBackupResponse, error) {
+func (c *CamundaClient) TakeRuntimeBackupAsClusterAdmin(ctx context.Context, body camundaapi.TakeRuntimeBackupRequest, opts ...func(camundaapi.ApiTakeRuntimeBackupAsClusterAdminRequest) camundaapi.ApiTakeRuntimeBackupAsClusterAdminRequest) (*camundaapi.ClusterTakeRuntimeBackupResponse, error) {
 	req := c.raw.BackupAPI.TakeRuntimeBackupAsClusterAdmin(ctx)
 	req = req.TakeRuntimeBackupRequest(body)
 	for _, opt := range opts {
@@ -829,7 +829,7 @@ func (c *CamundaClient) TakeRuntimeBackupAsClusterAdmin(ctx context.Context, bod
 // Example:
 //
 //	return client.CancelBatchOperation(ctx, "2251799813685290")
-func (c *CamundaClient) CancelBatchOperation(ctx context.Context, batchOperationKey string, opts ...func(openapi.ApiCancelBatchOperationRequest) openapi.ApiCancelBatchOperationRequest) error {
+func (c *CamundaClient) CancelBatchOperation(ctx context.Context, batchOperationKey string, opts ...func(camundaapi.ApiCancelBatchOperationRequest) camundaapi.ApiCancelBatchOperationRequest) error {
 	req := c.raw.BatchOperationAPI.CancelBatchOperation(ctx, batchOperationKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -847,7 +847,7 @@ func (c *CamundaClient) CancelBatchOperation(ctx context.Context, batchOperation
 //		return err
 //	}
 //	fmt.Printf("%v\n", op)
-func (c *CamundaClient) GetBatchOperation(ctx context.Context, batchOperationKey string, opts ...func(openapi.ApiGetBatchOperationRequest) openapi.ApiGetBatchOperationRequest) (*openapi.BatchOperationResponse, error) {
+func (c *CamundaClient) GetBatchOperation(ctx context.Context, batchOperationKey string, opts ...func(camundaapi.ApiGetBatchOperationRequest) camundaapi.ApiGetBatchOperationRequest) (*camundaapi.BatchOperationResponse, error) {
 	req := c.raw.BatchOperationAPI.GetBatchOperation(ctx, batchOperationKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -861,7 +861,7 @@ func (c *CamundaClient) GetBatchOperation(ctx context.Context, batchOperationKey
 // Example:
 //
 //	return client.ResumeBatchOperation(ctx, "2251799813685290")
-func (c *CamundaClient) ResumeBatchOperation(ctx context.Context, batchOperationKey string, opts ...func(openapi.ApiResumeBatchOperationRequest) openapi.ApiResumeBatchOperationRequest) error {
+func (c *CamundaClient) ResumeBatchOperation(ctx context.Context, batchOperationKey string, opts ...func(camundaapi.ApiResumeBatchOperationRequest) camundaapi.ApiResumeBatchOperationRequest) error {
 	req := c.raw.BatchOperationAPI.ResumeBatchOperation(ctx, batchOperationKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -874,14 +874,14 @@ func (c *CamundaClient) ResumeBatchOperation(ctx context.Context, batchOperation
 //
 // Example:
 //
-//	result, err := client.SearchBatchOperationItems(ctx, *openapi.NewBatchOperationItemSearchQuery())
+//	result, err := client.SearchBatchOperationItems(ctx, *camundaapi.NewBatchOperationItemSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, item := range result.GetItems() {
 //		fmt.Printf("%v\n", item)
 //	}
-func (c *CamundaClient) SearchBatchOperationItems(ctx context.Context, body openapi.BatchOperationItemSearchQuery, opts ...func(openapi.ApiSearchBatchOperationItemsRequest) openapi.ApiSearchBatchOperationItemsRequest) (*openapi.BatchOperationItemSearchQueryResult, error) {
+func (c *CamundaClient) SearchBatchOperationItems(ctx context.Context, body camundaapi.BatchOperationItemSearchQuery, opts ...func(camundaapi.ApiSearchBatchOperationItemsRequest) camundaapi.ApiSearchBatchOperationItemsRequest) (*camundaapi.BatchOperationItemSearchQueryResult, error) {
 	req := c.raw.BatchOperationAPI.SearchBatchOperationItems(ctx)
 	req = req.BatchOperationItemSearchQuery(body)
 	for _, opt := range opts {
@@ -895,14 +895,14 @@ func (c *CamundaClient) SearchBatchOperationItems(ctx context.Context, body open
 //
 // Example:
 //
-//	result, err := client.SearchBatchOperations(ctx, *openapi.NewBatchOperationSearchQuery())
+//	result, err := client.SearchBatchOperations(ctx, *camundaapi.NewBatchOperationSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, op := range result.GetItems() {
 //		fmt.Printf("%v\n", op)
 //	}
-func (c *CamundaClient) SearchBatchOperations(ctx context.Context, body openapi.BatchOperationSearchQuery, opts ...func(openapi.ApiSearchBatchOperationsRequest) openapi.ApiSearchBatchOperationsRequest) (*openapi.BatchOperationSearchQueryResult, error) {
+func (c *CamundaClient) SearchBatchOperations(ctx context.Context, body camundaapi.BatchOperationSearchQuery, opts ...func(camundaapi.ApiSearchBatchOperationsRequest) camundaapi.ApiSearchBatchOperationsRequest) (*camundaapi.BatchOperationSearchQueryResult, error) {
 	req := c.raw.BatchOperationAPI.SearchBatchOperations(ctx)
 	req = req.BatchOperationSearchQuery(body)
 	for _, opt := range opts {
@@ -917,7 +917,7 @@ func (c *CamundaClient) SearchBatchOperations(ctx context.Context, body openapi.
 // Example:
 //
 //	return client.SuspendBatchOperation(ctx, "2251799813685290")
-func (c *CamundaClient) SuspendBatchOperation(ctx context.Context, batchOperationKey string, opts ...func(openapi.ApiSuspendBatchOperationRequest) openapi.ApiSuspendBatchOperationRequest) error {
+func (c *CamundaClient) SuspendBatchOperation(ctx context.Context, batchOperationKey string, opts ...func(camundaapi.ApiSuspendBatchOperationRequest) camundaapi.ApiSuspendBatchOperationRequest) error {
 	req := c.raw.BatchOperationAPI.SuspendBatchOperation(ctx, batchOperationKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -932,8 +932,8 @@ func (c *CamundaClient) SuspendBatchOperation(ctx context.Context, batchOperatio
 //
 //	// Pin the cluster clock to a fixed instant (epoch milliseconds).
 //	pinned := time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
-//	return client.PinClock(ctx, *openapi.NewClockPinRequest(pinned.UnixMilli()))
-func (c *CamundaClient) PinClock(ctx context.Context, body openapi.ClockPinRequest, opts ...func(openapi.ApiPinClockRequest) openapi.ApiPinClockRequest) error {
+//	return client.PinClock(ctx, *camundaapi.NewClockPinRequest(pinned.UnixMilli()))
+func (c *CamundaClient) PinClock(ctx context.Context, body camundaapi.ClockPinRequest, opts ...func(camundaapi.ApiPinClockRequest) camundaapi.ApiPinClockRequest) error {
 	req := c.raw.ClockAPI.PinClock(ctx)
 	req = req.ClockPinRequest(body)
 	for _, opt := range opts {
@@ -949,7 +949,7 @@ func (c *CamundaClient) PinClock(ctx context.Context, body openapi.ClockPinReque
 //
 //	// Release a previously pinned clock back to system time.
 //	return client.ResetClock(ctx)
-func (c *CamundaClient) ResetClock(ctx context.Context, opts ...func(openapi.ApiResetClockRequest) openapi.ApiResetClockRequest) error {
+func (c *CamundaClient) ResetClock(ctx context.Context, opts ...func(camundaapi.ApiResetClockRequest) camundaapi.ApiResetClockRequest) error {
 	req := c.raw.ClockAPI.ResetClock(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -973,7 +973,7 @@ func (c *CamundaClient) ResetClock(ctx context.Context, opts ...func(openapi.Api
 //	} else {
 //		fmt.Println("no rebalance was running")
 //	}
-func (c *CamundaClient) CancelClusterRebalance(ctx context.Context, opts ...func(openapi.ApiCancelClusterRebalanceRequest) openapi.ApiCancelClusterRebalanceRequest) (*openapi.RebalanceCancellationResponse, error) {
+func (c *CamundaClient) CancelClusterRebalance(ctx context.Context, opts ...func(camundaapi.ApiCancelClusterRebalanceRequest) camundaapi.ApiCancelClusterRebalanceRequest) (*camundaapi.RebalanceCancellationResponse, error) {
 	req := c.raw.ClusterAPI.CancelClusterRebalance(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -996,7 +996,7 @@ func (c *CamundaClient) CancelClusterRebalance(ctx context.Context, opts ...func
 //	if running, ok := balance.GetRunningRebalanceOk(); ok && running != nil {
 //		fmt.Printf("rebalance in progress: %v\n", running)
 //	}
-func (c *CamundaClient) GetClusterRebalance(ctx context.Context, opts ...func(openapi.ApiGetClusterRebalanceRequest) openapi.ApiGetClusterRebalanceRequest) (*openapi.ClusterBalanceResponse, error) {
+func (c *CamundaClient) GetClusterRebalance(ctx context.Context, opts ...func(camundaapi.ApiGetClusterRebalanceRequest) camundaapi.ApiGetClusterRebalanceRequest) (*camundaapi.ClusterBalanceResponse, error) {
 	req := c.raw.ClusterAPI.GetClusterRebalance(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1015,7 +1015,7 @@ func (c *CamundaClient) GetClusterRebalance(ctx context.Context, opts ...func(op
 //		return err
 //	}
 //	fmt.Printf("cluster status: %s\n", status.GetStatus())
-func (c *CamundaClient) GetClusterStatus(ctx context.Context, opts ...func(openapi.ApiGetClusterStatusRequest) openapi.ApiGetClusterStatusRequest) (*openapi.ClusterStatusResponse, error) {
+func (c *CamundaClient) GetClusterStatus(ctx context.Context, opts ...func(camundaapi.ApiGetClusterStatusRequest) camundaapi.ApiGetClusterStatusRequest) (*camundaapi.ClusterStatusResponse, error) {
 	req := c.raw.ClusterAPI.GetClusterStatus(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1037,7 +1037,7 @@ func (c *CamundaClient) GetClusterStatus(ctx context.Context, opts ...func(opena
 //	}
 //	fmt.Printf("cluster %s — %d broker(s), %d physical tenant(s)\n",
 //		topology.GetClusterId(), len(topology.GetBrokers()), len(topology.GetPhysicalTenants()))
-func (c *CamundaClient) GetClusterTopology(ctx context.Context, opts ...func(openapi.ApiGetClusterTopologyRequest) openapi.ApiGetClusterTopologyRequest) (*openapi.ClusterTopologyResponse, error) {
+func (c *CamundaClient) GetClusterTopology(ctx context.Context, opts ...func(camundaapi.ApiGetClusterTopologyRequest) camundaapi.ApiGetClusterTopologyRequest) (*camundaapi.ClusterTopologyResponse, error) {
 	req := c.raw.ClusterAPI.GetClusterTopology(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1057,7 +1057,7 @@ func (c *CamundaClient) GetClusterTopology(ctx context.Context, opts ...func(ope
 //		return err
 //	}
 //	fmt.Printf("cluster upgrade status: %s\n", status.GetStatus())
-func (c *CamundaClient) GetClusterUpgradeStatus(ctx context.Context, opts ...func(openapi.ApiGetClusterUpgradeStatusRequest) openapi.ApiGetClusterUpgradeStatusRequest) (*openapi.ClusterUpgradeStatusResponse, error) {
+func (c *CamundaClient) GetClusterUpgradeStatus(ctx context.Context, opts ...func(camundaapi.ApiGetClusterUpgradeStatusRequest) camundaapi.ApiGetClusterUpgradeStatusRequest) (*camundaapi.ClusterUpgradeStatusResponse, error) {
 	req := c.raw.ClusterAPI.GetClusterUpgradeStatus(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1075,7 +1075,7 @@ func (c *CamundaClient) GetClusterUpgradeStatus(ctx context.Context, opts ...fun
 //		return err
 //	}
 //	fmt.Println("cluster is ready")
-func (c *CamundaClient) GetStatus(ctx context.Context, opts ...func(openapi.ApiGetStatusRequest) openapi.ApiGetStatusRequest) error {
+func (c *CamundaClient) GetStatus(ctx context.Context, opts ...func(camundaapi.ApiGetStatusRequest) camundaapi.ApiGetStatusRequest) error {
 	req := c.raw.ClusterAPI.GetStatus(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1094,7 +1094,7 @@ func (c *CamundaClient) GetStatus(ctx context.Context, opts ...func(openapi.ApiG
 //	}
 //	fmt.Printf("gateway %s — %d broker(s), %d partition(s)\n",
 //		topology.GetGatewayVersion(), len(topology.GetBrokers()), topology.GetPartitionsCount())
-func (c *CamundaClient) GetTopology(ctx context.Context, opts ...func(openapi.ApiGetTopologyRequest) openapi.ApiGetTopologyRequest) (*openapi.TopologyResponse, error) {
+func (c *CamundaClient) GetTopology(ctx context.Context, opts ...func(camundaapi.ApiGetTopologyRequest) camundaapi.ApiGetTopologyRequest) (*camundaapi.TopologyResponse, error) {
 	req := c.raw.ClusterAPI.GetTopology(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1110,7 +1110,7 @@ func (c *CamundaClient) GetTopology(ctx context.Context, opts ...func(openapi.Ap
 //	// Starts a cluster rebalance, redistributing partition leadership to the preferred nodes.
 //	// Requires cluster-admin credentials (a separate cluster-admin security chain) —
 //	// calling this with standard Orchestration credentials will fail authorization.
-//	req := openapi.NewClusterRebalanceRequest()
+//	req := camundaapi.NewClusterRebalanceRequest()
 //	req.SetReplicationLagThreshold(1024 * 1024) // 1 MiB max lag for leader transfer
 //
 //	balance, err := client.TriggerClusterRebalance(ctx, *req)
@@ -1118,7 +1118,7 @@ func (c *CamundaClient) GetTopology(ctx context.Context, opts ...func(openapi.Ap
 //		return err
 //	}
 //	fmt.Printf("cluster balance state: %s, %d partition(s)\n", balance.GetState(), len(balance.GetPartitions()))
-func (c *CamundaClient) TriggerClusterRebalance(ctx context.Context, body openapi.ClusterRebalanceRequest, opts ...func(openapi.ApiTriggerClusterRebalanceRequest) openapi.ApiTriggerClusterRebalanceRequest) (*openapi.ClusterBalanceResponse, error) {
+func (c *CamundaClient) TriggerClusterRebalance(ctx context.Context, body camundaapi.ClusterRebalanceRequest, opts ...func(camundaapi.ApiTriggerClusterRebalanceRequest) camundaapi.ApiTriggerClusterRebalanceRequest) (*camundaapi.ClusterBalanceResponse, error) {
 	req := c.raw.ClusterAPI.TriggerClusterRebalance(ctx)
 	req = req.ClusterRebalanceRequest(body)
 	for _, opt := range opts {
@@ -1133,12 +1133,12 @@ func (c *CamundaClient) TriggerClusterRebalance(ctx context.Context, body openap
 // Example:
 //
 //	result, err := client.CreateGlobalClusterVariable(ctx,
-//		*openapi.NewCreateClusterVariableRequest("region", map[string]any{"value": "eu-1"}))
+//		*camundaapi.NewCreateClusterVariableRequest("region", map[string]any{"value": "eu-1"}))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateGlobalClusterVariable(ctx context.Context, body openapi.CreateClusterVariableRequest, opts ...func(openapi.ApiCreateGlobalClusterVariableRequest) openapi.ApiCreateGlobalClusterVariableRequest) (*openapi.ClusterVariableResult, error) {
+func (c *CamundaClient) CreateGlobalClusterVariable(ctx context.Context, body camundaapi.CreateClusterVariableRequest, opts ...func(camundaapi.ApiCreateGlobalClusterVariableRequest) camundaapi.ApiCreateGlobalClusterVariableRequest) (*camundaapi.ClusterVariableResult, error) {
 	req := c.raw.ClusterVariableAPI.CreateGlobalClusterVariable(ctx)
 	req = req.CreateClusterVariableRequest(body)
 	for _, opt := range opts {
@@ -1153,12 +1153,12 @@ func (c *CamundaClient) CreateGlobalClusterVariable(ctx context.Context, body op
 // Example:
 //
 //	result, err := client.CreateTenantClusterVariable(ctx, "tenant-a",
-//		*openapi.NewCreateClusterVariableRequest("region", map[string]any{"value": "eu-1"}))
+//		*camundaapi.NewCreateClusterVariableRequest("region", map[string]any{"value": "eu-1"}))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateTenantClusterVariable(ctx context.Context, tenantId string, body openapi.CreateClusterVariableRequest, opts ...func(openapi.ApiCreateTenantClusterVariableRequest) openapi.ApiCreateTenantClusterVariableRequest) (*openapi.ClusterVariableResult, error) {
+func (c *CamundaClient) CreateTenantClusterVariable(ctx context.Context, tenantId string, body camundaapi.CreateClusterVariableRequest, opts ...func(camundaapi.ApiCreateTenantClusterVariableRequest) camundaapi.ApiCreateTenantClusterVariableRequest) (*camundaapi.ClusterVariableResult, error) {
 	req := c.raw.ClusterVariableAPI.CreateTenantClusterVariable(ctx, tenantId)
 	req = req.CreateClusterVariableRequest(body)
 	for _, opt := range opts {
@@ -1173,7 +1173,7 @@ func (c *CamundaClient) CreateTenantClusterVariable(ctx context.Context, tenantI
 // Example:
 //
 //	return client.DeleteGlobalClusterVariable(ctx, "region")
-func (c *CamundaClient) DeleteGlobalClusterVariable(ctx context.Context, name string, opts ...func(openapi.ApiDeleteGlobalClusterVariableRequest) openapi.ApiDeleteGlobalClusterVariableRequest) error {
+func (c *CamundaClient) DeleteGlobalClusterVariable(ctx context.Context, name string, opts ...func(camundaapi.ApiDeleteGlobalClusterVariableRequest) camundaapi.ApiDeleteGlobalClusterVariableRequest) error {
 	req := c.raw.ClusterVariableAPI.DeleteGlobalClusterVariable(ctx, name)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1187,7 +1187,7 @@ func (c *CamundaClient) DeleteGlobalClusterVariable(ctx context.Context, name st
 // Example:
 //
 //	return client.DeleteTenantClusterVariable(ctx, "tenant-a", "region")
-func (c *CamundaClient) DeleteTenantClusterVariable(ctx context.Context, tenantId string, name string, opts ...func(openapi.ApiDeleteTenantClusterVariableRequest) openapi.ApiDeleteTenantClusterVariableRequest) error {
+func (c *CamundaClient) DeleteTenantClusterVariable(ctx context.Context, tenantId string, name string, opts ...func(camundaapi.ApiDeleteTenantClusterVariableRequest) camundaapi.ApiDeleteTenantClusterVariableRequest) error {
 	req := c.raw.ClusterVariableAPI.DeleteTenantClusterVariable(ctx, tenantId, name)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1205,7 +1205,7 @@ func (c *CamundaClient) DeleteTenantClusterVariable(ctx context.Context, tenantI
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetGlobalClusterVariable(ctx context.Context, name string, opts ...func(openapi.ApiGetGlobalClusterVariableRequest) openapi.ApiGetGlobalClusterVariableRequest) (*openapi.ClusterVariableResult, error) {
+func (c *CamundaClient) GetGlobalClusterVariable(ctx context.Context, name string, opts ...func(camundaapi.ApiGetGlobalClusterVariableRequest) camundaapi.ApiGetGlobalClusterVariableRequest) (*camundaapi.ClusterVariableResult, error) {
 	req := c.raw.ClusterVariableAPI.GetGlobalClusterVariable(ctx, name)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1223,7 +1223,7 @@ func (c *CamundaClient) GetGlobalClusterVariable(ctx context.Context, name strin
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetTenantClusterVariable(ctx context.Context, tenantId string, name string, opts ...func(openapi.ApiGetTenantClusterVariableRequest) openapi.ApiGetTenantClusterVariableRequest) (*openapi.ClusterVariableResult, error) {
+func (c *CamundaClient) GetTenantClusterVariable(ctx context.Context, tenantId string, name string, opts ...func(camundaapi.ApiGetTenantClusterVariableRequest) camundaapi.ApiGetTenantClusterVariableRequest) (*camundaapi.ClusterVariableResult, error) {
 	req := c.raw.ClusterVariableAPI.GetTenantClusterVariable(ctx, tenantId, name)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1236,14 +1236,14 @@ func (c *CamundaClient) GetTenantClusterVariable(ctx context.Context, tenantId s
 //
 // Example:
 //
-//	result, err := client.SearchClusterVariables(ctx, *openapi.NewClusterVariableSearchQueryRequest())
+//	result, err := client.SearchClusterVariables(ctx, *camundaapi.NewClusterVariableSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	for _, v := range result.GetItems() {
 //		fmt.Printf("%v\n", v)
 //	}
-func (c *CamundaClient) SearchClusterVariables(ctx context.Context, body openapi.ClusterVariableSearchQueryRequest, opts ...func(openapi.ApiSearchClusterVariablesRequest) openapi.ApiSearchClusterVariablesRequest) (*openapi.ClusterVariableSearchQueryResult, error) {
+func (c *CamundaClient) SearchClusterVariables(ctx context.Context, body camundaapi.ClusterVariableSearchQueryRequest, opts ...func(camundaapi.ApiSearchClusterVariablesRequest) camundaapi.ApiSearchClusterVariablesRequest) (*camundaapi.ClusterVariableSearchQueryResult, error) {
 	req := c.raw.ClusterVariableAPI.SearchClusterVariables(ctx)
 	req = req.ClusterVariableSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -1258,12 +1258,12 @@ func (c *CamundaClient) SearchClusterVariables(ctx context.Context, body openapi
 // Example:
 //
 //	result, err := client.UpdateGlobalClusterVariable(ctx, "region",
-//		*openapi.NewUpdateClusterVariableRequest(map[string]any{"value": "eu-2"}))
+//		*camundaapi.NewUpdateClusterVariableRequest(map[string]any{"value": "eu-2"}))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateGlobalClusterVariable(ctx context.Context, name string, body openapi.UpdateClusterVariableRequest, opts ...func(openapi.ApiUpdateGlobalClusterVariableRequest) openapi.ApiUpdateGlobalClusterVariableRequest) (*openapi.ClusterVariableResult, error) {
+func (c *CamundaClient) UpdateGlobalClusterVariable(ctx context.Context, name string, body camundaapi.UpdateClusterVariableRequest, opts ...func(camundaapi.ApiUpdateGlobalClusterVariableRequest) camundaapi.ApiUpdateGlobalClusterVariableRequest) (*camundaapi.ClusterVariableResult, error) {
 	req := c.raw.ClusterVariableAPI.UpdateGlobalClusterVariable(ctx, name)
 	req = req.UpdateClusterVariableRequest(body)
 	for _, opt := range opts {
@@ -1278,12 +1278,12 @@ func (c *CamundaClient) UpdateGlobalClusterVariable(ctx context.Context, name st
 // Example:
 //
 //	result, err := client.UpdateTenantClusterVariable(ctx, "tenant-a", "region",
-//		*openapi.NewUpdateClusterVariableRequest(map[string]any{"value": "eu-2"}))
+//		*camundaapi.NewUpdateClusterVariableRequest(map[string]any{"value": "eu-2"}))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateTenantClusterVariable(ctx context.Context, tenantId string, name string, body openapi.UpdateClusterVariableRequest, opts ...func(openapi.ApiUpdateTenantClusterVariableRequest) openapi.ApiUpdateTenantClusterVariableRequest) (*openapi.ClusterVariableResult, error) {
+func (c *CamundaClient) UpdateTenantClusterVariable(ctx context.Context, tenantId string, name string, body camundaapi.UpdateClusterVariableRequest, opts ...func(camundaapi.ApiUpdateTenantClusterVariableRequest) camundaapi.ApiUpdateTenantClusterVariableRequest) (*camundaapi.ClusterVariableResult, error) {
 	req := c.raw.ClusterVariableAPI.UpdateTenantClusterVariable(ctx, tenantId, name)
 	req = req.UpdateClusterVariableRequest(body)
 	for _, opt := range opts {
@@ -1298,14 +1298,14 @@ func (c *CamundaClient) UpdateTenantClusterVariable(ctx context.Context, tenantI
 // Example:
 //
 //	// Evaluate which conditional start events match the given variables.
-//	req := openapi.NewConditionalEvaluationInstruction(map[string]any{"temperature": 42})
+//	req := camundaapi.NewConditionalEvaluationInstruction(map[string]any{"temperature": 42})
 //
 //	result, err := client.EvaluateConditionals(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) EvaluateConditionals(ctx context.Context, body openapi.ConditionalEvaluationInstruction, opts ...func(openapi.ApiEvaluateConditionalsRequest) openapi.ApiEvaluateConditionalsRequest) (*openapi.EvaluateConditionalResult, error) {
+func (c *CamundaClient) EvaluateConditionals(ctx context.Context, body camundaapi.ConditionalEvaluationInstruction, opts ...func(camundaapi.ApiEvaluateConditionalsRequest) camundaapi.ApiEvaluateConditionalsRequest) (*camundaapi.EvaluateConditionalResult, error) {
 	req := c.raw.ConditionalAPI.EvaluateConditionals(ctx)
 	req = req.ConditionalEvaluationInstruction(body)
 	for _, opt := range opts {
@@ -1320,16 +1320,16 @@ func (c *CamundaClient) EvaluateConditionals(ctx context.Context, body openapi.C
 // Example:
 //
 //	// DecisionEvaluationInstruction is a union; evaluate by decision id here.
-//	byID := openapi.NewDecisionEvaluationById("dish-decision")
+//	byID := camundaapi.NewDecisionEvaluationById("dish-decision")
 //	byID.SetVariables(map[string]any{"season": "Winter", "guestCount": 4})
 //
 //	result, err := client.EvaluateDecision(ctx,
-//		openapi.DecisionEvaluationByIdAsDecisionEvaluationInstruction(byID))
+//		camundaapi.DecisionEvaluationByIdAsDecisionEvaluationInstruction(byID))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) EvaluateDecision(ctx context.Context, body openapi.DecisionEvaluationInstruction, opts ...func(openapi.ApiEvaluateDecisionRequest) openapi.ApiEvaluateDecisionRequest) (*openapi.EvaluateDecisionResult, error) {
+func (c *CamundaClient) EvaluateDecision(ctx context.Context, body camundaapi.DecisionEvaluationInstruction, opts ...func(camundaapi.ApiEvaluateDecisionRequest) camundaapi.ApiEvaluateDecisionRequest) (*camundaapi.EvaluateDecisionResult, error) {
 	req := c.raw.DecisionDefinitionAPI.EvaluateDecision(ctx)
 	req = req.DecisionEvaluationInstruction(body)
 	for _, opt := range opts {
@@ -1343,12 +1343,12 @@ func (c *CamundaClient) EvaluateDecision(ctx context.Context, body openapi.Decis
 //
 // Example:
 //
-//	def, err := client.GetDecisionDefinition(ctx, openapi.MustDecisionDefinitionKey("2251799813685310"))
+//	def, err := client.GetDecisionDefinition(ctx, camundaapi.MustDecisionDefinitionKey("2251799813685310"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", def)
-func (c *CamundaClient) GetDecisionDefinition(ctx context.Context, decisionDefinitionKey openapi.DecisionDefinitionKey, opts ...func(openapi.ApiGetDecisionDefinitionRequest) openapi.ApiGetDecisionDefinitionRequest) (*openapi.DecisionDefinitionResult, error) {
+func (c *CamundaClient) GetDecisionDefinition(ctx context.Context, decisionDefinitionKey camundaapi.DecisionDefinitionKey, opts ...func(camundaapi.ApiGetDecisionDefinitionRequest) camundaapi.ApiGetDecisionDefinitionRequest) (*camundaapi.DecisionDefinitionResult, error) {
 	req := c.raw.DecisionDefinitionAPI.GetDecisionDefinition(ctx, decisionDefinitionKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1361,12 +1361,12 @@ func (c *CamundaClient) GetDecisionDefinition(ctx context.Context, decisionDefin
 //
 // Example:
 //
-//	xml, err := client.GetDecisionDefinitionXML(ctx, openapi.MustDecisionDefinitionKey("2251799813685310"))
+//	xml, err := client.GetDecisionDefinitionXML(ctx, camundaapi.MustDecisionDefinitionKey("2251799813685310"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Println(xml)
-func (c *CamundaClient) GetDecisionDefinitionXML(ctx context.Context, decisionDefinitionKey openapi.DecisionDefinitionKey, opts ...func(openapi.ApiGetDecisionDefinitionXMLRequest) openapi.ApiGetDecisionDefinitionXMLRequest) (string, error) {
+func (c *CamundaClient) GetDecisionDefinitionXML(ctx context.Context, decisionDefinitionKey camundaapi.DecisionDefinitionKey, opts ...func(camundaapi.ApiGetDecisionDefinitionXMLRequest) camundaapi.ApiGetDecisionDefinitionXMLRequest) (string, error) {
 	req := c.raw.DecisionDefinitionAPI.GetDecisionDefinitionXML(ctx, decisionDefinitionKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1379,14 +1379,14 @@ func (c *CamundaClient) GetDecisionDefinitionXML(ctx context.Context, decisionDe
 //
 // Example:
 //
-//	result, err := client.SearchDecisionDefinitions(ctx, *openapi.NewDecisionDefinitionSearchQuery())
+//	result, err := client.SearchDecisionDefinitions(ctx, *camundaapi.NewDecisionDefinitionSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, d := range result.GetItems() {
 //		fmt.Printf("%v\n", d)
 //	}
-func (c *CamundaClient) SearchDecisionDefinitions(ctx context.Context, body openapi.DecisionDefinitionSearchQuery, opts ...func(openapi.ApiSearchDecisionDefinitionsRequest) openapi.ApiSearchDecisionDefinitionsRequest) (*openapi.DecisionDefinitionSearchQueryResult, error) {
+func (c *CamundaClient) SearchDecisionDefinitions(ctx context.Context, body camundaapi.DecisionDefinitionSearchQuery, opts ...func(camundaapi.ApiSearchDecisionDefinitionsRequest) camundaapi.ApiSearchDecisionDefinitionsRequest) (*camundaapi.DecisionDefinitionSearchQueryResult, error) {
 	req := c.raw.DecisionDefinitionAPI.SearchDecisionDefinitions(ctx)
 	req = req.DecisionDefinitionSearchQuery(body)
 	for _, opt := range opts {
@@ -1401,9 +1401,9 @@ func (c *CamundaClient) SearchDecisionDefinitions(ctx context.Context, body open
 // Example:
 //
 //	return client.DeleteDecisionInstance(ctx,
-//		openapi.MustDecisionEvaluationKey("2251799813685310"),
-//		*openapi.NewDeleteDecisionInstanceRequest())
-func (c *CamundaClient) DeleteDecisionInstance(ctx context.Context, decisionEvaluationKey openapi.DecisionEvaluationKey, body openapi.DeleteDecisionInstanceRequest, opts ...func(openapi.ApiDeleteDecisionInstanceRequest) openapi.ApiDeleteDecisionInstanceRequest) error {
+//		camundaapi.MustDecisionEvaluationKey("2251799813685310"),
+//		*camundaapi.NewDeleteDecisionInstanceRequest())
+func (c *CamundaClient) DeleteDecisionInstance(ctx context.Context, decisionEvaluationKey camundaapi.DecisionEvaluationKey, body camundaapi.DeleteDecisionInstanceRequest, opts ...func(camundaapi.ApiDeleteDecisionInstanceRequest) camundaapi.ApiDeleteDecisionInstanceRequest) error {
 	req := c.raw.DecisionInstanceAPI.DeleteDecisionInstance(ctx, decisionEvaluationKey)
 	req = req.DeleteDecisionInstanceRequest(body)
 	for _, opt := range opts {
@@ -1417,14 +1417,14 @@ func (c *CamundaClient) DeleteDecisionInstance(ctx context.Context, decisionEval
 //
 // Example:
 //
-//	req := openapi.NewDecisionInstanceDeletionBatchOperationRequest(*openapi.NewDecisionInstanceFilter())
+//	req := camundaapi.NewDecisionInstanceDeletionBatchOperationRequest(*camundaapi.NewDecisionInstanceFilter())
 //
 //	result, err := client.DeleteDecisionInstancesBatchOperation(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) DeleteDecisionInstancesBatchOperation(ctx context.Context, body openapi.DecisionInstanceDeletionBatchOperationRequest, opts ...func(openapi.ApiDeleteDecisionInstancesBatchOperationRequest) openapi.ApiDeleteDecisionInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) DeleteDecisionInstancesBatchOperation(ctx context.Context, body camundaapi.DecisionInstanceDeletionBatchOperationRequest, opts ...func(camundaapi.ApiDeleteDecisionInstancesBatchOperationRequest) camundaapi.ApiDeleteDecisionInstancesBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.DecisionInstanceAPI.DeleteDecisionInstancesBatchOperation(ctx)
 	req = req.DecisionInstanceDeletionBatchOperationRequest(body)
 	for _, opt := range opts {
@@ -1443,7 +1443,7 @@ func (c *CamundaClient) DeleteDecisionInstancesBatchOperation(ctx context.Contex
 //		return err
 //	}
 //	fmt.Printf("%v\n", instance)
-func (c *CamundaClient) GetDecisionInstance(ctx context.Context, decisionEvaluationInstanceKey string, opts ...func(openapi.ApiGetDecisionInstanceRequest) openapi.ApiGetDecisionInstanceRequest) (*openapi.DecisionInstanceGetQueryResult, error) {
+func (c *CamundaClient) GetDecisionInstance(ctx context.Context, decisionEvaluationInstanceKey string, opts ...func(camundaapi.ApiGetDecisionInstanceRequest) camundaapi.ApiGetDecisionInstanceRequest) (*camundaapi.DecisionInstanceGetQueryResult, error) {
 	req := c.raw.DecisionInstanceAPI.GetDecisionInstance(ctx, decisionEvaluationInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1456,14 +1456,14 @@ func (c *CamundaClient) GetDecisionInstance(ctx context.Context, decisionEvaluat
 //
 // Example:
 //
-//	result, err := client.SearchDecisionInstances(ctx, *openapi.NewDecisionInstanceSearchQuery())
+//	result, err := client.SearchDecisionInstances(ctx, *camundaapi.NewDecisionInstanceSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, d := range result.GetItems() {
 //		fmt.Printf("%v\n", d)
 //	}
-func (c *CamundaClient) SearchDecisionInstances(ctx context.Context, body openapi.DecisionInstanceSearchQuery, opts ...func(openapi.ApiSearchDecisionInstancesRequest) openapi.ApiSearchDecisionInstancesRequest) (*openapi.DecisionInstanceSearchQueryResult, error) {
+func (c *CamundaClient) SearchDecisionInstances(ctx context.Context, body camundaapi.DecisionInstanceSearchQuery, opts ...func(camundaapi.ApiSearchDecisionInstancesRequest) camundaapi.ApiSearchDecisionInstancesRequest) (*camundaapi.DecisionInstanceSearchQueryResult, error) {
 	req := c.raw.DecisionInstanceAPI.SearchDecisionInstances(ctx)
 	req = req.DecisionInstanceSearchQuery(body)
 	for _, opt := range opts {
@@ -1477,12 +1477,12 @@ func (c *CamundaClient) SearchDecisionInstances(ctx context.Context, body openap
 //
 // Example:
 //
-//	drd, err := client.GetDecisionRequirements(ctx, openapi.MustDecisionRequirementsKey("2251799813685320"))
+//	drd, err := client.GetDecisionRequirements(ctx, camundaapi.MustDecisionRequirementsKey("2251799813685320"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", drd)
-func (c *CamundaClient) GetDecisionRequirements(ctx context.Context, decisionRequirementsKey openapi.DecisionRequirementsKey, opts ...func(openapi.ApiGetDecisionRequirementsRequest) openapi.ApiGetDecisionRequirementsRequest) (*openapi.DecisionRequirementsResult, error) {
+func (c *CamundaClient) GetDecisionRequirements(ctx context.Context, decisionRequirementsKey camundaapi.DecisionRequirementsKey, opts ...func(camundaapi.ApiGetDecisionRequirementsRequest) camundaapi.ApiGetDecisionRequirementsRequest) (*camundaapi.DecisionRequirementsResult, error) {
 	req := c.raw.DecisionRequirementsAPI.GetDecisionRequirements(ctx, decisionRequirementsKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1495,12 +1495,12 @@ func (c *CamundaClient) GetDecisionRequirements(ctx context.Context, decisionReq
 //
 // Example:
 //
-//	xml, err := client.GetDecisionRequirementsXML(ctx, openapi.MustDecisionRequirementsKey("2251799813685320"))
+//	xml, err := client.GetDecisionRequirementsXML(ctx, camundaapi.MustDecisionRequirementsKey("2251799813685320"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Println(xml)
-func (c *CamundaClient) GetDecisionRequirementsXML(ctx context.Context, decisionRequirementsKey openapi.DecisionRequirementsKey, opts ...func(openapi.ApiGetDecisionRequirementsXMLRequest) openapi.ApiGetDecisionRequirementsXMLRequest) (string, error) {
+func (c *CamundaClient) GetDecisionRequirementsXML(ctx context.Context, decisionRequirementsKey camundaapi.DecisionRequirementsKey, opts ...func(camundaapi.ApiGetDecisionRequirementsXMLRequest) camundaapi.ApiGetDecisionRequirementsXMLRequest) (string, error) {
 	req := c.raw.DecisionRequirementsAPI.GetDecisionRequirementsXML(ctx, decisionRequirementsKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1513,14 +1513,14 @@ func (c *CamundaClient) GetDecisionRequirementsXML(ctx context.Context, decision
 //
 // Example:
 //
-//	result, err := client.SearchDecisionRequirements(ctx, *openapi.NewDecisionRequirementsSearchQuery())
+//	result, err := client.SearchDecisionRequirements(ctx, *camundaapi.NewDecisionRequirementsSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, d := range result.GetItems() {
 //		fmt.Printf("%v\n", d)
 //	}
-func (c *CamundaClient) SearchDecisionRequirements(ctx context.Context, body openapi.DecisionRequirementsSearchQuery, opts ...func(openapi.ApiSearchDecisionRequirementsRequest) openapi.ApiSearchDecisionRequirementsRequest) (*openapi.DecisionRequirementsSearchQueryResult, error) {
+func (c *CamundaClient) SearchDecisionRequirements(ctx context.Context, body camundaapi.DecisionRequirementsSearchQuery, opts ...func(camundaapi.ApiSearchDecisionRequirementsRequest) camundaapi.ApiSearchDecisionRequirementsRequest) (*camundaapi.DecisionRequirementsSearchQueryResult, error) {
 	req := c.raw.DecisionRequirementsAPI.SearchDecisionRequirements(ctx)
 	req = req.DecisionRequirementsSearchQuery(body)
 	for _, opt := range opts {
@@ -1541,7 +1541,7 @@ func (c *CamundaClient) SearchDecisionRequirements(ctx context.Context, body ope
 //		return err
 //	}
 //	fmt.Printf("%v\n", ref)
-func (c *CamundaClient) CreateDocument(ctx context.Context, opts ...func(openapi.ApiCreateDocumentRequest) openapi.ApiCreateDocumentRequest) (*openapi.DocumentReference, error) {
+func (c *CamundaClient) CreateDocument(ctx context.Context, opts ...func(camundaapi.ApiCreateDocumentRequest) camundaapi.ApiCreateDocumentRequest) (*camundaapi.DocumentReference, error) {
 	req := c.raw.DocumentAPI.CreateDocument(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1555,12 +1555,12 @@ func (c *CamundaClient) CreateDocument(ctx context.Context, opts ...func(openapi
 // Example:
 //
 //	// Create a short-lived, shareable download link for a stored document.
-//	link, err := client.CreateDocumentLink(ctx, "doc-123", *openapi.NewDocumentLinkRequest())
+//	link, err := client.CreateDocumentLink(ctx, "doc-123", *camundaapi.NewDocumentLinkRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", link)
-func (c *CamundaClient) CreateDocumentLink(ctx context.Context, documentId string, body openapi.DocumentLinkRequest, opts ...func(openapi.ApiCreateDocumentLinkRequest) openapi.ApiCreateDocumentLinkRequest) (*openapi.DocumentLink, error) {
+func (c *CamundaClient) CreateDocumentLink(ctx context.Context, documentId string, body camundaapi.DocumentLinkRequest, opts ...func(camundaapi.ApiCreateDocumentLinkRequest) camundaapi.ApiCreateDocumentLinkRequest) (*camundaapi.DocumentLink, error) {
 	req := c.raw.DocumentAPI.CreateDocumentLink(ctx, documentId)
 	req = req.DocumentLinkRequest(body)
 	for _, opt := range opts {
@@ -1580,7 +1580,7 @@ func (c *CamundaClient) CreateDocumentLink(ctx context.Context, documentId strin
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateDocuments(ctx context.Context, opts ...func(openapi.ApiCreateDocumentsRequest) openapi.ApiCreateDocumentsRequest) (*openapi.DocumentCreationBatchResponse, error) {
+func (c *CamundaClient) CreateDocuments(ctx context.Context, opts ...func(camundaapi.ApiCreateDocumentsRequest) camundaapi.ApiCreateDocumentsRequest) (*camundaapi.DocumentCreationBatchResponse, error) {
 	req := c.raw.DocumentAPI.CreateDocuments(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1594,7 +1594,7 @@ func (c *CamundaClient) CreateDocuments(ctx context.Context, opts ...func(openap
 // Example:
 //
 //	return client.DeleteDocument(ctx, "doc-123")
-func (c *CamundaClient) DeleteDocument(ctx context.Context, documentId string, opts ...func(openapi.ApiDeleteDocumentRequest) openapi.ApiDeleteDocumentRequest) error {
+func (c *CamundaClient) DeleteDocument(ctx context.Context, documentId string, opts ...func(camundaapi.ApiDeleteDocumentRequest) camundaapi.ApiDeleteDocumentRequest) error {
 	req := c.raw.DocumentAPI.DeleteDocument(ctx, documentId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1612,7 +1612,7 @@ func (c *CamundaClient) DeleteDocument(ctx context.Context, documentId string, o
 //		return err
 //	}
 //	fmt.Printf("downloaded to %s\n", file.Name())
-func (c *CamundaClient) GetDocument(ctx context.Context, documentId string, opts ...func(openapi.ApiGetDocumentRequest) openapi.ApiGetDocumentRequest) (*os.File, error) {
+func (c *CamundaClient) GetDocument(ctx context.Context, documentId string, opts ...func(camundaapi.ApiGetDocumentRequest) camundaapi.ApiGetDocumentRequest) (*os.File, error) {
 	req := c.raw.DocumentAPI.GetDocument(ctx, documentId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1626,10 +1626,10 @@ func (c *CamundaClient) GetDocument(ctx context.Context, documentId string, opts
 // Example:
 //
 //	// Set local variables on a specific element instance scope.
-//	req := openapi.NewSetVariableRequest(map[string]any{"approved": true})
+//	req := camundaapi.NewSetVariableRequest(map[string]any{"approved": true})
 //
-//	return client.CreateElementInstanceVariables(ctx, openapi.MustElementInstanceKey("2251799813685360"), *req)
-func (c *CamundaClient) CreateElementInstanceVariables(ctx context.Context, elementInstanceKey openapi.ElementInstanceKey, body openapi.SetVariableRequest, opts ...func(openapi.ApiCreateElementInstanceVariablesRequest) openapi.ApiCreateElementInstanceVariablesRequest) error {
+//	return client.CreateElementInstanceVariables(ctx, camundaapi.MustElementInstanceKey("2251799813685360"), *req)
+func (c *CamundaClient) CreateElementInstanceVariables(ctx context.Context, elementInstanceKey camundaapi.ElementInstanceKey, body camundaapi.SetVariableRequest, opts ...func(camundaapi.ApiCreateElementInstanceVariablesRequest) camundaapi.ApiCreateElementInstanceVariablesRequest) error {
 	req := c.raw.ElementInstanceAPI.CreateElementInstanceVariables(ctx, elementInstanceKey)
 	req = req.SetVariableRequest(body)
 	for _, opt := range opts {
@@ -1643,12 +1643,12 @@ func (c *CamundaClient) CreateElementInstanceVariables(ctx context.Context, elem
 //
 // Example:
 //
-//	element, err := client.GetElementInstance(ctx, openapi.MustElementInstanceKey("2251799813685360"))
+//	element, err := client.GetElementInstance(ctx, camundaapi.MustElementInstanceKey("2251799813685360"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", element)
-func (c *CamundaClient) GetElementInstance(ctx context.Context, elementInstanceKey openapi.ElementInstanceKey, opts ...func(openapi.ApiGetElementInstanceRequest) openapi.ApiGetElementInstanceRequest) (*openapi.ElementInstanceResult, error) {
+func (c *CamundaClient) GetElementInstance(ctx context.Context, elementInstanceKey camundaapi.ElementInstanceKey, opts ...func(camundaapi.ApiGetElementInstanceRequest) camundaapi.ApiGetElementInstanceRequest) (*camundaapi.ElementInstanceResult, error) {
 	req := c.raw.ElementInstanceAPI.GetElementInstance(ctx, elementInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1662,15 +1662,15 @@ func (c *CamundaClient) GetElementInstance(ctx context.Context, elementInstanceK
 // Example:
 //
 //	result, err := client.SearchElementInstanceIncidents(ctx,
-//		openapi.MustElementInstanceKey("2251799813685360"),
-//		*openapi.NewIncidentSearchQuery())
+//		camundaapi.MustElementInstanceKey("2251799813685360"),
+//		*camundaapi.NewIncidentSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, inc := range result.GetItems() {
 //		fmt.Printf("%v\n", inc)
 //	}
-func (c *CamundaClient) SearchElementInstanceIncidents(ctx context.Context, elementInstanceKey openapi.ElementInstanceKey, body openapi.IncidentSearchQuery, opts ...func(openapi.ApiSearchElementInstanceIncidentsRequest) openapi.ApiSearchElementInstanceIncidentsRequest) (*openapi.IncidentSearchQueryResult, error) {
+func (c *CamundaClient) SearchElementInstanceIncidents(ctx context.Context, elementInstanceKey camundaapi.ElementInstanceKey, body camundaapi.IncidentSearchQuery, opts ...func(camundaapi.ApiSearchElementInstanceIncidentsRequest) camundaapi.ApiSearchElementInstanceIncidentsRequest) (*camundaapi.IncidentSearchQueryResult, error) {
 	req := c.raw.ElementInstanceAPI.SearchElementInstanceIncidents(ctx, elementInstanceKey)
 	req = req.IncidentSearchQuery(body)
 	for _, opt := range opts {
@@ -1684,12 +1684,12 @@ func (c *CamundaClient) SearchElementInstanceIncidents(ctx context.Context, elem
 //
 // Example:
 //
-//	result, err := client.SearchElementInstanceWaitStates(ctx, *openapi.NewElementInstanceWaitStateQuery())
+//	result, err := client.SearchElementInstanceWaitStates(ctx, *camundaapi.NewElementInstanceWaitStateQuery())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchElementInstanceWaitStates(ctx context.Context, body openapi.ElementInstanceWaitStateQuery, opts ...func(openapi.ApiSearchElementInstanceWaitStatesRequest) openapi.ApiSearchElementInstanceWaitStatesRequest) (*openapi.ElementInstanceWaitStateQueryResult, error) {
+func (c *CamundaClient) SearchElementInstanceWaitStates(ctx context.Context, body camundaapi.ElementInstanceWaitStateQuery, opts ...func(camundaapi.ApiSearchElementInstanceWaitStatesRequest) camundaapi.ApiSearchElementInstanceWaitStatesRequest) (*camundaapi.ElementInstanceWaitStateQueryResult, error) {
 	req := c.raw.ElementInstanceAPI.SearchElementInstanceWaitStates(ctx)
 	req = req.ElementInstanceWaitStateQuery(body)
 	for _, opt := range opts {
@@ -1703,14 +1703,14 @@ func (c *CamundaClient) SearchElementInstanceWaitStates(ctx context.Context, bod
 //
 // Example:
 //
-//	result, err := client.SearchElementInstances(ctx, *openapi.NewElementInstanceSearchQuery())
+//	result, err := client.SearchElementInstances(ctx, *camundaapi.NewElementInstanceSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, e := range result.GetItems() {
 //		fmt.Printf("%v\n", e)
 //	}
-func (c *CamundaClient) SearchElementInstances(ctx context.Context, body openapi.ElementInstanceSearchQuery, opts ...func(openapi.ApiSearchElementInstancesRequest) openapi.ApiSearchElementInstancesRequest) (*openapi.ElementInstanceSearchQueryResult, error) {
+func (c *CamundaClient) SearchElementInstances(ctx context.Context, body camundaapi.ElementInstanceSearchQuery, opts ...func(camundaapi.ApiSearchElementInstancesRequest) camundaapi.ApiSearchElementInstancesRequest) (*camundaapi.ElementInstanceSearchQueryResult, error) {
 	req := c.raw.ElementInstanceAPI.SearchElementInstances(ctx)
 	req = req.ElementInstanceSearchQuery(body)
 	for _, opt := range opts {
@@ -1730,7 +1730,7 @@ func (c *CamundaClient) SearchElementInstances(ctx context.Context, body openapi
 //		return err
 //	}
 //	fmt.Printf("cluster exporting status: %s\n", status.GetStatus())
-func (c *CamundaClient) GetClusterExportingStatus(ctx context.Context, opts ...func(openapi.ApiGetClusterExportingStatusRequest) openapi.ApiGetClusterExportingStatusRequest) (*openapi.ExportingStatusResponse, error) {
+func (c *CamundaClient) GetClusterExportingStatus(ctx context.Context, opts ...func(camundaapi.ApiGetClusterExportingStatusRequest) camundaapi.ApiGetClusterExportingStatusRequest) (*camundaapi.ExportingStatusResponse, error) {
 	req := c.raw.ExportingAPI.GetClusterExportingStatus(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1749,7 +1749,7 @@ func (c *CamundaClient) GetClusterExportingStatus(ctx context.Context, opts ...f
 //		return err
 //	}
 //	fmt.Printf("exporting status: %s\n", status.GetStatus())
-func (c *CamundaClient) GetExportingStatus(ctx context.Context, opts ...func(openapi.ApiGetExportingStatusRequest) openapi.ApiGetExportingStatusRequest) (*openapi.ExportingStatusResponse, error) {
+func (c *CamundaClient) GetExportingStatus(ctx context.Context, opts ...func(camundaapi.ApiGetExportingStatusRequest) camundaapi.ApiGetExportingStatusRequest) (*camundaapi.ExportingStatusResponse, error) {
 	req := c.raw.ExportingAPI.GetExportingStatus(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1767,7 +1767,7 @@ func (c *CamundaClient) GetExportingStatus(ctx context.Context, opts ...func(ope
 //	if err := client.PauseClusterExporting(ctx); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) PauseClusterExporting(ctx context.Context, opts ...func(openapi.ApiPauseClusterExportingRequest) openapi.ApiPauseClusterExportingRequest) error {
+func (c *CamundaClient) PauseClusterExporting(ctx context.Context, opts ...func(camundaapi.ApiPauseClusterExportingRequest) camundaapi.ApiPauseClusterExportingRequest) error {
 	req := c.raw.ExportingAPI.PauseClusterExporting(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1784,7 +1784,7 @@ func (c *CamundaClient) PauseClusterExporting(ctx context.Context, opts ...func(
 //	if err := client.PauseExporting(ctx); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) PauseExporting(ctx context.Context, opts ...func(openapi.ApiPauseExportingRequest) openapi.ApiPauseExportingRequest) error {
+func (c *CamundaClient) PauseExporting(ctx context.Context, opts ...func(camundaapi.ApiPauseExportingRequest) camundaapi.ApiPauseExportingRequest) error {
 	req := c.raw.ExportingAPI.PauseExporting(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1801,7 +1801,7 @@ func (c *CamundaClient) PauseExporting(ctx context.Context, opts ...func(openapi
 //	if err := client.ResumeClusterExporting(ctx); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) ResumeClusterExporting(ctx context.Context, opts ...func(openapi.ApiResumeClusterExportingRequest) openapi.ApiResumeClusterExportingRequest) error {
+func (c *CamundaClient) ResumeClusterExporting(ctx context.Context, opts ...func(camundaapi.ApiResumeClusterExportingRequest) camundaapi.ApiResumeClusterExportingRequest) error {
 	req := c.raw.ExportingAPI.ResumeClusterExporting(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1817,7 +1817,7 @@ func (c *CamundaClient) ResumeClusterExporting(ctx context.Context, opts ...func
 //	if err := client.ResumeExporting(ctx); err != nil {
 //		return err
 //	}
-func (c *CamundaClient) ResumeExporting(ctx context.Context, opts ...func(openapi.ApiResumeExportingRequest) openapi.ApiResumeExportingRequest) error {
+func (c *CamundaClient) ResumeExporting(ctx context.Context, opts ...func(camundaapi.ApiResumeExportingRequest) camundaapi.ApiResumeExportingRequest) error {
 	req := c.raw.ExportingAPI.ResumeExporting(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1831,7 +1831,7 @@ func (c *CamundaClient) ResumeExporting(ctx context.Context, opts ...func(openap
 // Example:
 //
 //	// Evaluate a FEEL expression against a set of variables.
-//	req := openapi.NewExpressionEvaluationRequest("a + b")
+//	req := camundaapi.NewExpressionEvaluationRequest("a + b")
 //	req.SetVariables(map[string]any{"a": 2, "b": 3})
 //
 //	result, err := client.EvaluateExpression(ctx, *req)
@@ -1839,7 +1839,7 @@ func (c *CamundaClient) ResumeExporting(ctx context.Context, opts ...func(openap
 //		return err
 //	}
 //	fmt.Printf("result: %v\n", result.GetResult())
-func (c *CamundaClient) EvaluateExpression(ctx context.Context, body openapi.ExpressionEvaluationRequest, opts ...func(openapi.ApiEvaluateExpressionRequest) openapi.ApiEvaluateExpressionRequest) (*openapi.ExpressionEvaluationResult, error) {
+func (c *CamundaClient) EvaluateExpression(ctx context.Context, body camundaapi.ExpressionEvaluationRequest, opts ...func(camundaapi.ApiEvaluateExpressionRequest) camundaapi.ApiEvaluateExpressionRequest) (*camundaapi.ExpressionEvaluationResult, error) {
 	req := c.raw.ExpressionAPI.EvaluateExpression(ctx)
 	req = req.ExpressionEvaluationRequest(body)
 	for _, opt := range opts {
@@ -1853,12 +1853,12 @@ func (c *CamundaClient) EvaluateExpression(ctx context.Context, body openapi.Exp
 //
 // Example:
 //
-//	form, err := client.GetFormByKey(ctx, openapi.MustFormKey("2251799813685260"))
+//	form, err := client.GetFormByKey(ctx, camundaapi.MustFormKey("2251799813685260"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("form %v version %d\n", form.GetFormId(), form.GetVersion())
-func (c *CamundaClient) GetFormByKey(ctx context.Context, formKey openapi.FormKey, opts ...func(openapi.ApiGetFormByKeyRequest) openapi.ApiGetFormByKeyRequest) (*openapi.FormResult, error) {
+func (c *CamundaClient) GetFormByKey(ctx context.Context, formKey camundaapi.FormKey, opts ...func(camundaapi.ApiGetFormByKeyRequest) camundaapi.ApiGetFormByKeyRequest) (*camundaapi.FormResult, error) {
 	req := c.raw.FormAPI.GetFormByKey(ctx, formKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1872,12 +1872,12 @@ func (c *CamundaClient) GetFormByKey(ctx context.Context, formKey openapi.FormKe
 // Example:
 //
 //	result, err := client.CreateGlobalTaskListener(ctx,
-//		*openapi.NewCreateGlobalTaskListenerRequest("audit-listener"))
+//		*camundaapi.NewCreateGlobalTaskListenerRequest("audit-listener"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateGlobalTaskListener(ctx context.Context, body openapi.CreateGlobalTaskListenerRequest, opts ...func(openapi.ApiCreateGlobalTaskListenerRequest) openapi.ApiCreateGlobalTaskListenerRequest) (*openapi.GlobalTaskListenerResult, error) {
+func (c *CamundaClient) CreateGlobalTaskListener(ctx context.Context, body camundaapi.CreateGlobalTaskListenerRequest, opts ...func(camundaapi.ApiCreateGlobalTaskListenerRequest) camundaapi.ApiCreateGlobalTaskListenerRequest) (*camundaapi.GlobalTaskListenerResult, error) {
 	req := c.raw.GlobalListenerAPI.CreateGlobalTaskListener(ctx)
 	req = req.CreateGlobalTaskListenerRequest(body)
 	for _, opt := range opts {
@@ -1892,7 +1892,7 @@ func (c *CamundaClient) CreateGlobalTaskListener(ctx context.Context, body opena
 // Example:
 //
 //	return client.DeleteGlobalTaskListener(ctx, "audit-listener")
-func (c *CamundaClient) DeleteGlobalTaskListener(ctx context.Context, id string, opts ...func(openapi.ApiDeleteGlobalTaskListenerRequest) openapi.ApiDeleteGlobalTaskListenerRequest) error {
+func (c *CamundaClient) DeleteGlobalTaskListener(ctx context.Context, id string, opts ...func(camundaapi.ApiDeleteGlobalTaskListenerRequest) camundaapi.ApiDeleteGlobalTaskListenerRequest) error {
 	req := c.raw.GlobalListenerAPI.DeleteGlobalTaskListener(ctx, id)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1910,7 +1910,7 @@ func (c *CamundaClient) DeleteGlobalTaskListener(ctx context.Context, id string,
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetGlobalTaskListener(ctx context.Context, id string, opts ...func(openapi.ApiGetGlobalTaskListenerRequest) openapi.ApiGetGlobalTaskListenerRequest) (*openapi.GlobalTaskListenerResult, error) {
+func (c *CamundaClient) GetGlobalTaskListener(ctx context.Context, id string, opts ...func(camundaapi.ApiGetGlobalTaskListenerRequest) camundaapi.ApiGetGlobalTaskListenerRequest) (*camundaapi.GlobalTaskListenerResult, error) {
 	req := c.raw.GlobalListenerAPI.GetGlobalTaskListener(ctx, id)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1923,14 +1923,14 @@ func (c *CamundaClient) GetGlobalTaskListener(ctx context.Context, id string, op
 //
 // Example:
 //
-//	result, err := client.SearchGlobalTaskListeners(ctx, *openapi.NewGlobalTaskListenerSearchQueryRequest())
+//	result, err := client.SearchGlobalTaskListeners(ctx, *camundaapi.NewGlobalTaskListenerSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	for _, l := range result.GetItems() {
 //		fmt.Printf("%v\n", l)
 //	}
-func (c *CamundaClient) SearchGlobalTaskListeners(ctx context.Context, body openapi.GlobalTaskListenerSearchQueryRequest, opts ...func(openapi.ApiSearchGlobalTaskListenersRequest) openapi.ApiSearchGlobalTaskListenersRequest) (*openapi.GlobalTaskListenerSearchQueryResult, error) {
+func (c *CamundaClient) SearchGlobalTaskListeners(ctx context.Context, body camundaapi.GlobalTaskListenerSearchQueryRequest, opts ...func(camundaapi.ApiSearchGlobalTaskListenersRequest) camundaapi.ApiSearchGlobalTaskListenersRequest) (*camundaapi.GlobalTaskListenerSearchQueryResult, error) {
 	req := c.raw.GlobalListenerAPI.SearchGlobalTaskListeners(ctx)
 	req = req.GlobalTaskListenerSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -1945,15 +1945,15 @@ func (c *CamundaClient) SearchGlobalTaskListeners(ctx context.Context, body open
 // Example:
 //
 //	result, err := client.UpdateGlobalTaskListener(ctx, "audit-listener",
-//		*openapi.NewUpdateGlobalTaskListenerRequest(
+//		*camundaapi.NewUpdateGlobalTaskListenerRequest(
 //			"audit-worker",
-//			[]openapi.GlobalTaskListenerEventTypeEnum{openapi.GLOBALTASKLISTENEREVENTTYPEENUM_ALL},
+//			[]camundaapi.GlobalTaskListenerEventTypeEnum{camundaapi.GLOBALTASKLISTENEREVENTTYPEENUM_ALL},
 //		))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateGlobalTaskListener(ctx context.Context, id string, body openapi.UpdateGlobalTaskListenerRequest, opts ...func(openapi.ApiUpdateGlobalTaskListenerRequest) openapi.ApiUpdateGlobalTaskListenerRequest) (*openapi.GlobalTaskListenerResult, error) {
+func (c *CamundaClient) UpdateGlobalTaskListener(ctx context.Context, id string, body camundaapi.UpdateGlobalTaskListenerRequest, opts ...func(camundaapi.ApiUpdateGlobalTaskListenerRequest) camundaapi.ApiUpdateGlobalTaskListenerRequest) (*camundaapi.GlobalTaskListenerResult, error) {
 	req := c.raw.GlobalListenerAPI.UpdateGlobalTaskListener(ctx, id)
 	req = req.UpdateGlobalTaskListenerRequest(body)
 	for _, opt := range opts {
@@ -1968,7 +1968,7 @@ func (c *CamundaClient) UpdateGlobalTaskListener(ctx context.Context, id string,
 // Example:
 //
 //	return client.AssignClientToGroup(ctx, "finance", "reporting-service")
-func (c *CamundaClient) AssignClientToGroup(ctx context.Context, groupId string, clientId string, opts ...func(openapi.ApiAssignClientToGroupRequest) openapi.ApiAssignClientToGroupRequest) error {
+func (c *CamundaClient) AssignClientToGroup(ctx context.Context, groupId string, clientId string, opts ...func(camundaapi.ApiAssignClientToGroupRequest) camundaapi.ApiAssignClientToGroupRequest) error {
 	req := c.raw.GroupAPI.AssignClientToGroup(ctx, groupId, clientId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1982,7 +1982,7 @@ func (c *CamundaClient) AssignClientToGroup(ctx context.Context, groupId string,
 // Example:
 //
 //	return client.AssignMappingRuleToGroup(ctx, "finance", "sso-auditors")
-func (c *CamundaClient) AssignMappingRuleToGroup(ctx context.Context, groupId string, mappingRuleId string, opts ...func(openapi.ApiAssignMappingRuleToGroupRequest) openapi.ApiAssignMappingRuleToGroupRequest) error {
+func (c *CamundaClient) AssignMappingRuleToGroup(ctx context.Context, groupId string, mappingRuleId string, opts ...func(camundaapi.ApiAssignMappingRuleToGroupRequest) camundaapi.ApiAssignMappingRuleToGroupRequest) error {
 	req := c.raw.GroupAPI.AssignMappingRuleToGroup(ctx, groupId, mappingRuleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -1996,7 +1996,7 @@ func (c *CamundaClient) AssignMappingRuleToGroup(ctx context.Context, groupId st
 // Example:
 //
 //	return client.AssignUserToGroup(ctx, "finance", "alice")
-func (c *CamundaClient) AssignUserToGroup(ctx context.Context, groupId string, username string, opts ...func(openapi.ApiAssignUserToGroupRequest) openapi.ApiAssignUserToGroupRequest) error {
+func (c *CamundaClient) AssignUserToGroup(ctx context.Context, groupId string, username string, opts ...func(camundaapi.ApiAssignUserToGroupRequest) camundaapi.ApiAssignUserToGroupRequest) error {
 	req := c.raw.GroupAPI.AssignUserToGroup(ctx, groupId, username)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2009,12 +2009,12 @@ func (c *CamundaClient) AssignUserToGroup(ctx context.Context, groupId string, u
 //
 // Example:
 //
-//	result, err := client.CreateGroup(ctx, *openapi.NewGroupCreateRequest("finance", "Finance"))
+//	result, err := client.CreateGroup(ctx, *camundaapi.NewGroupCreateRequest("finance", "Finance"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateGroup(ctx context.Context, body openapi.GroupCreateRequest, opts ...func(openapi.ApiCreateGroupRequest) openapi.ApiCreateGroupRequest) (*openapi.GroupCreateResult, error) {
+func (c *CamundaClient) CreateGroup(ctx context.Context, body camundaapi.GroupCreateRequest, opts ...func(camundaapi.ApiCreateGroupRequest) camundaapi.ApiCreateGroupRequest) (*camundaapi.GroupCreateResult, error) {
 	req := c.raw.GroupAPI.CreateGroup(ctx)
 	req = req.GroupCreateRequest(body)
 	for _, opt := range opts {
@@ -2029,7 +2029,7 @@ func (c *CamundaClient) CreateGroup(ctx context.Context, body openapi.GroupCreat
 // Example:
 //
 //	return client.DeleteGroup(ctx, "finance")
-func (c *CamundaClient) DeleteGroup(ctx context.Context, groupId string, opts ...func(openapi.ApiDeleteGroupRequest) openapi.ApiDeleteGroupRequest) error {
+func (c *CamundaClient) DeleteGroup(ctx context.Context, groupId string, opts ...func(camundaapi.ApiDeleteGroupRequest) camundaapi.ApiDeleteGroupRequest) error {
 	req := c.raw.GroupAPI.DeleteGroup(ctx, groupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2047,7 +2047,7 @@ func (c *CamundaClient) DeleteGroup(ctx context.Context, groupId string, opts ..
 //		return err
 //	}
 //	fmt.Printf("%v\n", group)
-func (c *CamundaClient) GetGroup(ctx context.Context, groupId string, opts ...func(openapi.ApiGetGroupRequest) openapi.ApiGetGroupRequest) (*openapi.GroupResult, error) {
+func (c *CamundaClient) GetGroup(ctx context.Context, groupId string, opts ...func(camundaapi.ApiGetGroupRequest) camundaapi.ApiGetGroupRequest) (*camundaapi.GroupResult, error) {
 	req := c.raw.GroupAPI.GetGroup(ctx, groupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2060,12 +2060,12 @@ func (c *CamundaClient) GetGroup(ctx context.Context, groupId string, opts ...fu
 //
 // Example:
 //
-//	result, err := client.SearchClientsForGroup(ctx, "finance", *openapi.NewGroupClientSearchQueryRequest())
+//	result, err := client.SearchClientsForGroup(ctx, "finance", *camundaapi.NewGroupClientSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchClientsForGroup(ctx context.Context, groupId string, body openapi.GroupClientSearchQueryRequest, opts ...func(openapi.ApiSearchClientsForGroupRequest) openapi.ApiSearchClientsForGroupRequest) (*openapi.GroupClientSearchResult, error) {
+func (c *CamundaClient) SearchClientsForGroup(ctx context.Context, groupId string, body camundaapi.GroupClientSearchQueryRequest, opts ...func(camundaapi.ApiSearchClientsForGroupRequest) camundaapi.ApiSearchClientsForGroupRequest) (*camundaapi.GroupClientSearchResult, error) {
 	req := c.raw.GroupAPI.SearchClientsForGroup(ctx, groupId)
 	req = req.GroupClientSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -2079,14 +2079,14 @@ func (c *CamundaClient) SearchClientsForGroup(ctx context.Context, groupId strin
 //
 // Example:
 //
-//	result, err := client.SearchGroups(ctx, *openapi.NewGroupSearchQueryRequest())
+//	result, err := client.SearchGroups(ctx, *camundaapi.NewGroupSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	for _, g := range result.GetItems() {
 //		fmt.Printf("%v\n", g)
 //	}
-func (c *CamundaClient) SearchGroups(ctx context.Context, body openapi.GroupSearchQueryRequest, opts ...func(openapi.ApiSearchGroupsRequest) openapi.ApiSearchGroupsRequest) (*openapi.GroupSearchQueryResult, error) {
+func (c *CamundaClient) SearchGroups(ctx context.Context, body camundaapi.GroupSearchQueryRequest, opts ...func(camundaapi.ApiSearchGroupsRequest) camundaapi.ApiSearchGroupsRequest) (*camundaapi.GroupSearchQueryResult, error) {
 	req := c.raw.GroupAPI.SearchGroups(ctx)
 	req = req.GroupSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -2100,12 +2100,12 @@ func (c *CamundaClient) SearchGroups(ctx context.Context, body openapi.GroupSear
 //
 // Example:
 //
-//	result, err := client.SearchMappingRulesForGroup(ctx, "finance", *openapi.NewMappingRuleSearchQueryRequest())
+//	result, err := client.SearchMappingRulesForGroup(ctx, "finance", *camundaapi.NewMappingRuleSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchMappingRulesForGroup(ctx context.Context, groupId string, body openapi.MappingRuleSearchQueryRequest, opts ...func(openapi.ApiSearchMappingRulesForGroupRequest) openapi.ApiSearchMappingRulesForGroupRequest) (*openapi.GroupMappingRuleSearchResult, error) {
+func (c *CamundaClient) SearchMappingRulesForGroup(ctx context.Context, groupId string, body camundaapi.MappingRuleSearchQueryRequest, opts ...func(camundaapi.ApiSearchMappingRulesForGroupRequest) camundaapi.ApiSearchMappingRulesForGroupRequest) (*camundaapi.GroupMappingRuleSearchResult, error) {
 	req := c.raw.GroupAPI.SearchMappingRulesForGroup(ctx, groupId)
 	req = req.MappingRuleSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -2119,12 +2119,12 @@ func (c *CamundaClient) SearchMappingRulesForGroup(ctx context.Context, groupId 
 //
 // Example:
 //
-//	result, err := client.SearchRolesForGroup(ctx, "finance", *openapi.NewRoleSearchQueryRequest())
+//	result, err := client.SearchRolesForGroup(ctx, "finance", *camundaapi.NewRoleSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchRolesForGroup(ctx context.Context, groupId string, body openapi.RoleSearchQueryRequest, opts ...func(openapi.ApiSearchRolesForGroupRequest) openapi.ApiSearchRolesForGroupRequest) (*openapi.GroupRoleSearchResult, error) {
+func (c *CamundaClient) SearchRolesForGroup(ctx context.Context, groupId string, body camundaapi.RoleSearchQueryRequest, opts ...func(camundaapi.ApiSearchRolesForGroupRequest) camundaapi.ApiSearchRolesForGroupRequest) (*camundaapi.GroupRoleSearchResult, error) {
 	req := c.raw.GroupAPI.SearchRolesForGroup(ctx, groupId)
 	req = req.RoleSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -2138,12 +2138,12 @@ func (c *CamundaClient) SearchRolesForGroup(ctx context.Context, groupId string,
 //
 // Example:
 //
-//	result, err := client.SearchUsersForGroup(ctx, "finance", *openapi.NewGroupUserSearchQueryRequest())
+//	result, err := client.SearchUsersForGroup(ctx, "finance", *camundaapi.NewGroupUserSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchUsersForGroup(ctx context.Context, groupId string, body openapi.GroupUserSearchQueryRequest, opts ...func(openapi.ApiSearchUsersForGroupRequest) openapi.ApiSearchUsersForGroupRequest) (*openapi.GroupUserSearchResult, error) {
+func (c *CamundaClient) SearchUsersForGroup(ctx context.Context, groupId string, body camundaapi.GroupUserSearchQueryRequest, opts ...func(camundaapi.ApiSearchUsersForGroupRequest) camundaapi.ApiSearchUsersForGroupRequest) (*camundaapi.GroupUserSearchResult, error) {
 	req := c.raw.GroupAPI.SearchUsersForGroup(ctx, groupId)
 	req = req.GroupUserSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -2158,7 +2158,7 @@ func (c *CamundaClient) SearchUsersForGroup(ctx context.Context, groupId string,
 // Example:
 //
 //	return client.UnassignClientFromGroup(ctx, "finance", "reporting-service")
-func (c *CamundaClient) UnassignClientFromGroup(ctx context.Context, groupId string, clientId string, opts ...func(openapi.ApiUnassignClientFromGroupRequest) openapi.ApiUnassignClientFromGroupRequest) error {
+func (c *CamundaClient) UnassignClientFromGroup(ctx context.Context, groupId string, clientId string, opts ...func(camundaapi.ApiUnassignClientFromGroupRequest) camundaapi.ApiUnassignClientFromGroupRequest) error {
 	req := c.raw.GroupAPI.UnassignClientFromGroup(ctx, groupId, clientId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2172,7 +2172,7 @@ func (c *CamundaClient) UnassignClientFromGroup(ctx context.Context, groupId str
 // Example:
 //
 //	return client.UnassignMappingRuleFromGroup(ctx, "finance", "sso-auditors")
-func (c *CamundaClient) UnassignMappingRuleFromGroup(ctx context.Context, groupId string, mappingRuleId string, opts ...func(openapi.ApiUnassignMappingRuleFromGroupRequest) openapi.ApiUnassignMappingRuleFromGroupRequest) error {
+func (c *CamundaClient) UnassignMappingRuleFromGroup(ctx context.Context, groupId string, mappingRuleId string, opts ...func(camundaapi.ApiUnassignMappingRuleFromGroupRequest) camundaapi.ApiUnassignMappingRuleFromGroupRequest) error {
 	req := c.raw.GroupAPI.UnassignMappingRuleFromGroup(ctx, groupId, mappingRuleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2186,7 +2186,7 @@ func (c *CamundaClient) UnassignMappingRuleFromGroup(ctx context.Context, groupI
 // Example:
 //
 //	return client.UnassignUserFromGroup(ctx, "finance", "alice")
-func (c *CamundaClient) UnassignUserFromGroup(ctx context.Context, groupId string, username string, opts ...func(openapi.ApiUnassignUserFromGroupRequest) openapi.ApiUnassignUserFromGroupRequest) error {
+func (c *CamundaClient) UnassignUserFromGroup(ctx context.Context, groupId string, username string, opts ...func(camundaapi.ApiUnassignUserFromGroupRequest) camundaapi.ApiUnassignUserFromGroupRequest) error {
 	req := c.raw.GroupAPI.UnassignUserFromGroup(ctx, groupId, username)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2199,12 +2199,12 @@ func (c *CamundaClient) UnassignUserFromGroup(ctx context.Context, groupId strin
 //
 // Example:
 //
-//	result, err := client.UpdateGroup(ctx, "finance", *openapi.NewGroupUpdateRequest("Finance & Accounting"))
+//	result, err := client.UpdateGroup(ctx, "finance", *camundaapi.NewGroupUpdateRequest("Finance & Accounting"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateGroup(ctx context.Context, groupId string, body openapi.GroupUpdateRequest, opts ...func(openapi.ApiUpdateGroupRequest) openapi.ApiUpdateGroupRequest) (*openapi.GroupUpdateResult, error) {
+func (c *CamundaClient) UpdateGroup(ctx context.Context, groupId string, body camundaapi.GroupUpdateRequest, opts ...func(camundaapi.ApiUpdateGroupRequest) camundaapi.ApiUpdateGroupRequest) (*camundaapi.GroupUpdateResult, error) {
 	req := c.raw.GroupAPI.UpdateGroup(ctx, groupId)
 	req = req.GroupUpdateRequest(body)
 	for _, opt := range opts {
@@ -2218,12 +2218,12 @@ func (c *CamundaClient) UpdateGroup(ctx context.Context, groupId string, body op
 //
 // Example:
 //
-//	incident, err := client.GetIncident(ctx, openapi.MustIncidentKey("2251799813685300"))
+//	incident, err := client.GetIncident(ctx, camundaapi.MustIncidentKey("2251799813685300"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", incident)
-func (c *CamundaClient) GetIncident(ctx context.Context, incidentKey openapi.IncidentKey, opts ...func(openapi.ApiGetIncidentRequest) openapi.ApiGetIncidentRequest) (*openapi.IncidentResult, error) {
+func (c *CamundaClient) GetIncident(ctx context.Context, incidentKey camundaapi.IncidentKey, opts ...func(camundaapi.ApiGetIncidentRequest) camundaapi.ApiGetIncidentRequest) (*camundaapi.IncidentResult, error) {
 	req := c.raw.IncidentAPI.GetIncident(ctx, incidentKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2236,15 +2236,15 @@ func (c *CamundaClient) GetIncident(ctx context.Context, incidentKey openapi.Inc
 //
 // Example:
 //
-//	query := openapi.NewIncidentProcessInstanceStatisticsByDefinitionQuery(
-//		*openapi.NewIncidentProcessInstanceStatisticsByDefinitionFilter(0))
+//	query := camundaapi.NewIncidentProcessInstanceStatisticsByDefinitionQuery(
+//		*camundaapi.NewIncidentProcessInstanceStatisticsByDefinitionFilter(0))
 //
 //	result, err := client.GetProcessInstanceStatisticsByDefinition(ctx, *query)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessInstanceStatisticsByDefinition(ctx context.Context, body openapi.IncidentProcessInstanceStatisticsByDefinitionQuery, opts ...func(openapi.ApiGetProcessInstanceStatisticsByDefinitionRequest) openapi.ApiGetProcessInstanceStatisticsByDefinitionRequest) (*openapi.IncidentProcessInstanceStatisticsByDefinitionQueryResult, error) {
+func (c *CamundaClient) GetProcessInstanceStatisticsByDefinition(ctx context.Context, body camundaapi.IncidentProcessInstanceStatisticsByDefinitionQuery, opts ...func(camundaapi.ApiGetProcessInstanceStatisticsByDefinitionRequest) camundaapi.ApiGetProcessInstanceStatisticsByDefinitionRequest) (*camundaapi.IncidentProcessInstanceStatisticsByDefinitionQueryResult, error) {
 	req := c.raw.IncidentAPI.GetProcessInstanceStatisticsByDefinition(ctx)
 	req = req.IncidentProcessInstanceStatisticsByDefinitionQuery(body)
 	for _, opt := range opts {
@@ -2259,12 +2259,12 @@ func (c *CamundaClient) GetProcessInstanceStatisticsByDefinition(ctx context.Con
 // Example:
 //
 //	result, err := client.GetProcessInstanceStatisticsByError(ctx,
-//		*openapi.NewIncidentProcessInstanceStatisticsByErrorQuery())
+//		*camundaapi.NewIncidentProcessInstanceStatisticsByErrorQuery())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessInstanceStatisticsByError(ctx context.Context, body openapi.IncidentProcessInstanceStatisticsByErrorQuery, opts ...func(openapi.ApiGetProcessInstanceStatisticsByErrorRequest) openapi.ApiGetProcessInstanceStatisticsByErrorRequest) (*openapi.IncidentProcessInstanceStatisticsByErrorQueryResult, error) {
+func (c *CamundaClient) GetProcessInstanceStatisticsByError(ctx context.Context, body camundaapi.IncidentProcessInstanceStatisticsByErrorQuery, opts ...func(camundaapi.ApiGetProcessInstanceStatisticsByErrorRequest) camundaapi.ApiGetProcessInstanceStatisticsByErrorRequest) (*camundaapi.IncidentProcessInstanceStatisticsByErrorQueryResult, error) {
 	req := c.raw.IncidentAPI.GetProcessInstanceStatisticsByError(ctx)
 	req = req.IncidentProcessInstanceStatisticsByErrorQuery(body)
 	for _, opt := range opts {
@@ -2281,9 +2281,9 @@ func (c *CamundaClient) GetProcessInstanceStatisticsByError(ctx context.Context,
 //	// After fixing the root cause (e.g. correcting a variable), resolve the
 //	// incident so the engine retries the failed element.
 //	return client.ResolveIncident(ctx,
-//		openapi.MustIncidentKey("2251799813685300"),
-//		*openapi.NewIncidentResolutionRequest())
-func (c *CamundaClient) ResolveIncident(ctx context.Context, incidentKey openapi.IncidentKey, body openapi.IncidentResolutionRequest, opts ...func(openapi.ApiResolveIncidentRequest) openapi.ApiResolveIncidentRequest) error {
+//		camundaapi.MustIncidentKey("2251799813685300"),
+//		*camundaapi.NewIncidentResolutionRequest())
+func (c *CamundaClient) ResolveIncident(ctx context.Context, incidentKey camundaapi.IncidentKey, body camundaapi.IncidentResolutionRequest, opts ...func(camundaapi.ApiResolveIncidentRequest) camundaapi.ApiResolveIncidentRequest) error {
 	req := c.raw.IncidentAPI.ResolveIncident(ctx, incidentKey)
 	req = req.IncidentResolutionRequest(body)
 	for _, opt := range opts {
@@ -2297,14 +2297,14 @@ func (c *CamundaClient) ResolveIncident(ctx context.Context, incidentKey openapi
 //
 // Example:
 //
-//	result, err := client.SearchIncidents(ctx, *openapi.NewIncidentSearchQuery())
+//	result, err := client.SearchIncidents(ctx, *camundaapi.NewIncidentSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, inc := range result.GetItems() {
 //		fmt.Printf("incident %v: %s\n", inc.GetIncidentKey(), inc.GetErrorType())
 //	}
-func (c *CamundaClient) SearchIncidents(ctx context.Context, body openapi.IncidentSearchQuery, opts ...func(openapi.ApiSearchIncidentsRequest) openapi.ApiSearchIncidentsRequest) (*openapi.IncidentSearchQueryResult, error) {
+func (c *CamundaClient) SearchIncidents(ctx context.Context, body camundaapi.IncidentSearchQuery, opts ...func(camundaapi.ApiSearchIncidentsRequest) camundaapi.ApiSearchIncidentsRequest) (*camundaapi.IncidentSearchQueryResult, error) {
 	req := c.raw.IncidentAPI.SearchIncidents(ctx)
 	req = req.IncidentSearchQuery(body)
 	for _, opt := range opts {
@@ -2319,7 +2319,7 @@ func (c *CamundaClient) SearchIncidents(ctx context.Context, body openapi.Incide
 // Example:
 //
 //	// Activate up to 10 "greet" jobs with a 60s activation timeout.
-//	req := openapi.NewJobActivationRequest("greet", 60_000, 10)
+//	req := camundaapi.NewJobActivationRequest("greet", 60_000, 10)
 //	req.SetWorker("greet-worker")
 //
 //	result, err := client.ActivateJobs(ctx, *req)
@@ -2329,7 +2329,7 @@ func (c *CamundaClient) SearchIncidents(ctx context.Context, body openapi.Incide
 //	for _, job := range result.GetJobs() {
 //		fmt.Printf("activated job %v\n", job.GetJobKey())
 //	}
-func (c *CamundaClient) ActivateJobs(ctx context.Context, body openapi.JobActivationRequest, opts ...func(openapi.ApiActivateJobsRequest) openapi.ApiActivateJobsRequest) (*openapi.JobActivationResult, error) {
+func (c *CamundaClient) ActivateJobs(ctx context.Context, body camundaapi.JobActivationRequest, opts ...func(camundaapi.ApiActivateJobsRequest) camundaapi.ApiActivateJobsRequest) (*camundaapi.JobActivationResult, error) {
 	req := c.raw.JobAPI.ActivateJobs(ctx)
 	req = req.JobActivationRequest(body)
 	for _, opt := range opts {
@@ -2343,11 +2343,11 @@ func (c *CamundaClient) ActivateJobs(ctx context.Context, body openapi.JobActiva
 //
 // Example:
 //
-//	req := openapi.NewJobCompletionRequest()
+//	req := camundaapi.NewJobCompletionRequest()
 //	req.SetVariables(map[string]any{"greeting": "Hello!"})
 //
-//	return client.CompleteJob(ctx, openapi.MustJobKey("2251799813685424"), *req)
-func (c *CamundaClient) CompleteJob(ctx context.Context, jobKey openapi.JobKey, body openapi.JobCompletionRequest, opts ...func(openapi.ApiCompleteJobRequest) openapi.ApiCompleteJobRequest) error {
+//	return client.CompleteJob(ctx, camundaapi.MustJobKey("2251799813685424"), *req)
+func (c *CamundaClient) CompleteJob(ctx context.Context, jobKey camundaapi.JobKey, body camundaapi.JobCompletionRequest, opts ...func(camundaapi.ApiCompleteJobRequest) camundaapi.ApiCompleteJobRequest) error {
 	req := c.raw.JobAPI.CompleteJob(ctx, jobKey)
 	req = req.JobCompletionRequest(body)
 	for _, opt := range opts {
@@ -2361,12 +2361,12 @@ func (c *CamundaClient) CompleteJob(ctx context.Context, jobKey openapi.JobKey, 
 //
 // Example:
 //
-//	req := openapi.NewJobFailRequest()
+//	req := camundaapi.NewJobFailRequest()
 //	req.SetRetries(2)
 //	req.SetErrorMessage("inventory service unavailable")
 //
-//	return client.FailJob(ctx, openapi.MustJobKey("2251799813685424"), *req)
-func (c *CamundaClient) FailJob(ctx context.Context, jobKey openapi.JobKey, body openapi.JobFailRequest, opts ...func(openapi.ApiFailJobRequest) openapi.ApiFailJobRequest) error {
+//	return client.FailJob(ctx, camundaapi.MustJobKey("2251799813685424"), *req)
+func (c *CamundaClient) FailJob(ctx context.Context, jobKey camundaapi.JobKey, body camundaapi.JobFailRequest, opts ...func(camundaapi.ApiFailJobRequest) camundaapi.ApiFailJobRequest) error {
 	req := c.raw.JobAPI.FailJob(ctx, jobKey)
 	req = req.JobFailRequest(body)
 	for _, opt := range opts {
@@ -2385,7 +2385,7 @@ func (c *CamundaClient) FailJob(ctx context.Context, jobKey openapi.JobKey, body
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetGlobalJobStatistics(ctx context.Context, opts ...func(openapi.ApiGetGlobalJobStatisticsRequest) openapi.ApiGetGlobalJobStatisticsRequest) (*openapi.GlobalJobStatisticsQueryResult, error) {
+func (c *CamundaClient) GetGlobalJobStatistics(ctx context.Context, opts ...func(camundaapi.ApiGetGlobalJobStatisticsRequest) camundaapi.ApiGetGlobalJobStatisticsRequest) (*camundaapi.GlobalJobStatisticsQueryResult, error) {
 	req := c.raw.JobAPI.GetGlobalJobStatistics(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2399,14 +2399,14 @@ func (c *CamundaClient) GetGlobalJobStatistics(ctx context.Context, opts ...func
 // Example:
 //
 //	from, to := time.Now().Add(-24*time.Hour), time.Now()
-//	query := openapi.NewJobErrorStatisticsQuery(*openapi.NewJobErrorStatisticsFilter(from, to, "greet"))
+//	query := camundaapi.NewJobErrorStatisticsQuery(*camundaapi.NewJobErrorStatisticsFilter(from, to, "greet"))
 //
 //	result, err := client.GetJobErrorStatistics(ctx, *query)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetJobErrorStatistics(ctx context.Context, body openapi.JobErrorStatisticsQuery, opts ...func(openapi.ApiGetJobErrorStatisticsRequest) openapi.ApiGetJobErrorStatisticsRequest) (*openapi.JobErrorStatisticsQueryResult, error) {
+func (c *CamundaClient) GetJobErrorStatistics(ctx context.Context, body camundaapi.JobErrorStatisticsQuery, opts ...func(camundaapi.ApiGetJobErrorStatisticsRequest) camundaapi.ApiGetJobErrorStatisticsRequest) (*camundaapi.JobErrorStatisticsQueryResult, error) {
 	req := c.raw.JobAPI.GetJobErrorStatistics(ctx)
 	req = req.JobErrorStatisticsQuery(body)
 	for _, opt := range opts {
@@ -2421,14 +2421,14 @@ func (c *CamundaClient) GetJobErrorStatistics(ctx context.Context, body openapi.
 // Example:
 //
 //	from, to := time.Now().Add(-24*time.Hour), time.Now()
-//	query := openapi.NewJobTimeSeriesStatisticsQuery(*openapi.NewJobTimeSeriesStatisticsFilter(from, to, "greet"))
+//	query := camundaapi.NewJobTimeSeriesStatisticsQuery(*camundaapi.NewJobTimeSeriesStatisticsFilter(from, to, "greet"))
 //
 //	result, err := client.GetJobTimeSeriesStatistics(ctx, *query)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetJobTimeSeriesStatistics(ctx context.Context, body openapi.JobTimeSeriesStatisticsQuery, opts ...func(openapi.ApiGetJobTimeSeriesStatisticsRequest) openapi.ApiGetJobTimeSeriesStatisticsRequest) (*openapi.JobTimeSeriesStatisticsQueryResult, error) {
+func (c *CamundaClient) GetJobTimeSeriesStatistics(ctx context.Context, body camundaapi.JobTimeSeriesStatisticsQuery, opts ...func(camundaapi.ApiGetJobTimeSeriesStatisticsRequest) camundaapi.ApiGetJobTimeSeriesStatisticsRequest) (*camundaapi.JobTimeSeriesStatisticsQueryResult, error) {
 	req := c.raw.JobAPI.GetJobTimeSeriesStatistics(ctx)
 	req = req.JobTimeSeriesStatisticsQuery(body)
 	for _, opt := range opts {
@@ -2442,12 +2442,12 @@ func (c *CamundaClient) GetJobTimeSeriesStatistics(ctx context.Context, body ope
 //
 // Example:
 //
-//	result, err := client.GetJobTypeStatistics(ctx, *openapi.NewJobTypeStatisticsQuery())
+//	result, err := client.GetJobTypeStatistics(ctx, *camundaapi.NewJobTypeStatisticsQuery())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetJobTypeStatistics(ctx context.Context, body openapi.JobTypeStatisticsQuery, opts ...func(openapi.ApiGetJobTypeStatisticsRequest) openapi.ApiGetJobTypeStatisticsRequest) (*openapi.JobTypeStatisticsQueryResult, error) {
+func (c *CamundaClient) GetJobTypeStatistics(ctx context.Context, body camundaapi.JobTypeStatisticsQuery, opts ...func(camundaapi.ApiGetJobTypeStatisticsRequest) camundaapi.ApiGetJobTypeStatisticsRequest) (*camundaapi.JobTypeStatisticsQueryResult, error) {
 	req := c.raw.JobAPI.GetJobTypeStatistics(ctx)
 	req = req.JobTypeStatisticsQuery(body)
 	for _, opt := range opts {
@@ -2462,14 +2462,14 @@ func (c *CamundaClient) GetJobTypeStatistics(ctx context.Context, body openapi.J
 // Example:
 //
 //	from, to := time.Now().Add(-24*time.Hour), time.Now()
-//	query := openapi.NewJobWorkerStatisticsQuery(*openapi.NewJobWorkerStatisticsFilter(from, to, "greet"))
+//	query := camundaapi.NewJobWorkerStatisticsQuery(*camundaapi.NewJobWorkerStatisticsFilter(from, to, "greet"))
 //
 //	result, err := client.GetJobWorkerStatistics(ctx, *query)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetJobWorkerStatistics(ctx context.Context, body openapi.JobWorkerStatisticsQuery, opts ...func(openapi.ApiGetJobWorkerStatisticsRequest) openapi.ApiGetJobWorkerStatisticsRequest) (*openapi.JobWorkerStatisticsQueryResult, error) {
+func (c *CamundaClient) GetJobWorkerStatistics(ctx context.Context, body camundaapi.JobWorkerStatisticsQuery, opts ...func(camundaapi.ApiGetJobWorkerStatisticsRequest) camundaapi.ApiGetJobWorkerStatisticsRequest) (*camundaapi.JobWorkerStatisticsQueryResult, error) {
 	req := c.raw.JobAPI.GetJobWorkerStatistics(ctx)
 	req = req.JobWorkerStatisticsQuery(body)
 	for _, opt := range opts {
@@ -2483,14 +2483,14 @@ func (c *CamundaClient) GetJobWorkerStatistics(ctx context.Context, body openapi
 //
 // Example:
 //
-//	result, err := client.SearchJobs(ctx, *openapi.NewJobSearchQuery())
+//	result, err := client.SearchJobs(ctx, *camundaapi.NewJobSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, job := range result.GetItems() {
 //		fmt.Printf("%v\n", job)
 //	}
-func (c *CamundaClient) SearchJobs(ctx context.Context, body openapi.JobSearchQuery, opts ...func(openapi.ApiSearchJobsRequest) openapi.ApiSearchJobsRequest) (*openapi.JobSearchQueryResult, error) {
+func (c *CamundaClient) SearchJobs(ctx context.Context, body camundaapi.JobSearchQuery, opts ...func(camundaapi.ApiSearchJobsRequest) camundaapi.ApiSearchJobsRequest) (*camundaapi.JobSearchQueryResult, error) {
 	req := c.raw.JobAPI.SearchJobs(ctx)
 	req = req.JobSearchQuery(body)
 	for _, opt := range opts {
@@ -2504,11 +2504,11 @@ func (c *CamundaClient) SearchJobs(ctx context.Context, body openapi.JobSearchQu
 //
 // Example:
 //
-//	req := openapi.NewJobErrorRequest("OUT_OF_STOCK")
+//	req := camundaapi.NewJobErrorRequest("OUT_OF_STOCK")
 //	req.SetErrorMessage("item is out of stock")
 //
-//	return client.ThrowJobError(ctx, openapi.MustJobKey("2251799813685424"), *req)
-func (c *CamundaClient) ThrowJobError(ctx context.Context, jobKey openapi.JobKey, body openapi.JobErrorRequest, opts ...func(openapi.ApiThrowJobErrorRequest) openapi.ApiThrowJobErrorRequest) error {
+//	return client.ThrowJobError(ctx, camundaapi.MustJobKey("2251799813685424"), *req)
+func (c *CamundaClient) ThrowJobError(ctx context.Context, jobKey camundaapi.JobKey, body camundaapi.JobErrorRequest, opts ...func(camundaapi.ApiThrowJobErrorRequest) camundaapi.ApiThrowJobErrorRequest) error {
 	req := c.raw.JobAPI.ThrowJobError(ctx, jobKey)
 	req = req.JobErrorRequest(body)
 	for _, opt := range opts {
@@ -2522,11 +2522,11 @@ func (c *CamundaClient) ThrowJobError(ctx context.Context, jobKey openapi.JobKey
 //
 // Example:
 //
-//	changeset := openapi.NewJobChangeset()
+//	changeset := camundaapi.NewJobChangeset()
 //	changeset.SetRetries(3)
 //
-//	return client.UpdateJob(ctx, openapi.MustJobKey("2251799813685424"), *openapi.NewJobUpdateRequest(*changeset))
-func (c *CamundaClient) UpdateJob(ctx context.Context, jobKey openapi.JobKey, body openapi.JobUpdateRequest, opts ...func(openapi.ApiUpdateJobRequest) openapi.ApiUpdateJobRequest) error {
+//	return client.UpdateJob(ctx, camundaapi.MustJobKey("2251799813685424"), *camundaapi.NewJobUpdateRequest(*changeset))
+func (c *CamundaClient) UpdateJob(ctx context.Context, jobKey camundaapi.JobKey, body camundaapi.JobUpdateRequest, opts ...func(camundaapi.ApiUpdateJobRequest) camundaapi.ApiUpdateJobRequest) error {
 	req := c.raw.JobAPI.UpdateJob(ctx, jobKey)
 	req = req.JobUpdateRequest(body)
 	for _, opt := range opts {
@@ -2540,16 +2540,16 @@ func (c *CamundaClient) UpdateJob(ctx context.Context, jobKey openapi.JobKey, bo
 //
 // Example:
 //
-//	changeset := openapi.NewJobChangeset()
+//	changeset := camundaapi.NewJobChangeset()
 //	changeset.SetRetries(3)
-//	req := openapi.NewJobBatchUpdateRequest(*openapi.NewJobFilter(), *changeset)
+//	req := camundaapi.NewJobBatchUpdateRequest(*camundaapi.NewJobFilter(), *changeset)
 //
 //	result, err := client.UpdateJobsBatchOperation(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) UpdateJobsBatchOperation(ctx context.Context, body openapi.JobBatchUpdateRequest, opts ...func(openapi.ApiUpdateJobsBatchOperationRequest) openapi.ApiUpdateJobsBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) UpdateJobsBatchOperation(ctx context.Context, body camundaapi.JobBatchUpdateRequest, opts ...func(camundaapi.ApiUpdateJobsBatchOperationRequest) camundaapi.ApiUpdateJobsBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.JobAPI.UpdateJobsBatchOperation(ctx)
 	req = req.JobBatchUpdateRequest(body)
 	for _, opt := range opts {
@@ -2568,7 +2568,7 @@ func (c *CamundaClient) UpdateJobsBatchOperation(ctx context.Context, body opena
 //		return err
 //	}
 //	fmt.Printf("license type=%s valid=%v\n", license.GetLicenseType(), license.GetValidLicense())
-func (c *CamundaClient) GetLicense(ctx context.Context, opts ...func(openapi.ApiGetLicenseRequest) openapi.ApiGetLicenseRequest) (*openapi.LicenseResponse, error) {
+func (c *CamundaClient) GetLicense(ctx context.Context, opts ...func(camundaapi.ApiGetLicenseRequest) camundaapi.ApiGetLicenseRequest) (*camundaapi.LicenseResponse, error) {
 	req := c.raw.LicenseAPI.GetLicense(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2583,12 +2583,12 @@ func (c *CamundaClient) GetLicense(ctx context.Context, opts ...func(openapi.Api
 //
 //	// Map the IdP claim `groups=auditors` to a Camunda mapping-rule identity.
 //	result, err := client.CreateMappingRule(ctx,
-//		*openapi.NewMappingRuleCreateRequest("groups", "auditors", "SSO Auditors", "sso-auditors"))
+//		*camundaapi.NewMappingRuleCreateRequest("groups", "auditors", "SSO Auditors", "sso-auditors"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateMappingRule(ctx context.Context, body openapi.MappingRuleCreateRequest, opts ...func(openapi.ApiCreateMappingRuleRequest) openapi.ApiCreateMappingRuleRequest) (*openapi.MappingRuleCreateResult, error) {
+func (c *CamundaClient) CreateMappingRule(ctx context.Context, body camundaapi.MappingRuleCreateRequest, opts ...func(camundaapi.ApiCreateMappingRuleRequest) camundaapi.ApiCreateMappingRuleRequest) (*camundaapi.MappingRuleCreateResult, error) {
 	req := c.raw.MappingRuleAPI.CreateMappingRule(ctx)
 	req = req.MappingRuleCreateRequest(body)
 	for _, opt := range opts {
@@ -2603,7 +2603,7 @@ func (c *CamundaClient) CreateMappingRule(ctx context.Context, body openapi.Mapp
 // Example:
 //
 //	return client.DeleteMappingRule(ctx, "sso-auditors")
-func (c *CamundaClient) DeleteMappingRule(ctx context.Context, mappingRuleId string, opts ...func(openapi.ApiDeleteMappingRuleRequest) openapi.ApiDeleteMappingRuleRequest) error {
+func (c *CamundaClient) DeleteMappingRule(ctx context.Context, mappingRuleId string, opts ...func(camundaapi.ApiDeleteMappingRuleRequest) camundaapi.ApiDeleteMappingRuleRequest) error {
 	req := c.raw.MappingRuleAPI.DeleteMappingRule(ctx, mappingRuleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2621,7 +2621,7 @@ func (c *CamundaClient) DeleteMappingRule(ctx context.Context, mappingRuleId str
 //		return err
 //	}
 //	fmt.Printf("%v\n", rule)
-func (c *CamundaClient) GetMappingRule(ctx context.Context, mappingRuleId string, opts ...func(openapi.ApiGetMappingRuleRequest) openapi.ApiGetMappingRuleRequest) (*openapi.MappingRuleResult, error) {
+func (c *CamundaClient) GetMappingRule(ctx context.Context, mappingRuleId string, opts ...func(camundaapi.ApiGetMappingRuleRequest) camundaapi.ApiGetMappingRuleRequest) (*camundaapi.MappingRuleResult, error) {
 	req := c.raw.MappingRuleAPI.GetMappingRule(ctx, mappingRuleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2634,14 +2634,14 @@ func (c *CamundaClient) GetMappingRule(ctx context.Context, mappingRuleId string
 //
 // Example:
 //
-//	result, err := client.SearchMappingRule(ctx, *openapi.NewMappingRuleSearchQueryRequest())
+//	result, err := client.SearchMappingRule(ctx, *camundaapi.NewMappingRuleSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	for _, r := range result.GetItems() {
 //		fmt.Printf("%v\n", r)
 //	}
-func (c *CamundaClient) SearchMappingRule(ctx context.Context, body openapi.MappingRuleSearchQueryRequest, opts ...func(openapi.ApiSearchMappingRuleRequest) openapi.ApiSearchMappingRuleRequest) (*openapi.MappingRuleSearchQueryResult, error) {
+func (c *CamundaClient) SearchMappingRule(ctx context.Context, body camundaapi.MappingRuleSearchQueryRequest, opts ...func(camundaapi.ApiSearchMappingRuleRequest) camundaapi.ApiSearchMappingRuleRequest) (*camundaapi.MappingRuleSearchQueryResult, error) {
 	req := c.raw.MappingRuleAPI.SearchMappingRule(ctx)
 	req = req.MappingRuleSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -2656,12 +2656,12 @@ func (c *CamundaClient) SearchMappingRule(ctx context.Context, body openapi.Mapp
 // Example:
 //
 //	result, err := client.UpdateMappingRule(ctx, "sso-auditors",
-//		*openapi.NewMappingRuleUpdateRequest("groups", "senior-auditors", "SSO Senior Auditors"))
+//		*camundaapi.NewMappingRuleUpdateRequest("groups", "senior-auditors", "SSO Senior Auditors"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateMappingRule(ctx context.Context, mappingRuleId string, body openapi.MappingRuleUpdateRequest, opts ...func(openapi.ApiUpdateMappingRuleRequest) openapi.ApiUpdateMappingRuleRequest) (*openapi.MappingRuleUpdateResult, error) {
+func (c *CamundaClient) UpdateMappingRule(ctx context.Context, mappingRuleId string, body camundaapi.MappingRuleUpdateRequest, opts ...func(camundaapi.ApiUpdateMappingRuleRequest) camundaapi.ApiUpdateMappingRuleRequest) (*camundaapi.MappingRuleUpdateResult, error) {
 	req := c.raw.MappingRuleAPI.UpdateMappingRule(ctx, mappingRuleId)
 	req = req.MappingRuleUpdateRequest(body)
 	for _, opt := range opts {
@@ -2675,7 +2675,7 @@ func (c *CamundaClient) UpdateMappingRule(ctx context.Context, mappingRuleId str
 //
 // Example:
 //
-//	req := openapi.NewMessageCorrelationRequest("order-confirmed")
+//	req := camundaapi.NewMessageCorrelationRequest("order-confirmed")
 //	req.SetCorrelationKey("order-42")
 //	req.SetVariables(map[string]any{"confirmedBy": "payment-service"})
 //
@@ -2684,7 +2684,7 @@ func (c *CamundaClient) UpdateMappingRule(ctx context.Context, mappingRuleId str
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CorrelateMessage(ctx context.Context, body openapi.MessageCorrelationRequest, opts ...func(openapi.ApiCorrelateMessageRequest) openapi.ApiCorrelateMessageRequest) (*openapi.MessageCorrelationResult, error) {
+func (c *CamundaClient) CorrelateMessage(ctx context.Context, body camundaapi.MessageCorrelationRequest, opts ...func(camundaapi.ApiCorrelateMessageRequest) camundaapi.ApiCorrelateMessageRequest) (*camundaapi.MessageCorrelationResult, error) {
 	req := c.raw.MessageAPI.CorrelateMessage(ctx)
 	req = req.MessageCorrelationRequest(body)
 	for _, opt := range opts {
@@ -2698,7 +2698,7 @@ func (c *CamundaClient) CorrelateMessage(ctx context.Context, body openapi.Messa
 //
 // Example:
 //
-//	req := openapi.NewMessagePublicationRequest("order-confirmed")
+//	req := camundaapi.NewMessagePublicationRequest("order-confirmed")
 //	req.SetCorrelationKey("order-42")
 //	req.SetVariables(map[string]any{"confirmedBy": "payment-service"})
 //
@@ -2707,7 +2707,7 @@ func (c *CamundaClient) CorrelateMessage(ctx context.Context, body openapi.Messa
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) PublishMessage(ctx context.Context, body openapi.MessagePublicationRequest, opts ...func(openapi.ApiPublishMessageRequest) openapi.ApiPublishMessageRequest) (*openapi.MessagePublicationResult, error) {
+func (c *CamundaClient) PublishMessage(ctx context.Context, body camundaapi.MessagePublicationRequest, opts ...func(camundaapi.ApiPublishMessageRequest) camundaapi.ApiPublishMessageRequest) (*camundaapi.MessagePublicationResult, error) {
 	req := c.raw.MessageAPI.PublishMessage(ctx)
 	req = req.MessagePublicationRequest(body)
 	for _, opt := range opts {
@@ -2722,14 +2722,14 @@ func (c *CamundaClient) PublishMessage(ctx context.Context, body openapi.Message
 // Example:
 //
 //	result, err := client.SearchCorrelatedMessageSubscriptions(ctx,
-//		*openapi.NewCorrelatedMessageSubscriptionSearchQuery())
+//		*camundaapi.NewCorrelatedMessageSubscriptionSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, s := range result.GetItems() {
 //		fmt.Printf("%v\n", s)
 //	}
-func (c *CamundaClient) SearchCorrelatedMessageSubscriptions(ctx context.Context, body openapi.CorrelatedMessageSubscriptionSearchQuery, opts ...func(openapi.ApiSearchCorrelatedMessageSubscriptionsRequest) openapi.ApiSearchCorrelatedMessageSubscriptionsRequest) (*openapi.CorrelatedMessageSubscriptionSearchQueryResult, error) {
+func (c *CamundaClient) SearchCorrelatedMessageSubscriptions(ctx context.Context, body camundaapi.CorrelatedMessageSubscriptionSearchQuery, opts ...func(camundaapi.ApiSearchCorrelatedMessageSubscriptionsRequest) camundaapi.ApiSearchCorrelatedMessageSubscriptionsRequest) (*camundaapi.CorrelatedMessageSubscriptionSearchQueryResult, error) {
 	req := c.raw.MessageSubscriptionAPI.SearchCorrelatedMessageSubscriptions(ctx)
 	req = req.CorrelatedMessageSubscriptionSearchQuery(body)
 	for _, opt := range opts {
@@ -2743,14 +2743,14 @@ func (c *CamundaClient) SearchCorrelatedMessageSubscriptions(ctx context.Context
 //
 // Example:
 //
-//	result, err := client.SearchMessageSubscriptions(ctx, *openapi.NewMessageSubscriptionSearchQuery())
+//	result, err := client.SearchMessageSubscriptions(ctx, *camundaapi.NewMessageSubscriptionSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, s := range result.GetItems() {
 //		fmt.Printf("%v\n", s)
 //	}
-func (c *CamundaClient) SearchMessageSubscriptions(ctx context.Context, body openapi.MessageSubscriptionSearchQuery, opts ...func(openapi.ApiSearchMessageSubscriptionsRequest) openapi.ApiSearchMessageSubscriptionsRequest) (*openapi.MessageSubscriptionSearchQueryResult, error) {
+func (c *CamundaClient) SearchMessageSubscriptions(ctx context.Context, body camundaapi.MessageSubscriptionSearchQuery, opts ...func(camundaapi.ApiSearchMessageSubscriptionsRequest) camundaapi.ApiSearchMessageSubscriptionsRequest) (*camundaapi.MessageSubscriptionSearchQueryResult, error) {
 	req := c.raw.MessageSubscriptionAPI.SearchMessageSubscriptions(ctx)
 	req = req.MessageSubscriptionSearchQuery(body)
 	for _, opt := range opts {
@@ -2764,12 +2764,12 @@ func (c *CamundaClient) SearchMessageSubscriptions(ctx context.Context, body ope
 //
 // Example:
 //
-//	def, err := client.GetProcessDefinition(ctx, openapi.MustProcessDefinitionKey("2251799813685330"))
+//	def, err := client.GetProcessDefinition(ctx, camundaapi.MustProcessDefinitionKey("2251799813685330"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", def)
-func (c *CamundaClient) GetProcessDefinition(ctx context.Context, processDefinitionKey openapi.ProcessDefinitionKey, opts ...func(openapi.ApiGetProcessDefinitionRequest) openapi.ApiGetProcessDefinitionRequest) (*openapi.ProcessDefinitionResult, error) {
+func (c *CamundaClient) GetProcessDefinition(ctx context.Context, processDefinitionKey camundaapi.ProcessDefinitionKey, opts ...func(camundaapi.ApiGetProcessDefinitionRequest) camundaapi.ApiGetProcessDefinitionRequest) (*camundaapi.ProcessDefinitionResult, error) {
 	req := c.raw.ProcessDefinitionAPI.GetProcessDefinition(ctx, processDefinitionKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2783,12 +2783,12 @@ func (c *CamundaClient) GetProcessDefinition(ctx context.Context, processDefinit
 // Example:
 //
 //	result, err := client.GetProcessDefinitionInstanceStatistics(ctx,
-//		*openapi.NewProcessDefinitionInstanceStatisticsQuery())
+//		*camundaapi.NewProcessDefinitionInstanceStatisticsQuery())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessDefinitionInstanceStatistics(ctx context.Context, body openapi.ProcessDefinitionInstanceStatisticsQuery, opts ...func(openapi.ApiGetProcessDefinitionInstanceStatisticsRequest) openapi.ApiGetProcessDefinitionInstanceStatisticsRequest) (*openapi.ProcessDefinitionInstanceStatisticsQueryResult, error) {
+func (c *CamundaClient) GetProcessDefinitionInstanceStatistics(ctx context.Context, body camundaapi.ProcessDefinitionInstanceStatisticsQuery, opts ...func(camundaapi.ApiGetProcessDefinitionInstanceStatisticsRequest) camundaapi.ApiGetProcessDefinitionInstanceStatisticsRequest) (*camundaapi.ProcessDefinitionInstanceStatisticsQueryResult, error) {
 	req := c.raw.ProcessDefinitionAPI.GetProcessDefinitionInstanceStatistics(ctx)
 	req = req.ProcessDefinitionInstanceStatisticsQuery(body)
 	for _, opt := range opts {
@@ -2802,15 +2802,15 @@ func (c *CamundaClient) GetProcessDefinitionInstanceStatistics(ctx context.Conte
 //
 // Example:
 //
-//	query := openapi.NewProcessDefinitionInstanceVersionStatisticsQuery(
-//		*openapi.NewProcessDefinitionInstanceVersionStatisticsFilter("order-process"))
+//	query := camundaapi.NewProcessDefinitionInstanceVersionStatisticsQuery(
+//		*camundaapi.NewProcessDefinitionInstanceVersionStatisticsFilter("order-process"))
 //
 //	result, err := client.GetProcessDefinitionInstanceVersionStatistics(ctx, *query)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessDefinitionInstanceVersionStatistics(ctx context.Context, body openapi.ProcessDefinitionInstanceVersionStatisticsQuery, opts ...func(openapi.ApiGetProcessDefinitionInstanceVersionStatisticsRequest) openapi.ApiGetProcessDefinitionInstanceVersionStatisticsRequest) (*openapi.ProcessDefinitionInstanceVersionStatisticsQueryResult, error) {
+func (c *CamundaClient) GetProcessDefinitionInstanceVersionStatistics(ctx context.Context, body camundaapi.ProcessDefinitionInstanceVersionStatisticsQuery, opts ...func(camundaapi.ApiGetProcessDefinitionInstanceVersionStatisticsRequest) camundaapi.ApiGetProcessDefinitionInstanceVersionStatisticsRequest) (*camundaapi.ProcessDefinitionInstanceVersionStatisticsQueryResult, error) {
 	req := c.raw.ProcessDefinitionAPI.GetProcessDefinitionInstanceVersionStatistics(ctx)
 	req = req.ProcessDefinitionInstanceVersionStatisticsQuery(body)
 	for _, opt := range opts {
@@ -2825,12 +2825,12 @@ func (c *CamundaClient) GetProcessDefinitionInstanceVersionStatistics(ctx contex
 // Example:
 //
 //	result, err := client.GetProcessDefinitionMessageSubscriptionStatistics(ctx,
-//		*openapi.NewProcessDefinitionMessageSubscriptionStatisticsQuery())
+//		*camundaapi.NewProcessDefinitionMessageSubscriptionStatisticsQuery())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessDefinitionMessageSubscriptionStatistics(ctx context.Context, body openapi.ProcessDefinitionMessageSubscriptionStatisticsQuery, opts ...func(openapi.ApiGetProcessDefinitionMessageSubscriptionStatisticsRequest) openapi.ApiGetProcessDefinitionMessageSubscriptionStatisticsRequest) (*openapi.ProcessDefinitionMessageSubscriptionStatisticsQueryResult, error) {
+func (c *CamundaClient) GetProcessDefinitionMessageSubscriptionStatistics(ctx context.Context, body camundaapi.ProcessDefinitionMessageSubscriptionStatisticsQuery, opts ...func(camundaapi.ApiGetProcessDefinitionMessageSubscriptionStatisticsRequest) camundaapi.ApiGetProcessDefinitionMessageSubscriptionStatisticsRequest) (*camundaapi.ProcessDefinitionMessageSubscriptionStatisticsQueryResult, error) {
 	req := c.raw.ProcessDefinitionAPI.GetProcessDefinitionMessageSubscriptionStatistics(ctx)
 	req = req.ProcessDefinitionMessageSubscriptionStatisticsQuery(body)
 	for _, opt := range opts {
@@ -2845,13 +2845,13 @@ func (c *CamundaClient) GetProcessDefinitionMessageSubscriptionStatistics(ctx co
 // Example:
 //
 //	result, err := client.GetProcessDefinitionStatistics(ctx,
-//		openapi.MustProcessDefinitionKey("2251799813685330"),
-//		*openapi.NewProcessDefinitionElementStatisticsQuery())
+//		camundaapi.MustProcessDefinitionKey("2251799813685330"),
+//		*camundaapi.NewProcessDefinitionElementStatisticsQuery())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessDefinitionStatistics(ctx context.Context, processDefinitionKey openapi.ProcessDefinitionKey, body openapi.ProcessDefinitionElementStatisticsQuery, opts ...func(openapi.ApiGetProcessDefinitionStatisticsRequest) openapi.ApiGetProcessDefinitionStatisticsRequest) (*openapi.ProcessDefinitionElementStatisticsQueryResult, error) {
+func (c *CamundaClient) GetProcessDefinitionStatistics(ctx context.Context, processDefinitionKey camundaapi.ProcessDefinitionKey, body camundaapi.ProcessDefinitionElementStatisticsQuery, opts ...func(camundaapi.ApiGetProcessDefinitionStatisticsRequest) camundaapi.ApiGetProcessDefinitionStatisticsRequest) (*camundaapi.ProcessDefinitionElementStatisticsQueryResult, error) {
 	req := c.raw.ProcessDefinitionAPI.GetProcessDefinitionStatistics(ctx, processDefinitionKey)
 	req = req.ProcessDefinitionElementStatisticsQuery(body)
 	for _, opt := range opts {
@@ -2865,12 +2865,12 @@ func (c *CamundaClient) GetProcessDefinitionStatistics(ctx context.Context, proc
 //
 // Example:
 //
-//	xml, err := client.GetProcessDefinitionXML(ctx, openapi.MustProcessDefinitionKey("2251799813685330"))
+//	xml, err := client.GetProcessDefinitionXML(ctx, camundaapi.MustProcessDefinitionKey("2251799813685330"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Println(xml)
-func (c *CamundaClient) GetProcessDefinitionXML(ctx context.Context, processDefinitionKey openapi.ProcessDefinitionKey, opts ...func(openapi.ApiGetProcessDefinitionXMLRequest) openapi.ApiGetProcessDefinitionXMLRequest) (string, error) {
+func (c *CamundaClient) GetProcessDefinitionXML(ctx context.Context, processDefinitionKey camundaapi.ProcessDefinitionKey, opts ...func(camundaapi.ApiGetProcessDefinitionXMLRequest) camundaapi.ApiGetProcessDefinitionXMLRequest) (string, error) {
 	req := c.raw.ProcessDefinitionAPI.GetProcessDefinitionXML(ctx, processDefinitionKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2883,12 +2883,12 @@ func (c *CamundaClient) GetProcessDefinitionXML(ctx context.Context, processDefi
 //
 // Example:
 //
-//	form, err := client.GetStartProcessForm(ctx, openapi.MustProcessDefinitionKey("2251799813685330"))
+//	form, err := client.GetStartProcessForm(ctx, camundaapi.MustProcessDefinitionKey("2251799813685330"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", form)
-func (c *CamundaClient) GetStartProcessForm(ctx context.Context, processDefinitionKey openapi.ProcessDefinitionKey, opts ...func(openapi.ApiGetStartProcessFormRequest) openapi.ApiGetStartProcessFormRequest) (*openapi.FormResult, error) {
+func (c *CamundaClient) GetStartProcessForm(ctx context.Context, processDefinitionKey camundaapi.ProcessDefinitionKey, opts ...func(camundaapi.ApiGetStartProcessFormRequest) camundaapi.ApiGetStartProcessFormRequest) (*camundaapi.FormResult, error) {
 	req := c.raw.ProcessDefinitionAPI.GetStartProcessForm(ctx, processDefinitionKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -2902,13 +2902,13 @@ func (c *CamundaClient) GetStartProcessForm(ctx context.Context, processDefiniti
 // Example:
 //
 //	result, err := client.SearchProcessDefinitionVariableNames(ctx,
-//		openapi.MustProcessDefinitionKey("2251799813685330"),
-//		*openapi.NewProcessDefinitionVariableNameSearchQuery())
+//		camundaapi.MustProcessDefinitionKey("2251799813685330"),
+//		*camundaapi.NewProcessDefinitionVariableNameSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchProcessDefinitionVariableNames(ctx context.Context, processDefinitionKey openapi.ProcessDefinitionKey, body openapi.ProcessDefinitionVariableNameSearchQuery, opts ...func(openapi.ApiSearchProcessDefinitionVariableNamesRequest) openapi.ApiSearchProcessDefinitionVariableNamesRequest) (*openapi.ProcessDefinitionVariableNameSearchQueryResult, error) {
+func (c *CamundaClient) SearchProcessDefinitionVariableNames(ctx context.Context, processDefinitionKey camundaapi.ProcessDefinitionKey, body camundaapi.ProcessDefinitionVariableNameSearchQuery, opts ...func(camundaapi.ApiSearchProcessDefinitionVariableNamesRequest) camundaapi.ApiSearchProcessDefinitionVariableNamesRequest) (*camundaapi.ProcessDefinitionVariableNameSearchQueryResult, error) {
 	req := c.raw.ProcessDefinitionAPI.SearchProcessDefinitionVariableNames(ctx, processDefinitionKey)
 	req = req.ProcessDefinitionVariableNameSearchQuery(body)
 	for _, opt := range opts {
@@ -2922,14 +2922,14 @@ func (c *CamundaClient) SearchProcessDefinitionVariableNames(ctx context.Context
 //
 // Example:
 //
-//	result, err := client.SearchProcessDefinitions(ctx, *openapi.NewProcessDefinitionSearchQuery())
+//	result, err := client.SearchProcessDefinitions(ctx, *camundaapi.NewProcessDefinitionSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, d := range result.GetItems() {
 //		fmt.Printf("%v\n", d)
 //	}
-func (c *CamundaClient) SearchProcessDefinitions(ctx context.Context, body openapi.ProcessDefinitionSearchQuery, opts ...func(openapi.ApiSearchProcessDefinitionsRequest) openapi.ApiSearchProcessDefinitionsRequest) (*openapi.ProcessDefinitionSearchQueryResult, error) {
+func (c *CamundaClient) SearchProcessDefinitions(ctx context.Context, body camundaapi.ProcessDefinitionSearchQuery, opts ...func(camundaapi.ApiSearchProcessDefinitionsRequest) camundaapi.ApiSearchProcessDefinitionsRequest) (*camundaapi.ProcessDefinitionSearchQueryResult, error) {
 	req := c.raw.ProcessDefinitionAPI.SearchProcessDefinitions(ctx)
 	req = req.ProcessDefinitionSearchQuery(body)
 	for _, opt := range opts {
@@ -2944,9 +2944,9 @@ func (c *CamundaClient) SearchProcessDefinitions(ctx context.Context, body opena
 // Example:
 //
 //	return client.AssignProcessInstanceBusinessId(ctx,
-//		openapi.MustProcessInstanceKey("2251799813685340"),
-//		*openapi.NewProcessInstanceBusinessIdAssignmentInstruction("order-42"))
-func (c *CamundaClient) AssignProcessInstanceBusinessId(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.ProcessInstanceBusinessIdAssignmentInstruction, opts ...func(openapi.ApiAssignProcessInstanceBusinessIdRequest) openapi.ApiAssignProcessInstanceBusinessIdRequest) error {
+//		camundaapi.MustProcessInstanceKey("2251799813685340"),
+//		*camundaapi.NewProcessInstanceBusinessIdAssignmentInstruction("order-42"))
+func (c *CamundaClient) AssignProcessInstanceBusinessId(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, body camundaapi.ProcessInstanceBusinessIdAssignmentInstruction, opts ...func(camundaapi.ApiAssignProcessInstanceBusinessIdRequest) camundaapi.ApiAssignProcessInstanceBusinessIdRequest) error {
 	req := c.raw.ProcessInstanceAPI.AssignProcessInstanceBusinessId(ctx, processInstanceKey)
 	req = req.ProcessInstanceBusinessIdAssignmentInstruction(body)
 	for _, opt := range opts {
@@ -2961,9 +2961,9 @@ func (c *CamundaClient) AssignProcessInstanceBusinessId(ctx context.Context, pro
 // Example:
 //
 //	return client.CancelProcessInstance(ctx,
-//		openapi.MustProcessInstanceKey("2251799813685340"),
-//		*openapi.NewCancelProcessInstanceRequest())
-func (c *CamundaClient) CancelProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.CancelProcessInstanceRequest, opts ...func(openapi.ApiCancelProcessInstanceRequest) openapi.ApiCancelProcessInstanceRequest) error {
+//		camundaapi.MustProcessInstanceKey("2251799813685340"),
+//		*camundaapi.NewCancelProcessInstanceRequest())
+func (c *CamundaClient) CancelProcessInstance(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, body camundaapi.CancelProcessInstanceRequest, opts ...func(camundaapi.ApiCancelProcessInstanceRequest) camundaapi.ApiCancelProcessInstanceRequest) error {
 	req := c.raw.ProcessInstanceAPI.CancelProcessInstance(ctx, processInstanceKey)
 	req = req.CancelProcessInstanceRequest(body)
 	for _, opt := range opts {
@@ -2978,14 +2978,14 @@ func (c *CamundaClient) CancelProcessInstance(ctx context.Context, processInstan
 // Example:
 //
 //	// Cancel every instance matching a filter in a single batch operation.
-//	req := openapi.NewProcessInstanceCancellationBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+//	req := camundaapi.NewProcessInstanceCancellationBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 //
 //	result, err := client.CancelProcessInstancesBatchOperation(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) CancelProcessInstancesBatchOperation(ctx context.Context, body openapi.ProcessInstanceCancellationBatchOperationRequest, opts ...func(openapi.ApiCancelProcessInstancesBatchOperationRequest) openapi.ApiCancelProcessInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) CancelProcessInstancesBatchOperation(ctx context.Context, body camundaapi.ProcessInstanceCancellationBatchOperationRequest, opts ...func(camundaapi.ApiCancelProcessInstancesBatchOperationRequest) camundaapi.ApiCancelProcessInstancesBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.ProcessInstanceAPI.CancelProcessInstancesBatchOperation(ctx)
 	req = req.ProcessInstanceCancellationBatchOperationRequest(body)
 	for _, opt := range opts {
@@ -3000,9 +3000,9 @@ func (c *CamundaClient) CancelProcessInstancesBatchOperation(ctx context.Context
 // Example:
 //
 //	return client.DeleteProcessInstance(ctx,
-//		openapi.MustProcessInstanceKey("2251799813685340"),
-//		*openapi.NewDeleteProcessInstanceRequest())
-func (c *CamundaClient) DeleteProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.DeleteProcessInstanceRequest, opts ...func(openapi.ApiDeleteProcessInstanceRequest) openapi.ApiDeleteProcessInstanceRequest) error {
+//		camundaapi.MustProcessInstanceKey("2251799813685340"),
+//		*camundaapi.NewDeleteProcessInstanceRequest())
+func (c *CamundaClient) DeleteProcessInstance(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, body camundaapi.DeleteProcessInstanceRequest, opts ...func(camundaapi.ApiDeleteProcessInstanceRequest) camundaapi.ApiDeleteProcessInstanceRequest) error {
 	req := c.raw.ProcessInstanceAPI.DeleteProcessInstance(ctx, processInstanceKey)
 	req = req.DeleteProcessInstanceRequest(body)
 	for _, opt := range opts {
@@ -3016,14 +3016,14 @@ func (c *CamundaClient) DeleteProcessInstance(ctx context.Context, processInstan
 //
 // Example:
 //
-//	req := openapi.NewProcessInstanceDeletionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+//	req := camundaapi.NewProcessInstanceDeletionBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 //
 //	result, err := client.DeleteProcessInstancesBatchOperation(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) DeleteProcessInstancesBatchOperation(ctx context.Context, body openapi.ProcessInstanceDeletionBatchOperationRequest, opts ...func(openapi.ApiDeleteProcessInstancesBatchOperationRequest) openapi.ApiDeleteProcessInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) DeleteProcessInstancesBatchOperation(ctx context.Context, body camundaapi.ProcessInstanceDeletionBatchOperationRequest, opts ...func(camundaapi.ApiDeleteProcessInstancesBatchOperationRequest) camundaapi.ApiDeleteProcessInstancesBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.ProcessInstanceAPI.DeleteProcessInstancesBatchOperation(ctx)
 	req = req.ProcessInstanceDeletionBatchOperationRequest(body)
 	for _, opt := range opts {
@@ -3037,12 +3037,12 @@ func (c *CamundaClient) DeleteProcessInstancesBatchOperation(ctx context.Context
 //
 // Example:
 //
-//	instance, err := client.GetProcessInstance(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+//	instance, err := client.GetProcessInstance(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("state=%v definition=%q\n", instance.GetState(), instance.GetProcessDefinitionId())
-func (c *CamundaClient) GetProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, opts ...func(openapi.ApiGetProcessInstanceRequest) openapi.ApiGetProcessInstanceRequest) (*openapi.ProcessInstanceResult, error) {
+func (c *CamundaClient) GetProcessInstance(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, opts ...func(camundaapi.ApiGetProcessInstanceRequest) camundaapi.ApiGetProcessInstanceRequest) (*camundaapi.ProcessInstanceResult, error) {
 	req := c.raw.ProcessInstanceAPI.GetProcessInstance(ctx, processInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3055,14 +3055,14 @@ func (c *CamundaClient) GetProcessInstance(ctx context.Context, processInstanceK
 //
 // Example:
 //
-//	hierarchy, err := client.GetProcessInstanceCallHierarchy(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+//	hierarchy, err := client.GetProcessInstanceCallHierarchy(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 //	if err != nil {
 //		return err
 //	}
 //	for _, entry := range hierarchy {
 //		fmt.Printf("%v\n", entry)
 //	}
-func (c *CamundaClient) GetProcessInstanceCallHierarchy(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, opts ...func(openapi.ApiGetProcessInstanceCallHierarchyRequest) openapi.ApiGetProcessInstanceCallHierarchyRequest) ([]openapi.ProcessInstanceCallHierarchyEntry, error) {
+func (c *CamundaClient) GetProcessInstanceCallHierarchy(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, opts ...func(camundaapi.ApiGetProcessInstanceCallHierarchyRequest) camundaapi.ApiGetProcessInstanceCallHierarchyRequest) ([]camundaapi.ProcessInstanceCallHierarchyEntry, error) {
 	req := c.raw.ProcessInstanceAPI.GetProcessInstanceCallHierarchy(ctx, processInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3075,12 +3075,12 @@ func (c *CamundaClient) GetProcessInstanceCallHierarchy(ctx context.Context, pro
 //
 // Example:
 //
-//	result, err := client.GetProcessInstanceSequenceFlows(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+//	result, err := client.GetProcessInstanceSequenceFlows(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessInstanceSequenceFlows(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, opts ...func(openapi.ApiGetProcessInstanceSequenceFlowsRequest) openapi.ApiGetProcessInstanceSequenceFlowsRequest) (*openapi.ProcessInstanceSequenceFlowsQueryResult, error) {
+func (c *CamundaClient) GetProcessInstanceSequenceFlows(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, opts ...func(camundaapi.ApiGetProcessInstanceSequenceFlowsRequest) camundaapi.ApiGetProcessInstanceSequenceFlowsRequest) (*camundaapi.ProcessInstanceSequenceFlowsQueryResult, error) {
 	req := c.raw.ProcessInstanceAPI.GetProcessInstanceSequenceFlows(ctx, processInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3093,12 +3093,12 @@ func (c *CamundaClient) GetProcessInstanceSequenceFlows(ctx context.Context, pro
 //
 // Example:
 //
-//	result, err := client.GetProcessInstanceStatistics(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+//	result, err := client.GetProcessInstanceStatistics(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessInstanceStatistics(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, opts ...func(openapi.ApiGetProcessInstanceStatisticsRequest) openapi.ApiGetProcessInstanceStatisticsRequest) (*openapi.ProcessInstanceElementStatisticsQueryResult, error) {
+func (c *CamundaClient) GetProcessInstanceStatistics(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, opts ...func(camundaapi.ApiGetProcessInstanceStatisticsRequest) camundaapi.ApiGetProcessInstanceStatisticsRequest) (*camundaapi.ProcessInstanceElementStatisticsQueryResult, error) {
 	req := c.raw.ProcessInstanceAPI.GetProcessInstanceStatistics(ctx, processInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3111,12 +3111,12 @@ func (c *CamundaClient) GetProcessInstanceStatistics(ctx context.Context, proces
 //
 // Example:
 //
-//	result, err := client.GetProcessInstanceWaitStateStatistics(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+//	result, err := client.GetProcessInstanceWaitStateStatistics(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) GetProcessInstanceWaitStateStatistics(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, opts ...func(openapi.ApiGetProcessInstanceWaitStateStatisticsRequest) openapi.ApiGetProcessInstanceWaitStateStatisticsRequest) (*openapi.ProcessInstanceWaitStateStatisticsQueryResult, error) {
+func (c *CamundaClient) GetProcessInstanceWaitStateStatistics(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, opts ...func(camundaapi.ApiGetProcessInstanceWaitStateStatisticsRequest) camundaapi.ApiGetProcessInstanceWaitStateStatisticsRequest) (*camundaapi.ProcessInstanceWaitStateStatisticsQueryResult, error) {
 	req := c.raw.ProcessInstanceAPI.GetProcessInstanceWaitStateStatistics(ctx, processInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3129,14 +3129,14 @@ func (c *CamundaClient) GetProcessInstanceWaitStateStatistics(ctx context.Contex
 //
 // Example:
 //
-//	instruction := openapi.NewProcessInstanceMigrationInstruction(
-//		openapi.ProcessDefinitionKey("2251799813685399"),
-//		[]openapi.MigrateProcessInstanceMappingInstruction{
-//			*openapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
+//	instruction := camundaapi.NewProcessInstanceMigrationInstruction(
+//		camundaapi.ProcessDefinitionKey("2251799813685399"),
+//		[]camundaapi.MigrateProcessInstanceMappingInstruction{
+//			*camundaapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
 //		})
 //
-//	return client.MigrateProcessInstance(ctx, openapi.MustProcessInstanceKey("2251799813685340"), *instruction)
-func (c *CamundaClient) MigrateProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.ProcessInstanceMigrationInstruction, opts ...func(openapi.ApiMigrateProcessInstanceRequest) openapi.ApiMigrateProcessInstanceRequest) error {
+//	return client.MigrateProcessInstance(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"), *instruction)
+func (c *CamundaClient) MigrateProcessInstance(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, body camundaapi.ProcessInstanceMigrationInstruction, opts ...func(camundaapi.ApiMigrateProcessInstanceRequest) camundaapi.ApiMigrateProcessInstanceRequest) error {
 	req := c.raw.ProcessInstanceAPI.MigrateProcessInstance(ctx, processInstanceKey)
 	req = req.ProcessInstanceMigrationInstruction(body)
 	for _, opt := range opts {
@@ -3150,19 +3150,19 @@ func (c *CamundaClient) MigrateProcessInstance(ctx context.Context, processInsta
 //
 // Example:
 //
-//	plan := openapi.NewProcessInstanceMigrationBatchOperationPlan(
-//		openapi.ProcessDefinitionKey("2251799813685399"),
-//		[]openapi.MigrateProcessInstanceMappingInstruction{
-//			*openapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
+//	plan := camundaapi.NewProcessInstanceMigrationBatchOperationPlan(
+//		camundaapi.ProcessDefinitionKey("2251799813685399"),
+//		[]camundaapi.MigrateProcessInstanceMappingInstruction{
+//			*camundaapi.NewMigrateProcessInstanceMappingInstruction("review", "review-v2"),
 //		})
-//	req := openapi.NewProcessInstanceMigrationBatchOperationRequest(*openapi.NewProcessInstanceFilter(), *plan)
+//	req := camundaapi.NewProcessInstanceMigrationBatchOperationRequest(*camundaapi.NewProcessInstanceFilter(), *plan)
 //
 //	result, err := client.MigrateProcessInstancesBatchOperation(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) MigrateProcessInstancesBatchOperation(ctx context.Context, body openapi.ProcessInstanceMigrationBatchOperationRequest, opts ...func(openapi.ApiMigrateProcessInstancesBatchOperationRequest) openapi.ApiMigrateProcessInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) MigrateProcessInstancesBatchOperation(ctx context.Context, body camundaapi.ProcessInstanceMigrationBatchOperationRequest, opts ...func(camundaapi.ApiMigrateProcessInstancesBatchOperationRequest) camundaapi.ApiMigrateProcessInstancesBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.ProcessInstanceAPI.MigrateProcessInstancesBatchOperation(ctx)
 	req = req.ProcessInstanceMigrationBatchOperationRequest(body)
 	for _, opt := range opts {
@@ -3177,9 +3177,9 @@ func (c *CamundaClient) MigrateProcessInstancesBatchOperation(ctx context.Contex
 // Example:
 //
 //	return client.ModifyProcessInstance(ctx,
-//		openapi.MustProcessInstanceKey("2251799813685340"),
-//		*openapi.NewProcessInstanceModificationInstruction())
-func (c *CamundaClient) ModifyProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.ProcessInstanceModificationInstruction, opts ...func(openapi.ApiModifyProcessInstanceRequest) openapi.ApiModifyProcessInstanceRequest) error {
+//		camundaapi.MustProcessInstanceKey("2251799813685340"),
+//		*camundaapi.NewProcessInstanceModificationInstruction())
+func (c *CamundaClient) ModifyProcessInstance(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, body camundaapi.ProcessInstanceModificationInstruction, opts ...func(camundaapi.ApiModifyProcessInstanceRequest) camundaapi.ApiModifyProcessInstanceRequest) error {
 	req := c.raw.ProcessInstanceAPI.ModifyProcessInstance(ctx, processInstanceKey)
 	req = req.ProcessInstanceModificationInstruction(body)
 	for _, opt := range opts {
@@ -3193,10 +3193,10 @@ func (c *CamundaClient) ModifyProcessInstance(ctx context.Context, processInstan
 //
 // Example:
 //
-//	req := openapi.NewProcessInstanceModificationBatchOperationRequest(
-//		*openapi.NewProcessInstanceFilter(),
-//		[]openapi.ProcessInstanceModificationMoveBatchOperationInstruction{
-//			*openapi.NewProcessInstanceModificationMoveBatchOperationInstruction("review", "approve"),
+//	req := camundaapi.NewProcessInstanceModificationBatchOperationRequest(
+//		*camundaapi.NewProcessInstanceFilter(),
+//		[]camundaapi.ProcessInstanceModificationMoveBatchOperationInstruction{
+//			*camundaapi.NewProcessInstanceModificationMoveBatchOperationInstruction("review", "approve"),
 //		})
 //
 //	result, err := client.ModifyProcessInstancesBatchOperation(ctx, *req)
@@ -3204,7 +3204,7 @@ func (c *CamundaClient) ModifyProcessInstance(ctx context.Context, processInstan
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) ModifyProcessInstancesBatchOperation(ctx context.Context, body openapi.ProcessInstanceModificationBatchOperationRequest, opts ...func(openapi.ApiModifyProcessInstancesBatchOperationRequest) openapi.ApiModifyProcessInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) ModifyProcessInstancesBatchOperation(ctx context.Context, body camundaapi.ProcessInstanceModificationBatchOperationRequest, opts ...func(camundaapi.ApiModifyProcessInstancesBatchOperationRequest) camundaapi.ApiModifyProcessInstancesBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.ProcessInstanceAPI.ModifyProcessInstancesBatchOperation(ctx)
 	req = req.ProcessInstanceModificationBatchOperationRequest(body)
 	for _, opt := range opts {
@@ -3218,14 +3218,14 @@ func (c *CamundaClient) ModifyProcessInstancesBatchOperation(ctx context.Context
 //
 // Example:
 //
-//	req := openapi.NewProcessInstanceIncidentResolutionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+//	req := camundaapi.NewProcessInstanceIncidentResolutionBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 //
 //	result, err := client.ResolveIncidentsBatchOperation(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) ResolveIncidentsBatchOperation(ctx context.Context, body openapi.ProcessInstanceIncidentResolutionBatchOperationRequest, opts ...func(openapi.ApiResolveIncidentsBatchOperationRequest) openapi.ApiResolveIncidentsBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) ResolveIncidentsBatchOperation(ctx context.Context, body camundaapi.ProcessInstanceIncidentResolutionBatchOperationRequest, opts ...func(camundaapi.ApiResolveIncidentsBatchOperationRequest) camundaapi.ApiResolveIncidentsBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.ProcessInstanceAPI.ResolveIncidentsBatchOperation(ctx)
 	req = req.ProcessInstanceIncidentResolutionBatchOperationRequest(body)
 	for _, opt := range opts {
@@ -3239,12 +3239,12 @@ func (c *CamundaClient) ResolveIncidentsBatchOperation(ctx context.Context, body
 //
 // Example:
 //
-//	result, err := client.ResolveProcessInstanceIncidents(ctx, openapi.MustProcessInstanceKey("2251799813685340"))
+//	result, err := client.ResolveProcessInstanceIncidents(ctx, camundaapi.MustProcessInstanceKey("2251799813685340"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) ResolveProcessInstanceIncidents(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, opts ...func(openapi.ApiResolveProcessInstanceIncidentsRequest) openapi.ApiResolveProcessInstanceIncidentsRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) ResolveProcessInstanceIncidents(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, opts ...func(camundaapi.ApiResolveProcessInstanceIncidentsRequest) camundaapi.ApiResolveProcessInstanceIncidentsRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.ProcessInstanceAPI.ResolveProcessInstanceIncidents(ctx, processInstanceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3258,9 +3258,9 @@ func (c *CamundaClient) ResolveProcessInstanceIncidents(ctx context.Context, pro
 // Example:
 //
 //	return client.ResumeProcessInstance(ctx,
-//		openapi.MustProcessInstanceKey("2251799813685340"),
-//		*openapi.NewResumeProcessInstanceRequest())
-func (c *CamundaClient) ResumeProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.ResumeProcessInstanceRequest, opts ...func(openapi.ApiResumeProcessInstanceRequest) openapi.ApiResumeProcessInstanceRequest) error {
+//		camundaapi.MustProcessInstanceKey("2251799813685340"),
+//		*camundaapi.NewResumeProcessInstanceRequest())
+func (c *CamundaClient) ResumeProcessInstance(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, body camundaapi.ResumeProcessInstanceRequest, opts ...func(camundaapi.ApiResumeProcessInstanceRequest) camundaapi.ApiResumeProcessInstanceRequest) error {
 	req := c.raw.ProcessInstanceAPI.ResumeProcessInstance(ctx, processInstanceKey)
 	req = req.ResumeProcessInstanceRequest(body)
 	for _, opt := range opts {
@@ -3275,14 +3275,14 @@ func (c *CamundaClient) ResumeProcessInstance(ctx context.Context, processInstan
 // Example:
 //
 //	// Resume every previously-suspended instance matching a filter.
-//	req := openapi.NewProcessInstanceResumptionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+//	req := camundaapi.NewProcessInstanceResumptionBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 //
 //	result, err := client.ResumeProcessInstancesBatchOperation(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) ResumeProcessInstancesBatchOperation(ctx context.Context, body openapi.ProcessInstanceResumptionBatchOperationRequest, opts ...func(openapi.ApiResumeProcessInstancesBatchOperationRequest) openapi.ApiResumeProcessInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) ResumeProcessInstancesBatchOperation(ctx context.Context, body camundaapi.ProcessInstanceResumptionBatchOperationRequest, opts ...func(camundaapi.ApiResumeProcessInstancesBatchOperationRequest) camundaapi.ApiResumeProcessInstancesBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.ProcessInstanceAPI.ResumeProcessInstancesBatchOperation(ctx)
 	req = req.ProcessInstanceResumptionBatchOperationRequest(body)
 	for _, opt := range opts {
@@ -3297,15 +3297,15 @@ func (c *CamundaClient) ResumeProcessInstancesBatchOperation(ctx context.Context
 // Example:
 //
 //	result, err := client.SearchProcessInstanceIncidents(ctx,
-//		openapi.MustProcessInstanceKey("2251799813685340"),
-//		*openapi.NewIncidentSearchQuery())
+//		camundaapi.MustProcessInstanceKey("2251799813685340"),
+//		*camundaapi.NewIncidentSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, inc := range result.GetItems() {
 //		fmt.Printf("%v\n", inc)
 //	}
-func (c *CamundaClient) SearchProcessInstanceIncidents(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.IncidentSearchQuery, opts ...func(openapi.ApiSearchProcessInstanceIncidentsRequest) openapi.ApiSearchProcessInstanceIncidentsRequest) (*openapi.IncidentSearchQueryResult, error) {
+func (c *CamundaClient) SearchProcessInstanceIncidents(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, body camundaapi.IncidentSearchQuery, opts ...func(camundaapi.ApiSearchProcessInstanceIncidentsRequest) camundaapi.ApiSearchProcessInstanceIncidentsRequest) (*camundaapi.IncidentSearchQueryResult, error) {
 	req := c.raw.ProcessInstanceAPI.SearchProcessInstanceIncidents(ctx, processInstanceKey)
 	req = req.IncidentSearchQuery(body)
 	for _, opt := range opts {
@@ -3319,14 +3319,14 @@ func (c *CamundaClient) SearchProcessInstanceIncidents(ctx context.Context, proc
 //
 // Example:
 //
-//	result, err := client.SearchProcessInstances(ctx, *openapi.NewProcessInstanceSearchQuery())
+//	result, err := client.SearchProcessInstances(ctx, *camundaapi.NewProcessInstanceSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, pi := range result.GetItems() {
 //		fmt.Printf("%v: %v\n", pi.GetProcessInstanceKey(), pi.GetState())
 //	}
-func (c *CamundaClient) SearchProcessInstances(ctx context.Context, body openapi.ProcessInstanceSearchQuery, opts ...func(openapi.ApiSearchProcessInstancesRequest) openapi.ApiSearchProcessInstancesRequest) (*openapi.ProcessInstanceSearchQueryResult, error) {
+func (c *CamundaClient) SearchProcessInstances(ctx context.Context, body camundaapi.ProcessInstanceSearchQuery, opts ...func(camundaapi.ApiSearchProcessInstancesRequest) camundaapi.ApiSearchProcessInstancesRequest) (*camundaapi.ProcessInstanceSearchQueryResult, error) {
 	req := c.raw.ProcessInstanceAPI.SearchProcessInstances(ctx)
 	req = req.ProcessInstanceSearchQuery(body)
 	for _, opt := range opts {
@@ -3341,9 +3341,9 @@ func (c *CamundaClient) SearchProcessInstances(ctx context.Context, body openapi
 // Example:
 //
 //	return client.SuspendProcessInstance(ctx,
-//		openapi.MustProcessInstanceKey("2251799813685340"),
-//		*openapi.NewSuspendProcessInstanceRequest())
-func (c *CamundaClient) SuspendProcessInstance(ctx context.Context, processInstanceKey openapi.ProcessInstanceKey, body openapi.SuspendProcessInstanceRequest, opts ...func(openapi.ApiSuspendProcessInstanceRequest) openapi.ApiSuspendProcessInstanceRequest) error {
+//		camundaapi.MustProcessInstanceKey("2251799813685340"),
+//		*camundaapi.NewSuspendProcessInstanceRequest())
+func (c *CamundaClient) SuspendProcessInstance(ctx context.Context, processInstanceKey camundaapi.ProcessInstanceKey, body camundaapi.SuspendProcessInstanceRequest, opts ...func(camundaapi.ApiSuspendProcessInstanceRequest) camundaapi.ApiSuspendProcessInstanceRequest) error {
 	req := c.raw.ProcessInstanceAPI.SuspendProcessInstance(ctx, processInstanceKey)
 	req = req.SuspendProcessInstanceRequest(body)
 	for _, opt := range opts {
@@ -3358,14 +3358,14 @@ func (c *CamundaClient) SuspendProcessInstance(ctx context.Context, processInsta
 // Example:
 //
 //	// Suspend every instance matching a filter in a single batch operation.
-//	req := openapi.NewProcessInstanceSuspensionBatchOperationRequest(*openapi.NewProcessInstanceFilter())
+//	req := camundaapi.NewProcessInstanceSuspensionBatchOperationRequest(*camundaapi.NewProcessInstanceFilter())
 //
 //	result, err := client.SuspendProcessInstancesBatchOperation(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("created batch operation %v\n", result.GetBatchOperationKey())
-func (c *CamundaClient) SuspendProcessInstancesBatchOperation(ctx context.Context, body openapi.ProcessInstanceSuspensionBatchOperationRequest, opts ...func(openapi.ApiSuspendProcessInstancesBatchOperationRequest) openapi.ApiSuspendProcessInstancesBatchOperationRequest) (*openapi.BatchOperationCreatedResult, error) {
+func (c *CamundaClient) SuspendProcessInstancesBatchOperation(ctx context.Context, body camundaapi.ProcessInstanceSuspensionBatchOperationRequest, opts ...func(camundaapi.ApiSuspendProcessInstancesBatchOperationRequest) camundaapi.ApiSuspendProcessInstancesBatchOperationRequest) (*camundaapi.BatchOperationCreatedResult, error) {
 	req := c.raw.ProcessInstanceAPI.SuspendProcessInstancesBatchOperation(ctx)
 	req = req.ProcessInstanceSuspensionBatchOperationRequest(body)
 	for _, opt := range opts {
@@ -3384,7 +3384,7 @@ func (c *CamundaClient) SuspendProcessInstancesBatchOperation(ctx context.Contex
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) ChangeClusterMode(ctx context.Context, opts ...func(openapi.ApiChangeClusterModeRequest) openapi.ApiChangeClusterModeRequest) (*openapi.ClusterModeChangeResponse, error) {
+func (c *CamundaClient) ChangeClusterMode(ctx context.Context, opts ...func(camundaapi.ApiChangeClusterModeRequest) camundaapi.ApiChangeClusterModeRequest) (*camundaapi.ClusterModeChangeResponse, error) {
 	req := c.raw.RecoveryAPI.ChangeClusterMode(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3398,14 +3398,14 @@ func (c *CamundaClient) ChangeClusterMode(ctx context.Context, opts ...func(open
 // Example:
 //
 //	// Changes the cluster mode as a cluster-level admin (cross-tenant authority).
-//	result, err := client.ChangeClusterModeAsClusterAdmin(ctx, func(r openapi.ApiChangeClusterModeAsClusterAdminRequest) openapi.ApiChangeClusterModeAsClusterAdminRequest {
-//		return r.Mode(openapi.MODE_RECOVERING)
+//	result, err := client.ChangeClusterModeAsClusterAdmin(ctx, func(r camundaapi.ApiChangeClusterModeAsClusterAdminRequest) camundaapi.ApiChangeClusterModeAsClusterAdminRequest {
+//		return r.Mode(camundaapi.MODE_RECOVERING)
 //	})
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("change %s: %d planned operation group(s)\n", result.GetChangeId(), len(result.GetPlannedChanges()))
-func (c *CamundaClient) ChangeClusterModeAsClusterAdmin(ctx context.Context, opts ...func(openapi.ApiChangeClusterModeAsClusterAdminRequest) openapi.ApiChangeClusterModeAsClusterAdminRequest) (*openapi.ClusterModeChangeResponse, error) {
+func (c *CamundaClient) ChangeClusterModeAsClusterAdmin(ctx context.Context, opts ...func(camundaapi.ApiChangeClusterModeAsClusterAdminRequest) camundaapi.ApiChangeClusterModeAsClusterAdminRequest) (*camundaapi.ClusterModeChangeResponse, error) {
 	req := c.raw.RecoveryAPI.ChangeClusterModeAsClusterAdmin(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3427,7 +3427,7 @@ func (c *CamundaClient) ChangeClusterModeAsClusterAdmin(ctx context.Context, opt
 //	for _, broker := range status.GetBrokers() {
 //		fmt.Printf("%v\n", broker)
 //	}
-func (c *CamundaClient) GetRestoreStatus(ctx context.Context, opts ...func(openapi.ApiGetRestoreStatusRequest) openapi.ApiGetRestoreStatusRequest) (*openapi.RestoreStatusResponse, error) {
+func (c *CamundaClient) GetRestoreStatus(ctx context.Context, opts ...func(camundaapi.ApiGetRestoreStatusRequest) camundaapi.ApiGetRestoreStatusRequest) (*camundaapi.RestoreStatusResponse, error) {
 	req := c.raw.RecoveryAPI.GetRestoreStatus(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3440,12 +3440,12 @@ func (c *CamundaClient) GetRestoreStatus(ctx context.Context, opts ...func(opena
 //
 // Example:
 //
-//	result, err := client.Restore(ctx, *openapi.NewRestoreRequest())
+//	result, err := client.Restore(ctx, *camundaapi.NewRestoreRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) Restore(ctx context.Context, body openapi.RestoreRequest, opts ...func(openapi.ApiRestoreRequest) openapi.ApiRestoreRequest) (*openapi.ClusterRestoreResponse, error) {
+func (c *CamundaClient) Restore(ctx context.Context, body camundaapi.RestoreRequest, opts ...func(camundaapi.ApiRestoreRequest) camundaapi.ApiRestoreRequest) (*camundaapi.ClusterRestoreResponse, error) {
 	req := c.raw.RecoveryAPI.Restore(ctx)
 	req = req.RestoreRequest(body)
 	for _, opt := range opts {
@@ -3462,14 +3462,14 @@ func (c *CamundaClient) Restore(ctx context.Context, body openapi.RestoreRequest
 //	// Triggers a cluster-level restore (cluster-admin authority), restoring from the given backup IDs.
 //	// backupIds are one per partition, so the placeholder slice below must be extended to
 //	// match the actual partition count of the target cluster (shown here for a 2-partition cluster).
-//	restoreRequest := openapi.NewClusterRestoreRequestWithDefaults()
+//	restoreRequest := camundaapi.NewClusterRestoreRequestWithDefaults()
 //	restoreRequest.SetBackupIds([]int64{1, 2})
 //	result, err := client.RestoreAsClusterAdmin(ctx, *restoreRequest)
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("restore change id: %s\n", result.GetChangeId())
-func (c *CamundaClient) RestoreAsClusterAdmin(ctx context.Context, body openapi.ClusterRestoreRequest, opts ...func(openapi.ApiRestoreAsClusterAdminRequest) openapi.ApiRestoreAsClusterAdminRequest) (*openapi.ClusterRestoreResponse, error) {
+func (c *CamundaClient) RestoreAsClusterAdmin(ctx context.Context, body camundaapi.ClusterRestoreRequest, opts ...func(camundaapi.ApiRestoreAsClusterAdminRequest) camundaapi.ApiRestoreAsClusterAdminRequest) (*camundaapi.ClusterRestoreResponse, error) {
 	req := c.raw.RecoveryAPI.RestoreAsClusterAdmin(ctx)
 	req = req.ClusterRestoreRequest(body)
 	for _, opt := range opts {
@@ -3497,7 +3497,7 @@ func (c *CamundaClient) RestoreAsClusterAdmin(ctx context.Context, body openapi.
 //		return err
 //	}
 //	fmt.Printf("deployment key %v\n", deployment.GetDeploymentKey())
-func (c *CamundaClient) CreateDeployment(ctx context.Context, opts ...func(openapi.ApiCreateDeploymentRequest) openapi.ApiCreateDeploymentRequest) (*openapi.DeploymentResult, error) {
+func (c *CamundaClient) CreateDeployment(ctx context.Context, opts ...func(camundaapi.ApiCreateDeploymentRequest) camundaapi.ApiCreateDeploymentRequest) (*camundaapi.DeploymentResult, error) {
 	req := c.raw.ResourceAPI.CreateDeployment(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3511,13 +3511,13 @@ func (c *CamundaClient) CreateDeployment(ctx context.Context, opts ...func(opena
 // Example:
 //
 //	result, err := client.DeleteResource(ctx,
-//		openapi.MustResourceKey("2251799813685350"),
-//		*openapi.NewDeleteResourceRequest())
+//		camundaapi.MustResourceKey("2251799813685350"),
+//		*camundaapi.NewDeleteResourceRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) DeleteResource(ctx context.Context, resourceKey openapi.ResourceKey, body openapi.DeleteResourceRequest, opts ...func(openapi.ApiDeleteResourceRequest) openapi.ApiDeleteResourceRequest) (*openapi.DeleteResourceResponse, error) {
+func (c *CamundaClient) DeleteResource(ctx context.Context, resourceKey camundaapi.ResourceKey, body camundaapi.DeleteResourceRequest, opts ...func(camundaapi.ApiDeleteResourceRequest) camundaapi.ApiDeleteResourceRequest) (*camundaapi.DeleteResourceResponse, error) {
 	req := c.raw.ResourceAPI.DeleteResource(ctx, resourceKey)
 	req = req.DeleteResourceRequest(body)
 	for _, opt := range opts {
@@ -3531,12 +3531,12 @@ func (c *CamundaClient) DeleteResource(ctx context.Context, resourceKey openapi.
 //
 // Example:
 //
-//	resource, err := client.GetResource(ctx, openapi.MustResourceKey("2251799813685350"))
+//	resource, err := client.GetResource(ctx, camundaapi.MustResourceKey("2251799813685350"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", resource)
-func (c *CamundaClient) GetResource(ctx context.Context, resourceKey openapi.ResourceKey, opts ...func(openapi.ApiGetResourceRequest) openapi.ApiGetResourceRequest) (*openapi.ResourceResult, error) {
+func (c *CamundaClient) GetResource(ctx context.Context, resourceKey camundaapi.ResourceKey, opts ...func(camundaapi.ApiGetResourceRequest) camundaapi.ApiGetResourceRequest) (*camundaapi.ResourceResult, error) {
 	req := c.raw.ResourceAPI.GetResource(ctx, resourceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3549,12 +3549,12 @@ func (c *CamundaClient) GetResource(ctx context.Context, resourceKey openapi.Res
 //
 // Example:
 //
-//	content, err := client.GetResourceContent(ctx, openapi.MustResourceKey("2251799813685350"))
+//	content, err := client.GetResourceContent(ctx, camundaapi.MustResourceKey("2251799813685350"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", content)
-func (c *CamundaClient) GetResourceContent(ctx context.Context, resourceKey openapi.ResourceKey, opts ...func(openapi.ApiGetResourceContentRequest) openapi.ApiGetResourceContentRequest) (map[string]interface{}, error) {
+func (c *CamundaClient) GetResourceContent(ctx context.Context, resourceKey camundaapi.ResourceKey, opts ...func(camundaapi.ApiGetResourceContentRequest) camundaapi.ApiGetResourceContentRequest) (map[string]interface{}, error) {
 	req := c.raw.ResourceAPI.GetResourceContent(ctx, resourceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3567,12 +3567,12 @@ func (c *CamundaClient) GetResourceContent(ctx context.Context, resourceKey open
 //
 // Example:
 //
-//	file, err := client.GetResourceContentBinary(ctx, openapi.MustResourceKey("2251799813685350"))
+//	file, err := client.GetResourceContentBinary(ctx, camundaapi.MustResourceKey("2251799813685350"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("downloaded to %s\n", file.Name())
-func (c *CamundaClient) GetResourceContentBinary(ctx context.Context, resourceKey openapi.ResourceKey, opts ...func(openapi.ApiGetResourceContentBinaryRequest) openapi.ApiGetResourceContentBinaryRequest) (*os.File, error) {
+func (c *CamundaClient) GetResourceContentBinary(ctx context.Context, resourceKey camundaapi.ResourceKey, opts ...func(camundaapi.ApiGetResourceContentBinaryRequest) camundaapi.ApiGetResourceContentBinaryRequest) (*os.File, error) {
 	req := c.raw.ResourceAPI.GetResourceContentBinary(ctx, resourceKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3585,14 +3585,14 @@ func (c *CamundaClient) GetResourceContentBinary(ctx context.Context, resourceKe
 //
 // Example:
 //
-//	result, err := client.SearchResources(ctx, *openapi.NewResourceSearchQuery())
+//	result, err := client.SearchResources(ctx, *camundaapi.NewResourceSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, r := range result.GetItems() {
 //		fmt.Printf("%v\n", r)
 //	}
-func (c *CamundaClient) SearchResources(ctx context.Context, body openapi.ResourceSearchQuery, opts ...func(openapi.ApiSearchResourcesRequest) openapi.ApiSearchResourcesRequest) (*openapi.ResourceSearchQueryResult, error) {
+func (c *CamundaClient) SearchResources(ctx context.Context, body camundaapi.ResourceSearchQuery, opts ...func(camundaapi.ApiSearchResourcesRequest) camundaapi.ApiSearchResourcesRequest) (*camundaapi.ResourceSearchQueryResult, error) {
 	req := c.raw.ResourceAPI.SearchResources(ctx)
 	req = req.ResourceSearchQuery(body)
 	for _, opt := range opts {
@@ -3607,7 +3607,7 @@ func (c *CamundaClient) SearchResources(ctx context.Context, body openapi.Resour
 // Example:
 //
 //	return client.AssignRoleToClient(ctx, "auditor", "reporting-service")
-func (c *CamundaClient) AssignRoleToClient(ctx context.Context, roleId string, clientId string, opts ...func(openapi.ApiAssignRoleToClientRequest) openapi.ApiAssignRoleToClientRequest) error {
+func (c *CamundaClient) AssignRoleToClient(ctx context.Context, roleId string, clientId string, opts ...func(camundaapi.ApiAssignRoleToClientRequest) camundaapi.ApiAssignRoleToClientRequest) error {
 	req := c.raw.RoleAPI.AssignRoleToClient(ctx, roleId, clientId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3621,7 +3621,7 @@ func (c *CamundaClient) AssignRoleToClient(ctx context.Context, roleId string, c
 // Example:
 //
 //	return client.AssignRoleToGroup(ctx, "auditor", "finance")
-func (c *CamundaClient) AssignRoleToGroup(ctx context.Context, roleId string, groupId string, opts ...func(openapi.ApiAssignRoleToGroupRequest) openapi.ApiAssignRoleToGroupRequest) error {
+func (c *CamundaClient) AssignRoleToGroup(ctx context.Context, roleId string, groupId string, opts ...func(camundaapi.ApiAssignRoleToGroupRequest) camundaapi.ApiAssignRoleToGroupRequest) error {
 	req := c.raw.RoleAPI.AssignRoleToGroup(ctx, roleId, groupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3635,7 +3635,7 @@ func (c *CamundaClient) AssignRoleToGroup(ctx context.Context, roleId string, gr
 // Example:
 //
 //	return client.AssignRoleToMappingRule(ctx, "auditor", "sso-auditors")
-func (c *CamundaClient) AssignRoleToMappingRule(ctx context.Context, roleId string, mappingRuleId string, opts ...func(openapi.ApiAssignRoleToMappingRuleRequest) openapi.ApiAssignRoleToMappingRuleRequest) error {
+func (c *CamundaClient) AssignRoleToMappingRule(ctx context.Context, roleId string, mappingRuleId string, opts ...func(camundaapi.ApiAssignRoleToMappingRuleRequest) camundaapi.ApiAssignRoleToMappingRuleRequest) error {
 	req := c.raw.RoleAPI.AssignRoleToMappingRule(ctx, roleId, mappingRuleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3649,7 +3649,7 @@ func (c *CamundaClient) AssignRoleToMappingRule(ctx context.Context, roleId stri
 // Example:
 //
 //	return client.AssignRoleToUser(ctx, "auditor", "alice")
-func (c *CamundaClient) AssignRoleToUser(ctx context.Context, roleId string, username string, opts ...func(openapi.ApiAssignRoleToUserRequest) openapi.ApiAssignRoleToUserRequest) error {
+func (c *CamundaClient) AssignRoleToUser(ctx context.Context, roleId string, username string, opts ...func(camundaapi.ApiAssignRoleToUserRequest) camundaapi.ApiAssignRoleToUserRequest) error {
 	req := c.raw.RoleAPI.AssignRoleToUser(ctx, roleId, username)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3662,12 +3662,12 @@ func (c *CamundaClient) AssignRoleToUser(ctx context.Context, roleId string, use
 //
 // Example:
 //
-//	result, err := client.CreateRole(ctx, *openapi.NewRoleCreateRequest("auditor", "Auditor"))
+//	result, err := client.CreateRole(ctx, *camundaapi.NewRoleCreateRequest("auditor", "Auditor"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateRole(ctx context.Context, body openapi.RoleCreateRequest, opts ...func(openapi.ApiCreateRoleRequest) openapi.ApiCreateRoleRequest) (*openapi.RoleCreateResult, error) {
+func (c *CamundaClient) CreateRole(ctx context.Context, body camundaapi.RoleCreateRequest, opts ...func(camundaapi.ApiCreateRoleRequest) camundaapi.ApiCreateRoleRequest) (*camundaapi.RoleCreateResult, error) {
 	req := c.raw.RoleAPI.CreateRole(ctx)
 	req = req.RoleCreateRequest(body)
 	for _, opt := range opts {
@@ -3682,7 +3682,7 @@ func (c *CamundaClient) CreateRole(ctx context.Context, body openapi.RoleCreateR
 // Example:
 //
 //	return client.DeleteRole(ctx, "auditor")
-func (c *CamundaClient) DeleteRole(ctx context.Context, roleId string, opts ...func(openapi.ApiDeleteRoleRequest) openapi.ApiDeleteRoleRequest) error {
+func (c *CamundaClient) DeleteRole(ctx context.Context, roleId string, opts ...func(camundaapi.ApiDeleteRoleRequest) camundaapi.ApiDeleteRoleRequest) error {
 	req := c.raw.RoleAPI.DeleteRole(ctx, roleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3700,7 +3700,7 @@ func (c *CamundaClient) DeleteRole(ctx context.Context, roleId string, opts ...f
 //		return err
 //	}
 //	fmt.Printf("%v\n", role)
-func (c *CamundaClient) GetRole(ctx context.Context, roleId string, opts ...func(openapi.ApiGetRoleRequest) openapi.ApiGetRoleRequest) (*openapi.RoleResult, error) {
+func (c *CamundaClient) GetRole(ctx context.Context, roleId string, opts ...func(camundaapi.ApiGetRoleRequest) camundaapi.ApiGetRoleRequest) (*camundaapi.RoleResult, error) {
 	req := c.raw.RoleAPI.GetRole(ctx, roleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3713,12 +3713,12 @@ func (c *CamundaClient) GetRole(ctx context.Context, roleId string, opts ...func
 //
 // Example:
 //
-//	result, err := client.SearchClientsForRole(ctx, "auditor", *openapi.NewRoleClientSearchQueryRequest())
+//	result, err := client.SearchClientsForRole(ctx, "auditor", *camundaapi.NewRoleClientSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchClientsForRole(ctx context.Context, roleId string, body openapi.RoleClientSearchQueryRequest, opts ...func(openapi.ApiSearchClientsForRoleRequest) openapi.ApiSearchClientsForRoleRequest) (*openapi.RoleClientSearchResult, error) {
+func (c *CamundaClient) SearchClientsForRole(ctx context.Context, roleId string, body camundaapi.RoleClientSearchQueryRequest, opts ...func(camundaapi.ApiSearchClientsForRoleRequest) camundaapi.ApiSearchClientsForRoleRequest) (*camundaapi.RoleClientSearchResult, error) {
 	req := c.raw.RoleAPI.SearchClientsForRole(ctx, roleId)
 	req = req.RoleClientSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -3732,12 +3732,12 @@ func (c *CamundaClient) SearchClientsForRole(ctx context.Context, roleId string,
 //
 // Example:
 //
-//	result, err := client.SearchGroupsForRole(ctx, "auditor", *openapi.NewRoleGroupSearchQueryRequest())
+//	result, err := client.SearchGroupsForRole(ctx, "auditor", *camundaapi.NewRoleGroupSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchGroupsForRole(ctx context.Context, roleId string, body openapi.RoleGroupSearchQueryRequest, opts ...func(openapi.ApiSearchGroupsForRoleRequest) openapi.ApiSearchGroupsForRoleRequest) (*openapi.RoleGroupSearchResult, error) {
+func (c *CamundaClient) SearchGroupsForRole(ctx context.Context, roleId string, body camundaapi.RoleGroupSearchQueryRequest, opts ...func(camundaapi.ApiSearchGroupsForRoleRequest) camundaapi.ApiSearchGroupsForRoleRequest) (*camundaapi.RoleGroupSearchResult, error) {
 	req := c.raw.RoleAPI.SearchGroupsForRole(ctx, roleId)
 	req = req.RoleGroupSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -3751,12 +3751,12 @@ func (c *CamundaClient) SearchGroupsForRole(ctx context.Context, roleId string, 
 //
 // Example:
 //
-//	result, err := client.SearchMappingRulesForRole(ctx, "auditor", *openapi.NewMappingRuleSearchQueryRequest())
+//	result, err := client.SearchMappingRulesForRole(ctx, "auditor", *camundaapi.NewMappingRuleSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchMappingRulesForRole(ctx context.Context, roleId string, body openapi.MappingRuleSearchQueryRequest, opts ...func(openapi.ApiSearchMappingRulesForRoleRequest) openapi.ApiSearchMappingRulesForRoleRequest) (*openapi.RoleMappingRuleSearchResult, error) {
+func (c *CamundaClient) SearchMappingRulesForRole(ctx context.Context, roleId string, body camundaapi.MappingRuleSearchQueryRequest, opts ...func(camundaapi.ApiSearchMappingRulesForRoleRequest) camundaapi.ApiSearchMappingRulesForRoleRequest) (*camundaapi.RoleMappingRuleSearchResult, error) {
 	req := c.raw.RoleAPI.SearchMappingRulesForRole(ctx, roleId)
 	req = req.MappingRuleSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -3770,14 +3770,14 @@ func (c *CamundaClient) SearchMappingRulesForRole(ctx context.Context, roleId st
 //
 // Example:
 //
-//	result, err := client.SearchRoles(ctx, *openapi.NewRoleSearchQueryRequest())
+//	result, err := client.SearchRoles(ctx, *camundaapi.NewRoleSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	for _, r := range result.GetItems() {
 //		fmt.Printf("%v\n", r)
 //	}
-func (c *CamundaClient) SearchRoles(ctx context.Context, body openapi.RoleSearchQueryRequest, opts ...func(openapi.ApiSearchRolesRequest) openapi.ApiSearchRolesRequest) (*openapi.RoleSearchQueryResult, error) {
+func (c *CamundaClient) SearchRoles(ctx context.Context, body camundaapi.RoleSearchQueryRequest, opts ...func(camundaapi.ApiSearchRolesRequest) camundaapi.ApiSearchRolesRequest) (*camundaapi.RoleSearchQueryResult, error) {
 	req := c.raw.RoleAPI.SearchRoles(ctx)
 	req = req.RoleSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -3791,12 +3791,12 @@ func (c *CamundaClient) SearchRoles(ctx context.Context, body openapi.RoleSearch
 //
 // Example:
 //
-//	result, err := client.SearchUsersForRole(ctx, "auditor", *openapi.NewRoleUserSearchQueryRequest())
+//	result, err := client.SearchUsersForRole(ctx, "auditor", *camundaapi.NewRoleUserSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchUsersForRole(ctx context.Context, roleId string, body openapi.RoleUserSearchQueryRequest, opts ...func(openapi.ApiSearchUsersForRoleRequest) openapi.ApiSearchUsersForRoleRequest) (*openapi.RoleUserSearchResult, error) {
+func (c *CamundaClient) SearchUsersForRole(ctx context.Context, roleId string, body camundaapi.RoleUserSearchQueryRequest, opts ...func(camundaapi.ApiSearchUsersForRoleRequest) camundaapi.ApiSearchUsersForRoleRequest) (*camundaapi.RoleUserSearchResult, error) {
 	req := c.raw.RoleAPI.SearchUsersForRole(ctx, roleId)
 	req = req.RoleUserSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -3811,7 +3811,7 @@ func (c *CamundaClient) SearchUsersForRole(ctx context.Context, roleId string, b
 // Example:
 //
 //	return client.UnassignRoleFromClient(ctx, "auditor", "reporting-service")
-func (c *CamundaClient) UnassignRoleFromClient(ctx context.Context, roleId string, clientId string, opts ...func(openapi.ApiUnassignRoleFromClientRequest) openapi.ApiUnassignRoleFromClientRequest) error {
+func (c *CamundaClient) UnassignRoleFromClient(ctx context.Context, roleId string, clientId string, opts ...func(camundaapi.ApiUnassignRoleFromClientRequest) camundaapi.ApiUnassignRoleFromClientRequest) error {
 	req := c.raw.RoleAPI.UnassignRoleFromClient(ctx, roleId, clientId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3825,7 +3825,7 @@ func (c *CamundaClient) UnassignRoleFromClient(ctx context.Context, roleId strin
 // Example:
 //
 //	return client.UnassignRoleFromGroup(ctx, "auditor", "finance")
-func (c *CamundaClient) UnassignRoleFromGroup(ctx context.Context, roleId string, groupId string, opts ...func(openapi.ApiUnassignRoleFromGroupRequest) openapi.ApiUnassignRoleFromGroupRequest) error {
+func (c *CamundaClient) UnassignRoleFromGroup(ctx context.Context, roleId string, groupId string, opts ...func(camundaapi.ApiUnassignRoleFromGroupRequest) camundaapi.ApiUnassignRoleFromGroupRequest) error {
 	req := c.raw.RoleAPI.UnassignRoleFromGroup(ctx, roleId, groupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3839,7 +3839,7 @@ func (c *CamundaClient) UnassignRoleFromGroup(ctx context.Context, roleId string
 // Example:
 //
 //	return client.UnassignRoleFromMappingRule(ctx, "auditor", "sso-auditors")
-func (c *CamundaClient) UnassignRoleFromMappingRule(ctx context.Context, roleId string, mappingRuleId string, opts ...func(openapi.ApiUnassignRoleFromMappingRuleRequest) openapi.ApiUnassignRoleFromMappingRuleRequest) error {
+func (c *CamundaClient) UnassignRoleFromMappingRule(ctx context.Context, roleId string, mappingRuleId string, opts ...func(camundaapi.ApiUnassignRoleFromMappingRuleRequest) camundaapi.ApiUnassignRoleFromMappingRuleRequest) error {
 	req := c.raw.RoleAPI.UnassignRoleFromMappingRule(ctx, roleId, mappingRuleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3853,7 +3853,7 @@ func (c *CamundaClient) UnassignRoleFromMappingRule(ctx context.Context, roleId 
 // Example:
 //
 //	return client.UnassignRoleFromUser(ctx, "auditor", "alice")
-func (c *CamundaClient) UnassignRoleFromUser(ctx context.Context, roleId string, username string, opts ...func(openapi.ApiUnassignRoleFromUserRequest) openapi.ApiUnassignRoleFromUserRequest) error {
+func (c *CamundaClient) UnassignRoleFromUser(ctx context.Context, roleId string, username string, opts ...func(camundaapi.ApiUnassignRoleFromUserRequest) camundaapi.ApiUnassignRoleFromUserRequest) error {
 	req := c.raw.RoleAPI.UnassignRoleFromUser(ctx, roleId, username)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3866,12 +3866,12 @@ func (c *CamundaClient) UnassignRoleFromUser(ctx context.Context, roleId string,
 //
 // Example:
 //
-//	result, err := client.UpdateRole(ctx, "auditor", *openapi.NewRoleUpdateRequest("Senior Auditor"))
+//	result, err := client.UpdateRole(ctx, "auditor", *camundaapi.NewRoleUpdateRequest("Senior Auditor"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateRole(ctx context.Context, roleId string, body openapi.RoleUpdateRequest, opts ...func(openapi.ApiUpdateRoleRequest) openapi.ApiUpdateRoleRequest) (*openapi.RoleUpdateResult, error) {
+func (c *CamundaClient) UpdateRole(ctx context.Context, roleId string, body camundaapi.RoleUpdateRequest, opts ...func(camundaapi.ApiUpdateRoleRequest) camundaapi.ApiUpdateRoleRequest) (*camundaapi.RoleUpdateResult, error) {
 	req := c.raw.RoleAPI.UpdateRole(ctx, roleId)
 	req = req.RoleUpdateRequest(body)
 	for _, opt := range opts {
@@ -3893,7 +3893,7 @@ func (c *CamundaClient) UpdateRole(ctx context.Context, roleId string, body open
 //	for _, reference := range result.GetReferences() {
 //		fmt.Printf("%v\n", reference)
 //	}
-func (c *CamundaClient) ListSecrets(ctx context.Context, opts ...func(openapi.ApiListSecretsRequest) openapi.ApiListSecretsRequest) (*openapi.SecretListResult, error) {
+func (c *CamundaClient) ListSecrets(ctx context.Context, opts ...func(camundaapi.ApiListSecretsRequest) camundaapi.ApiListSecretsRequest) (*camundaapi.SecretListResult, error) {
 	req := c.raw.SecretAPI.ListSecrets(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3907,7 +3907,7 @@ func (c *CamundaClient) ListSecrets(ctx context.Context, opts ...func(openapi.Ap
 // Example:
 //
 //	// References take the form `camunda.secrets.<name>`.
-//	req := openapi.NewSecretResolveRequest([]string{"camunda.secrets.MY_API_KEY", "camunda.secrets.MY_TOKEN"})
+//	req := camundaapi.NewSecretResolveRequest([]string{"camunda.secrets.MY_API_KEY", "camunda.secrets.MY_TOKEN"})
 //
 //	result, err := client.ResolveSecrets(ctx, *req)
 //	if err != nil {
@@ -3916,7 +3916,7 @@ func (c *CamundaClient) ListSecrets(ctx context.Context, opts ...func(openapi.Ap
 //	for _, secret := range result.GetResolved() {
 //		fmt.Printf("%v = %v\n", secret.GetReference(), secret.GetValue())
 //	}
-func (c *CamundaClient) ResolveSecrets(ctx context.Context, body openapi.SecretResolveRequest, opts ...func(openapi.ApiResolveSecretsRequest) openapi.ApiResolveSecretsRequest) (*openapi.SecretResolveResult, error) {
+func (c *CamundaClient) ResolveSecrets(ctx context.Context, body camundaapi.SecretResolveRequest, opts ...func(camundaapi.ApiResolveSecretsRequest) camundaapi.ApiResolveSecretsRequest) (*camundaapi.SecretResolveResult, error) {
 	req := c.raw.SecretAPI.ResolveSecrets(ctx)
 	req = req.SecretResolveRequest(body)
 	for _, opt := range opts {
@@ -3932,12 +3932,12 @@ func (c *CamundaClient) ResolveSecrets(ctx context.Context, body openapi.SecretR
 //
 //	// One-time setup: create the initial administrator on a fresh cluster.
 //	// "admin-password-123" is a placeholder — don't hardcode passwords in production.
-//	result, err := client.CreateAdminUser(ctx, *openapi.NewUserRequest("admin-password-123", "admin"))
+//	result, err := client.CreateAdminUser(ctx, *camundaapi.NewUserRequest("admin-password-123", "admin"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateAdminUser(ctx context.Context, body openapi.UserRequest, opts ...func(openapi.ApiCreateAdminUserRequest) openapi.ApiCreateAdminUserRequest) (*openapi.UserCreateResult, error) {
+func (c *CamundaClient) CreateAdminUser(ctx context.Context, body camundaapi.UserRequest, opts ...func(camundaapi.ApiCreateAdminUserRequest) camundaapi.ApiCreateAdminUserRequest) (*camundaapi.UserCreateResult, error) {
 	req := c.raw.SetupAPI.CreateAdminUser(ctx)
 	req = req.UserRequest(body)
 	for _, opt := range opts {
@@ -3951,7 +3951,7 @@ func (c *CamundaClient) CreateAdminUser(ctx context.Context, body openapi.UserRe
 //
 // Example:
 //
-//	req := openapi.NewSignalBroadcastRequest("cancel-all-orders")
+//	req := camundaapi.NewSignalBroadcastRequest("cancel-all-orders")
 //	req.SetVariables(map[string]any{"reason": "maintenance"})
 //
 //	result, err := client.BroadcastSignal(ctx, *req)
@@ -3959,7 +3959,7 @@ func (c *CamundaClient) CreateAdminUser(ctx context.Context, body openapi.UserRe
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) BroadcastSignal(ctx context.Context, body openapi.SignalBroadcastRequest, opts ...func(openapi.ApiBroadcastSignalRequest) openapi.ApiBroadcastSignalRequest) (*openapi.SignalBroadcastResult, error) {
+func (c *CamundaClient) BroadcastSignal(ctx context.Context, body camundaapi.SignalBroadcastRequest, opts ...func(camundaapi.ApiBroadcastSignalRequest) camundaapi.ApiBroadcastSignalRequest) (*camundaapi.SignalBroadcastResult, error) {
 	req := c.raw.SignalAPI.BroadcastSignal(ctx)
 	req = req.SignalBroadcastRequest(body)
 	for _, opt := range opts {
@@ -3978,7 +3978,7 @@ func (c *CamundaClient) BroadcastSignal(ctx context.Context, body openapi.Signal
 //		return err
 //	}
 //	fmt.Printf("%v\n", config)
-func (c *CamundaClient) GetSystemConfiguration(ctx context.Context, opts ...func(openapi.ApiGetSystemConfigurationRequest) openapi.ApiGetSystemConfigurationRequest) (*openapi.SystemConfigurationResponse, error) {
+func (c *CamundaClient) GetSystemConfiguration(ctx context.Context, opts ...func(camundaapi.ApiGetSystemConfigurationRequest) camundaapi.ApiGetSystemConfigurationRequest) (*camundaapi.SystemConfigurationResponse, error) {
 	req := c.raw.SystemAPI.GetSystemConfiguration(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -3996,7 +3996,7 @@ func (c *CamundaClient) GetSystemConfiguration(ctx context.Context, opts ...func
 //		return err
 //	}
 //	fmt.Printf("%v\n", metrics)
-func (c *CamundaClient) GetUsageMetrics(ctx context.Context, opts ...func(openapi.ApiGetUsageMetricsRequest) openapi.ApiGetUsageMetricsRequest) (*openapi.UsageMetricsResponse, error) {
+func (c *CamundaClient) GetUsageMetrics(ctx context.Context, opts ...func(camundaapi.ApiGetUsageMetricsRequest) camundaapi.ApiGetUsageMetricsRequest) (*camundaapi.UsageMetricsResponse, error) {
 	req := c.raw.SystemAPI.GetUsageMetrics(ctx)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4010,7 +4010,7 @@ func (c *CamundaClient) GetUsageMetrics(ctx context.Context, opts ...func(openap
 // Example:
 //
 //	return client.AssignClientToTenant(ctx, "tenant-a", "reporting-service")
-func (c *CamundaClient) AssignClientToTenant(ctx context.Context, tenantId string, clientId string, opts ...func(openapi.ApiAssignClientToTenantRequest) openapi.ApiAssignClientToTenantRequest) error {
+func (c *CamundaClient) AssignClientToTenant(ctx context.Context, tenantId string, clientId string, opts ...func(camundaapi.ApiAssignClientToTenantRequest) camundaapi.ApiAssignClientToTenantRequest) error {
 	req := c.raw.TenantAPI.AssignClientToTenant(ctx, tenantId, clientId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4024,7 +4024,7 @@ func (c *CamundaClient) AssignClientToTenant(ctx context.Context, tenantId strin
 // Example:
 //
 //	return client.AssignGroupToTenant(ctx, "tenant-a", "finance")
-func (c *CamundaClient) AssignGroupToTenant(ctx context.Context, tenantId string, groupId string, opts ...func(openapi.ApiAssignGroupToTenantRequest) openapi.ApiAssignGroupToTenantRequest) error {
+func (c *CamundaClient) AssignGroupToTenant(ctx context.Context, tenantId string, groupId string, opts ...func(camundaapi.ApiAssignGroupToTenantRequest) camundaapi.ApiAssignGroupToTenantRequest) error {
 	req := c.raw.TenantAPI.AssignGroupToTenant(ctx, tenantId, groupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4038,7 +4038,7 @@ func (c *CamundaClient) AssignGroupToTenant(ctx context.Context, tenantId string
 // Example:
 //
 //	return client.AssignMappingRuleToTenant(ctx, "tenant-a", "sso-auditors")
-func (c *CamundaClient) AssignMappingRuleToTenant(ctx context.Context, tenantId string, mappingRuleId string, opts ...func(openapi.ApiAssignMappingRuleToTenantRequest) openapi.ApiAssignMappingRuleToTenantRequest) error {
+func (c *CamundaClient) AssignMappingRuleToTenant(ctx context.Context, tenantId string, mappingRuleId string, opts ...func(camundaapi.ApiAssignMappingRuleToTenantRequest) camundaapi.ApiAssignMappingRuleToTenantRequest) error {
 	req := c.raw.TenantAPI.AssignMappingRuleToTenant(ctx, tenantId, mappingRuleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4052,7 +4052,7 @@ func (c *CamundaClient) AssignMappingRuleToTenant(ctx context.Context, tenantId 
 // Example:
 //
 //	return client.AssignRoleToTenant(ctx, "tenant-a", "auditor")
-func (c *CamundaClient) AssignRoleToTenant(ctx context.Context, tenantId string, roleId string, opts ...func(openapi.ApiAssignRoleToTenantRequest) openapi.ApiAssignRoleToTenantRequest) error {
+func (c *CamundaClient) AssignRoleToTenant(ctx context.Context, tenantId string, roleId string, opts ...func(camundaapi.ApiAssignRoleToTenantRequest) camundaapi.ApiAssignRoleToTenantRequest) error {
 	req := c.raw.TenantAPI.AssignRoleToTenant(ctx, tenantId, roleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4066,7 +4066,7 @@ func (c *CamundaClient) AssignRoleToTenant(ctx context.Context, tenantId string,
 // Example:
 //
 //	return client.AssignUserToTenant(ctx, "tenant-a", "alice")
-func (c *CamundaClient) AssignUserToTenant(ctx context.Context, tenantId string, username string, opts ...func(openapi.ApiAssignUserToTenantRequest) openapi.ApiAssignUserToTenantRequest) error {
+func (c *CamundaClient) AssignUserToTenant(ctx context.Context, tenantId string, username string, opts ...func(camundaapi.ApiAssignUserToTenantRequest) camundaapi.ApiAssignUserToTenantRequest) error {
 	req := c.raw.TenantAPI.AssignUserToTenant(ctx, tenantId, username)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4079,12 +4079,12 @@ func (c *CamundaClient) AssignUserToTenant(ctx context.Context, tenantId string,
 //
 // Example:
 //
-//	result, err := client.CreateTenant(ctx, *openapi.NewTenantCreateRequest("tenant-a", "Tenant A"))
+//	result, err := client.CreateTenant(ctx, *camundaapi.NewTenantCreateRequest("tenant-a", "Tenant A"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateTenant(ctx context.Context, body openapi.TenantCreateRequest, opts ...func(openapi.ApiCreateTenantRequest) openapi.ApiCreateTenantRequest) (*openapi.TenantCreateResult, error) {
+func (c *CamundaClient) CreateTenant(ctx context.Context, body camundaapi.TenantCreateRequest, opts ...func(camundaapi.ApiCreateTenantRequest) camundaapi.ApiCreateTenantRequest) (*camundaapi.TenantCreateResult, error) {
 	req := c.raw.TenantAPI.CreateTenant(ctx)
 	req = req.TenantCreateRequest(body)
 	for _, opt := range opts {
@@ -4099,7 +4099,7 @@ func (c *CamundaClient) CreateTenant(ctx context.Context, body openapi.TenantCre
 // Example:
 //
 //	return client.DeleteTenant(ctx, "tenant-a")
-func (c *CamundaClient) DeleteTenant(ctx context.Context, tenantId string, opts ...func(openapi.ApiDeleteTenantRequest) openapi.ApiDeleteTenantRequest) error {
+func (c *CamundaClient) DeleteTenant(ctx context.Context, tenantId string, opts ...func(camundaapi.ApiDeleteTenantRequest) camundaapi.ApiDeleteTenantRequest) error {
 	req := c.raw.TenantAPI.DeleteTenant(ctx, tenantId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4117,7 +4117,7 @@ func (c *CamundaClient) DeleteTenant(ctx context.Context, tenantId string, opts 
 //		return err
 //	}
 //	fmt.Printf("%v\n", tenant)
-func (c *CamundaClient) GetTenant(ctx context.Context, tenantId string, opts ...func(openapi.ApiGetTenantRequest) openapi.ApiGetTenantRequest) (*openapi.TenantResult, error) {
+func (c *CamundaClient) GetTenant(ctx context.Context, tenantId string, opts ...func(camundaapi.ApiGetTenantRequest) camundaapi.ApiGetTenantRequest) (*camundaapi.TenantResult, error) {
 	req := c.raw.TenantAPI.GetTenant(ctx, tenantId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4130,12 +4130,12 @@ func (c *CamundaClient) GetTenant(ctx context.Context, tenantId string, opts ...
 //
 // Example:
 //
-//	result, err := client.SearchClientsForTenant(ctx, "tenant-a", *openapi.NewTenantClientSearchQueryRequest())
+//	result, err := client.SearchClientsForTenant(ctx, "tenant-a", *camundaapi.NewTenantClientSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchClientsForTenant(ctx context.Context, tenantId string, body openapi.TenantClientSearchQueryRequest, opts ...func(openapi.ApiSearchClientsForTenantRequest) openapi.ApiSearchClientsForTenantRequest) (*openapi.TenantClientSearchResult, error) {
+func (c *CamundaClient) SearchClientsForTenant(ctx context.Context, tenantId string, body camundaapi.TenantClientSearchQueryRequest, opts ...func(camundaapi.ApiSearchClientsForTenantRequest) camundaapi.ApiSearchClientsForTenantRequest) (*camundaapi.TenantClientSearchResult, error) {
 	req := c.raw.TenantAPI.SearchClientsForTenant(ctx, tenantId)
 	req = req.TenantClientSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4149,12 +4149,12 @@ func (c *CamundaClient) SearchClientsForTenant(ctx context.Context, tenantId str
 //
 // Example:
 //
-//	result, err := client.SearchGroupIdsForTenant(ctx, "tenant-a", *openapi.NewTenantGroupSearchQueryRequest())
+//	result, err := client.SearchGroupIdsForTenant(ctx, "tenant-a", *camundaapi.NewTenantGroupSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchGroupIdsForTenant(ctx context.Context, tenantId string, body openapi.TenantGroupSearchQueryRequest, opts ...func(openapi.ApiSearchGroupIdsForTenantRequest) openapi.ApiSearchGroupIdsForTenantRequest) (*openapi.TenantGroupSearchResult, error) {
+func (c *CamundaClient) SearchGroupIdsForTenant(ctx context.Context, tenantId string, body camundaapi.TenantGroupSearchQueryRequest, opts ...func(camundaapi.ApiSearchGroupIdsForTenantRequest) camundaapi.ApiSearchGroupIdsForTenantRequest) (*camundaapi.TenantGroupSearchResult, error) {
 	req := c.raw.TenantAPI.SearchGroupIdsForTenant(ctx, tenantId)
 	req = req.TenantGroupSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4168,12 +4168,12 @@ func (c *CamundaClient) SearchGroupIdsForTenant(ctx context.Context, tenantId st
 //
 // Example:
 //
-//	result, err := client.SearchMappingRulesForTenant(ctx, "tenant-a", *openapi.NewMappingRuleSearchQueryRequest())
+//	result, err := client.SearchMappingRulesForTenant(ctx, "tenant-a", *camundaapi.NewMappingRuleSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchMappingRulesForTenant(ctx context.Context, tenantId string, body openapi.MappingRuleSearchQueryRequest, opts ...func(openapi.ApiSearchMappingRulesForTenantRequest) openapi.ApiSearchMappingRulesForTenantRequest) (*openapi.TenantMappingRuleSearchResult, error) {
+func (c *CamundaClient) SearchMappingRulesForTenant(ctx context.Context, tenantId string, body camundaapi.MappingRuleSearchQueryRequest, opts ...func(camundaapi.ApiSearchMappingRulesForTenantRequest) camundaapi.ApiSearchMappingRulesForTenantRequest) (*camundaapi.TenantMappingRuleSearchResult, error) {
 	req := c.raw.TenantAPI.SearchMappingRulesForTenant(ctx, tenantId)
 	req = req.MappingRuleSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4187,12 +4187,12 @@ func (c *CamundaClient) SearchMappingRulesForTenant(ctx context.Context, tenantI
 //
 // Example:
 //
-//	result, err := client.SearchRolesForTenant(ctx, "tenant-a", *openapi.NewRoleSearchQueryRequest())
+//	result, err := client.SearchRolesForTenant(ctx, "tenant-a", *camundaapi.NewRoleSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchRolesForTenant(ctx context.Context, tenantId string, body openapi.RoleSearchQueryRequest, opts ...func(openapi.ApiSearchRolesForTenantRequest) openapi.ApiSearchRolesForTenantRequest) (*openapi.TenantRoleSearchResult, error) {
+func (c *CamundaClient) SearchRolesForTenant(ctx context.Context, tenantId string, body camundaapi.RoleSearchQueryRequest, opts ...func(camundaapi.ApiSearchRolesForTenantRequest) camundaapi.ApiSearchRolesForTenantRequest) (*camundaapi.TenantRoleSearchResult, error) {
 	req := c.raw.TenantAPI.SearchRolesForTenant(ctx, tenantId)
 	req = req.RoleSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4206,14 +4206,14 @@ func (c *CamundaClient) SearchRolesForTenant(ctx context.Context, tenantId strin
 //
 // Example:
 //
-//	result, err := client.SearchTenants(ctx, *openapi.NewTenantSearchQueryRequest())
+//	result, err := client.SearchTenants(ctx, *camundaapi.NewTenantSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	for _, t := range result.GetItems() {
 //		fmt.Printf("%v\n", t)
 //	}
-func (c *CamundaClient) SearchTenants(ctx context.Context, body openapi.TenantSearchQueryRequest, opts ...func(openapi.ApiSearchTenantsRequest) openapi.ApiSearchTenantsRequest) (*openapi.TenantSearchQueryResult, error) {
+func (c *CamundaClient) SearchTenants(ctx context.Context, body camundaapi.TenantSearchQueryRequest, opts ...func(camundaapi.ApiSearchTenantsRequest) camundaapi.ApiSearchTenantsRequest) (*camundaapi.TenantSearchQueryResult, error) {
 	req := c.raw.TenantAPI.SearchTenants(ctx)
 	req = req.TenantSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4227,12 +4227,12 @@ func (c *CamundaClient) SearchTenants(ctx context.Context, body openapi.TenantSe
 //
 // Example:
 //
-//	result, err := client.SearchUsersForTenant(ctx, "tenant-a", *openapi.NewTenantUserSearchQueryRequest())
+//	result, err := client.SearchUsersForTenant(ctx, "tenant-a", *camundaapi.NewTenantUserSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchUsersForTenant(ctx context.Context, tenantId string, body openapi.TenantUserSearchQueryRequest, opts ...func(openapi.ApiSearchUsersForTenantRequest) openapi.ApiSearchUsersForTenantRequest) (*openapi.TenantUserSearchResult, error) {
+func (c *CamundaClient) SearchUsersForTenant(ctx context.Context, tenantId string, body camundaapi.TenantUserSearchQueryRequest, opts ...func(camundaapi.ApiSearchUsersForTenantRequest) camundaapi.ApiSearchUsersForTenantRequest) (*camundaapi.TenantUserSearchResult, error) {
 	req := c.raw.TenantAPI.SearchUsersForTenant(ctx, tenantId)
 	req = req.TenantUserSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4247,7 +4247,7 @@ func (c *CamundaClient) SearchUsersForTenant(ctx context.Context, tenantId strin
 // Example:
 //
 //	return client.UnassignClientFromTenant(ctx, "tenant-a", "reporting-service")
-func (c *CamundaClient) UnassignClientFromTenant(ctx context.Context, tenantId string, clientId string, opts ...func(openapi.ApiUnassignClientFromTenantRequest) openapi.ApiUnassignClientFromTenantRequest) error {
+func (c *CamundaClient) UnassignClientFromTenant(ctx context.Context, tenantId string, clientId string, opts ...func(camundaapi.ApiUnassignClientFromTenantRequest) camundaapi.ApiUnassignClientFromTenantRequest) error {
 	req := c.raw.TenantAPI.UnassignClientFromTenant(ctx, tenantId, clientId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4261,7 +4261,7 @@ func (c *CamundaClient) UnassignClientFromTenant(ctx context.Context, tenantId s
 // Example:
 //
 //	return client.UnassignGroupFromTenant(ctx, "tenant-a", "finance")
-func (c *CamundaClient) UnassignGroupFromTenant(ctx context.Context, tenantId string, groupId string, opts ...func(openapi.ApiUnassignGroupFromTenantRequest) openapi.ApiUnassignGroupFromTenantRequest) error {
+func (c *CamundaClient) UnassignGroupFromTenant(ctx context.Context, tenantId string, groupId string, opts ...func(camundaapi.ApiUnassignGroupFromTenantRequest) camundaapi.ApiUnassignGroupFromTenantRequest) error {
 	req := c.raw.TenantAPI.UnassignGroupFromTenant(ctx, tenantId, groupId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4275,7 +4275,7 @@ func (c *CamundaClient) UnassignGroupFromTenant(ctx context.Context, tenantId st
 // Example:
 //
 //	return client.UnassignMappingRuleFromTenant(ctx, "tenant-a", "sso-auditors")
-func (c *CamundaClient) UnassignMappingRuleFromTenant(ctx context.Context, tenantId string, mappingRuleId string, opts ...func(openapi.ApiUnassignMappingRuleFromTenantRequest) openapi.ApiUnassignMappingRuleFromTenantRequest) error {
+func (c *CamundaClient) UnassignMappingRuleFromTenant(ctx context.Context, tenantId string, mappingRuleId string, opts ...func(camundaapi.ApiUnassignMappingRuleFromTenantRequest) camundaapi.ApiUnassignMappingRuleFromTenantRequest) error {
 	req := c.raw.TenantAPI.UnassignMappingRuleFromTenant(ctx, tenantId, mappingRuleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4289,7 +4289,7 @@ func (c *CamundaClient) UnassignMappingRuleFromTenant(ctx context.Context, tenan
 // Example:
 //
 //	return client.UnassignRoleFromTenant(ctx, "tenant-a", "auditor")
-func (c *CamundaClient) UnassignRoleFromTenant(ctx context.Context, tenantId string, roleId string, opts ...func(openapi.ApiUnassignRoleFromTenantRequest) openapi.ApiUnassignRoleFromTenantRequest) error {
+func (c *CamundaClient) UnassignRoleFromTenant(ctx context.Context, tenantId string, roleId string, opts ...func(camundaapi.ApiUnassignRoleFromTenantRequest) camundaapi.ApiUnassignRoleFromTenantRequest) error {
 	req := c.raw.TenantAPI.UnassignRoleFromTenant(ctx, tenantId, roleId)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4303,7 +4303,7 @@ func (c *CamundaClient) UnassignRoleFromTenant(ctx context.Context, tenantId str
 // Example:
 //
 //	return client.UnassignUserFromTenant(ctx, "tenant-a", "alice")
-func (c *CamundaClient) UnassignUserFromTenant(ctx context.Context, tenantId string, username string, opts ...func(openapi.ApiUnassignUserFromTenantRequest) openapi.ApiUnassignUserFromTenantRequest) error {
+func (c *CamundaClient) UnassignUserFromTenant(ctx context.Context, tenantId string, username string, opts ...func(camundaapi.ApiUnassignUserFromTenantRequest) camundaapi.ApiUnassignUserFromTenantRequest) error {
 	req := c.raw.TenantAPI.UnassignUserFromTenant(ctx, tenantId, username)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4316,12 +4316,12 @@ func (c *CamundaClient) UnassignUserFromTenant(ctx context.Context, tenantId str
 //
 // Example:
 //
-//	result, err := client.UpdateTenant(ctx, "tenant-a", *openapi.NewTenantUpdateRequest("Tenant A (renamed)"))
+//	result, err := client.UpdateTenant(ctx, "tenant-a", *camundaapi.NewTenantUpdateRequest("Tenant A (renamed)"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateTenant(ctx context.Context, tenantId string, body openapi.TenantUpdateRequest, opts ...func(openapi.ApiUpdateTenantRequest) openapi.ApiUpdateTenantRequest) (*openapi.TenantUpdateResult, error) {
+func (c *CamundaClient) UpdateTenant(ctx context.Context, tenantId string, body camundaapi.TenantUpdateRequest, opts ...func(camundaapi.ApiUpdateTenantRequest) camundaapi.ApiUpdateTenantRequest) (*camundaapi.TenantUpdateResult, error) {
 	req := c.raw.TenantAPI.UpdateTenant(ctx, tenantId)
 	req = req.TenantUpdateRequest(body)
 	for _, opt := range opts {
@@ -4336,7 +4336,7 @@ func (c *CamundaClient) UpdateTenant(ctx context.Context, tenantId string, body 
 // Example:
 //
 //	// "secure-password-123" is a placeholder — don't hardcode passwords in production.
-//	req := openapi.NewUserRequest("secure-password-123", "alice")
+//	req := camundaapi.NewUserRequest("secure-password-123", "alice")
 //	req.SetName("Alice Example")
 //	req.SetEmail("alice@example.com")
 //
@@ -4345,7 +4345,7 @@ func (c *CamundaClient) UpdateTenant(ctx context.Context, tenantId string, body 
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) CreateUser(ctx context.Context, body openapi.UserRequest, opts ...func(openapi.ApiCreateUserRequest) openapi.ApiCreateUserRequest) (*openapi.UserCreateResult, error) {
+func (c *CamundaClient) CreateUser(ctx context.Context, body camundaapi.UserRequest, opts ...func(camundaapi.ApiCreateUserRequest) camundaapi.ApiCreateUserRequest) (*camundaapi.UserCreateResult, error) {
 	req := c.raw.UserAPI.CreateUser(ctx)
 	req = req.UserRequest(body)
 	for _, opt := range opts {
@@ -4360,7 +4360,7 @@ func (c *CamundaClient) CreateUser(ctx context.Context, body openapi.UserRequest
 // Example:
 //
 //	return client.DeleteUser(ctx, "alice")
-func (c *CamundaClient) DeleteUser(ctx context.Context, username string, opts ...func(openapi.ApiDeleteUserRequest) openapi.ApiDeleteUserRequest) error {
+func (c *CamundaClient) DeleteUser(ctx context.Context, username string, opts ...func(camundaapi.ApiDeleteUserRequest) camundaapi.ApiDeleteUserRequest) error {
 	req := c.raw.UserAPI.DeleteUser(ctx, username)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4378,7 +4378,7 @@ func (c *CamundaClient) DeleteUser(ctx context.Context, username string, opts ..
 //		return err
 //	}
 //	fmt.Printf("%v\n", user)
-func (c *CamundaClient) GetUser(ctx context.Context, username string, opts ...func(openapi.ApiGetUserRequest) openapi.ApiGetUserRequest) (*openapi.UserResult, error) {
+func (c *CamundaClient) GetUser(ctx context.Context, username string, opts ...func(camundaapi.ApiGetUserRequest) camundaapi.ApiGetUserRequest) (*camundaapi.UserResult, error) {
 	req := c.raw.UserAPI.GetUser(ctx, username)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4391,14 +4391,14 @@ func (c *CamundaClient) GetUser(ctx context.Context, username string, opts ...fu
 //
 // Example:
 //
-//	result, err := client.SearchUsers(ctx, *openapi.NewUserSearchQueryRequest())
+//	result, err := client.SearchUsers(ctx, *camundaapi.NewUserSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	for _, u := range result.GetItems() {
 //		fmt.Printf("%v\n", u)
 //	}
-func (c *CamundaClient) SearchUsers(ctx context.Context, body openapi.UserSearchQueryRequest, opts ...func(openapi.ApiSearchUsersRequest) openapi.ApiSearchUsersRequest) (*openapi.UserSearchResult, error) {
+func (c *CamundaClient) SearchUsers(ctx context.Context, body camundaapi.UserSearchQueryRequest, opts ...func(camundaapi.ApiSearchUsersRequest) camundaapi.ApiSearchUsersRequest) (*camundaapi.UserSearchResult, error) {
 	req := c.raw.UserAPI.SearchUsers(ctx)
 	req = req.UserSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4412,7 +4412,7 @@ func (c *CamundaClient) SearchUsers(ctx context.Context, body openapi.UserSearch
 //
 // Example:
 //
-//	req := openapi.NewUserUpdateRequest()
+//	req := camundaapi.NewUserUpdateRequest()
 //	req.SetName("Alice Updated")
 //
 //	result, err := client.UpdateUser(ctx, "alice", *req)
@@ -4420,7 +4420,7 @@ func (c *CamundaClient) SearchUsers(ctx context.Context, body openapi.UserSearch
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) UpdateUser(ctx context.Context, username string, body openapi.UserUpdateRequest, opts ...func(openapi.ApiUpdateUserRequest) openapi.ApiUpdateUserRequest) (*openapi.UserUpdateResult, error) {
+func (c *CamundaClient) UpdateUser(ctx context.Context, username string, body camundaapi.UserUpdateRequest, opts ...func(camundaapi.ApiUpdateUserRequest) camundaapi.ApiUpdateUserRequest) (*camundaapi.UserUpdateResult, error) {
 	req := c.raw.UserAPI.UpdateUser(ctx, username)
 	req = req.UserUpdateRequest(body)
 	for _, opt := range opts {
@@ -4434,11 +4434,11 @@ func (c *CamundaClient) UpdateUser(ctx context.Context, username string, body op
 //
 // Example:
 //
-//	req := openapi.NewUserTaskAssignmentRequest()
+//	req := camundaapi.NewUserTaskAssignmentRequest()
 //	req.SetAssignee("alice")
 //
-//	return client.AssignUserTask(ctx, openapi.MustUserTaskKey("2251799813685380"), *req)
-func (c *CamundaClient) AssignUserTask(ctx context.Context, userTaskKey openapi.UserTaskKey, body openapi.UserTaskAssignmentRequest, opts ...func(openapi.ApiAssignUserTaskRequest) openapi.ApiAssignUserTaskRequest) error {
+//	return client.AssignUserTask(ctx, camundaapi.MustUserTaskKey("2251799813685380"), *req)
+func (c *CamundaClient) AssignUserTask(ctx context.Context, userTaskKey camundaapi.UserTaskKey, body camundaapi.UserTaskAssignmentRequest, opts ...func(camundaapi.ApiAssignUserTaskRequest) camundaapi.ApiAssignUserTaskRequest) error {
 	req := c.raw.UserTaskAPI.AssignUserTask(ctx, userTaskKey)
 	req = req.UserTaskAssignmentRequest(body)
 	for _, opt := range opts {
@@ -4452,11 +4452,11 @@ func (c *CamundaClient) AssignUserTask(ctx context.Context, userTaskKey openapi.
 //
 // Example:
 //
-//	req := openapi.NewUserTaskCompletionRequest()
+//	req := camundaapi.NewUserTaskCompletionRequest()
 //	req.SetVariables(map[string]any{"approved": true})
 //
-//	return client.CompleteUserTask(ctx, openapi.MustUserTaskKey("2251799813685380"), *req)
-func (c *CamundaClient) CompleteUserTask(ctx context.Context, userTaskKey openapi.UserTaskKey, body openapi.UserTaskCompletionRequest, opts ...func(openapi.ApiCompleteUserTaskRequest) openapi.ApiCompleteUserTaskRequest) error {
+//	return client.CompleteUserTask(ctx, camundaapi.MustUserTaskKey("2251799813685380"), *req)
+func (c *CamundaClient) CompleteUserTask(ctx context.Context, userTaskKey camundaapi.UserTaskKey, body camundaapi.UserTaskCompletionRequest, opts ...func(camundaapi.ApiCompleteUserTaskRequest) camundaapi.ApiCompleteUserTaskRequest) error {
 	req := c.raw.UserTaskAPI.CompleteUserTask(ctx, userTaskKey)
 	req = req.UserTaskCompletionRequest(body)
 	for _, opt := range opts {
@@ -4470,12 +4470,12 @@ func (c *CamundaClient) CompleteUserTask(ctx context.Context, userTaskKey openap
 //
 // Example:
 //
-//	task, err := client.GetUserTask(ctx, openapi.MustUserTaskKey("2251799813685380"))
+//	task, err := client.GetUserTask(ctx, camundaapi.MustUserTaskKey("2251799813685380"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", task)
-func (c *CamundaClient) GetUserTask(ctx context.Context, userTaskKey openapi.UserTaskKey, opts ...func(openapi.ApiGetUserTaskRequest) openapi.ApiGetUserTaskRequest) (*openapi.UserTaskResult, error) {
+func (c *CamundaClient) GetUserTask(ctx context.Context, userTaskKey camundaapi.UserTaskKey, opts ...func(camundaapi.ApiGetUserTaskRequest) camundaapi.ApiGetUserTaskRequest) (*camundaapi.UserTaskResult, error) {
 	req := c.raw.UserTaskAPI.GetUserTask(ctx, userTaskKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4488,12 +4488,12 @@ func (c *CamundaClient) GetUserTask(ctx context.Context, userTaskKey openapi.Use
 //
 // Example:
 //
-//	form, err := client.GetUserTaskForm(ctx, openapi.MustUserTaskKey("2251799813685380"))
+//	form, err := client.GetUserTaskForm(ctx, camundaapi.MustUserTaskKey("2251799813685380"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", form)
-func (c *CamundaClient) GetUserTaskForm(ctx context.Context, userTaskKey openapi.UserTaskKey, opts ...func(openapi.ApiGetUserTaskFormRequest) openapi.ApiGetUserTaskFormRequest) (*openapi.FormResult, error) {
+func (c *CamundaClient) GetUserTaskForm(ctx context.Context, userTaskKey camundaapi.UserTaskKey, opts ...func(camundaapi.ApiGetUserTaskFormRequest) camundaapi.ApiGetUserTaskFormRequest) (*camundaapi.FormResult, error) {
 	req := c.raw.UserTaskAPI.GetUserTaskForm(ctx, userTaskKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4507,13 +4507,13 @@ func (c *CamundaClient) GetUserTaskForm(ctx context.Context, userTaskKey openapi
 // Example:
 //
 //	result, err := client.SearchUserTaskAuditLogs(ctx,
-//		openapi.MustUserTaskKey("2251799813685380"),
-//		*openapi.NewUserTaskAuditLogSearchQueryRequest())
+//		camundaapi.MustUserTaskKey("2251799813685380"),
+//		*camundaapi.NewUserTaskAuditLogSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchUserTaskAuditLogs(ctx context.Context, userTaskKey openapi.UserTaskKey, body openapi.UserTaskAuditLogSearchQueryRequest, opts ...func(openapi.ApiSearchUserTaskAuditLogsRequest) openapi.ApiSearchUserTaskAuditLogsRequest) (*openapi.AuditLogSearchQueryResult, error) {
+func (c *CamundaClient) SearchUserTaskAuditLogs(ctx context.Context, userTaskKey camundaapi.UserTaskKey, body camundaapi.UserTaskAuditLogSearchQueryRequest, opts ...func(camundaapi.ApiSearchUserTaskAuditLogsRequest) camundaapi.ApiSearchUserTaskAuditLogsRequest) (*camundaapi.AuditLogSearchQueryResult, error) {
 	req := c.raw.UserTaskAPI.SearchUserTaskAuditLogs(ctx, userTaskKey)
 	req = req.UserTaskAuditLogSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4528,13 +4528,13 @@ func (c *CamundaClient) SearchUserTaskAuditLogs(ctx context.Context, userTaskKey
 // Example:
 //
 //	result, err := client.SearchUserTaskEffectiveVariables(ctx,
-//		openapi.MustUserTaskKey("2251799813685380"),
-//		*openapi.NewUserTaskEffectiveVariableSearchQueryRequest())
+//		camundaapi.MustUserTaskKey("2251799813685380"),
+//		*camundaapi.NewUserTaskEffectiveVariableSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchUserTaskEffectiveVariables(ctx context.Context, userTaskKey openapi.UserTaskKey, body openapi.UserTaskEffectiveVariableSearchQueryRequest, opts ...func(openapi.ApiSearchUserTaskEffectiveVariablesRequest) openapi.ApiSearchUserTaskEffectiveVariablesRequest) (*openapi.VariableSearchQueryResult, error) {
+func (c *CamundaClient) SearchUserTaskEffectiveVariables(ctx context.Context, userTaskKey camundaapi.UserTaskKey, body camundaapi.UserTaskEffectiveVariableSearchQueryRequest, opts ...func(camundaapi.ApiSearchUserTaskEffectiveVariablesRequest) camundaapi.ApiSearchUserTaskEffectiveVariablesRequest) (*camundaapi.VariableSearchQueryResult, error) {
 	req := c.raw.UserTaskAPI.SearchUserTaskEffectiveVariables(ctx, userTaskKey)
 	req = req.UserTaskEffectiveVariableSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4549,13 +4549,13 @@ func (c *CamundaClient) SearchUserTaskEffectiveVariables(ctx context.Context, us
 // Example:
 //
 //	result, err := client.SearchUserTaskVariables(ctx,
-//		openapi.MustUserTaskKey("2251799813685380"),
-//		*openapi.NewUserTaskVariableSearchQueryRequest())
+//		camundaapi.MustUserTaskKey("2251799813685380"),
+//		*camundaapi.NewUserTaskVariableSearchQueryRequest())
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", result)
-func (c *CamundaClient) SearchUserTaskVariables(ctx context.Context, userTaskKey openapi.UserTaskKey, body openapi.UserTaskVariableSearchQueryRequest, opts ...func(openapi.ApiSearchUserTaskVariablesRequest) openapi.ApiSearchUserTaskVariablesRequest) (*openapi.VariableSearchQueryResult, error) {
+func (c *CamundaClient) SearchUserTaskVariables(ctx context.Context, userTaskKey camundaapi.UserTaskKey, body camundaapi.UserTaskVariableSearchQueryRequest, opts ...func(camundaapi.ApiSearchUserTaskVariablesRequest) camundaapi.ApiSearchUserTaskVariablesRequest) (*camundaapi.VariableSearchQueryResult, error) {
 	req := c.raw.UserTaskAPI.SearchUserTaskVariables(ctx, userTaskKey)
 	req = req.UserTaskVariableSearchQueryRequest(body)
 	for _, opt := range opts {
@@ -4569,14 +4569,14 @@ func (c *CamundaClient) SearchUserTaskVariables(ctx context.Context, userTaskKey
 //
 // Example:
 //
-//	result, err := client.SearchUserTasks(ctx, *openapi.NewUserTaskSearchQuery())
+//	result, err := client.SearchUserTasks(ctx, *camundaapi.NewUserTaskSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, t := range result.GetItems() {
 //		fmt.Printf("%v\n", t)
 //	}
-func (c *CamundaClient) SearchUserTasks(ctx context.Context, body openapi.UserTaskSearchQuery, opts ...func(openapi.ApiSearchUserTasksRequest) openapi.ApiSearchUserTasksRequest) (*openapi.UserTaskSearchQueryResult, error) {
+func (c *CamundaClient) SearchUserTasks(ctx context.Context, body camundaapi.UserTaskSearchQuery, opts ...func(camundaapi.ApiSearchUserTasksRequest) camundaapi.ApiSearchUserTasksRequest) (*camundaapi.UserTaskSearchQueryResult, error) {
 	req := c.raw.UserTaskAPI.SearchUserTasks(ctx)
 	req = req.UserTaskSearchQuery(body)
 	for _, opt := range opts {
@@ -4590,8 +4590,8 @@ func (c *CamundaClient) SearchUserTasks(ctx context.Context, body openapi.UserTa
 //
 // Example:
 //
-//	return client.UnassignUserTask(ctx, openapi.MustUserTaskKey("2251799813685380"))
-func (c *CamundaClient) UnassignUserTask(ctx context.Context, userTaskKey openapi.UserTaskKey, opts ...func(openapi.ApiUnassignUserTaskRequest) openapi.ApiUnassignUserTaskRequest) error {
+//	return client.UnassignUserTask(ctx, camundaapi.MustUserTaskKey("2251799813685380"))
+func (c *CamundaClient) UnassignUserTask(ctx context.Context, userTaskKey camundaapi.UserTaskKey, opts ...func(camundaapi.ApiUnassignUserTaskRequest) camundaapi.ApiUnassignUserTaskRequest) error {
 	req := c.raw.UserTaskAPI.UnassignUserTask(ctx, userTaskKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4606,10 +4606,10 @@ func (c *CamundaClient) UnassignUserTask(ctx context.Context, userTaskKey openap
 //
 //	// Update fields (priority, due/follow-up dates, ...) via the request's
 //	// changeset. An empty request is a no-op.
-//	req := openapi.NewUserTaskUpdateRequest()
+//	req := camundaapi.NewUserTaskUpdateRequest()
 //
-//	return client.UpdateUserTask(ctx, openapi.MustUserTaskKey("2251799813685380"), *req)
-func (c *CamundaClient) UpdateUserTask(ctx context.Context, userTaskKey openapi.UserTaskKey, body openapi.UserTaskUpdateRequest, opts ...func(openapi.ApiUpdateUserTaskRequest) openapi.ApiUpdateUserTaskRequest) error {
+//	return client.UpdateUserTask(ctx, camundaapi.MustUserTaskKey("2251799813685380"), *req)
+func (c *CamundaClient) UpdateUserTask(ctx context.Context, userTaskKey camundaapi.UserTaskKey, body camundaapi.UserTaskUpdateRequest, opts ...func(camundaapi.ApiUpdateUserTaskRequest) camundaapi.ApiUpdateUserTaskRequest) error {
 	req := c.raw.UserTaskAPI.UpdateUserTask(ctx, userTaskKey)
 	req = req.UserTaskUpdateRequest(body)
 	for _, opt := range opts {
@@ -4623,12 +4623,12 @@ func (c *CamundaClient) UpdateUserTask(ctx context.Context, userTaskKey openapi.
 //
 // Example:
 //
-//	variable, err := client.GetVariable(ctx, openapi.MustVariableKey("2251799813685390"))
+//	variable, err := client.GetVariable(ctx, camundaapi.MustVariableKey("2251799813685390"))
 //	if err != nil {
 //		return err
 //	}
 //	fmt.Printf("%v\n", variable)
-func (c *CamundaClient) GetVariable(ctx context.Context, variableKey openapi.VariableKey, opts ...func(openapi.ApiGetVariableRequest) openapi.ApiGetVariableRequest) (*openapi.VariableResult, error) {
+func (c *CamundaClient) GetVariable(ctx context.Context, variableKey camundaapi.VariableKey, opts ...func(camundaapi.ApiGetVariableRequest) camundaapi.ApiGetVariableRequest) (*camundaapi.VariableResult, error) {
 	req := c.raw.VariableAPI.GetVariable(ctx, variableKey)
 	for _, opt := range opts {
 		req = opt(req)
@@ -4641,14 +4641,14 @@ func (c *CamundaClient) GetVariable(ctx context.Context, variableKey openapi.Var
 //
 // Example:
 //
-//	result, err := client.SearchVariables(ctx, *openapi.NewVariableSearchQuery())
+//	result, err := client.SearchVariables(ctx, *camundaapi.NewVariableSearchQuery())
 //	if err != nil {
 //		return err
 //	}
 //	for _, v := range result.GetItems() {
 //		fmt.Printf("%v\n", v)
 //	}
-func (c *CamundaClient) SearchVariables(ctx context.Context, body openapi.VariableSearchQuery, opts ...func(openapi.ApiSearchVariablesRequest) openapi.ApiSearchVariablesRequest) (*openapi.VariableSearchQueryResult, error) {
+func (c *CamundaClient) SearchVariables(ctx context.Context, body camundaapi.VariableSearchQuery, opts ...func(camundaapi.ApiSearchVariablesRequest) camundaapi.ApiSearchVariablesRequest) (*camundaapi.VariableSearchQueryResult, error) {
 	req := c.raw.VariableAPI.SearchVariables(ctx)
 	req = req.VariableSearchQuery(body)
 	for _, opt := range opts {
