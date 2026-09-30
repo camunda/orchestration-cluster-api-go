@@ -314,9 +314,9 @@ if _, _, err := client.Raw().ResourceAPI.CreateDeployment(ctx).
 
 // Start an instance by process id. The request body is a first-class facade
 // parameter — no Raw() needed.
-byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("demo-process"))
+byID := camunda.NewProcessInstanceCreationInstructionById(camunda.ProcessDefinitionId("demo-process"))
 byID.SetVariables(map[string]any{"name": "Camunda"})
-instruction := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
+instruction := camunda.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
 
 instance, err := client.CreateProcessInstance(ctx, instruction)
 if err != nil {
@@ -382,9 +382,9 @@ entity is visible or a timeout elapses:
 ```go
 // Reads are eventually consistent: a just-created entity may briefly 404.
 // Poll retries 404s until the entity is visible or the timeout elapses.
-key := camundaapi.MustProcessInstanceKey("2251799813685249")
+key := camunda.MustProcessInstanceKey("2251799813685249")
 
-instance, err := camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ProcessInstanceResult, error) {
+instance, err := camunda.Poll(ctx, func(ctx context.Context) (*camunda.ProcessInstanceResult, error) {
 	return client.GetProcessInstance(ctx, key)
 }, camunda.WithPollTimeout(10*time.Second))
 if err != nil {
@@ -483,14 +483,14 @@ types rather than bare strings:
 <!-- snippet-source: examples/readme.go | regions: SemanticKeys -->
 ```go
 // Semantic key types validate their format at construction.
-key, err := camundaapi.NewJobKey("2251799813685424") // validates pattern & length
+key, err := camunda.NewJobKey("2251799813685424") // validates pattern & length
 if err != nil {
 	return err
 }
 fmt.Println(key.String())
 
 // Side-load a key you already trust, without validation:
-loose := camundaapi.MustJobKey("2251799813685424")
+loose := camunda.MustJobKey("2251799813685424")
 _ = loose
 ```
 
@@ -516,7 +516,7 @@ Two helpers cover the common classifications without unwrapping by hand:
 
 <!-- snippet-source: examples/readme.go | regions: ErrorClassification -->
 ```go
-key := camundaapi.MustProcessInstanceKey("2251799813685249")
+key := camunda.MustProcessInstanceKey("2251799813685249")
 
 _, err := client.GetProcessInstance(ctx, key)
 
@@ -563,6 +563,11 @@ specification, generated from the same spec as the low-level client so the two
 can never diverge. Each facade method flattens the generated builder into
 first-class parameters and returns the deserialized result.
 
+Every request, response, key and enum type is available from the `camunda`
+package, so one import covers normal use. Only the raw HTTP-client machinery —
+the client `Raw()` returns, its configuration, and its error type — stays in the
+generated `github.com/camunda/orchestration-cluster-api-go/client` package.
+
 When you need something the facade deliberately does not model — multipart
 uploads, unusual query-parameter combinations, or the raw `*http.Response` —
 `Raw()` hands you the generated client directly:
@@ -592,9 +597,9 @@ Full API documentation is published on
 
 ## Regenerating the client
 
-`client/`, `pb/`, and `facade_generated.go` are generated. Never hand-edit them —
-change the generator instead, under `scripts/hooks/` (post-processing) or
-`cmd/facadegen/` (the facade generator).
+`client/`, `pb/`, `facade_generated.go` and `reexport_generated.go` are generated.
+Never hand-edit them — change the generator instead, under `scripts/hooks/`
+(post-processing) or `cmd/facadegen/` (the facade and re-export generator).
 
 ```sh
 make bundle        # re-bundle the upstream OpenAPI spec, then regenerate

@@ -6,13 +6,12 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func createGlobalTaskListenerExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateGlobalTaskListener
 	result, err := client.CreateGlobalTaskListener(ctx,
-		*camundaapi.NewCreateGlobalTaskListenerRequest("audit-listener"))
+		*camunda.NewCreateGlobalTaskListenerRequest("audit-listener"))
 	if err != nil {
 		return err
 	}
@@ -35,9 +34,9 @@ func getGlobalTaskListenerExample(ctx context.Context, client *camunda.CamundaCl
 func updateGlobalTaskListenerExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateGlobalTaskListener
 	result, err := client.UpdateGlobalTaskListener(ctx, "audit-listener",
-		*camundaapi.NewUpdateGlobalTaskListenerRequest(
+		*camunda.NewUpdateGlobalTaskListenerRequest(
 			"audit-worker",
-			[]camundaapi.GlobalTaskListenerEventTypeEnum{camundaapi.GLOBALTASKLISTENEREVENTTYPEENUM_ALL},
+			[]camunda.GlobalTaskListenerEventTypeEnum{camunda.GLOBALTASKLISTENEREVENTTYPEENUM_ALL},
 		))
 	if err != nil {
 		return err
@@ -55,7 +54,7 @@ func deleteGlobalTaskListenerExample(ctx context.Context, client *camunda.Camund
 
 func searchGlobalTaskListenersExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchGlobalTaskListeners
-	result, err := client.SearchGlobalTaskListeners(ctx, *camundaapi.NewGlobalTaskListenerSearchQueryRequest())
+	result, err := client.SearchGlobalTaskListeners(ctx, *camunda.NewGlobalTaskListenerSearchQueryRequest())
 	if err != nil {
 		return err
 	}

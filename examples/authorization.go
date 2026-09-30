@@ -6,25 +6,24 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func createAuthorizationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateAuthorization
 	// AuthorizationRequest is a union; grant an id-based authorization here.
-	grant := camundaapi.NewAuthorizationIdBasedRequest(
+	grant := camunda.NewAuthorizationIdBasedRequest(
 		"user@example.com",
-		camundaapi.OWNERTYPEENUM_USER,
+		camunda.OWNERTYPEENUM_USER,
 		"order-process",
-		camundaapi.RESOURCETYPEENUM_PROCESS_DEFINITION,
-		[]camundaapi.PermissionTypeEnum{
-			camundaapi.PERMISSIONTYPEENUM_READ_PROCESS_DEFINITION,
-			camundaapi.PERMISSIONTYPEENUM_CREATE_PROCESS_INSTANCE,
+		camunda.RESOURCETYPEENUM_PROCESS_DEFINITION,
+		[]camunda.PermissionTypeEnum{
+			camunda.PERMISSIONTYPEENUM_READ_PROCESS_DEFINITION,
+			camunda.PERMISSIONTYPEENUM_CREATE_PROCESS_INSTANCE,
 		},
 	)
 
 	result, err := client.CreateAuthorization(ctx,
-		camundaapi.AuthorizationIdBasedRequestAsAuthorizationRequest(grant))
+		camunda.AuthorizationIdBasedRequestAsAuthorizationRequest(grant))
 	if err != nil {
 		return err
 	}
@@ -35,7 +34,7 @@ func createAuthorizationExample(ctx context.Context, client *camunda.CamundaClie
 
 func searchAuthorizationsExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchAuthorizations
-	result, err := client.SearchAuthorizations(ctx, *camundaapi.NewAuthorizationSearchQuery())
+	result, err := client.SearchAuthorizations(ctx, *camunda.NewAuthorizationSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -50,7 +49,7 @@ func searchOwnAuthorizationsExample(ctx context.Context, client *camunda.Camunda
 	// region SearchOwnAuthorizations
 	// Scoped to the authenticated principal: direct grants plus those inherited
 	// from a group, role, or mapping rule.
-	result, err := client.SearchOwnAuthorizations(ctx, *camundaapi.NewAuthorizationSearchQuery())
+	result, err := client.SearchOwnAuthorizations(ctx, *camunda.NewAuthorizationSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -63,7 +62,7 @@ func searchOwnAuthorizationsExample(ctx context.Context, client *camunda.Camunda
 
 func getAuthorizationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetAuthorization
-	auth, err := client.GetAuthorization(ctx, camundaapi.MustAuthorizationKey("2251799813685280"))
+	auth, err := client.GetAuthorization(ctx, camunda.MustAuthorizationKey("2251799813685280"))
 	if err != nil {
 		return err
 	}
@@ -74,22 +73,22 @@ func getAuthorizationExample(ctx context.Context, client *camunda.CamundaClient)
 
 func updateAuthorizationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateAuthorization
-	updated := camundaapi.NewAuthorizationIdBasedRequest(
+	updated := camunda.NewAuthorizationIdBasedRequest(
 		"user@example.com",
-		camundaapi.OWNERTYPEENUM_USER,
+		camunda.OWNERTYPEENUM_USER,
 		"order-process",
-		camundaapi.RESOURCETYPEENUM_PROCESS_DEFINITION,
-		[]camundaapi.PermissionTypeEnum{camundaapi.PERMISSIONTYPEENUM_READ_PROCESS_DEFINITION},
+		camunda.RESOURCETYPEENUM_PROCESS_DEFINITION,
+		[]camunda.PermissionTypeEnum{camunda.PERMISSIONTYPEENUM_READ_PROCESS_DEFINITION},
 	)
 
 	return client.UpdateAuthorization(ctx,
-		camundaapi.MustAuthorizationKey("2251799813685280"),
-		camundaapi.AuthorizationIdBasedRequestAsAuthorizationRequest(updated))
+		camunda.MustAuthorizationKey("2251799813685280"),
+		camunda.AuthorizationIdBasedRequestAsAuthorizationRequest(updated))
 	// endregion UpdateAuthorization
 }
 
 func deleteAuthorizationExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region DeleteAuthorization
-	return client.DeleteAuthorization(ctx, camundaapi.MustAuthorizationKey("2251799813685280"))
+	return client.DeleteAuthorization(ctx, camunda.MustAuthorizationKey("2251799813685280"))
 	// endregion DeleteAuthorization
 }

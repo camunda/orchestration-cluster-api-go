@@ -6,13 +6,12 @@ import (
 	"fmt"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func createGlobalClusterVariableExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateGlobalClusterVariable
 	result, err := client.CreateGlobalClusterVariable(ctx,
-		*camundaapi.NewCreateClusterVariableRequest("region", map[string]any{"value": "eu-1"}))
+		*camunda.NewCreateClusterVariableRequest("region", map[string]any{"value": "eu-1"}))
 	if err != nil {
 		return err
 	}
@@ -35,7 +34,7 @@ func getGlobalClusterVariableExample(ctx context.Context, client *camunda.Camund
 func updateGlobalClusterVariableExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateGlobalClusterVariable
 	result, err := client.UpdateGlobalClusterVariable(ctx, "region",
-		*camundaapi.NewUpdateClusterVariableRequest(map[string]any{"value": "eu-2"}))
+		*camunda.NewUpdateClusterVariableRequest(map[string]any{"value": "eu-2"}))
 	if err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func deleteGlobalClusterVariableExample(ctx context.Context, client *camunda.Cam
 
 func searchClusterVariablesExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchClusterVariables
-	result, err := client.SearchClusterVariables(ctx, *camundaapi.NewClusterVariableSearchQueryRequest())
+	result, err := client.SearchClusterVariables(ctx, *camunda.NewClusterVariableSearchQueryRequest())
 	if err != nil {
 		return err
 	}
@@ -66,7 +65,7 @@ func searchClusterVariablesExample(ctx context.Context, client *camunda.CamundaC
 func createTenantClusterVariableExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateTenantClusterVariable
 	result, err := client.CreateTenantClusterVariable(ctx, "tenant-a",
-		*camundaapi.NewCreateClusterVariableRequest("region", map[string]any{"value": "eu-1"}))
+		*camunda.NewCreateClusterVariableRequest("region", map[string]any{"value": "eu-1"}))
 	if err != nil {
 		return err
 	}
@@ -89,7 +88,7 @@ func getTenantClusterVariableExample(ctx context.Context, client *camunda.Camund
 func updateTenantClusterVariableExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateTenantClusterVariable
 	result, err := client.UpdateTenantClusterVariable(ctx, "tenant-a", "region",
-		*camundaapi.NewUpdateClusterVariableRequest(map[string]any{"value": "eu-2"}))
+		*camunda.NewUpdateClusterVariableRequest(map[string]any{"value": "eu-2"}))
 	if err != nil {
 		return err
 	}

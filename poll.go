@@ -80,7 +80,7 @@ func IsNotFound(err error) bool {
 //
 // Example:
 //
-//	pi, err := camunda.Poll(ctx, func(ctx context.Context) (*camundaapi.ProcessInstanceResult, error) {
+//	pi, err := camunda.Poll(ctx, func(ctx context.Context) (*camunda.ProcessInstanceResult, error) {
 //	    return client.GetProcessInstance(ctx, key)
 //	})
 func Poll[T any](ctx context.Context, fn func(context.Context) (T, error), opts ...PollOption) (T, error) {

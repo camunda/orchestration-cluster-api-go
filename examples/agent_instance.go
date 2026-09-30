@@ -7,26 +7,25 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 )
 
 func createAgentInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region CreateAgentInstance
-	systemPrompt := []camundaapi.AgentInstanceMessageContent{
-		camundaapi.AgentInstanceTextContentAsAgentInstanceMessageContent(
-			camundaapi.NewAgentInstanceTextContent("TEXT", "You are a helpful assistant.")),
+	systemPrompt := []camunda.AgentInstanceMessageContent{
+		camunda.AgentInstanceTextContentAsAgentInstanceMessageContent(
+			camunda.NewAgentInstanceTextContent("TEXT", "You are a helpful assistant.")),
 	}
-	configItem := camundaapi.NewAgentInstanceHistoryItem(
-		"config-1", camundaapi.MustLoopIterationId(1), camundaapi.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
+	configItem := camunda.NewAgentInstanceHistoryItem(
+		"config-1", camunda.MustLoopIterationId(1), camunda.AGENTINSTANCEHISTORYROLEENUM_CONFIGURATION, nil, time.Now())
 	configItem.SetModel("gpt-4o")
 	configItem.SetProvider("openai")
 	configItem.SetSystemPrompt(systemPrompt)
 
-	req := camundaapi.NewAgentInstanceCreationRequest(
-		camundaapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
-		camundaapi.JobKey("2251799813685424"),             // jobKey
+	req := camunda.NewAgentInstanceCreationRequest(
+		camunda.ElementInstanceKey("2251799813685360"), // elementInstanceKey
+		camunda.JobKey("2251799813685424"),             // jobKey
 		"lease-token",
-		[]camundaapi.AgentInstanceHistoryItem{*configItem}, // history
+		[]camunda.AgentInstanceHistoryItem{*configItem}, // history
 	)
 
 	result, err := client.CreateAgentInstance(ctx, *req)
@@ -40,7 +39,7 @@ func createAgentInstanceExample(ctx context.Context, client *camunda.CamundaClie
 
 func getAgentInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region GetAgentInstance
-	agent, err := client.GetAgentInstance(ctx, camundaapi.MustAgentInstanceKey("2251799813685370"))
+	agent, err := client.GetAgentInstance(ctx, camunda.MustAgentInstanceKey("2251799813685370"))
 	if err != nil {
 		return err
 	}
@@ -51,13 +50,13 @@ func getAgentInstanceExample(ctx context.Context, client *camunda.CamundaClient)
 
 func updateAgentInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region UpdateAgentInstance
-	req := camundaapi.NewAgentInstanceUpdateRequest(
-		camundaapi.ElementInstanceKey("2251799813685360"), // elementInstanceKey
-		camundaapi.JobKey("2251799813685424"),             // jobKey
+	req := camunda.NewAgentInstanceUpdateRequest(
+		camunda.ElementInstanceKey("2251799813685360"), // elementInstanceKey
+		camunda.JobKey("2251799813685424"),             // jobKey
 		"lease-token",
 	)
 
-	result, err := client.UpdateAgentInstance(ctx, camundaapi.MustAgentInstanceKey("2251799813685370"), *req)
+	result, err := client.UpdateAgentInstance(ctx, camunda.MustAgentInstanceKey("2251799813685370"), *req)
 	if err != nil {
 		return err
 	}
@@ -68,7 +67,7 @@ func updateAgentInstanceExample(ctx context.Context, client *camunda.CamundaClie
 
 func searchAgentInstancesExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchAgentInstances
-	result, err := client.SearchAgentInstances(ctx, *camundaapi.NewAgentInstanceSearchQuery())
+	result, err := client.SearchAgentInstances(ctx, *camunda.NewAgentInstanceSearchQuery())
 	if err != nil {
 		return err
 	}
@@ -82,8 +81,8 @@ func searchAgentInstancesExample(ctx context.Context, client *camunda.CamundaCli
 func searchAgentInstanceHistoryExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region SearchAgentInstanceHistory
 	result, err := client.SearchAgentInstanceHistory(ctx,
-		camundaapi.MustAgentInstanceKey("2251799813685370"),
-		*camundaapi.NewAgentInstanceHistorySearchQuery())
+		camunda.MustAgentInstanceKey("2251799813685370"),
+		*camunda.NewAgentInstanceHistorySearchQuery())
 	if err != nil {
 		return err
 	}

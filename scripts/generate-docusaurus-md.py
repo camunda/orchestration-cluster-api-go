@@ -722,7 +722,7 @@ def generate_domain_keys(keys: list[TypeItem]) -> str:
         "classes of identifier mix-ups are caught before the request is sent.\n\n"
     )
     out += (
-        '```go\nimport camundaapi "github.com/camunda/orchestration-cluster-api-go/client"'
+        '```go\nimport camunda "github.com/camunda/orchestration-cluster-api-go"'
         "\n```\n\n"
     )
 

@@ -14,7 +14,6 @@ import (
 	"time"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
 	"github.com/camunda/orchestration-cluster-api-go/examples/advanced/internal/exampleutil"
 )
 
@@ -159,7 +158,7 @@ func flood(
 	source int,
 	stats *counters,
 ) {
-	request := *camundaapi.NewSignalBroadcastRequest("inventory-level-changed")
+	request := *camunda.NewSignalBroadcastRequest("inventory-level-changed")
 	for sequence := 0; ctx.Err() == nil; sequence++ {
 		// Simulate a runaway warehouse feed broadcasting high-cardinality stock
 		// updates during a Black Friday sale.
@@ -185,11 +184,11 @@ func protect(
 		orderID := fmt.Sprintf("order-%s-%d-%d", runID, worker, sequence)
 		paymentID := fmt.Sprintf("payment-%s-%d-%d", runID, worker, sequence)
 		messageID := "payment-provider-event-" + paymentID
-		request := camundaapi.NewMessagePublicationRequest("payment-received")
+		request := camunda.NewMessagePublicationRequest("payment-received")
 		request.SetMessageId(messageID)
 		// A business ID identifies the workflow; the provider event ID identifies
 		// this delivery. They solve different idempotency problems.
-		request.SetBusinessId(camundaapi.BusinessId(orderID))
+		request.SetBusinessId(camunda.BusinessId(orderID))
 		request.SetTimeToLive((30 * time.Second).Milliseconds())
 		request.SetVariables(map[string]any{
 			"orderId":     orderID,
