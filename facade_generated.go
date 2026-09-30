@@ -1047,6 +1047,16 @@ func (c *CamundaClient) GetClusterTopology(ctx context.Context, opts ...func(ope
 }
 
 // GetClusterUpgradeStatus calls the GetClusterUpgradeStatus operation.
+//
+// Example:
+//
+//	// One overall status folded over every physical tenant and condition:
+//	// MIGRATED, MIGRATION_IN_PROGRESS, or UNKNOWN before anything has been reported yet.
+//	status, err := client.GetClusterUpgradeStatus(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("cluster upgrade status: %s\n", status.GetStatus())
 func (c *CamundaClient) GetClusterUpgradeStatus(ctx context.Context, opts ...func(openapi.ApiGetClusterUpgradeStatusRequest) openapi.ApiGetClusterUpgradeStatusRequest) (*openapi.ClusterUpgradeStatusResponse, error) {
 	req := c.raw.ClusterAPI.GetClusterUpgradeStatus(ctx)
 	for _, opt := range opts {
