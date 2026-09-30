@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go/ast"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,8 +10,8 @@ import (
 
 // TestGenerateFacade locks the AST-based facade generator against a fixture
 // client package: it must emit one ergonomic *CamundaClient method per operation,
-// qualify client types with the camundaapi alias, and handle both value-returning
-// and no-value operations.
+// name client types by their re-exported camunda names, and handle both
+// value-returning and no-value operations.
 func TestGenerateFacade(t *testing.T) {
 	src, count, err := generateFacade("testdata/client", "", "")
 	if err != nil {
@@ -22,21 +23,41 @@ func TestGenerateFacade(t *testing.T) {
 
 	want := []string{
 		"package camunda",
-		`camundaapi "github.com/camunda/orchestration-cluster-api-go/client"`,
 		// Value-returning op: exposes required params + an opts transform, returns (value, error).
-		"func (c *CamundaClient) GetWidget(ctx context.Context, id camundaapi.WidgetKey, opts ...func(camundaapi.ApiGetWidgetRequest) camundaapi.ApiGetWidgetRequest) (*camundaapi.Widget, error) {",
+		"func (c *CamundaClient) GetWidget(ctx context.Context, id WidgetKey, opts ...func(ApiGetWidgetRequest) ApiGetWidgetRequest) (*Widget, error) {",
 		"req := c.raw.WidgetAPI.GetWidget(ctx, id)",
 		"req = opt(req)",
 		"value, resp, err := req.Execute()",
 		"return value, c.wrapError(resp, err)",
 		// No-value op: returns error only.
-		"func (c *CamundaClient) DeleteWidget(ctx context.Context, id camundaapi.WidgetKey, opts ...func(camundaapi.ApiDeleteWidgetRequest) camundaapi.ApiDeleteWidgetRequest) error {",
+		"func (c *CamundaClient) DeleteWidget(ctx context.Context, id WidgetKey, opts ...func(ApiDeleteWidgetRequest) ApiDeleteWidgetRequest) error {",
 		"return c.wrapError(resp, err)",
 	}
 	for _, w := range want {
 		if !strings.Contains(src, w) {
 			t.Errorf("facade output missing %q\n--- generated ---\n%s", w, src)
 		}
+	}
+	// Every fixture type is re-exported, so an unused client import would not compile.
+	if strings.Contains(src, clientImportPath) {
+		t.Errorf("facade imports the client package although no signature needs it\n%s", src)
+	}
+}
+
+func TestTypeStringQualifiesOnlyTypesThatAreNotReexported(t *testing.T) {
+	r := &renderer{
+		clientTypes: map[string]bool{"Widget": true, "Configuration": true},
+		short:       map[string]bool{"Widget": true},
+		usedPkgs:    map[string]bool{},
+	}
+	if got := r.typeString(&ast.StarExpr{X: ast.NewIdent("Widget")}); got != "*Widget" || r.qualified {
+		t.Fatalf("re-exported type rendered as %q (qualified=%v), want *Widget", got, r.qualified)
+	}
+	if got := r.typeString(&ast.StarExpr{X: ast.NewIdent("Configuration")}); got != "*camundaapi.Configuration" || !r.qualified {
+		t.Fatalf("plumbing type rendered as %q (qualified=%v), want *camundaapi.Configuration", got, r.qualified)
+	}
+	if src := emit(nil, nil, true); !strings.Contains(src, `camundaapi "`+clientImportPath+`"`) {
+		t.Errorf("facade must import the client package when a signature is qualified\n%s", src)
 	}
 }
 
@@ -91,7 +112,7 @@ func TestLoadBodyInfoIncludesOnlyJSONClientModels(t *testing.T) {
 
 	got := loadBodyInfo(path, map[string]bool{"WidgetRequest": true})
 	info, ok := got["CreateWidget"]
-	if !ok || info.builder != "WidgetRequest" || info.typ != "camundaapi.WidgetRequest" {
+	if !ok || info.builder != "WidgetRequest" {
 		t.Fatalf("CreateWidget body info = %+v, present=%v", info, ok)
 	}
 	if _, ok := got["UploadWidget"]; ok {

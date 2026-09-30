@@ -12,8 +12,13 @@
 //	type APIClient struct { <Field> *<Svc>APIService ... }
 //
 // The generated facade is package `camunda` and references the raw client through
-// the alias `camundaapi`, the client field `c.raw`, and the error mapper `c.wrapError`,
-// which are provided by the hand-written client wiring.
+// the client field `c.raw` and the error mapper `c.wrapError`, which are provided
+// by the hand-written client wiring.
+//
+// facadegen also emits reexport_generated.go, which re-exports every client
+// declaration except the HTTP-client plumbing (see reexport.go), so callers need
+// only the `camunda` import. Facade signatures therefore name client types by
+// their re-exported `camunda` names.
 package main
 
 import (
@@ -21,7 +26,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go/ast"
-	"go/parser"
 	"go/printer"
 	"go/token"
 	"os"
@@ -63,7 +67,6 @@ type operation struct {
 // bodyInfo describes an operation's JSON request body, derived from spec metadata.
 type bodyInfo struct {
 	builder string // builder method name on ApiXxxRequest (== the body model name)
-	typ     string // qualified Go type, e.g. "camundaapi.JobActivationRequest"
 }
 
 func main() {
@@ -71,6 +74,7 @@ func main() {
 	outPath := "facade_generated.go"
 	metadataPath := ""
 	examplesDir := ""
+	reexportPath := "reexport_generated.go"
 	if len(os.Args) > 1 {
 		clientDir = os.Args[1]
 	}
@@ -82,6 +86,9 @@ func main() {
 	}
 	if len(os.Args) > 4 {
 		examplesDir = os.Args[4]
+	}
+	if len(os.Args) > 5 {
+		reexportPath = os.Args[5]
 	}
 
 	src, count, err := generateFacade(clientDir, metadataPath, examplesDir)
@@ -95,6 +102,16 @@ func main() {
 		fatalf("writing %s: %v", outPath, err)
 	}
 	fmt.Printf("facadegen: emitted %d operations into %s\n", count, outPath)
+
+	src, count, err = generateReexports(clientDir, filepath.Dir(reexportPath),
+		filepath.Base(outPath), filepath.Base(reexportPath))
+	if err != nil {
+		fatalf("%v", err)
+	}
+	if err := os.WriteFile(reexportPath, []byte(src), 0o644); err != nil {
+		fatalf("writing %s: %v", reexportPath, err)
+	}
+	fmt.Printf("facadegen: re-exported %d client names into %s\n", count, reexportPath)
 }
 
 // generateFacade AST-parses the client package in clientDir and returns the
@@ -102,25 +119,18 @@ func main() {
 // metadataPath is non-empty, JSON request bodies are surfaced as typed method
 // parameters (derived from the spec metadata).
 func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, error) {
-	fset := token.NewFileSet()
-	pkgs, err := parser.ParseDir(fset, clientDir, func(fi os.FileInfo) bool { //nolint:staticcheck // ParseDir is adequate for the single generated client package
-		return !strings.HasSuffix(fi.Name(), "_test.go")
-	}, 0)
+	pkg, err := parseClient(clientDir)
 	if err != nil {
-		return "", 0, fmt.Errorf("parsing %s: %w", clientDir, err)
+		return "", 0, err
 	}
+	files := pkg.astFiles()
 
-	var files []*ast.File
-	for _, pkg := range pkgs {
-		for _, f := range pkg.Files {
-			files = append(files, f)
-		}
+	r := &renderer{
+		fset:        pkg.fset,
+		clientTypes: collectTypeNames(files),
+		short:       reexportedTypes(pkg.files),
+		usedPkgs:    map[string]bool{},
 	}
-	if len(files) == 0 {
-		return "", 0, fmt.Errorf("no Go files found in %s", clientDir)
-	}
-
-	r := &renderer{fset: fset, clientTypes: collectTypeNames(files), usedPkgs: map[string]bool{}}
 	fieldByService := collectAPIClientFields(files) // serviceType -> field name
 	constructors, executes := collectServiceMethods(files)
 	bodyByOp := loadBodyInfo(metadataPath, r.clientTypes)
@@ -147,7 +157,7 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 			reqType: r.resultType(ctor.decl),
 		}
 		if bi, ok := bodyByOp[op.name]; ok {
-			op.bodyType = bi.typ
+			op.bodyType = r.typeString(ast.NewIdent(bi.builder))
 			op.bodyBuilder = bi.builder
 		}
 		if ex, ok := exampleByOp[lowerFirst(op.name)]; ok {
@@ -170,7 +180,7 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 		extraStd = append(extraStd, pkg)
 	}
 	sort.Strings(extraStd)
-	return emit(ops, extraStd), len(ops), nil
+	return emit(ops, extraStd, r.qualified), len(ops), nil
 }
 
 // lowerFirst returns s with its first rune lowercased (PascalCase method name ->
@@ -388,6 +398,11 @@ func recvTypeName(expr ast.Expr) string {
 type renderer struct {
 	fset        *token.FileSet
 	clientTypes map[string]bool
+	// short holds the client types re-exported by camunda, which are rendered
+	// unqualified; any other client type keeps the camundaapi qualifier.
+	short map[string]bool
+	// qualified records whether any rendered type needed the camundaapi qualifier.
+	qualified bool
 	// usedPkgs records non-client selector packages referenced in signatures
 	// (e.g. "os" from *os.File), so emit can import them.
 	usedPkgs map[string]bool
@@ -434,12 +449,17 @@ func (r *renderer) resultType(fn *ast.FuncDecl) string {
 	return r.typeString(fn.Type.Results.List[0].Type)
 }
 
-// typeString renders a type expression, qualifying client-package types with the
-// `camundaapi.` alias.
+// typeString renders a type expression for use in package camunda: re-exported
+// client types by their camunda name, other client types with the `camundaapi.`
+// qualifier.
 func (r *renderer) typeString(expr ast.Expr) string {
 	switch e := expr.(type) {
 	case *ast.Ident:
 		if r.clientTypes[e.Name] && ast.IsExported(e.Name) {
+			if r.short[e.Name] {
+				return e.Name
+			}
+			r.qualified = true
 			return clientAlias + "." + e.Name
 		}
 		return e.Name
@@ -472,7 +492,7 @@ func (r *renderer) exprString(expr ast.Expr) string {
 	return buf.String()
 }
 
-func emit(ops []operation, extraStd []string) string {
+func emit(ops []operation, extraStd []string, importClient bool) string {
 	var b strings.Builder
 	b.WriteString("// Code generated by cmd/facadegen. DO NOT EDIT.\n\n")
 	b.WriteString("package camunda\n\n")
@@ -480,7 +500,10 @@ func emit(ops []operation, extraStd []string) string {
 	for _, p := range extraStd {
 		b.WriteString("\t\"" + p + "\"\n")
 	}
-	b.WriteString("\n\t" + clientAlias + " \"" + clientImportPath + "\"\n)\n\n")
+	if importClient {
+		b.WriteString("\n\t" + clientAlias + " \"" + clientImportPath + "\"\n")
+	}
+	b.WriteString(")\n\n")
 	b.WriteString("var _ = context.Background\n\n")
 
 	for _, op := range ops {
@@ -566,7 +589,7 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]b
 		if !clientTypes[model] {
 			continue // e.g. multipart deploy, or a primitive/inline body
 		}
-		out[upperFirst(o.OperationID)] = bodyInfo{builder: model, typ: clientAlias + "." + model}
+		out[upperFirst(o.OperationID)] = bodyInfo{builder: model}
 	}
 	return out
 }

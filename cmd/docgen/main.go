@@ -11,14 +11,17 @@
 //
 // Usage:
 //
-//	docgen -dir . -import-path github.com/camunda/orchestration-cluster-api-go \
+//	docgen -dir . -exclude reexport_generated.go \
+//	       -import-path github.com/camunda/orchestration-cluster-api-go \
 //	       -out docs-json/camunda.json
 //	docgen -dir ./client -include zz_generated_domain_keys.go \
 //	       -import-path github.com/camunda/orchestration-cluster-api-go/client \
 //	       -out docs-json/domain-keys.json
 //
 // The -include flag restricts parsing to a single file, which keeps the
-// generated client's 700-odd model files out of the domain-key snapshot.
+// generated client's 700-odd model files out of the domain-key snapshot. The
+// -exclude flag skips one file; the camunda snapshot uses it to leave out the
+// thousands of re-exported client names, which are documented on the client.
 package main
 
 import (
@@ -98,6 +101,7 @@ func main() {
 		dir        = flag.String("dir", ".", "package directory to document")
 		importPath = flag.String("import-path", "", "import path of the package (required)")
 		include    = flag.String("include", "", "if set, parse only this file within -dir")
+		exclude    = flag.String("exclude", "", "if set, skip this file within -dir")
 		out        = flag.String("out", "", "output JSON path (required)")
 	)
 	flag.Parse()
@@ -108,7 +112,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	pkg, err := document(*dir, *importPath, *include)
+	pkg, err := document(*dir, *importPath, *include, *exclude)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "docgen: %v\n", err)
 		os.Exit(1)
@@ -130,9 +134,9 @@ func main() {
 	fmt.Printf("  Wrote %s (%d types, %d funcs)\n", *out, len(pkg.Types), len(pkg.Funcs))
 }
 
-func document(dir, importPath, include string) (*Package, error) {
+func document(dir, importPath, include, exclude string) (*Package, error) {
 	fset := token.NewFileSet()
-	files, err := parseDir(fset, dir, include)
+	files, err := parseDir(fset, dir, include, exclude)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +170,7 @@ func document(dir, importPath, include string) (*Package, error) {
 
 // parseDir reads dir and parses its non-test Go files. It deliberately avoids
 // go/parser.ParseDir, which is deprecated and build-constraint unaware.
-func parseDir(fset *token.FileSet, dir, include string) ([]*ast.File, error) {
+func parseDir(fset *token.FileSet, dir, include, exclude string) ([]*ast.File, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", dir, err)
@@ -177,7 +181,7 @@ func parseDir(fset *token.FileSet, dir, include string) ([]*ast.File, error) {
 		if e.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
 			continue
 		}
-		if include != "" && name != include {
+		if (include != "" && name != include) || name == exclude {
 			continue
 		}
 		f, err := parser.ParseFile(fset, filepath.Join(dir, name), nil, parser.ParseComments)

@@ -8,10 +8,6 @@ import (
 	"net/http"
 )
 
-type APIClient struct {
-	WidgetAPI *WidgetAPIService
-}
-
 type WidgetAPIService struct{}
 
 type WidgetKey string
