@@ -120,6 +120,38 @@ func TestFalconResolution(t *testing.T) {
 	}
 }
 
+func TestExactRestAddressResolution(t *testing.T) {
+	cases := []struct {
+		name string
+		env  map[string]string
+		opts []Option
+		want bool
+	}{
+		{name: "default off", want: false},
+		{name: "env true", env: map[string]string{"CAMUNDA_REST_ADDRESS_EXACT": "true"}, want: true},
+		{name: "env 1", env: map[string]string{"CAMUNDA_REST_ADDRESS_EXACT": "1"}, want: true},
+		{name: "env false", env: map[string]string{"CAMUNDA_REST_ADDRESS_EXACT": "false"}, want: false},
+		{name: "option enables", opts: []Option{WithExactRestAddress(true)}, want: true},
+		{
+			name: "option overrides env",
+			env:  map[string]string{"CAMUNDA_REST_ADDRESS_EXACT": "true"},
+			opts: []Option{WithExactRestAddress(false)},
+			want: false,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg, err := loadConfig(envFrom(tc.env), nil, tc.opts...)
+			if err != nil {
+				t.Fatalf("loadConfig: %v", err)
+			}
+			if cfg.ExactRestAddress != tc.want {
+				t.Errorf("ExactRestAddress = %v, want %v", cfg.ExactRestAddress, tc.want)
+			}
+		})
+	}
+}
+
 func TestOptionsOverrideEnv(t *testing.T) {
 	env := map[string]string{"CAMUNDA_REST_ADDRESS": "http://from-env:8080"}
 	cfg, err := loadConfig(envFrom(env), nil,

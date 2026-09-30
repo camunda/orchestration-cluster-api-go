@@ -66,7 +66,7 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	// caller's context but cap it at falconDetectTimeout; a ctx-canceled probe is
 	// transient and retried on a later call.
 	pctx, cancel := context.WithTimeout(ctx, falconDetectTimeout)
-	caps, err := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress), dialer.HTTPClient)
+	caps, err := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress, c.cfg.ExactRestAddress), dialer.HTTPClient)
 	cancel()
 
 	c.falconMu.Lock()

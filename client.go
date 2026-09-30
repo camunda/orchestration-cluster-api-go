@@ -82,7 +82,7 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 
 	oc := camundaapi.NewConfiguration()
 	oc.HTTPClient = &http.Client{Transport: rt}
-	oc.Servers = camundaapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress)}}
+	oc.Servers = camundaapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress, cfg.ExactRestAddress)}}
 
 	return &CamundaClient{
 		cfg:    cfg,
@@ -239,9 +239,16 @@ func exemptDrainOps(req *http.Request) bool {
 	return false
 }
 
-// v2BaseURL ensures the REST base address targets the /v2 API root.
-func v2BaseURL(addr string) string {
+// v2BaseURL ensures the REST base address targets the /v2 API root. When exact
+// is true the caller has opted out of suffix normalization (see
+// Config.ExactRestAddress) and the address is returned verbatim (trimmed of a
+// trailing slash) so gateway/reverse-proxy fronted deployments can use a base
+// path that does not follow the .../v2 convention.
+func v2BaseURL(addr string, exact bool) string {
 	addr = strings.TrimRight(addr, "/")
+	if exact {
+		return addr
+	}
 	if strings.HasSuffix(addr, "/v2") {
 		return addr
 	}

@@ -29,6 +29,7 @@ type ConfigField struct {
 // configuration contract.
 var ConfigSchema = []ConfigField{
 	{Keys: []string{"CAMUNDA_REST_ADDRESS", "ZEEBE_REST_ADDRESS"}, Default: defaultRestAddress, Description: "Orchestration Cluster REST base address."},
+	{Keys: []string{"CAMUNDA_REST_ADDRESS_EXACT"}, Description: "Use CAMUNDA_REST_ADDRESS exactly as provided, without appending the /v2 suffix (for gateway/reverse-proxy fronted deployments)."},
 	{Keys: []string{"CAMUNDA_GRPC_ADDRESS", "ZEEBE_GRPC_ADDRESS"}, Default: defaultGrpcAddress, Description: "Zeebe gRPC gateway address (host:port) for the streaming job worker."},
 
 	{Keys: []string{"CAMUNDA_AUTH_STRATEGY"}, Description: "Authentication strategy: OAUTH, BASIC, or NONE. Inferred from credentials when unset."},

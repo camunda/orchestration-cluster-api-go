@@ -175,6 +175,13 @@ type Config struct {
 	RestAddress string
 	GrpcAddress string
 
+	// ExactRestAddress opts out of the automatic /v2 suffix normally appended to
+	// RestAddress (CAMUNDA_REST_ADDRESS_EXACT). When true, the SDK targets
+	// RestAddress exactly as provided — useful behind an API gateway / reverse
+	// proxy that mounts the REST API under a prefix that does not follow the
+	// .../v2 convention.
+	ExactRestAddress bool
+
 	AuthStrategy      AuthStrategy
 	ClientID          string
 	ClientSecret      string
@@ -245,6 +252,7 @@ func resolveFromEnv(getenv func(string) string, overrides map[string]string) (*C
 
 	cfg := &Config{
 		RestAddress:         normalizeRestAddress(orDefault(get("CAMUNDA_REST_ADDRESS", "ZEEBE_REST_ADDRESS"), defaultRestAddress)),
+		ExactRestAddress:    isTruthy(get("CAMUNDA_REST_ADDRESS_EXACT")),
 		GrpcAddress:         orDefault(get("CAMUNDA_GRPC_ADDRESS", "ZEEBE_GRPC_ADDRESS"), defaultGrpcAddress),
 		ClientID:            get("CAMUNDA_CLIENT_ID", "ZEEBE_CLIENT_ID"),
 		ClientSecret:        get("CAMUNDA_CLIENT_SECRET", "ZEEBE_CLIENT_SECRET"),
