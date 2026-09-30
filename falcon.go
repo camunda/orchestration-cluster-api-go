@@ -186,10 +186,10 @@ func (c *CamundaClient) falconProducer(caps *falcon.Caps) (*falcon.Producer, err
 //
 // Example:
 //
-//	instruction := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
-//		camundaapi.NewProcessInstanceCreationInstructionById("order-process"))
+//	instruction := camunda.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+//		camunda.NewProcessInstanceCreationInstructionById("order-process"))
 //	result, err := client.CreateProcessInstance(ctx, instruction)
-func (c *CamundaClient) CreateProcessInstance(ctx context.Context, body camundaapi.ProcessInstanceCreationInstruction, opts ...func(camundaapi.ApiCreateProcessInstanceRequest) camundaapi.ApiCreateProcessInstanceRequest) (*camundaapi.CreateProcessInstanceResult, error) {
+func (c *CamundaClient) CreateProcessInstance(ctx context.Context, body ProcessInstanceCreationInstruction, opts ...func(ApiCreateProcessInstanceRequest) ApiCreateProcessInstanceRequest) (*CreateProcessInstanceResult, error) {
 	if c.falconCaps(ctx) != nil {
 		result, ok, err := c.createProcessInstanceFalcon(ctx, body)
 		if err != nil {
