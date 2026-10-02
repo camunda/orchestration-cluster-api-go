@@ -23,7 +23,7 @@ type IncidentFilter struct {
 	ProcessDefinitionId *StringFilterProperty `json:"processDefinitionId,omitempty"`
 	// Incident error type with a defined set of values.
 	ErrorType *IncidentErrorTypeFilterProperty `json:"errorType,omitempty"`
-	// The error message of this incident.
+	// The error message of this incident. For `$eq`, `$neq`, `$in`, and `$notIn`, matching is case-insensitive and matches if the incident's error message contains the given value as a phrase, not necessarily the entire error message. `$like` matches on individual words of the error message and does not support multi-word patterns.
 	ErrorMessage *StringFilterProperty `json:"errorMessage,omitempty"`
 	// The element ID associated to this incident.
 	ElementId *StringFilterProperty `json:"elementId,omitempty"`
