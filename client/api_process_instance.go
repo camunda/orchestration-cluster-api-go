@@ -259,6 +259,17 @@ func (a *ProcessInstanceAPIService) CancelProcessInstanceExecute(r ApiCancelProc
 			newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
 		return localVarHTTPResponse, newErr
 	}
 
@@ -284,8 +295,12 @@ func (r ApiCancelProcessInstancesBatchOperationRequest) Execute() (*BatchOperati
 CancelProcessInstancesBatchOperation Cancel process instances (batch)
 
 Cancels multiple active or suspended process instances.
-Since only ACTIVE and SUSPENDED root instances can be cancelled, any given filters for state and
-parentProcessInstanceKey are ignored and overridden during this batch operation.
+Only ACTIVE and SUSPENDED root instances can be cancelled. A state filter narrows the batch
+to the given states. Requesting any state other than ACTIVE or SUSPENDED through the `$eq` or
+`$in` operators is rejected. Other state operators (`$neq`, `$exists`, `$like`) are applied as
+given, and the batch remains limited to ACTIVE and SUSPENDED instances. Without a state filter,
+both ACTIVE and SUSPENDED instances are selected. Any given filter for parentProcessInstanceKey
+is ignored and overridden during this batch operation.
 This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
