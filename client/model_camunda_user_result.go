@@ -27,7 +27,7 @@ type CamundaUserResult struct {
 	DisplayName NullableString `json:"displayName"`
 	// The email of the user.
 	Email NullableString `json:"email"`
-	// The web components the user is authorized to use.
+	// The web components the user is authorized to use. When authorizations are disabled for the cluster, this always returns `[\"*\"]`, regardless of the user's actual permissions, since access is not restricted in that case.
 	AuthorizedComponents []string `json:"authorizedComponents"`
 	// The tenants the user is a member of.
 	Tenants []TenantResult `json:"tenants"`
