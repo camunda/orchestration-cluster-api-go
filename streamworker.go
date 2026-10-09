@@ -86,6 +86,8 @@ type StreamJobWorker struct {
 	pollMaxJobs      int
 	tenantIDs        []string
 	withLease        bool
+	// startupDelay is drawn once, when the worker is built; see startupJitter.
+	startupDelay time.Duration
 
 	// dial is an injectable seam for tests; nil means use client.grpcConn.
 	dial func(ctx context.Context) (*grpc.ClientConn, error)
@@ -185,6 +187,7 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 	for _, o := range opts {
 		o(w)
 	}
+	w.startupDelay = startupJitter(c.random, wd.StartupJitterMaxSeconds)
 	return w
 }
 
@@ -193,7 +196,13 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 // reconnectBackoff) whenever it ends, so in-flight acknowledgements are never cut
 // off by a reconnect. Run blocks; call it in a goroutine to run alongside other
 // work.
+//
+// A worker configured with a startup jitter (CAMUNDA_WORKER_STARTUP_JITTER_MAX_SECONDS)
+// first waits out its delay on the client's clock.
 func (w *StreamJobWorker) Run(ctx context.Context) error {
+	if err := waitStartup(ctx, w.client.clock, w.startupDelay); err != nil {
+		return err
+	}
 	dial := w.dial
 	if dial == nil {
 		dial = func(context.Context) (*grpc.ClientConn, error) { return w.client.grpcConn() }

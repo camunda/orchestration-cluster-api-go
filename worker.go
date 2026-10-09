@@ -27,6 +27,8 @@ type JobWorker struct {
 	fetchVariables []string
 	tenantIDs      []string
 	withLease      bool
+	// startupDelay is drawn once, when the worker is built; see startupJitter.
+	startupDelay time.Duration
 }
 
 // WorkerOption customizes a JobWorker.
@@ -110,18 +112,44 @@ func (c *CamundaClient) NewJobWorker(jobType string, handler JobHandler, opts ..
 	for _, o := range opts {
 		o(w)
 	}
+	w.startupDelay = startupJitter(c.random, wd.StartupJitterMaxSeconds)
 	return w
+}
+
+// startupJitter draws the delay a worker waits before it first polls, spreading
+// a fleet that restarts together. It is drawn when the worker is built rather
+// than in Run: Run is normally started on its own goroutine, so drawing there
+// would hand a seeded source's sequence to workers in scheduler order.
+func startupJitter(r Random, maxSeconds int) time.Duration {
+	if maxSeconds <= 0 {
+		return 0
+	}
+	return time.Duration(r.Float64() * float64(maxSeconds) * float64(time.Second))
+}
+
+// waitStartup waits out a worker's startup delay on clock.
+func waitStartup(ctx context.Context, clock Clock, d time.Duration) error {
+	if d <= 0 {
+		return nil
+	}
+	return clock.Sleep(ctx, d)
 }
 
 // Run polls and dispatches jobs until ctx is canceled, then waits for in-flight
 // handlers to finish and returns ctx.Err(). Run blocks; call it in a goroutine to
 // run alongside other work.
 //
+// A worker configured with a startup jitter (CAMUNDA_WORKER_STARTUP_JITTER_MAX_SECONDS)
+// first waits out its delay on the client's clock.
+//
 // When the gateway advertises the FALCON command stream (a nanobpmn gateway) and
 // FALCON is enabled, jobs are pushed over a WebSocket subscription instead of
 // REST long-polling. If the subscription cannot be established (e.g. a proxy
 // blocks WebSockets) the worker transparently falls back to REST polling.
 func (w *JobWorker) Run(ctx context.Context) error {
+	if err := waitStartup(ctx, w.client.clock, w.startupDelay); err != nil {
+		return err
+	}
 	if caps := w.client.falconCaps(ctx); caps != nil {
 		if err := w.runFalcon(ctx, caps); err != nil {
 			if ctx.Err() != nil {

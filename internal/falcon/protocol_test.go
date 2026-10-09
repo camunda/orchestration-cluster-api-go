@@ -12,18 +12,56 @@ import (
 	"github.com/coder/websocket"
 )
 
-func TestPickEndpointAvoidsFailedNode(t *testing.T) {
+// fixedRandom draws the same value every time.
+type fixedRandom float64
+
+func (f fixedRandom) Float64() float64 { return float64(f) }
+
+func TestPickEndpointMapsTheDrawOntoTheDirectory(t *testing.T) {
 	eps := []string{"ws://a/falcon", "ws://b/falcon", "ws://c/falcon"}
-	seed := uint64(0x1234_5678)
-	for i := 0; i < 200; i++ {
-		if got := pickEndpoint(eps, "ws://b/falcon", &seed); got == "ws://b/falcon" {
-			t.Fatalf("pickEndpoint selected the avoided node")
+	for _, tc := range []struct {
+		u     float64
+		avoid string
+		want  string
+	}{
+		{0, "", "ws://a/falcon"},
+		{0.34, "", "ws://b/falcon"},
+		{0.999, "", "ws://c/falcon"},
+		// The drawn node failed last time: take the next one round the ring.
+		{0.5, "ws://b/falcon", "ws://c/falcon"},
+		{0.9, "ws://c/falcon", "ws://a/falcon"},
+	} {
+		if got := pickEndpoint(eps, tc.avoid, tc.u); got != tc.want {
+			t.Errorf("pickEndpoint(u=%v, avoid=%q) = %q, want %q", tc.u, tc.avoid, got, tc.want)
 		}
 	}
 	// A single-element directory always returns its only entry, even if avoided.
 	one := []string{"ws://solo/falcon"}
-	if got := pickEndpoint(one, "ws://solo/falcon", &seed); got != "ws://solo/falcon" {
+	if got := pickEndpoint(one, "ws://solo/falcon", 0.5); got != "ws://solo/falcon" {
 		t.Fatalf("single-node directory should return its only entry, got %q", got)
+	}
+}
+
+// The supervisor dials the endpoint the dialer's source selects. With one dead
+// and one live node, the draw alone decides whether the first dial succeeds.
+func TestTheFirstDialGoesWhereTheDialersSourcePoints(t *testing.T) {
+	live, d := startFalconServer(t, func(ctx context.Context, c *websocket.Conn) {
+		_ = writeJSON(ctx, c, map[string]any{"type": "welcome", "submissionCredits": 1, "heartbeatMs": 15000})
+		<-ctx.Done()
+	})
+	eps := []string{"ws://127.0.0.1:1/falcon", live[0]}
+
+	d.Random = fixedRandom(0.9)
+	p, err := StartProducer(eps, d)
+	if err != nil {
+		t.Fatalf("a draw selecting the live node should connect: %v", err)
+	}
+	p.Close()
+
+	d.Random = fixedRandom(0.1)
+	if p, err := StartProducer(eps, d); err == nil {
+		p.Close()
+		t.Fatal("a draw selecting the dead node should fail the first dial")
 	}
 }
 
@@ -53,7 +91,7 @@ func startFalconServer(t *testing.T, handler falconServerHandler) ([]string, *Di
 	}))
 	t.Cleanup(srv.Close)
 	u, _ := url.Parse(srv.URL)
-	return []string{"ws://" + u.Host + "/falcon"}, &Dialer{HTTPClient: srv.Client()}
+	return []string{"ws://" + u.Host + "/falcon"}, &Dialer{HTTPClient: srv.Client(), Random: fixedRandom(0)}
 }
 
 func writeJSON(ctx context.Context, c *websocket.Conn, v any) error {

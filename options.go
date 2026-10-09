@@ -108,6 +108,16 @@ func WithClock(c Clock) Option {
 	return func(cfg *Config) { cfg.Clock = c }
 }
 
+// WithRandom sets the source of randomness the client draws jitter from: retry
+// backoff, worker startup delay and FALCON endpoint selection. Defaults to
+// [LiveRandom]. Pass a [SeededRandom] to make those draws reproducible.
+//
+// A nil Random selects the default; a typed nil is rejected by [New], as for
+// [WithClock].
+func WithRandom(r Random) Option {
+	return func(cfg *Config) { cfg.Random = r }
+}
+
 // WithForceREST forces the pure-REST path even when the gateway advertises FALCON
 // support (useful where WebSockets are blocked by a proxy).
 func WithForceREST(force bool) Option {

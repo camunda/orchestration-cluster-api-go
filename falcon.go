@@ -107,7 +107,7 @@ func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
 		return nil, err
 	}
 	httpClient := &http.Client{Transport: &falconAuthTransport{base: base, header: header}}
-	return &falcon.Dialer{HTTPClient: httpClient}, nil
+	return &falcon.Dialer{HTTPClient: httpClient, Random: c.random}, nil
 }
 
 // falconAuthHeader returns a per-request header provider for the configured auth

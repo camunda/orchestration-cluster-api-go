@@ -619,6 +619,9 @@ RUNTIME_TYPES = [
     "ClockController",
     "LiveClock",
     "EngineClock",
+    "Random",
+    "LiveRandom",
+    "SeededRandom",
 ]
 
 # Types declared alongside the domain keys that are serialization plumbing, not
@@ -633,10 +636,11 @@ RUNTIME_TYPES = [
 # scripts/hooks/hook_01_domain_type_system.py's ``_EXTRA_SCALAR_TYPES``).
 NON_KEY_TYPES = {"ModelString", "JobLeaseToken"}
 
-# Package-level var groups, keyed by their first declared name.
+# Package-level var and const groups, keyed by their first declared name.
 VAR_BUCKETS = {
     "ConfigSchema": "configuration",
     "ErrConfig": "runtime",
+    "SeedEnvVar": "runtime",
 }
 
 BUCKETS: dict[str, list[str]] = {
@@ -687,14 +691,14 @@ def classify_types(types: dict[str, TypeItem]) -> dict[str, list[TypeItem]]:
 
 
 def classify_vars(values: list[Value]) -> dict[str, list[Value]]:
-    """Route package-level var groups to their reference page."""
+    """Route package-level var and const groups to their reference page."""
     out: dict[str, list[Value]] = {slug: [] for slug in BUCKETS}
     for v in values:
         head = v.names[0] if v.names else ""
         slug = VAR_BUCKETS.get(head)
         if slug is None:
             raise SystemExit(
-                f"Unclassified package-level var group '{head}'.\n"
+                f"Unclassified package-level var or const group '{head}'.\n"
                 "Add it to VAR_BUCKETS in generate-docusaurus-md.py."
             )
         out[slug].append(v)
@@ -1128,7 +1132,7 @@ def validate_generated_links(output_dir: Path) -> list[str]:
 def generate_api_reference() -> None:
     sdk = load_doc_json(SDK_JSON_PATH)
     buckets = classify_types(sdk.types)
-    var_buckets = classify_vars(sdk.vars)
+    var_buckets = classify_vars(sdk.consts + sdk.vars)
     examples = load_examples()
     generated = load_generated_types()
 
