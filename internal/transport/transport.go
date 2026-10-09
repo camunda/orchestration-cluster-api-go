@@ -36,9 +36,10 @@ type Options struct {
 }
 
 // New builds the RoundTripper chain described in the package doc.
-// New builds the RoundTripper chain. clock is positional so a caller cannot silently
-// omit it and leave retry backoff on real time.
-func New(o Options, clock retry.Clock) http.RoundTripper {
+// New builds the RoundTripper chain. clock and random are positional so a caller
+// cannot silently omit them and leave retry backoff on real time or ambient
+// randomness.
+func New(o Options, clock retry.Clock, random retry.Random) http.RoundTripper {
 	inner := o.Base
 	if inner == nil {
 		inner = http.DefaultTransport
@@ -47,7 +48,7 @@ func New(o Options, clock retry.Clock) http.RoundTripper {
 		o.Auth.Base = inner
 		inner = o.Auth
 	}
-	inner = &retry.Transport{Base: inner, Cfg: o.Retry, Clock: clock}
+	inner = &retry.Transport{Base: inner, Cfg: o.Retry, Clock: clock, Random: random}
 	if o.Backpressure != nil {
 		inner = &BackpressureTransport{Base: inner, Mgr: o.Backpressure, Exempt: o.Exempt}
 	}

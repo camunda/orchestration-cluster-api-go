@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"math/rand"
 	"net/http"
 	"time"
 )
@@ -39,8 +38,14 @@ type Transport struct {
 	// Clock resolves the backoff wait. Required; transport.New always sets it.
 	Clock Clock
 
-	// randFloat is a test hook; nil uses the production implementation.
-	randFloat func() float64
+	// Random draws the jitter. Required; transport.New always sets it.
+	Random Random
+}
+
+// Random is the part of the SDK random source this package needs, declared here
+// for the same reason as Clock.
+type Random interface {
+	Float64() float64
 }
 
 // Clock is the part of the SDK clock this package needs. Declared here rather than
@@ -55,13 +60,6 @@ func (t *Transport) base() http.RoundTripper {
 		return t.Base
 	}
 	return http.DefaultTransport
-}
-
-func (t *Transport) rnd() float64 {
-	if t.randFloat != nil {
-		return t.randFloat()
-	}
-	return rand.Float64()
 }
 
 func (t *Transport) doSleep(ctx context.Context, d time.Duration) error {
@@ -104,7 +102,7 @@ func (t *Transport) backoff(attempt int) time.Duration {
 	if exp <= 0 || exp > t.Cfg.MaxDelay {
 		exp = t.Cfg.MaxDelay
 	}
-	return time.Duration(float64(exp) * t.rnd())
+	return time.Duration(float64(exp) * t.Random.Float64())
 }
 
 // RoundTrip implements http.RoundTripper.

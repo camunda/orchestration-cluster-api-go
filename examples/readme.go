@@ -266,6 +266,22 @@ func transientRetry() error {
 	return nil
 }
 
+func reproducibleJitter() error {
+	// region ReproducibleJitter
+	// Seeds from CAMUNDA_TEST_SEED when it is set, otherwise from a fresh seed.
+	random, err := camunda.SeededRandomFromEnv()
+	if err != nil {
+		return err
+	}
+	// Log the source: it names the seed and how to replay this run.
+	fmt.Println(random) // SeededRandom(seed=...; replay with CAMUNDA_TEST_SEED=...)
+
+	client, err := camunda.New(camunda.WithRandom(random))
+	// endregion ReproducibleJitter
+	_, _ = client, err
+	return nil
+}
+
 func logging() error {
 	// region Logging
 	// Levels: LogOff, LogError, LogWarn, LogInfo (default), LogDebug, LogTrace.

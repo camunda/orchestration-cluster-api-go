@@ -44,10 +44,10 @@ func (s *stubRT) RoundTrip(req *http.Request) (*http.Response, error) {
 
 func newTransport(base http.RoundTripper) *Transport {
 	return &Transport{
-		Base:      base,
-		Cfg:       Config{MaxAttempts: 4, BaseDelay: time.Millisecond, MaxDelay: 2 * time.Millisecond},
-		randFloat: func() float64 { return 1.0 },
-		Clock:     instantClock{},
+		Base:   base,
+		Cfg:    Config{MaxAttempts: 4, BaseDelay: time.Millisecond, MaxDelay: 2 * time.Millisecond},
+		Clock:  instantClock{},
+		Random: fixedRandom(0.5),
 	}
 }
 
@@ -144,3 +144,30 @@ func TestDoesNotRetryContextCanceled(t *testing.T) {
 type instantClock struct{}
 
 func (instantClock) Sleep(ctx context.Context, d time.Duration) error { return ctx.Err() }
+
+// fixedRandom draws the same value every time.
+type fixedRandom float64
+
+func (f fixedRandom) Float64() float64 { return float64(f) }
+
+// The backoff is the draw scaled onto the capped exponential window, so a
+// controlled draw yields the exact delay rather than a range.
+func TestBackoffScalesTheDrawOntoTheCappedWindow(t *testing.T) {
+	tr := &Transport{
+		Cfg:    Config{MaxAttempts: 10, BaseDelay: 100 * time.Millisecond, MaxDelay: 5 * time.Second},
+		Random: fixedRandom(0.25),
+	}
+	for _, tc := range []struct {
+		attempt int
+		want    time.Duration
+	}{
+		{0, 25 * time.Millisecond},    // 0.25 * 100ms
+		{3, 200 * time.Millisecond},   // 0.25 * 800ms
+		{6, 1250 * time.Millisecond},  // 6.4s capped to 5s
+		{40, 1250 * time.Millisecond}, // the shift is bounded, then capped
+	} {
+		if got := tr.backoff(tc.attempt); got != tc.want {
+			t.Errorf("backoff(%d) = %v, want %v", tc.attempt, got, tc.want)
+		}
+	}
+}

@@ -48,7 +48,7 @@ func TestChainAppliesAuthAndObservesHealthy(t *testing.T) {
 		Auth:         &auth.Transport{Strategy: auth.Basic, BasicUsername: "u", BasicPassword: "p"},
 		Retry:        retry.Config{MaxAttempts: 3, BaseDelay: time.Millisecond, MaxDelay: time.Millisecond},
 		Backpressure: mgr,
-	}, testClock{})
+	}, testClock{}, fixedRandom(0.5))
 	resp, err := rt.RoundTrip(newReq(t))
 	if err != nil {
 		t.Fatalf("RoundTrip: %v", err)
@@ -124,3 +124,8 @@ type testClock struct{}
 
 func (testClock) Now() time.Time                                   { return time.Unix(1_000_000, 0) }
 func (testClock) Sleep(ctx context.Context, d time.Duration) error { return ctx.Err() }
+
+// fixedRandom draws the same value every time.
+type fixedRandom float64
+
+func (f fixedRandom) Float64() float64 { return float64(f) }

@@ -619,6 +619,9 @@ RUNTIME_TYPES = [
     "ClockController",
     "LiveClock",
     "EngineClock",
+    "Random",
+    "LiveRandom",
+    "SeededRandom",
 ]
 
 # Types declared alongside the domain keys that are serialization plumbing, not

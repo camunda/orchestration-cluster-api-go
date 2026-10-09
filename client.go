@@ -29,6 +29,7 @@ type CamundaClient struct {
 	logger *diag.Logger
 	bp     *backpressure.Manager
 	clock  Clock
+	random Random
 
 	// FALCON (nanobpmn command-stream) state, lazily resolved and shared for the
 	// client's lifetime. falconMu guards a probe that caches a definitive result
@@ -61,6 +62,10 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	if clk == nil {
 		clk = LiveClock{}
 	}
+	rnd := cfg.Random
+	if rnd == nil {
+		rnd = LiveRandom{}
+	}
 
 	authT, err := buildAuthTransport(cfg, clk)
 	if err != nil {
@@ -78,7 +83,7 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 		Retry:        retry.Config{MaxAttempts: cfg.Retry.MaxAttempts, BaseDelay: cfg.Retry.BaseDelay, MaxDelay: cfg.Retry.MaxDelay},
 		Backpressure: bp,
 		Exempt:       exemptDrainOps,
-	}, clk)
+	}, clk, rnd)
 
 	oc := camundaapi.NewConfiguration()
 	oc.HTTPClient = &http.Client{Transport: rt}
@@ -90,11 +95,15 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 		logger: diag.New(logLevel(cfg.LogLevel), nil, clk),
 		bp:     bp,
 		clock:  clk,
+		random: rnd,
 	}, nil
 }
 
 // Clock returns the clock this client resolves cadence through.
 func (c *CamundaClient) Clock() Clock { return c.clock }
+
+// Random returns the source this client draws jitter from.
+func (c *CamundaClient) Random() Random { return c.random }
 
 // Raw returns the underlying generated client for operations or options not yet
 // surfaced on the ergonomic facade.

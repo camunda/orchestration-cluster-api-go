@@ -50,8 +50,16 @@ type Dialer struct {
 	// Header, when non-nil, is called before each dial to obtain request headers
 	// (typically Authorization). A returned error aborts the dial.
 	Header func(ctx context.Context) (http.Header, error)
+	// Random picks which endpoint to dial on (re)connect. Required.
+	Random Random
 	// dialFn is a test seam; nil means dial a real WebSocket.
 	dialFn func(ctx context.Context, url string, opts *websocket.DialOptions) (*websocket.Conn, error)
+}
+
+// Random is the part of the SDK random source falcon needs. Declared here so the
+// package stays a leaf; the injected source satisfies it structurally.
+type Random interface {
+	Float64() float64
 }
 
 // baseFrame carries the fields the supervisor inspects on every frame before
@@ -232,13 +240,12 @@ func (l *SupervisedLink) close() {
 
 func (l *SupervisedLink) supervise(supCtx context.Context, d *Dialer, hooks linkHooks, ready chan<- error) {
 	idle := linkIdle(defaultHeartbeatMs)
-	seed := uint64(time.Now().UnixNano()) | 1 //nolint:forbidigo // seeds reconnect jitter; no cadence depends on it
 
 	lastFailed := ""
 	sentReady := false
 
 	for supCtx.Err() == nil {
-		url := pickEndpoint(l.endpoints, lastFailed, &seed)
+		url := pickEndpoint(l.endpoints, lastFailed, d.Random.Float64())
 		// Bound the handshake so a hung dial can't stall failover. dial only uses the
 		// context for the upgrade; the live connection runs on its own context, so
 		// cancelling here after dial returns is safe.
@@ -333,17 +340,13 @@ func (l *SupervisedLink) pump(supCtx context.Context, c *conn, hooks linkHooks, 
 	}
 }
 
-// pickEndpoint returns a random endpoint, avoiding avoid (the node that just
-// failed) when the directory has more than one entry. Uses a cheap xorshift so no
-// rng dependency is needed.
-func pickEndpoint(endpoints []string, avoid string, seed *uint64) string {
+// pickEndpoint returns the endpoint a uniform draw u in [0, 1) selects, avoiding
+// avoid (the node that just failed) when the directory has more than one entry.
+func pickEndpoint(endpoints []string, avoid string, u float64) string {
 	if len(endpoints) == 1 {
 		return endpoints[0]
 	}
-	*seed ^= *seed << 13
-	*seed ^= *seed >> 7
-	*seed ^= *seed << 17
-	start := int(*seed % uint64(len(endpoints)))
+	start := int(u * float64(len(endpoints)))
 	for i := 0; i < len(endpoints); i++ {
 		cand := endpoints[(start+i)%len(endpoints)]
 		if cand != avoid {

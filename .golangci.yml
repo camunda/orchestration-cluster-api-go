@@ -52,6 +52,12 @@ linters:
           msg: use Clock.Sleep or Clock.After so an injected clock controls the wait
         - pattern: ^time\.AfterFunc$
           msg: 'run the callback yourself: go func() { if clock.Sleep(ctx, d) == nil { f() } }() -- skipping it when the wait was cancelled'
+        # Jitter draws from the injected Random, so a seeded source makes it
+        # reproducible. The pkg match catches an aliased import as well, and
+        # rand.New is covered, so a private generator cannot be built either.
+        - pattern: ^rand\.
+          pkg: ^math/rand(/v2)?$
+          msg: draw from the injected Random (WithRandom) so a seeded source controls the jitter
 
     revive:
       rules:

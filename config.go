@@ -211,6 +211,9 @@ type Config struct {
 
 	// Clock resolves runtime cadence. Nil selects [LiveClock].
 	Clock Clock
+
+	// Random is the source jitter is drawn from. Nil selects [LiveRandom].
+	Random Random
 }
 
 // LoadConfig resolves configuration from environment variables, applies opts
@@ -400,6 +403,9 @@ func (c *Config) Validate() error {
 	// the first method call, far from WithClock and long after New returned.
 	if c.Clock != nil && isNilUnderlyingValue(c.Clock) {
 		return configErrorf("WithClock was given a nil %T", c.Clock)
+	}
+	if c.Random != nil && isNilUnderlyingValue(c.Random) {
+		return configErrorf("WithRandom was given a nil %T", c.Random)
 	}
 	u, err := url.Parse(c.RestAddress)
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
