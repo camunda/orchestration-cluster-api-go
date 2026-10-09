@@ -35,10 +35,9 @@ type Options struct {
 	Exempt func(*http.Request) bool
 }
 
-// New builds the RoundTripper chain described in the package doc.
-// New builds the RoundTripper chain. clock and random are positional so a caller
-// cannot silently omit them and leave retry backoff on real time or ambient
-// randomness.
+// New builds the RoundTripper chain described in the package doc. clock and
+// random are positional so a caller cannot silently omit them and leave retry
+// backoff on real time or ambient randomness.
 func New(o Options, clock retry.Clock, random retry.Random) http.RoundTripper {
 	inner := o.Base
 	if inner == nil {

@@ -209,6 +209,39 @@ func TestSeededRetryBackoffIsExact(t *testing.T) {
 	}
 }
 
+// The same property for an arbitrary seed: the wait is exactly the one a replay
+// of the seed predicts. Set CAMUNDA_TEST_SEED to the reported seed to reproduce.
+func TestRetryBackoffIsReplayableForAnySeed(t *testing.T) {
+	random, err := camunda.SeededRandomFromEnv()
+	if err != nil {
+		t.Fatal(err)
+	}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer srv.Close()
+	clock := newCountingClock()
+	client, err := camunda.New(
+		camunda.WithRestAddress(srv.URL),
+		camunda.WithNoAuth(),
+		camunda.WithClock(clock),
+		camunda.WithRandom(random),
+		camunda.WithRetry(camunda.RetryConfig{MaxAttempts: 2, BaseDelay: 100 * time.Millisecond, MaxDelay: 5 * time.Second}),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = client.GetTopology(context.Background())
+
+	want := time.Duration(float64(100*time.Millisecond) * camunda.NewSeededRandom(random.Seed()).Float64())
+	if want < 0 || want >= 100*time.Millisecond {
+		t.Fatalf("%v: predicted wait %v is outside the full-jitter window [0, 100ms)", random, want)
+	}
+	if sleeps, _ := clock.recorded(); !slices.Equal(sleeps, []time.Duration{want}) {
+		t.Fatalf("%v: backoff = %v, want [%v]", random, sleeps, want)
+	}
+}
+
 // stopClock records the first wait it is asked for and ends the run there, so a
 // test observes a worker's startup delay without anything after it.
 type stopClock struct {
