@@ -1,3 +1,6 @@
+// Deprecated: this unsuffixed path holds the v0.x Technical Preview releases.
+// Use github.com/camunda/orchestration-cluster-api-go/v10 for Camunda 8.10, or
+// the /vN major matching your Camunda server minor (8.N -> /vN).
 module github.com/camunda/orchestration-cluster-api-go
 
 go 1.25.0
