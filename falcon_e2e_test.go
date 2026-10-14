@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
 	"github.com/coder/websocket"
 )
 

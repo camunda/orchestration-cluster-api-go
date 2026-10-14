@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
 )
 
 // fakeEngine records what the engine was asked to do, and can be made to refuse.

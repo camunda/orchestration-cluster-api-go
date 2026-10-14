@@ -1,6 +1,6 @@
 # Camunda 8 Orchestration Cluster API — Go SDK
 
-> **Technical Preview.** APIs may change before a stable `v1`/`v9` release. See
+> **Technical Preview.** APIs may change between releases. See
 > [versioning](#versioning).
 
 An idiomatic Go client for the [Camunda 8](https://camunda.io) Orchestration
@@ -19,11 +19,11 @@ the same two-layer architecture.
 ## Installation
 
 ```sh
-go get github.com/camunda/orchestration-cluster-api-go
+go get github.com/camunda/orchestration-cluster-api-go/v11
 ```
 
-Requires Go 1.25+. During Technical Preview the module path has no version suffix
-(see [versioning](#versioning)).
+Requires Go 1.25+. The `/v11` suffix is the Camunda server line this SDK targets
+(8.11); see [versioning](#versioning).
 
 ## Quick start
 
@@ -596,7 +596,7 @@ first-class parameters and returns the deserialized result.
 Every request, response, key and enum type is available from the `camunda`
 package, so one import covers normal use. Only the raw HTTP-client machinery —
 the client `Raw()` returns, its configuration, and its error type — stays in the
-generated `github.com/camunda/orchestration-cluster-api-go/client` package.
+generated `github.com/camunda/orchestration-cluster-api-go/v11/client` package.
 
 When you need something the facade deliberately does not model — multipart
 uploads, unusual query-parameter combinations, or the raw `*http.Response` —
@@ -621,7 +621,7 @@ retry, and authentication all apply, because those are `http.RoundTripper` layer
 on the transport rather than facade-level wrappers.
 
 Full API documentation is published on
-[pkg.go.dev](https://pkg.go.dev/github.com/camunda/orchestration-cluster-api-go).
+[pkg.go.dev](https://pkg.go.dev/github.com/camunda/orchestration-cluster-api-go/v11).
 
 <!-- docs:cut:start -->
 
@@ -666,10 +666,17 @@ runs `make docs-md` and opens the update PR.
 
 ## Versioning
 
-The SDK major version tracks the Camunda server minor version (server 8.9 → SDK
-9.x). Per Go conventions, majors ≥ 2 use a `/vN` module-path suffix
-(`.../orchestration-cluster-api-go/v9`). During Technical Preview the module
-stays at `v0`.
+The SDK major version tracks the Camunda server minor version: use the SDK line
+that matches your server. Go requires majors ≥ 2 to carry a `/vN` module-path
+suffix, so the import path names the server line:
+
+| Camunda server        | Module path suffix | Branch      |
+| --------------------- | ------------------ | ----------- |
+| 8.10                  | `/v10`             | `stable/10` |
+| 8.11 (in development) | `/v11`             | `main`      |
+
+Moving to a new server minor means changing the import path. Releases before
+v10 (`v0.x`) used the module path without a suffix.
 
 ## License
 

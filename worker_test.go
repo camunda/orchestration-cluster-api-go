@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
 )
 
 // jobTemplate renders a single activated job with the given key; %s is the jobKey.

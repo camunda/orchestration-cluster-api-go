@@ -1,4 +1,4 @@
-module github.com/camunda/orchestration-cluster-api-go
+module github.com/camunda/orchestration-cluster-api-go/v11
 
 go 1.25.0
 
