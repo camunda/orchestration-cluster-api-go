@@ -28,8 +28,8 @@ type JobSearchResult struct {
 	Deadline NullableTime `json:"deadline"`
 	// The reason provided by the user task listener for denying the work.
 	DeniedReason NullableString `json:"deniedReason"`
-	// The element ID associated with the job. May be missing on job failure.
-	ElementId NullableElementId `json:"elementId"`
+	// The element ID associated with the job.
+	ElementId ElementId `json:"elementId"`
 	// The element instance key associated with the job.
 	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// End date of the job. This is `null` if the job is not in an end state yet.
@@ -79,7 +79,7 @@ type _JobSearchResult JobSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
+func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId ElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
 	this := JobSearchResult{}
 	this.CustomHeaders = customHeaders
 	this.Deadline = deadline
@@ -195,29 +195,27 @@ func (o *JobSearchResult) SetDeniedReason(v string) {
 }
 
 // GetElementId returns the ElementId field value
-// If the value is explicit nil, the zero value for ElementId will be returned
 func (o *JobSearchResult) GetElementId() ElementId {
-	if o == nil || o.ElementId.Get() == nil {
+	if o == nil {
 		var ret ElementId
 		return ret
 	}
 
-	return *o.ElementId.Get()
+	return o.ElementId
 }
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *JobSearchResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.ElementId.Get(), o.ElementId.IsSet()
+	return &o.ElementId, true
 }
 
 // SetElementId sets field value
 func (o *JobSearchResult) SetElementId(v ElementId) {
-	o.ElementId.Set(&v)
+	o.ElementId = v
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
@@ -777,7 +775,7 @@ func (o JobSearchResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["customHeaders"] = o.CustomHeaders
 	toSerialize["deadline"] = o.Deadline.Get()
 	toSerialize["deniedReason"] = o.DeniedReason.Get()
-	toSerialize["elementId"] = o.ElementId.Get()
+	toSerialize["elementId"] = o.ElementId
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
 	toSerialize["endTime"] = o.EndTime.Get()
 	toSerialize["errorCode"] = o.ErrorCode.Get()

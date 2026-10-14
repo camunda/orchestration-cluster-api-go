@@ -53,6 +53,8 @@ type UserTaskResult struct {
 	CustomHeaders map[string]string `json:"customHeaders"`
 	// The priority of a user task. The higher the value the higher the priority.
 	Priority int32 `json:"priority"`
+	// Whether the user task is suspended because its owning process instance is suspended.
+	IsSuspended bool `json:"isSuspended"`
 	// The key of the user task.
 	UserTaskKey UserTaskKey `json:"userTaskKey"`
 	// The key of the element instance.
@@ -79,7 +81,7 @@ type _UserTaskResult UserTaskResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee NullableString, elementId ElementId, candidateGroups []string, candidateUsers []string, processDefinitionId ProcessDefinitionId, creationDate time.Time, completionDate NullableTime, followUpDate NullableTime, dueDate NullableTime, tenantId TenantId, externalFormReference NullableString, processDefinitionVersion int32, customHeaders map[string]string, priority int32, userTaskKey UserTaskKey, elementInstanceKey ElementInstanceKey, processName NullableString, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, formKey NullableFormKey, tags []Tag) *UserTaskResult {
+func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee NullableString, elementId ElementId, candidateGroups []string, candidateUsers []string, processDefinitionId ProcessDefinitionId, creationDate time.Time, completionDate NullableTime, followUpDate NullableTime, dueDate NullableTime, tenantId TenantId, externalFormReference NullableString, processDefinitionVersion int32, customHeaders map[string]string, priority int32, isSuspended bool, userTaskKey UserTaskKey, elementInstanceKey ElementInstanceKey, processName NullableString, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, formKey NullableFormKey, tags []Tag) *UserTaskResult {
 	this := UserTaskResult{}
 	this.Name = name
 	this.State = state
@@ -97,6 +99,7 @@ func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee Nu
 	this.ProcessDefinitionVersion = processDefinitionVersion
 	this.CustomHeaders = customHeaders
 	this.Priority = priority
+	this.IsSuspended = isSuspended
 	this.UserTaskKey = userTaskKey
 	this.ElementInstanceKey = elementInstanceKey
 	this.ProcessName = processName
@@ -515,6 +518,30 @@ func (o *UserTaskResult) SetPriority(v int32) {
 	o.Priority = v
 }
 
+// GetIsSuspended returns the IsSuspended field value
+func (o *UserTaskResult) GetIsSuspended() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.IsSuspended
+}
+
+// GetIsSuspendedOk returns a tuple with the IsSuspended field value
+// and a boolean to check if the value has been set.
+func (o *UserTaskResult) GetIsSuspendedOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.IsSuspended, true
+}
+
+// SetIsSuspended sets field value
+func (o *UserTaskResult) SetIsSuspended(v bool) {
+	o.IsSuspended = v
+}
+
 // GetUserTaskKey returns the UserTaskKey field value
 func (o *UserTaskResult) GetUserTaskKey() UserTaskKey {
 	if o == nil {
@@ -765,6 +792,7 @@ func (o UserTaskResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["processDefinitionVersion"] = o.ProcessDefinitionVersion
 	toSerialize["customHeaders"] = o.CustomHeaders
 	toSerialize["priority"] = o.Priority
+	toSerialize["isSuspended"] = o.IsSuspended
 	toSerialize["userTaskKey"] = o.UserTaskKey
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
 	toSerialize["processName"] = o.ProcessName.Get()
@@ -798,6 +826,7 @@ func (o *UserTaskResult) UnmarshalJSON(data []byte) (err error) {
 		"processDefinitionVersion",
 		"customHeaders",
 		"priority",
+		"isSuspended",
 		"userTaskKey",
 		"elementInstanceKey",
 		"processName",

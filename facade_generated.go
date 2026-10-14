@@ -4432,8 +4432,7 @@ func (c *CamundaClient) UpdateUser(ctx context.Context, username string, body Us
 //
 // Example:
 //
-//	req := camunda.NewUserTaskAssignmentRequest()
-//	req.SetAssignee("alice")
+//	req := camunda.NewUserTaskAssignmentRequest("alice")
 //
 //	return client.AssignUserTask(ctx, camunda.MustUserTaskKey("2251799813685380"), *req)
 func (c *CamundaClient) AssignUserTask(ctx context.Context, userTaskKey UserTaskKey, body UserTaskAssignmentRequest, opts ...func(ApiAssignUserTaskRequest) ApiAssignUserTaskRequest) error {

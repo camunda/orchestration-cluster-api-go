@@ -11,7 +11,9 @@ API version: 0.1
 package camundaapi
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the UserTaskAssignmentRequest type satisfies the MappedNullable interface at compile time
@@ -20,19 +22,22 @@ var _ MappedNullable = &UserTaskAssignmentRequest{}
 // UserTaskAssignmentRequest struct for UserTaskAssignmentRequest
 type UserTaskAssignmentRequest struct {
 	// The assignee for the user task. The assignee must not be empty or `null`.
-	Assignee *string `json:"assignee,omitempty"`
+	Assignee string `json:"assignee"`
 	// By default, the task is reassigned if it was already assigned. Set this to `false` to return an error in such cases. The task must then first be unassigned to be assigned again. Use this when you have users picking from group task queues to prevent race conditions.
 	AllowOverride NullableBool `json:"allowOverride,omitempty"`
 	// A custom action value that will be accessible from user task events resulting from this endpoint invocation. If not provided, it will default to \"assign\".
 	Action NullableString `json:"action,omitempty"`
 }
 
+type _UserTaskAssignmentRequest UserTaskAssignmentRequest
+
 // NewUserTaskAssignmentRequest instantiates a new UserTaskAssignmentRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskAssignmentRequest() *UserTaskAssignmentRequest {
+func NewUserTaskAssignmentRequest(assignee string) *UserTaskAssignmentRequest {
 	this := UserTaskAssignmentRequest{}
+	this.Assignee = assignee
 	return &this
 }
 
@@ -44,36 +49,28 @@ func NewUserTaskAssignmentRequestWithDefaults() *UserTaskAssignmentRequest {
 	return &this
 }
 
-// GetAssignee returns the Assignee field value if set, zero value otherwise.
+// GetAssignee returns the Assignee field value
 func (o *UserTaskAssignmentRequest) GetAssignee() string {
-	if o == nil || IsNil(o.Assignee) {
+	if o == nil {
 		var ret string
 		return ret
 	}
-	return *o.Assignee
+
+	return o.Assignee
 }
 
-// GetAssigneeOk returns a tuple with the Assignee field value if set, nil otherwise
+// GetAssigneeOk returns a tuple with the Assignee field value
 // and a boolean to check if the value has been set.
 func (o *UserTaskAssignmentRequest) GetAssigneeOk() (*string, bool) {
-	if o == nil || IsNil(o.Assignee) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Assignee, true
+	return &o.Assignee, true
 }
 
-// HasAssignee returns a boolean if a field has been set.
-func (o *UserTaskAssignmentRequest) HasAssignee() bool {
-	if o != nil && !IsNil(o.Assignee) {
-		return true
-	}
-
-	return false
-}
-
-// SetAssignee gets a reference to the given string and assigns it to the Assignee field.
+// SetAssignee sets field value
 func (o *UserTaskAssignmentRequest) SetAssignee(v string) {
-	o.Assignee = &v
+	o.Assignee = v
 }
 
 // GetAllowOverride returns the AllowOverride field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -172,9 +169,7 @@ func (o UserTaskAssignmentRequest) MarshalJSON() ([]byte, error) {
 
 func (o UserTaskAssignmentRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Assignee) {
-		toSerialize["assignee"] = o.Assignee
-	}
+	toSerialize["assignee"] = o.Assignee
 	if o.AllowOverride.IsSet() {
 		toSerialize["allowOverride"] = o.AllowOverride.Get()
 	}
@@ -182,6 +177,43 @@ func (o UserTaskAssignmentRequest) ToMap() (map[string]interface{}, error) {
 		toSerialize["action"] = o.Action.Get()
 	}
 	return toSerialize, nil
+}
+
+func (o *UserTaskAssignmentRequest) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	requiredProperties := []string{
+		"assignee",
+	}
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	for _, requiredProperty := range requiredProperties {
+		if _, exists := allProperties[requiredProperty]; !exists {
+			return fmt.Errorf("no value given for required property %v", requiredProperty)
+		}
+	}
+
+	varUserTaskAssignmentRequest := _UserTaskAssignmentRequest{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	err = decoder.Decode(&varUserTaskAssignmentRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = UserTaskAssignmentRequest(varUserTaskAssignmentRequest)
+
+	return err
 }
 
 type NullableUserTaskAssignmentRequest struct {

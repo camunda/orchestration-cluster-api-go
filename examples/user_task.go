@@ -35,8 +35,7 @@ func getUserTaskExample(ctx context.Context, client *camunda.CamundaClient) erro
 
 func assignUserTaskExample(ctx context.Context, client *camunda.CamundaClient) error {
 	// region AssignUserTask
-	req := camunda.NewUserTaskAssignmentRequest()
-	req.SetAssignee("alice")
+	req := camunda.NewUserTaskAssignmentRequest("alice")
 
 	return client.AssignUserTask(ctx, camunda.MustUserTaskKey("2251799813685380"), *req)
 	// endregion AssignUserTask
