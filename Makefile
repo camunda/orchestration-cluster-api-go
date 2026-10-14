@@ -2,7 +2,8 @@
 
 SPEC_REF ?= stable/8.10
 GO ?= go
-MODULE = $(shell $(GO) list -m)
+# GOWORK=off: under a go.work, `go list -m` prints every workspace module.
+MODULE = $(shell GOWORK=off $(GO) list -m)
 
 help:
 	@echo "Camunda Orchestration Cluster API — Go SDK"
