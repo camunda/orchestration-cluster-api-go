@@ -29,16 +29,26 @@ import (
 	"go/printer"
 	"go/token"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
 )
 
-const (
-	clientImportPath = "github.com/camunda/orchestration-cluster-api-go/client"
-	clientAlias      = "camundaapi"
-)
+const clientAlias = "camundaapi"
+
+// clientImportPath follows go.mod so a /vN major-version path change needs no edit here.
+var clientImportPath = mustModulePath() + "/client"
+
+func mustModulePath() string {
+	out, err := exec.Command("go", "list", "-m").Output()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "facadegen: go list -m: %v\n", err)
+		os.Exit(1)
+	}
+	return strings.TrimSpace(string(out))
+}
 
 // handwrittenOps are operations excluded from generation because the SDK ships a
 // hand-written ergonomic method with the same signature. CreateProcessInstance is
