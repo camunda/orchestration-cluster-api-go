@@ -6453,8 +6453,8 @@ const file_gateway_proto_rawDesc = "" +
 	"\x11UpdateJobPriority\x12*.gateway_protocol.UpdateJobPriorityRequest\x1a+.gateway_protocol.UpdateJobPriorityResponse\"\x00\x12e\n" +
 	"\x0eDeleteResource\x12'.gateway_protocol.DeleteResourceRequest\x1a(.gateway_protocol.DeleteResourceResponse\"\x00\x12h\n" +
 	"\x0fBroadcastSignal\x12(.gateway_protocol.BroadcastSignalRequest\x1a).gateway_protocol.BroadcastSignalResponse\"\x00\x12t\n" +
-	"\x13EvaluateConditional\x12,.gateway_protocol.EvaluateConditionalRequest\x1a-.gateway_protocol.EvaluateConditionalResponse\"\x00B\xb4\x01\n" +
-	"\x14com.gateway_protocolB\fGatewayProtoP\x01Z2github.com/camunda/orchestration-cluster-api-go/pb\xa2\x02\x03GXX\xaa\x02\x0fGatewayProtocol\xca\x02\x0fGatewayProtocol\xe2\x02\x1bGatewayProtocol\\GPBMetadata\xea\x02\x0fGatewayProtocolb\x06proto3"
+	"\x13EvaluateConditional\x12,.gateway_protocol.EvaluateConditionalRequest\x1a-.gateway_protocol.EvaluateConditionalResponse\"\x00B\xb8\x01\n" +
+	"\x14com.gateway_protocolB\fGatewayProtoP\x01Z6github.com/camunda/orchestration-cluster-api-go/v11/pb\xa2\x02\x03GXX\xaa\x02\x0fGatewayProtocol\xca\x02\x0fGatewayProtocol\xe2\x02\x1bGatewayProtocol\\GPBMetadata\xea\x02\x0fGatewayProtocolb\x06proto3"
 
 var (
 	file_gateway_proto_rawDescOnce sync.Once
