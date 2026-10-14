@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/auth"
 )
 
 func TestConfigurationOptionsApplyAllValues(t *testing.T) {

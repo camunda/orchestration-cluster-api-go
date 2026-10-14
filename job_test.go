@@ -3,7 +3,7 @@ package camunda
 import (
 	"testing"
 
-	"github.com/camunda/orchestration-cluster-api-go/pb"
+	"github.com/camunda/orchestration-cluster-api-go/v10/pb"
 )
 
 // TestNewGRPCJobDecodesFields verifies that a gRPC ActivatedJob is normalized

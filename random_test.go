@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
 )
 
 // seed42 is the cross-SDK conformance vector: the first five draws of a source

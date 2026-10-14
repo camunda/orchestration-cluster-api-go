@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"testing"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
-	"github.com/camunda/orchestration-cluster-api-go/internal/backpressure"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/backpressure"
 )
 
 // TestBackpressureQueueFullMapsToPublicSentinel guards issue #6: a request

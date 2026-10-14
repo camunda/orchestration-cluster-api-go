@@ -8,7 +8,7 @@ managed:
     # Force the generated Go import path regardless of the proto's own
     # `option go_package` (upstream sets it to "./;pb").
     - file_option: go_package
-      value: github.com/camunda/orchestration-cluster-api-go/pb
+      value: github.com/camunda/orchestration-cluster-api-go/v10/pb
 plugins:
   - remote: buf.build/protocolbuffers/go:v1.36.11
     out: pb

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
 )
 
 func createAgentInstanceExample(ctx context.Context, client *camunda.CamundaClient) error {

@@ -16,7 +16,7 @@ import (
 	"os"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
 )
 
 func quickStart() error {

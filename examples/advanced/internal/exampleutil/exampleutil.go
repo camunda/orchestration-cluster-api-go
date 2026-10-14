@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
 )
 
 var errProcessActive = errors.New("process instance is still active")
