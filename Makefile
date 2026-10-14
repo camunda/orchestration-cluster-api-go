@@ -2,6 +2,7 @@
 
 SPEC_REF ?= stable/8.10
 GO ?= go
+MODULE = $(shell $(GO) list -m)
 
 help:
 	@echo "Camunda Orchestration Cluster API — Go SDK"
@@ -89,10 +90,10 @@ coverage:
 docs-json:
 	@mkdir -p docs-json
 	$(GO) run ./cmd/docgen -dir . -exclude reexport_generated.go \
-		-import-path github.com/camunda/orchestration-cluster-api-go \
+		-import-path $(MODULE) \
 		-out docs-json/camunda.json
 	$(GO) run ./cmd/docgen -dir ./client -include zz_generated_domain_keys.go \
-		-import-path github.com/camunda/orchestration-cluster-api-go/client \
+		-import-path $(MODULE)/client \
 		-out docs-json/domain-keys.json
 
 # Render the Docusaurus pages published at docs.camunda.io.
