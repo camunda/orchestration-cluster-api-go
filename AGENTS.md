@@ -9,7 +9,7 @@
 This repo produces the **Go SDK** for the Camunda 8 Orchestration Cluster REST API,
 plus a **gRPC job-streaming worker**. It is a sibling of the JS / Python / C# / Rust
 SDKs and follows the same pattern: a generated low-level client wrapped by a
-hand-written ergonomic runtime. Target API version: **8.10** (`main`).
+hand-written ergonomic runtime. Target API version: **8.10** (`stable/10`).
 
 Upstream dependencies — fix at the source when they misbehave, not by working around
 them here:
@@ -116,9 +116,16 @@ review-comment fix-ups and regeneration commits.
 
 ## Versioning
 
-Semantic versioning via `git` tags. The SDK major tracks the Camunda server minor
-(server 8.9 → SDK 9.x). Go majors ≥ 2 require the `/vN` module-path suffix; during
-Technical Preview the module stays at `v0`.
+Semantic versioning via annotated `git` tags; `release.yml` gates the tag and creates
+the GitHub Release. The SDK major tracks the Camunda server minor (server 8.10 → SDK
+v10.x), and Go carries majors ≥ 2 in the module path: `stable/10` is `/v10`, `main`
+is `/v11`. Pre-v10 releases (`v0.x`) used the unsuffixed path.
+
+When `main` moves to a new server line, cut `stable/N` first, then on `main`:
+`go mod edit -module` to the next `/vN`, rewrite the Go import strings, update the
+`go_package` in `buf.gen.yaml`, and regenerate `pb/` with `buf generate` (the
+descriptor embeds the path, so do not hand-edit it). Everything else reads the path
+from `go.mod`; `TestModulePathLiteralsMatchGoMod` flags any literal that was missed.
 
 ## Go conventions
 
