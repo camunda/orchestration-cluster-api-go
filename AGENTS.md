@@ -9,7 +9,7 @@
 This repo produces the **Go SDK** for the Camunda 8 Orchestration Cluster REST API,
 plus a **gRPC job-streaming worker**. It is a sibling of the JS / Python / C# / Rust
 SDKs and follows the same pattern: a generated low-level client wrapped by a
-hand-written ergonomic runtime. Target API version: **8.10** (`main`).
+hand-written ergonomic runtime. Target API version: **8.11** (`main`).
 
 Upstream dependencies — fix at the source when they misbehave, not by working around
 them here:
