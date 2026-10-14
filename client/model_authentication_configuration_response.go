@@ -25,6 +25,8 @@ type AuthenticationConfigurationResponse struct {
 	CanLogout bool `json:"canLogout"`
 	// Whether login is delegated to an external identity provider.
 	IsLoginDelegated bool `json:"isLoginDelegated"`
+	// Whether Camunda manages group membership locally, as opposed to delegating it to the identity provider via a groups claim.
+	IsCamundaGroupsEnabled bool `json:"isCamundaGroupsEnabled"`
 }
 
 type _AuthenticationConfigurationResponse AuthenticationConfigurationResponse
@@ -33,10 +35,11 @@ type _AuthenticationConfigurationResponse AuthenticationConfigurationResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAuthenticationConfigurationResponse(canLogout bool, isLoginDelegated bool) *AuthenticationConfigurationResponse {
+func NewAuthenticationConfigurationResponse(canLogout bool, isLoginDelegated bool, isCamundaGroupsEnabled bool) *AuthenticationConfigurationResponse {
 	this := AuthenticationConfigurationResponse{}
 	this.CanLogout = canLogout
 	this.IsLoginDelegated = isLoginDelegated
+	this.IsCamundaGroupsEnabled = isCamundaGroupsEnabled
 	return &this
 }
 
@@ -96,6 +99,30 @@ func (o *AuthenticationConfigurationResponse) SetIsLoginDelegated(v bool) {
 	o.IsLoginDelegated = v
 }
 
+// GetIsCamundaGroupsEnabled returns the IsCamundaGroupsEnabled field value
+func (o *AuthenticationConfigurationResponse) GetIsCamundaGroupsEnabled() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.IsCamundaGroupsEnabled
+}
+
+// GetIsCamundaGroupsEnabledOk returns a tuple with the IsCamundaGroupsEnabled field value
+// and a boolean to check if the value has been set.
+func (o *AuthenticationConfigurationResponse) GetIsCamundaGroupsEnabledOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.IsCamundaGroupsEnabled, true
+}
+
+// SetIsCamundaGroupsEnabled sets field value
+func (o *AuthenticationConfigurationResponse) SetIsCamundaGroupsEnabled(v bool) {
+	o.IsCamundaGroupsEnabled = v
+}
+
 func (o AuthenticationConfigurationResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -108,6 +135,7 @@ func (o AuthenticationConfigurationResponse) ToMap() (map[string]interface{}, er
 	toSerialize := map[string]interface{}{}
 	toSerialize["canLogout"] = o.CanLogout
 	toSerialize["isLoginDelegated"] = o.IsLoginDelegated
+	toSerialize["isCamundaGroupsEnabled"] = o.IsCamundaGroupsEnabled
 	return toSerialize, nil
 }
 
@@ -118,6 +146,7 @@ func (o *AuthenticationConfigurationResponse) UnmarshalJSON(data []byte) (err er
 	requiredProperties := []string{
 		"canLogout",
 		"isLoginDelegated",
+		"isCamundaGroupsEnabled",
 	}
 
 	allProperties := make(map[string]interface{})

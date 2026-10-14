@@ -196,9 +196,14 @@ type ApiCreateDocumentLinkRequest struct {
 	ctx                 context.Context
 	ApiService          *DocumentAPIService
 	documentId          string
+	documentLinkRequest *DocumentLinkRequest
 	storeId             *string
 	contentHash         *string
-	documentLinkRequest *DocumentLinkRequest
+}
+
+func (r ApiCreateDocumentLinkRequest) DocumentLinkRequest(documentLinkRequest DocumentLinkRequest) ApiCreateDocumentLinkRequest {
+	r.documentLinkRequest = &documentLinkRequest
+	return r
 }
 
 // The ID of the document store where the document is located.
@@ -210,11 +215,6 @@ func (r ApiCreateDocumentLinkRequest) StoreId(storeId string) ApiCreateDocumentL
 // The hash of the document content that was computed by the document store during upload. The hash is part of the document reference that is returned when uploading a document. If the client fails to provide the correct hash, the request will be rejected.
 func (r ApiCreateDocumentLinkRequest) ContentHash(contentHash string) ApiCreateDocumentLinkRequest {
 	r.contentHash = &contentHash
-	return r
-}
-
-func (r ApiCreateDocumentLinkRequest) DocumentLinkRequest(documentLinkRequest DocumentLinkRequest) ApiCreateDocumentLinkRequest {
-	r.documentLinkRequest = &documentLinkRequest
 	return r
 }
 
@@ -263,6 +263,9 @@ func (a *DocumentAPIService) CreateDocumentLinkExecute(r ApiCreateDocumentLinkRe
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if r.documentLinkRequest == nil {
+		return localVarReturnValue, nil, reportError("documentLinkRequest is required and must be specified")
+	}
 
 	if r.storeId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "storeId", r.storeId, "form", "")

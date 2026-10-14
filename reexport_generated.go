@@ -4390,8 +4390,8 @@ type AuthenticationConfigurationResponse = camundaapi.AuthenticationConfiguratio
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAuthenticationConfigurationResponse(canLogout bool, isLoginDelegated bool) *AuthenticationConfigurationResponse {
-	return camundaapi.NewAuthenticationConfigurationResponse(canLogout, isLoginDelegated)
+func NewAuthenticationConfigurationResponse(canLogout bool, isLoginDelegated bool, isCamundaGroupsEnabled bool) *AuthenticationConfigurationResponse {
+	return camundaapi.NewAuthenticationConfigurationResponse(canLogout, isLoginDelegated, isCamundaGroupsEnabled)
 }
 
 // NewAuthenticationConfigurationResponseWithDefaults instantiates a new AuthenticationConfigurationResponse object
@@ -7186,7 +7186,7 @@ type CreateClusterVariableRequest = camundaapi.CreateClusterVariableRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateClusterVariableRequest(name ClusterVariableName, value map[string]interface{}) *CreateClusterVariableRequest {
+func NewCreateClusterVariableRequest(name ClusterVariableName, value interface{}) *CreateClusterVariableRequest {
 	return camundaapi.NewCreateClusterVariableRequest(name, value)
 }
 
@@ -8288,8 +8288,8 @@ type DeploymentConfigurationResponse = camundaapi.DeploymentConfigurationRespons
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentConfigurationResponse(isMultiTenancyEnabled bool, maxRequestSize int64) *DeploymentConfigurationResponse {
-	return camundaapi.NewDeploymentConfigurationResponse(isMultiTenancyEnabled, maxRequestSize)
+func NewDeploymentConfigurationResponse(isMultiTenancyEnabled bool, isTenantsApiEnabled bool, maxRequestSize int64) *DeploymentConfigurationResponse {
+	return camundaapi.NewDeploymentConfigurationResponse(isMultiTenancyEnabled, isTenantsApiEnabled, maxRequestSize)
 }
 
 // NewDeploymentConfigurationResponseWithDefaults instantiates a new DeploymentConfigurationResponse object
@@ -12049,7 +12049,7 @@ type JobSearchResult = camundaapi.JobSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
+func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId ElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
 	return camundaapi.NewJobSearchResult(customHeaders, deadline, deniedReason, elementId, elementInstanceKey, endTime, errorCode, errorMessage, hasFailedWithRetriesLeft, isDenied, jobKey, kind, listenerEventType, processDefinitionId, processDefinitionKey, processInstanceKey, rootProcessInstanceKey, businessId, retries, state, tenantId, type_, worker, creationTime, lastUpdateTime, priority)
 }
 
@@ -16668,6 +16668,33 @@ func NewNullableRoleUpdateResult(val *RoleUpdateResult) *NullableRoleUpdateResul
 	return camundaapi.NewNullableRoleUpdateResult(val)
 }
 
+// RoleUserFilterRequest Role user filter request
+//
+// Fields and methods are documented on [camundaapi.RoleUserFilterRequest].
+type RoleUserFilterRequest = camundaapi.RoleUserFilterRequest
+
+// NewRoleUserFilterRequest instantiates a new RoleUserFilterRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewRoleUserFilterRequest() *RoleUserFilterRequest {
+	return camundaapi.NewRoleUserFilterRequest()
+}
+
+// NewRoleUserFilterRequestWithDefaults instantiates a new RoleUserFilterRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewRoleUserFilterRequestWithDefaults() *RoleUserFilterRequest {
+	return camundaapi.NewRoleUserFilterRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableRoleUserFilterRequest].
+type NullableRoleUserFilterRequest = camundaapi.NullableRoleUserFilterRequest
+
+func NewNullableRoleUserFilterRequest(val *RoleUserFilterRequest) *NullableRoleUserFilterRequest {
+	return camundaapi.NewNullableRoleUserFilterRequest(val)
+}
+
 // RoleUserResult struct for RoleUserResult
 //
 // Fields and methods are documented on [camundaapi.RoleUserResult].
@@ -18274,7 +18301,7 @@ type UpdateClusterVariableRequest = camundaapi.UpdateClusterVariableRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateClusterVariableRequest(value map[string]interface{}) *UpdateClusterVariableRequest {
+func NewUpdateClusterVariableRequest(value interface{}) *UpdateClusterVariableRequest {
 	return camundaapi.NewUpdateClusterVariableRequest(value)
 }
 
@@ -18625,8 +18652,8 @@ type UserTaskAssignmentRequest = camundaapi.UserTaskAssignmentRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskAssignmentRequest() *UserTaskAssignmentRequest {
-	return camundaapi.NewUserTaskAssignmentRequest()
+func NewUserTaskAssignmentRequest(assignee string) *UserTaskAssignmentRequest {
+	return camundaapi.NewUserTaskAssignmentRequest(assignee)
 }
 
 // NewUserTaskAssignmentRequestWithDefaults instantiates a new UserTaskAssignmentRequest object
@@ -18841,8 +18868,8 @@ type UserTaskResult = camundaapi.UserTaskResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee NullableString, elementId ElementId, candidateGroups []string, candidateUsers []string, processDefinitionId ProcessDefinitionId, creationDate time.Time, completionDate NullableTime, followUpDate NullableTime, dueDate NullableTime, tenantId TenantId, externalFormReference NullableString, processDefinitionVersion int32, customHeaders map[string]string, priority int32, userTaskKey UserTaskKey, elementInstanceKey ElementInstanceKey, processName NullableString, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, formKey NullableFormKey, tags []Tag) *UserTaskResult {
-	return camundaapi.NewUserTaskResult(name, state, assignee, elementId, candidateGroups, candidateUsers, processDefinitionId, creationDate, completionDate, followUpDate, dueDate, tenantId, externalFormReference, processDefinitionVersion, customHeaders, priority, userTaskKey, elementInstanceKey, processName, processDefinitionKey, processInstanceKey, rootProcessInstanceKey, businessId, formKey, tags)
+func NewUserTaskResult(name NullableString, state UserTaskStateEnum, assignee NullableString, elementId ElementId, candidateGroups []string, candidateUsers []string, processDefinitionId ProcessDefinitionId, creationDate time.Time, completionDate NullableTime, followUpDate NullableTime, dueDate NullableTime, tenantId TenantId, externalFormReference NullableString, processDefinitionVersion int32, customHeaders map[string]string, priority int32, isSuspended bool, userTaskKey UserTaskKey, elementInstanceKey ElementInstanceKey, processName NullableString, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, formKey NullableFormKey, tags []Tag) *UserTaskResult {
+	return camundaapi.NewUserTaskResult(name, state, assignee, elementId, candidateGroups, candidateUsers, processDefinitionId, creationDate, completionDate, followUpDate, dueDate, tenantId, externalFormReference, processDefinitionVersion, customHeaders, priority, isSuspended, userTaskKey, elementInstanceKey, processName, processDefinitionKey, processInstanceKey, rootProcessInstanceKey, businessId, formKey, tags)
 }
 
 // NewUserTaskResultWithDefaults instantiates a new UserTaskResult object

@@ -23,6 +23,8 @@ var _ MappedNullable = &DeploymentConfigurationResponse{}
 type DeploymentConfigurationResponse struct {
 	// Whether multi-tenancy is enabled.
 	IsMultiTenancyEnabled bool `json:"isMultiTenancyEnabled"`
+	// Whether the tenants management API and UI are enabled.
+	IsTenantsApiEnabled bool `json:"isTenantsApiEnabled"`
 	// The maximum HTTP request size in bytes.
 	MaxRequestSize int64 `json:"maxRequestSize"`
 }
@@ -33,9 +35,10 @@ type _DeploymentConfigurationResponse DeploymentConfigurationResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentConfigurationResponse(isMultiTenancyEnabled bool, maxRequestSize int64) *DeploymentConfigurationResponse {
+func NewDeploymentConfigurationResponse(isMultiTenancyEnabled bool, isTenantsApiEnabled bool, maxRequestSize int64) *DeploymentConfigurationResponse {
 	this := DeploymentConfigurationResponse{}
 	this.IsMultiTenancyEnabled = isMultiTenancyEnabled
+	this.IsTenantsApiEnabled = isTenantsApiEnabled
 	this.MaxRequestSize = maxRequestSize
 	return &this
 }
@@ -70,6 +73,30 @@ func (o *DeploymentConfigurationResponse) GetIsMultiTenancyEnabledOk() (*bool, b
 // SetIsMultiTenancyEnabled sets field value
 func (o *DeploymentConfigurationResponse) SetIsMultiTenancyEnabled(v bool) {
 	o.IsMultiTenancyEnabled = v
+}
+
+// GetIsTenantsApiEnabled returns the IsTenantsApiEnabled field value
+func (o *DeploymentConfigurationResponse) GetIsTenantsApiEnabled() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.IsTenantsApiEnabled
+}
+
+// GetIsTenantsApiEnabledOk returns a tuple with the IsTenantsApiEnabled field value
+// and a boolean to check if the value has been set.
+func (o *DeploymentConfigurationResponse) GetIsTenantsApiEnabledOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.IsTenantsApiEnabled, true
+}
+
+// SetIsTenantsApiEnabled sets field value
+func (o *DeploymentConfigurationResponse) SetIsTenantsApiEnabled(v bool) {
+	o.IsTenantsApiEnabled = v
 }
 
 // GetMaxRequestSize returns the MaxRequestSize field value
@@ -107,6 +134,7 @@ func (o DeploymentConfigurationResponse) MarshalJSON() ([]byte, error) {
 func (o DeploymentConfigurationResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["isMultiTenancyEnabled"] = o.IsMultiTenancyEnabled
+	toSerialize["isTenantsApiEnabled"] = o.IsTenantsApiEnabled
 	toSerialize["maxRequestSize"] = o.MaxRequestSize
 	return toSerialize, nil
 }
@@ -117,6 +145,7 @@ func (o *DeploymentConfigurationResponse) UnmarshalJSON(data []byte) (err error)
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"isMultiTenancyEnabled",
+		"isTenantsApiEnabled",
 		"maxRequestSize",
 	}
 

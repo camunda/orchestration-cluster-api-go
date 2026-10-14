@@ -22,7 +22,7 @@ var _ MappedNullable = &UpdateClusterVariableRequest{}
 // UpdateClusterVariableRequest struct for UpdateClusterVariableRequest
 type UpdateClusterVariableRequest struct {
 	// The new value of the cluster variable. Can be any JSON object or primitive value. Will be serialized as a JSON string in responses.
-	Value map[string]interface{} `json:"value"`
+	Value interface{} `json:"value"`
 	// A generic key-value metadata bag attached to the cluster variable. Values must be strings or numbers. Limited to 100 entries and a configurable maximum serialized size (default: 100 entries at max key length of a cluster variable name (256 chars) plus the maximum value length, 8192 characters).
 	Metadata map[string]CreateClusterVariableRequestMetadataValue `json:"metadata,omitempty"`
 }
@@ -33,7 +33,7 @@ type _UpdateClusterVariableRequest UpdateClusterVariableRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateClusterVariableRequest(value map[string]interface{}) *UpdateClusterVariableRequest {
+func NewUpdateClusterVariableRequest(value interface{}) *UpdateClusterVariableRequest {
 	this := UpdateClusterVariableRequest{}
 	this.Value = value
 	return &this
@@ -48,9 +48,10 @@ func NewUpdateClusterVariableRequestWithDefaults() *UpdateClusterVariableRequest
 }
 
 // GetValue returns the Value field value
-func (o *UpdateClusterVariableRequest) GetValue() map[string]interface{} {
+// If the value is explicit nil, the zero value for interface{} will be returned
+func (o *UpdateClusterVariableRequest) GetValue() interface{} {
 	if o == nil {
-		var ret map[string]interface{}
+		var ret interface{}
 		return ret
 	}
 
@@ -59,15 +60,16 @@ func (o *UpdateClusterVariableRequest) GetValue() map[string]interface{} {
 
 // GetValueOk returns a tuple with the Value field value
 // and a boolean to check if the value has been set.
-func (o *UpdateClusterVariableRequest) GetValueOk() (map[string]interface{}, bool) {
-	if o == nil {
-		return map[string]interface{}{}, false
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateClusterVariableRequest) GetValueOk() (*interface{}, bool) {
+	if o == nil || IsNil(o.Value) {
+		return nil, false
 	}
-	return o.Value, true
+	return &o.Value, true
 }
 
 // SetValue sets field value
-func (o *UpdateClusterVariableRequest) SetValue(v map[string]interface{}) {
+func (o *UpdateClusterVariableRequest) SetValue(v interface{}) {
 	o.Value = v
 }
 
@@ -113,7 +115,9 @@ func (o UpdateClusterVariableRequest) MarshalJSON() ([]byte, error) {
 
 func (o UpdateClusterVariableRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["value"] = o.Value
+	if o.Value != nil {
+		toSerialize["value"] = o.Value
+	}
 	if !IsNil(o.Metadata) {
 		toSerialize["metadata"] = o.Metadata
 	}
