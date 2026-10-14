@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
-	"github.com/camunda/orchestration-cluster-api-go/internal/backpressure"
-	"github.com/camunda/orchestration-cluster-api-go/internal/diag"
-	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
-	"github.com/camunda/orchestration-cluster-api-go/internal/retry"
-	"github.com/camunda/orchestration-cluster-api-go/internal/transport"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/auth"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/backpressure"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/diag"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/falcon"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/retry"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/transport"
 )
 
 // CamundaClient is the ergonomic entry point to the Camunda 8 Orchestration

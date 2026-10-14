@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
-	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/auth"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/falcon"
 )
 
 // falconDetectTimeout bounds a single topology probe.

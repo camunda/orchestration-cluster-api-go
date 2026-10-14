@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/falcon"
 )
 
 // JobWorker polls for jobs of a given type and dispatches them to a handler with

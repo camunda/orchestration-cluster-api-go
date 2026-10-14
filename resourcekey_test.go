@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
 )
 
 // TestResourceKeyIsValidatedStringKey guards the domain-type-system repair for

@@ -19,7 +19,7 @@ the same two-layer architecture.
 ## Installation
 
 ```sh
-go get github.com/camunda/orchestration-cluster-api-go
+go get github.com/camunda/orchestration-cluster-api-go/v11
 ```
 
 Requires Go 1.25+. During Technical Preview the module path has no version suffix
@@ -596,7 +596,7 @@ first-class parameters and returns the deserialized result.
 Every request, response, key and enum type is available from the `camunda`
 package, so one import covers normal use. Only the raw HTTP-client machinery —
 the client `Raw()` returns, its configuration, and its error type — stays in the
-generated `github.com/camunda/orchestration-cluster-api-go/client` package.
+generated `github.com/camunda/orchestration-cluster-api-go/v11/client` package.
 
 When you need something the facade deliberately does not model — multipart
 uploads, unusual query-parameter combinations, or the raw `*http.Response` —
@@ -621,7 +621,7 @@ retry, and authentication all apply, because those are `http.RoundTripper` layer
 on the transport rather than facade-level wrappers.
 
 Full API documentation is published on
-[pkg.go.dev](https://pkg.go.dev/github.com/camunda/orchestration-cluster-api-go).
+[pkg.go.dev](https://pkg.go.dev/github.com/camunda/orchestration-cluster-api-go/v11).
 
 <!-- docs:cut:start -->
 

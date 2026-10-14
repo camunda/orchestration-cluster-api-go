@@ -13,9 +13,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
-	"github.com/camunda/orchestration-cluster-api-go/internal/backpressure"
-	"github.com/camunda/orchestration-cluster-api-go/internal/retry"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/auth"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/backpressure"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/retry"
 )
 
 // Options configures the RoundTripper chain.
