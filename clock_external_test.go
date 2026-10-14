@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
 )
 
 // recordingClock is a downstream implementation, written against nothing but the

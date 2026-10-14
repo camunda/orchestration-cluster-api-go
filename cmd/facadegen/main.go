@@ -35,10 +35,47 @@ import (
 	"strings"
 )
 
-const (
-	clientImportPath = "github.com/camunda/orchestration-cluster-api-go/client"
-	clientAlias      = "camundaapi"
-)
+const clientAlias = "camundaapi"
+
+// clientImportPath follows go.mod so a /vN major-version path change needs no edit here.
+var clientImportPath = mustModulePath() + "/client"
+
+func mustModulePath() string {
+	path, err := modulePath()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "facadegen: %v\n", err)
+		os.Exit(1)
+	}
+	return path
+}
+
+// modulePath reads go.mod rather than running `go list -m`, which reports every
+// module under a go.work and "command-line-arguments" outside a module.
+func modulePath() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	for {
+		data, err := os.ReadFile(filepath.Join(dir, "go.mod"))
+		if err == nil {
+			for _, line := range strings.Split(string(data), "\n") {
+				if f := strings.Fields(line); len(f) >= 2 && f[0] == "module" {
+					return strings.Trim(f[1], `"`), nil
+				}
+			}
+			return "", fmt.Errorf("%s has no module directive", filepath.Join(dir, "go.mod"))
+		}
+		if !os.IsNotExist(err) {
+			return "", err
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("no go.mod found above the working directory")
+		}
+		dir = parent
+	}
+}
 
 // handwrittenOps are operations excluded from generation because the SDK ships a
 // hand-written ergonomic method with the same signature. CreateProcessInstance is

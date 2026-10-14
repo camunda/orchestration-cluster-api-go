@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strconv"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/pb"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v10/client"
+	"github.com/camunda/orchestration-cluster-api-go/v10/pb"
 )
 
 // Job is an activated job passed to a JobHandler. It is transport-agnostic: the

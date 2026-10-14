@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
-	"github.com/camunda/orchestration-cluster-api-go/pb"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v10/client"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/auth"
+	"github.com/camunda/orchestration-cluster-api-go/v10/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"

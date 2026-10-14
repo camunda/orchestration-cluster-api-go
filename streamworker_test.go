@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/camunda/orchestration-cluster-api-go/internal/diag"
-	"github.com/camunda/orchestration-cluster-api-go/pb"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/diag"
+	"github.com/camunda/orchestration-cluster-api-go/v10/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"

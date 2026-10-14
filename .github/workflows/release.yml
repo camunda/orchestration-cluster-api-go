@@ -6,16 +6,15 @@ name: Release
 #
 # Release flow:
 #   1. Make sure `main` is green.
-#   2. Create and push an annotated SemVer tag, e.g. `git tag -a v0.2.0 -m v0.2.0 &&
-#      git push origin v0.2.0`.
+#   2. Create and push an annotated SemVer tag, e.g. `git tag -a v10.0.0 -m v10.0.0 &&
+#      git push origin v10.0.0`.
 #   The tag push triggers this workflow, which re-runs the build/test gate, verifies
 #   the tag's major agrees with the module path, and publishes a GitHub Release.
 #
 # Versioning policy (see AGENTS.md): the SDK major tracks the Camunda server minor
-# (server 8.9 -> SDK 9.x). During Technical Preview the module stays at v0 (the
-# module path has no `/vN` suffix). Go requires majors >= 2 to carry a matching
-# `/vN` suffix in the module path; the version check below enforces that agreement
-# so a mismatched tag fails fast instead of shipping an unresolvable module.
+# (server 8.10 -> SDK v10.x). Go requires majors >= 2 to carry a matching `/vN`
+# suffix in the module path; the version check below enforces that agreement so a
+# mismatched tag fails fast instead of shipping an unresolvable module.
 #
 # A manual workflow_dispatch run executes the gate only (no tag, no release) as a
 # smoke test.

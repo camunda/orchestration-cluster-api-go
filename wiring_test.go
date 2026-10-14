@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v10/client"
 )
 
 func TestNewBasicAuthBuildsClient(t *testing.T) {

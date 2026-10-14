@@ -3,7 +3,7 @@ package camunda_test
 import (
 	"testing"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
 )
 
 func TestIsEventuallyConsistent(t *testing.T) {

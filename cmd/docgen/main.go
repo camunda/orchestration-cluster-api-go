@@ -12,10 +12,10 @@
 // Usage:
 //
 //	docgen -dir . -exclude reexport_generated.go \
-//	       -import-path github.com/camunda/orchestration-cluster-api-go \
+//	       -import-path $(go list -m) \
 //	       -out docs-json/camunda.json
 //	docgen -dir ./client -include zz_generated_domain_keys.go \
-//	       -import-path github.com/camunda/orchestration-cluster-api-go/client \
+//	       -import-path $(go list -m)/client \
 //	       -out docs-json/domain-keys.json
 //
 // The -include flag restricts parsing to a single file, which keeps the

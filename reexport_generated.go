@@ -5,7 +5,7 @@ package camunda
 import (
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v10/client"
 )
 
 // AdHocSubProcessAPIService AdHocSubProcessAPI service

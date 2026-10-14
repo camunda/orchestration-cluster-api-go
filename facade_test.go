@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v10/client"
 )
 
 // TestFacadeAppliesOptsTransform verifies that a facade method applies the

@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/camunda/orchestration-cluster-api-go/internal/backpressure"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/backpressure"
 )
 
 // Sentinel errors. Use errors.Is to test for them.

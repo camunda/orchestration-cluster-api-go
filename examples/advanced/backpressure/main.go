@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
-	"github.com/camunda/orchestration-cluster-api-go/examples/advanced/internal/exampleutil"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
+	"github.com/camunda/orchestration-cluster-api-go/v10/examples/advanced/internal/exampleutil"
 )
 
 type counters struct {

@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
 )
 
 func searchBatchOperationsExample(ctx context.Context, client *camunda.CamundaClient) error {
