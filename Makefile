@@ -2,6 +2,8 @@
 
 SPEC_REF ?= main
 GO ?= go
+# GOWORK=off: under a go.work, `go list -m` prints every workspace module.
+MODULE = $(shell GOWORK=off $(GO) list -m)
 
 help:
 	@echo "Camunda Orchestration Cluster API — Go SDK"
@@ -89,10 +91,10 @@ coverage:
 docs-json:
 	@mkdir -p docs-json
 	$(GO) run ./cmd/docgen -dir . -exclude reexport_generated.go \
-		-import-path github.com/camunda/orchestration-cluster-api-go \
+		-import-path $(MODULE) \
 		-out docs-json/camunda.json
 	$(GO) run ./cmd/docgen -dir ./client -include zz_generated_domain_keys.go \
-		-import-path github.com/camunda/orchestration-cluster-api-go/client \
+		-import-path $(MODULE)/client \
 		-out docs-json/domain-keys.json
 
 # Render the Docusaurus pages published at docs.camunda.io.
