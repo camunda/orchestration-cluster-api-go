@@ -1,0 +1,122 @@
+name: SaaS integration
+
+# Runs the `saas`-tagged tests in ./test/saas against a live Camunda 8 SaaS cluster.
+# Unlike the `integration` job in ci.yml (a local docker stack, no auth), these go
+# through the real SaaS edge: OAuth, TLS, and the Cloudflare-fronted gRPC gateway.
+#
+# For now this only runs on demand (Actions tab -> "SaaS integration" -> Run workflow).
+# To make it part of the PR / main push guard, see the commented block below.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#
+#   CAMUNDA_SAAS_REST_ADDRESS    REST base address, WITHOUT the /v2 suffix:
+#                                https://<region>.zeebe.camunda.io/<cluster-id>
+#   CAMUNDA_SAAS_GRPC_ADDRESS    gRPC gateway host:port:
+#                                <cluster-id>.<region>.zeebe.camunda.io:443
+#   CAMUNDA_SAAS_CLIENT_ID       client id of a cluster API client (Zeebe scope)
+#   CAMUNDA_SAAS_CLIENT_SECRET   client secret of that client
+#
+# Optional secrets (defaults apply when unset):
+#
+#   CAMUNDA_SAAS_OAUTH_URL       token endpoint
+#                                (default https://login.cloud.camunda.io/oauth/token)
+#   CAMUNDA_SAAS_TOKEN_AUDIENCE  token audience (default zeebe.camunda.io)
+#
+# They are mapped onto the SDK's own CAMUNDA_* variables (see configschema.go), so the
+# tests build the client from the environment exactly as an application would.
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: 'Optional go test -run regular expression (e.g. TestSaaSStreamIdle). Empty runs everything.'
+        required: false
+        default: ''
+        type: string
+      include_long:
+        description: 'Include the long-running idle-stream tests (over a minute of idling each). Unticked passes -short.'
+        required: false
+        default: true
+        type: boolean
+
+  # --- Enable as a PR / main push guard -----------------------------------------------
+  # Once the secrets above exist in the repository, replace the `on:` block above with
+  # the one below (or add these triggers beside workflow_dispatch), and uncomment the
+  # `if:` guard on the job. Do both: the triggers alone would run on fork PRs, which
+  # GitHub gives no secrets, and the tests would then fail the preflight step.
+  #
+  # on:
+  #   pull_request:
+  #   push:
+  #     branches: [main, "stable/**"]
+  #   workflow_dispatch:
+  #     inputs:
+  #       ... (unchanged)
+  #
+  # job `saas`:
+  #   # Skip PRs from forks and from Dependabot, which receive no repository secrets.
+  #   if: >-
+  #     github.event_name != 'pull_request' ||
+  #     (github.event.pull_request.head.repo.full_name == github.repository &&
+  #      github.actor != 'dependabot[bot]')
+  #
+  # The idle-stream tests add about three minutes; on pull requests you may prefer to
+  # pass -short there and keep the full run for pushes to main (see the Test step).
+  # ------------------------------------------------------------------------------------
+
+permissions:
+  contents: read
+
+# One run per ref at a time: the tests share a single SaaS cluster. Superseded
+# pull-request runs are cancelled; a manual run is never cancelled mid-test.
+concurrency:
+  group: saas-integration-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  saas:
+    name: SaaS integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Check SaaS secrets are configured
+        # Without these the tests skip, which would report green having tested nothing.
+        env:
+          CAMUNDA_REST_ADDRESS: ${{ secrets.CAMUNDA_SAAS_REST_ADDRESS }}
+          CAMUNDA_GRPC_ADDRESS: ${{ secrets.CAMUNDA_SAAS_GRPC_ADDRESS }}
+          CAMUNDA_CLIENT_ID: ${{ secrets.CAMUNDA_SAAS_CLIENT_ID }}
+          CAMUNDA_CLIENT_SECRET: ${{ secrets.CAMUNDA_SAAS_CLIENT_SECRET }}
+        run: |
+          missing=0
+          for name in CAMUNDA_REST_ADDRESS CAMUNDA_GRPC_ADDRESS CAMUNDA_CLIENT_ID CAMUNDA_CLIENT_SECRET; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository secret CAMUNDA_SAAS_${name#CAMUNDA_} is not set"
+              missing=1
+            fi
+          done
+          exit "$missing"
+      - name: go vet (saas build)
+        run: go vet -tags saas ./test/saas/...
+      - name: SaaS integration tests
+        env:
+          CAMUNDA_AUTH_STRATEGY: OAUTH
+          CAMUNDA_REST_ADDRESS: ${{ secrets.CAMUNDA_SAAS_REST_ADDRESS }}
+          CAMUNDA_GRPC_ADDRESS: ${{ secrets.CAMUNDA_SAAS_GRPC_ADDRESS }}
+          CAMUNDA_CLIENT_ID: ${{ secrets.CAMUNDA_SAAS_CLIENT_ID }}
+          CAMUNDA_CLIENT_SECRET: ${{ secrets.CAMUNDA_SAAS_CLIENT_SECRET }}
+          # Empty when the optional secrets are unset; the tests then use the defaults.
+          CAMUNDA_OAUTH_URL: ${{ secrets.CAMUNDA_SAAS_OAUTH_URL }}
+          CAMUNDA_TOKEN_AUDIENCE: ${{ secrets.CAMUNDA_SAAS_TOKEN_AUDIENCE }}
+          # Inputs go through the environment, never interpolated into the script.
+          TEST_FILTER: ${{ inputs.test_filter }}
+          INCLUDE_LONG: ${{ inputs.include_long }}
+        run: |
+          args=(-tags saas -v -count=1 -timeout 20m)
+          if [ "$INCLUDE_LONG" = "false" ]; then args+=(-short); fi
+          if [ -n "$TEST_FILTER" ]; then args+=(-run "$TEST_FILTER"); fi
+          go test "${args[@]}" ./test/saas/...

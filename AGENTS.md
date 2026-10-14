@@ -97,6 +97,12 @@ for a follow-up regen PR, rather than failing the run — routine upstream spec 
 not mask a real regression in the other jobs. It does still fail if the codegen pipeline
 itself breaks.
 
+`.github/workflows/saas-integration.yml` runs the `saas`-tagged tests in `test/saas/`
+against a live SaaS cluster. It is on-demand only until the `CAMUNDA_SAAS_*` repository
+secrets exist; the file carries a commented block for enabling it as a PR / main push
+guard. Those tests skip when the `CAMUNDA_*` connection variables are unset, and the
+long idle-stream tests also skip under `go test -short`.
+
 ## Separate generator changes from regenerated output
 
 When a change modifies the generator (hooks, `cmd/facadegen`, configs, scripts) **and**
