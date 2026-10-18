@@ -295,12 +295,11 @@ func (r ApiCancelProcessInstancesBatchOperationRequest) Execute() (*BatchOperati
 CancelProcessInstancesBatchOperation Cancel process instances (batch)
 
 Cancels multiple active or suspended process instances.
-Only ACTIVE and SUSPENDED root instances can be cancelled. A state filter narrows the batch
-to the given states. Requesting any state other than ACTIVE or SUSPENDED through the `$eq` or
-`$in` operators is rejected. Other state operators (`$neq`, `$exists`, `$like`) are applied as
-given, and the batch remains limited to ACTIVE and SUSPENDED instances. Without a state filter,
-both ACTIVE and SUSPENDED instances are selected. Any given filter for parentProcessInstanceKey
-is ignored and overridden during this batch operation.
+Only ACTIVE and SUSPENDED root instances are cancelled; child instances are cancelled
+together with their root instance. The given filter only narrows the batch, except for
+parentProcessInstanceKey: a top-level filter is ignored, and an `$or` branch on it matches
+nothing. Other `state` operators (`$neq`, `$notIn`, `$exists`, `$like`) are applied as given
+and are not validated.
 This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1482,8 +1481,7 @@ func (r ApiMigrateProcessInstancesBatchOperationRequest) Execute() (*BatchOperat
 MigrateProcessInstancesBatchOperation Migrate process instances (batch)
 
 Migrate multiple process instances.
-Since only process instances with ACTIVE state can be migrated, any given
-filters for state are ignored and overridden during this batch operation.
+Only ACTIVE process instances are migrated. The given filter only narrows the batch.
 This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1726,8 +1724,7 @@ func (r ApiModifyProcessInstancesBatchOperationRequest) Execute() (*BatchOperati
 ModifyProcessInstancesBatchOperation Modify process instances (batch)
 
 Modify multiple process instances.
-Since only process instances with ACTIVE state can be modified, any given
-filters for state are ignored and overridden during this batch operation.
+Only ACTIVE process instances are modified. The given filter only narrows the batch.
 In contrast to single modification operation, it is not possible to add variable instructions or modify by element key.
 It is only possible to use the element id of the source and target.
 This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
@@ -1853,8 +1850,7 @@ func (r ApiResolveIncidentsBatchOperationRequest) Execute() (*BatchOperationCrea
 ResolveIncidentsBatchOperation Resolve related incidents (batch)
 
 Resolves multiple instances of process instances.
-Since only process instances with ACTIVE state can have unresolved incidents, any given
-filters for state are ignored and overridden during this batch operation.
+Only incidents of ACTIVE process instances are resolved. The given filter only narrows the batch.
 This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -2218,10 +2214,10 @@ func (r ApiResumeProcessInstancesBatchOperationRequest) Execute() (*BatchOperati
 ResumeProcessInstancesBatchOperation Resume process instances (batch)
 
 Resumes multiple suspended process instances.
-Any given filter for state or parentProcessInstanceKey is ignored and overridden, as only
-SUSPENDED process instances can be resumed and resumption does not cascade between parent
-and child instances, so child instances are resumed independently of their parent or root
-instance.
+Only SUSPENDED process instances are resumed. The given filter only narrows the batch.
+Other `state` operators (`$neq`, `$notIn`, `$exists`, `$like`) are applied as given and are
+not validated. Resumption does not cascade, so child instances are resumed independently of their parent
+or root instance.
 This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -2706,10 +2702,10 @@ func (r ApiSuspendProcessInstancesBatchOperationRequest) Execute() (*BatchOperat
 SuspendProcessInstancesBatchOperation Suspend process instances (batch)
 
 Suspends multiple running process instances.
-Any given filter for state or parentProcessInstanceKey is ignored and overridden, as only
-ACTIVE process instances can be suspended and suspension does not cascade between parent
-and child instances, so child instances are suspended independently of their parent or
-root instance.
+Only ACTIVE process instances are suspended. The given filter only narrows the batch.
+Other `state` operators (`$neq`, `$notIn`, `$exists`, `$like`) are applied as given and are
+not validated. Suspension does not cascade, so child instances are suspended independently of their parent
+or root instance.
 This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
