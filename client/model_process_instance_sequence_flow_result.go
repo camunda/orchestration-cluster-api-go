@@ -27,10 +27,10 @@ type ProcessInstanceSequenceFlowResult struct {
 	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
-	// The process definition key.
-	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
-	// The process definition id.
-	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	// The process definition key. This field is not present for sequence flows imported by Operate 8.1 or earlier.
+	ProcessDefinitionKey NullableProcessDefinitionKey `json:"processDefinitionKey"`
+	// The process definition id. This field is not present for sequence flows imported by Operate 8.1 or earlier.
+	ProcessDefinitionId NullableProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
 	// The element id for this sequence flow, as provided in the BPMN process.
 	ElementId ElementId `json:"elementId"`
 	// The unique identifier of the tenant.
@@ -43,7 +43,7 @@ type _ProcessInstanceSequenceFlowResult ProcessInstanceSequenceFlowResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceSequenceFlowResult(sequenceFlowId string, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, processDefinitionId ProcessDefinitionId, elementId ElementId, tenantId TenantId) *ProcessInstanceSequenceFlowResult {
+func NewProcessInstanceSequenceFlowResult(sequenceFlowId string, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey NullableProcessDefinitionKey, processDefinitionId NullableProcessDefinitionId, elementId ElementId, tenantId TenantId) *ProcessInstanceSequenceFlowResult {
 	this := ProcessInstanceSequenceFlowResult{}
 	this.SequenceFlowId = sequenceFlowId
 	this.ProcessInstanceKey = processInstanceKey
@@ -138,51 +138,55 @@ func (o *ProcessInstanceSequenceFlowResult) SetRootProcessInstanceKey(v ProcessI
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
+// If the value is explicit nil, the zero value for ProcessDefinitionKey will be returned
 func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionKey() ProcessDefinitionKey {
-	if o == nil {
+	if o == nil || o.ProcessDefinitionKey.Get() == nil {
 		var ret ProcessDefinitionKey
 		return ret
 	}
 
-	return o.ProcessDefinitionKey
+	return *o.ProcessDefinitionKey.Get()
 }
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ProcessDefinitionKey, true
+	return o.ProcessDefinitionKey.Get(), o.ProcessDefinitionKey.IsSet()
 }
 
 // SetProcessDefinitionKey sets field value
 func (o *ProcessInstanceSequenceFlowResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
-	o.ProcessDefinitionKey = v
+	o.ProcessDefinitionKey.Set(&v)
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
+// If the value is explicit nil, the zero value for ProcessDefinitionId will be returned
 func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionId() ProcessDefinitionId {
-	if o == nil {
+	if o == nil || o.ProcessDefinitionId.Get() == nil {
 		var ret ProcessDefinitionId
 		return ret
 	}
 
-	return o.ProcessDefinitionId
+	return *o.ProcessDefinitionId.Get()
 }
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ProcessInstanceSequenceFlowResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ProcessDefinitionId, true
+	return o.ProcessDefinitionId.Get(), o.ProcessDefinitionId.IsSet()
 }
 
 // SetProcessDefinitionId sets field value
 func (o *ProcessInstanceSequenceFlowResult) SetProcessDefinitionId(v ProcessDefinitionId) {
-	o.ProcessDefinitionId = v
+	o.ProcessDefinitionId.Set(&v)
 }
 
 // GetElementId returns the ElementId field value
@@ -246,8 +250,8 @@ func (o ProcessInstanceSequenceFlowResult) ToMap() (map[string]interface{}, erro
 	toSerialize["sequenceFlowId"] = o.SequenceFlowId
 	toSerialize["processInstanceKey"] = o.ProcessInstanceKey
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
-	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey
-	toSerialize["processDefinitionId"] = o.ProcessDefinitionId
+	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey.Get()
+	toSerialize["processDefinitionId"] = o.ProcessDefinitionId.Get()
 	toSerialize["elementId"] = o.ElementId
 	toSerialize["tenantId"] = o.TenantId
 	return toSerialize, nil

@@ -28,8 +28,8 @@ type JobSearchResult struct {
 	Deadline NullableTime `json:"deadline"`
 	// The reason provided by the user task listener for denying the work.
 	DeniedReason NullableString `json:"deniedReason"`
-	// The element ID associated with the job.
-	ElementId ElementId `json:"elementId"`
+	// The element ID associated with the job. May be missing on job failure.
+	ElementId NullableElementId `json:"elementId"`
 	// The element instance key associated with the job.
 	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// End date of the job. This is `null` if the job is not in an end state yet.
@@ -46,10 +46,10 @@ type JobSearchResult struct {
 	JobKey            JobKey                   `json:"jobKey"`
 	Kind              JobKindEnum              `json:"kind"`
 	ListenerEventType JobListenerEventTypeEnum `json:"listenerEventType"`
-	// The process definition ID associated with the job.
-	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
-	// The process definition key associated with the job.
-	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
+	// The process definition ID associated with the job. This field is not present for jobs imported by Operate 8.7 and earlier.
+	ProcessDefinitionId NullableProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	// The process definition key associated with the job. This field is not present for jobs imported by Operate 8.7 and earlier.
+	ProcessDefinitionKey NullableProcessDefinitionKey `json:"processDefinitionKey"`
 	// The process instance key associated with the job.
 	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
@@ -79,7 +79,7 @@ type _JobSearchResult JobSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId ElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
+func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId NullableProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
 	this := JobSearchResult{}
 	this.CustomHeaders = customHeaders
 	this.Deadline = deadline
@@ -195,27 +195,29 @@ func (o *JobSearchResult) SetDeniedReason(v string) {
 }
 
 // GetElementId returns the ElementId field value
+// If the value is explicit nil, the zero value for ElementId will be returned
 func (o *JobSearchResult) GetElementId() ElementId {
-	if o == nil {
+	if o == nil || o.ElementId.Get() == nil {
 		var ret ElementId
 		return ret
 	}
 
-	return o.ElementId
+	return *o.ElementId.Get()
 }
 
 // GetElementIdOk returns a tuple with the ElementId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *JobSearchResult) GetElementIdOk() (*ElementId, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ElementId, true
+	return o.ElementId.Get(), o.ElementId.IsSet()
 }
 
 // SetElementId sets field value
 func (o *JobSearchResult) SetElementId(v ElementId) {
-	o.ElementId = v
+	o.ElementId.Set(&v)
 }
 
 // GetElementInstanceKey returns the ElementInstanceKey field value
@@ -443,51 +445,55 @@ func (o *JobSearchResult) SetListenerEventType(v JobListenerEventTypeEnum) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
+// If the value is explicit nil, the zero value for ProcessDefinitionId will be returned
 func (o *JobSearchResult) GetProcessDefinitionId() ProcessDefinitionId {
-	if o == nil {
+	if o == nil || o.ProcessDefinitionId.Get() == nil {
 		var ret ProcessDefinitionId
 		return ret
 	}
 
-	return o.ProcessDefinitionId
+	return *o.ProcessDefinitionId.Get()
 }
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *JobSearchResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ProcessDefinitionId, true
+	return o.ProcessDefinitionId.Get(), o.ProcessDefinitionId.IsSet()
 }
 
 // SetProcessDefinitionId sets field value
 func (o *JobSearchResult) SetProcessDefinitionId(v ProcessDefinitionId) {
-	o.ProcessDefinitionId = v
+	o.ProcessDefinitionId.Set(&v)
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
+// If the value is explicit nil, the zero value for ProcessDefinitionKey will be returned
 func (o *JobSearchResult) GetProcessDefinitionKey() ProcessDefinitionKey {
-	if o == nil {
+	if o == nil || o.ProcessDefinitionKey.Get() == nil {
 		var ret ProcessDefinitionKey
 		return ret
 	}
 
-	return o.ProcessDefinitionKey
+	return *o.ProcessDefinitionKey.Get()
 }
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *JobSearchResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ProcessDefinitionKey, true
+	return o.ProcessDefinitionKey.Get(), o.ProcessDefinitionKey.IsSet()
 }
 
 // SetProcessDefinitionKey sets field value
 func (o *JobSearchResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
-	o.ProcessDefinitionKey = v
+	o.ProcessDefinitionKey.Set(&v)
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
@@ -775,7 +781,7 @@ func (o JobSearchResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["customHeaders"] = o.CustomHeaders
 	toSerialize["deadline"] = o.Deadline.Get()
 	toSerialize["deniedReason"] = o.DeniedReason.Get()
-	toSerialize["elementId"] = o.ElementId
+	toSerialize["elementId"] = o.ElementId.Get()
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
 	toSerialize["endTime"] = o.EndTime.Get()
 	toSerialize["errorCode"] = o.ErrorCode.Get()
@@ -785,8 +791,8 @@ func (o JobSearchResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["jobKey"] = o.JobKey
 	toSerialize["kind"] = o.Kind
 	toSerialize["listenerEventType"] = o.ListenerEventType
-	toSerialize["processDefinitionId"] = o.ProcessDefinitionId
-	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey
+	toSerialize["processDefinitionId"] = o.ProcessDefinitionId.Get()
+	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey.Get()
 	toSerialize["processInstanceKey"] = o.ProcessInstanceKey
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
 	toSerialize["businessId"] = o.BusinessId.Get()
