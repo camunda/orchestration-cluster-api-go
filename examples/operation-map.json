@@ -153,6 +153,13 @@
       "label": "Suspend Batch operation"
     }
   ],
+  "getClock": [
+    {
+      "file": "clock.go",
+      "region": "GetClock",
+      "label": "Get internal clock (alpha)"
+    }
+  ],
   "pinClock": [
     {
       "file": "clock.go",
