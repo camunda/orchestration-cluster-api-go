@@ -924,6 +924,16 @@ func (c *CamundaClient) SuspendBatchOperation(ctx context.Context, batchOperatio
 	return c.wrapError(resp, err)
 }
 
+// GetClock calls the GetClock operation.
+func (c *CamundaClient) GetClock(ctx context.Context, opts ...func(ApiGetClockRequest) ApiGetClockRequest) (*ClockResult, error) {
+	req := c.raw.ClockAPI.GetClock(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // PinClock calls the PinClock operation.
 //
 // Example:

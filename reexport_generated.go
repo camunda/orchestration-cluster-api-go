@@ -188,6 +188,9 @@ type ApiSuspendBatchOperationRequest = camundaapi.ApiSuspendBatchOperationReques
 // Fields and methods are documented on [camundaapi.ClockAPIService].
 type ClockAPIService = camundaapi.ClockAPIService
 
+// Fields and methods are documented on [camundaapi.ApiGetClockRequest].
+type ApiGetClockRequest = camundaapi.ApiGetClockRequest
+
 // Fields and methods are documented on [camundaapi.ApiPinClockRequest].
 type ApiPinClockRequest = camundaapi.ApiPinClockRequest
 
@@ -5593,6 +5596,33 @@ type NullableClockPinRequest = camundaapi.NullableClockPinRequest
 
 func NewNullableClockPinRequest(val *ClockPinRequest) *NullableClockPinRequest {
 	return camundaapi.NewNullableClockPinRequest(val)
+}
+
+// ClockResult struct for ClockResult
+//
+// Fields and methods are documented on [camundaapi.ClockResult].
+type ClockResult = camundaapi.ClockResult
+
+// NewClockResult instantiates a new ClockResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewClockResult(timestamp time.Time) *ClockResult {
+	return camundaapi.NewClockResult(timestamp)
+}
+
+// NewClockResultWithDefaults instantiates a new ClockResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewClockResultWithDefaults() *ClockResult {
+	return camundaapi.NewClockResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableClockResult].
+type NullableClockResult = camundaapi.NullableClockResult
+
+func NewNullableClockResult(val *ClockResult) *NullableClockResult {
+	return camundaapi.NewNullableClockResult(val)
 }
 
 // CloudConfigurationResponse Configuration for SaaS/cloud-specific settings.
