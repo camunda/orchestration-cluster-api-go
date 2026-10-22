@@ -925,6 +925,18 @@ func (c *CamundaClient) SuspendBatchOperation(ctx context.Context, batchOperatio
 }
 
 // GetClock calls the GetClock operation.
+//
+// Example:
+//
+//	// Read the cluster clock. While the clock is pinned this reports the pinned
+//	// instant, so a test can assert that a pin took effect before driving time.
+//	clock, err := client.GetClock(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	clusterNow := clock.GetTimestamp()
+//	skew := time.Since(clusterNow).Round(time.Millisecond)
+//	fmt.Printf("cluster clock: %s (skew vs local: %s)\n", clusterNow.Format(time.RFC3339), skew)
 func (c *CamundaClient) GetClock(ctx context.Context, opts ...func(ApiGetClockRequest) ApiGetClockRequest) (*ClockResult, error) {
 	req := c.raw.ClockAPI.GetClock(ctx)
 	for _, opt := range opts {
