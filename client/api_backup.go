@@ -2852,3 +2852,96 @@ func (a *BackupAPIService) TakeRuntimeBackupAsClusterAdminExecute(r ApiTakeRunti
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiDeleteHistoryBackupAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiDeleteRuntimeBackupAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiDeleteRuntimeBackupStateAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiGetHistoryBackupAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiGetRuntimeBackupAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiGetRuntimeBackupStateAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetPrefix returns the prefix field value, or nil when unset.
+func (r ApiListHistoryBackupsRequest) GetPrefix() *string { return r.prefix }
+
+// GetVerbose returns the verbose field value, or nil when unset.
+func (r ApiListHistoryBackupsRequest) GetVerbose() *bool { return r.verbose }
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiListHistoryBackupsAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetPrefix returns the prefix field value, or nil when unset.
+func (r ApiListHistoryBackupsAsClusterAdminRequest) GetPrefix() *string { return r.prefix }
+
+// GetVerbose returns the verbose field value, or nil when unset.
+func (r ApiListHistoryBackupsAsClusterAdminRequest) GetVerbose() *bool { return r.verbose }
+
+// GetPrefix returns the prefix field value, or nil when unset.
+func (r ApiListRuntimeBackupsRequest) GetPrefix() *string { return r.prefix }
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiListRuntimeBackupsAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetPrefix returns the prefix field value, or nil when unset.
+func (r ApiListRuntimeBackupsAsClusterAdminRequest) GetPrefix() *string { return r.prefix }
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiSyncRuntimeBackupStateAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetTakeHistoryBackupRequest returns the takeHistoryBackupRequest field value, or nil when unset.
+func (r ApiTakeHistoryBackupRequest) GetTakeHistoryBackupRequest() *TakeHistoryBackupRequest {
+	return r.takeHistoryBackupRequest
+}
+
+// GetTakeHistoryBackupRequest returns the takeHistoryBackupRequest field value, or nil when unset.
+func (r ApiTakeHistoryBackupAsClusterAdminRequest) GetTakeHistoryBackupRequest() *TakeHistoryBackupRequest {
+	return r.takeHistoryBackupRequest
+}
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiTakeHistoryBackupAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetTakeRuntimeBackupRequest returns the takeRuntimeBackupRequest field value, or nil when unset.
+func (r ApiTakeRuntimeBackupRequest) GetTakeRuntimeBackupRequest() *TakeRuntimeBackupRequest {
+	return r.takeRuntimeBackupRequest
+}
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiTakeRuntimeBackupAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetTakeRuntimeBackupRequest returns the takeRuntimeBackupRequest field value, or nil when unset.
+func (r ApiTakeRuntimeBackupAsClusterAdminRequest) GetTakeRuntimeBackupRequest() *TakeRuntimeBackupRequest {
+	return r.takeRuntimeBackupRequest
+}

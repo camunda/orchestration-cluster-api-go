@@ -2122,3 +2122,34 @@ func (a *RoleAPIService) UpdateRoleExecute(r ApiUpdateRoleRequest) (*RoleUpdateR
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetRoleCreateRequest returns the roleCreateRequest field value, or nil when unset.
+func (r ApiCreateRoleRequest) GetRoleCreateRequest() *RoleCreateRequest { return r.roleCreateRequest }
+
+// GetRoleClientSearchQueryRequest returns the roleClientSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchClientsForRoleRequest) GetRoleClientSearchQueryRequest() *RoleClientSearchQueryRequest {
+	return r.roleClientSearchQueryRequest
+}
+
+// GetRoleGroupSearchQueryRequest returns the roleGroupSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchGroupsForRoleRequest) GetRoleGroupSearchQueryRequest() *RoleGroupSearchQueryRequest {
+	return r.roleGroupSearchQueryRequest
+}
+
+// GetMappingRuleSearchQueryRequest returns the mappingRuleSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchMappingRulesForRoleRequest) GetMappingRuleSearchQueryRequest() *MappingRuleSearchQueryRequest {
+	return r.mappingRuleSearchQueryRequest
+}
+
+// GetRoleSearchQueryRequest returns the roleSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchRolesRequest) GetRoleSearchQueryRequest() *RoleSearchQueryRequest {
+	return r.roleSearchQueryRequest
+}
+
+// GetRoleUserSearchQueryRequest returns the roleUserSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchUsersForRoleRequest) GetRoleUserSearchQueryRequest() *RoleUserSearchQueryRequest {
+	return r.roleUserSearchQueryRequest
+}
+
+// GetRoleUpdateRequest returns the roleUpdateRequest field value, or nil when unset.
+func (r ApiUpdateRoleRequest) GetRoleUpdateRequest() *RoleUpdateRequest { return r.roleUpdateRequest }

@@ -1160,3 +1160,31 @@ func (a *ClusterVariableAPIService) UpdateTenantClusterVariableExecute(r ApiUpda
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetCreateClusterVariableRequest returns the createClusterVariableRequest field value, or nil when unset.
+func (r ApiCreateGlobalClusterVariableRequest) GetCreateClusterVariableRequest() *CreateClusterVariableRequest {
+	return r.createClusterVariableRequest
+}
+
+// GetCreateClusterVariableRequest returns the createClusterVariableRequest field value, or nil when unset.
+func (r ApiCreateTenantClusterVariableRequest) GetCreateClusterVariableRequest() *CreateClusterVariableRequest {
+	return r.createClusterVariableRequest
+}
+
+// GetTruncateValues returns the truncateValues field value, or nil when unset.
+func (r ApiSearchClusterVariablesRequest) GetTruncateValues() *bool { return r.truncateValues }
+
+// GetClusterVariableSearchQueryRequest returns the clusterVariableSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchClusterVariablesRequest) GetClusterVariableSearchQueryRequest() *ClusterVariableSearchQueryRequest {
+	return r.clusterVariableSearchQueryRequest
+}
+
+// GetUpdateClusterVariableRequest returns the updateClusterVariableRequest field value, or nil when unset.
+func (r ApiUpdateGlobalClusterVariableRequest) GetUpdateClusterVariableRequest() *UpdateClusterVariableRequest {
+	return r.updateClusterVariableRequest
+}
+
+// GetUpdateClusterVariableRequest returns the updateClusterVariableRequest field value, or nil when unset.
+func (r ApiUpdateTenantClusterVariableRequest) GetUpdateClusterVariableRequest() *UpdateClusterVariableRequest {
+	return r.updateClusterVariableRequest
+}

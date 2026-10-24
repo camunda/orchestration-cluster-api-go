@@ -697,3 +697,13 @@ func (a *BatchOperationAPIService) SuspendBatchOperationExecute(r ApiSuspendBatc
 
 	return localVarHTTPResponse, nil
 }
+
+// GetBatchOperationItemSearchQuery returns the batchOperationItemSearchQuery field value, or nil when unset.
+func (r ApiSearchBatchOperationItemsRequest) GetBatchOperationItemSearchQuery() *BatchOperationItemSearchQuery {
+	return r.batchOperationItemSearchQuery
+}
+
+// GetBatchOperationSearchQuery returns the batchOperationSearchQuery field value, or nil when unset.
+func (r ApiSearchBatchOperationsRequest) GetBatchOperationSearchQuery() *BatchOperationSearchQuery {
+	return r.batchOperationSearchQuery
+}

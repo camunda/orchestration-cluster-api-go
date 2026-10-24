@@ -1220,3 +1220,46 @@ func (a *UserTaskAPIService) UpdateUserTaskExecute(r ApiUpdateUserTaskRequest) (
 
 	return localVarHTTPResponse, nil
 }
+
+// GetUserTaskAssignmentRequest returns the userTaskAssignmentRequest field value, or nil when unset.
+func (r ApiAssignUserTaskRequest) GetUserTaskAssignmentRequest() *UserTaskAssignmentRequest {
+	return r.userTaskAssignmentRequest
+}
+
+// GetUserTaskCompletionRequest returns the userTaskCompletionRequest field value, or nil when unset.
+func (r ApiCompleteUserTaskRequest) GetUserTaskCompletionRequest() *UserTaskCompletionRequest {
+	return r.userTaskCompletionRequest
+}
+
+// GetUserTaskAuditLogSearchQueryRequest returns the userTaskAuditLogSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchUserTaskAuditLogsRequest) GetUserTaskAuditLogSearchQueryRequest() *UserTaskAuditLogSearchQueryRequest {
+	return r.userTaskAuditLogSearchQueryRequest
+}
+
+// GetTruncateValues returns the truncateValues field value, or nil when unset.
+func (r ApiSearchUserTaskEffectiveVariablesRequest) GetTruncateValues() *bool {
+	return r.truncateValues
+}
+
+// GetUserTaskEffectiveVariableSearchQueryRequest returns the userTaskEffectiveVariableSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchUserTaskEffectiveVariablesRequest) GetUserTaskEffectiveVariableSearchQueryRequest() *UserTaskEffectiveVariableSearchQueryRequest {
+	return r.userTaskEffectiveVariableSearchQueryRequest
+}
+
+// GetTruncateValues returns the truncateValues field value, or nil when unset.
+func (r ApiSearchUserTaskVariablesRequest) GetTruncateValues() *bool { return r.truncateValues }
+
+// GetUserTaskVariableSearchQueryRequest returns the userTaskVariableSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchUserTaskVariablesRequest) GetUserTaskVariableSearchQueryRequest() *UserTaskVariableSearchQueryRequest {
+	return r.userTaskVariableSearchQueryRequest
+}
+
+// GetUserTaskSearchQuery returns the userTaskSearchQuery field value, or nil when unset.
+func (r ApiSearchUserTasksRequest) GetUserTaskSearchQuery() *UserTaskSearchQuery {
+	return r.userTaskSearchQuery
+}
+
+// GetUserTaskUpdateRequest returns the userTaskUpdateRequest field value, or nil when unset.
+func (r ApiUpdateUserTaskRequest) GetUserTaskUpdateRequest() *UserTaskUpdateRequest {
+	return r.userTaskUpdateRequest
+}

@@ -613,3 +613,18 @@ func (a *GlobalListenerAPIService) UpdateGlobalTaskListenerExecute(r ApiUpdateGl
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetCreateGlobalTaskListenerRequest returns the createGlobalTaskListenerRequest field value, or nil when unset.
+func (r ApiCreateGlobalTaskListenerRequest) GetCreateGlobalTaskListenerRequest() *CreateGlobalTaskListenerRequest {
+	return r.createGlobalTaskListenerRequest
+}
+
+// GetGlobalTaskListenerSearchQueryRequest returns the globalTaskListenerSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchGlobalTaskListenersRequest) GetGlobalTaskListenerSearchQueryRequest() *GlobalTaskListenerSearchQueryRequest {
+	return r.globalTaskListenerSearchQueryRequest
+}
+
+// GetUpdateGlobalTaskListenerRequest returns the updateGlobalTaskListenerRequest field value, or nil when unset.
+func (r ApiUpdateGlobalTaskListenerRequest) GetUpdateGlobalTaskListenerRequest() *UpdateGlobalTaskListenerRequest {
+	return r.updateGlobalTaskListenerRequest
+}

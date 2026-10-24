@@ -266,3 +266,11 @@ func (a *VariableAPIService) SearchVariablesExecute(r ApiSearchVariablesRequest)
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetTruncateValues returns the truncateValues field value, or nil when unset.
+func (r ApiSearchVariablesRequest) GetTruncateValues() *bool { return r.truncateValues }
+
+// GetVariableSearchQuery returns the variableSearchQuery field value, or nil when unset.
+func (r ApiSearchVariablesRequest) GetVariableSearchQuery() *VariableSearchQuery {
+	return r.variableSearchQuery
+}

@@ -137,3 +137,8 @@ func (a *AdHocSubProcessAPIService) ActivateAdHocSubProcessActivitiesExecute(r A
 
 	return localVarHTTPResponse, nil
 }
+
+// GetAdHocSubProcessActivateActivitiesInstruction returns the adHocSubProcessActivateActivitiesInstruction field value, or nil when unset.
+func (r ApiActivateAdHocSubProcessActivitiesRequest) GetAdHocSubProcessActivateActivitiesInstruction() *AdHocSubProcessActivateActivitiesInstruction {
+	return r.adHocSubProcessActivateActivitiesInstruction
+}

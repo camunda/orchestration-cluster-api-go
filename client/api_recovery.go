@@ -694,3 +694,37 @@ func (a *RecoveryAPIService) RestoreAsClusterAdminExecute(r ApiRestoreAsClusterA
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetMode returns the mode field value, or nil when unset.
+func (r ApiChangeClusterModeRequest) GetMode() *Mode { return r.mode }
+
+// GetDryRun returns the dryRun field value, or nil when unset.
+func (r ApiChangeClusterModeRequest) GetDryRun() *bool { return r.dryRun }
+
+// GetMode returns the mode field value, or nil when unset.
+func (r ApiChangeClusterModeAsClusterAdminRequest) GetMode() *Mode { return r.mode }
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiChangeClusterModeAsClusterAdminRequest) GetPhysicalTenantId() *string {
+	return r.physicalTenantId
+}
+
+// GetDryRun returns the dryRun field value, or nil when unset.
+func (r ApiChangeClusterModeAsClusterAdminRequest) GetDryRun() *bool { return r.dryRun }
+
+// GetRestoreRequest returns the restoreRequest field value, or nil when unset.
+func (r ApiRestoreRequest) GetRestoreRequest() *RestoreRequest { return r.restoreRequest }
+
+// GetDryRun returns the dryRun field value, or nil when unset.
+func (r ApiRestoreRequest) GetDryRun() *bool { return r.dryRun }
+
+// GetClusterRestoreRequest returns the clusterRestoreRequest field value, or nil when unset.
+func (r ApiRestoreAsClusterAdminRequest) GetClusterRestoreRequest() *ClusterRestoreRequest {
+	return r.clusterRestoreRequest
+}
+
+// GetPhysicalTenantId returns the physicalTenantId field value, or nil when unset.
+func (r ApiRestoreAsClusterAdminRequest) GetPhysicalTenantId() *string { return r.physicalTenantId }
+
+// GetDryRun returns the dryRun field value, or nil when unset.
+func (r ApiRestoreAsClusterAdminRequest) GetDryRun() *bool { return r.dryRun }

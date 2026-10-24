@@ -249,3 +249,6 @@ func (a *ClockAPIService) ResetClockExecute(r ApiResetClockRequest) (*http.Respo
 
 	return localVarHTTPResponse, nil
 }
+
+// GetClockPinRequest returns the clockPinRequest field value, or nil when unset.
+func (r ApiPinClockRequest) GetClockPinRequest() *ClockPinRequest { return r.clockPinRequest }

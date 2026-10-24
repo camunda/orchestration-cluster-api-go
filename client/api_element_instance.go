@@ -592,3 +592,23 @@ func (a *ElementInstanceAPIService) SearchElementInstancesExecute(r ApiSearchEle
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetSetVariableRequest returns the setVariableRequest field value, or nil when unset.
+func (r ApiCreateElementInstanceVariablesRequest) GetSetVariableRequest() *SetVariableRequest {
+	return r.setVariableRequest
+}
+
+// GetIncidentSearchQuery returns the incidentSearchQuery field value, or nil when unset.
+func (r ApiSearchElementInstanceIncidentsRequest) GetIncidentSearchQuery() *IncidentSearchQuery {
+	return r.incidentSearchQuery
+}
+
+// GetElementInstanceWaitStateQuery returns the elementInstanceWaitStateQuery field value, or nil when unset.
+func (r ApiSearchElementInstanceWaitStatesRequest) GetElementInstanceWaitStateQuery() *ElementInstanceWaitStateQuery {
+	return r.elementInstanceWaitStateQuery
+}
+
+// GetElementInstanceSearchQuery returns the elementInstanceSearchQuery field value, or nil when unset.
+func (r ApiSearchElementInstancesRequest) GetElementInstanceSearchQuery() *ElementInstanceSearchQuery {
+	return r.elementInstanceSearchQuery
+}
