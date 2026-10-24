@@ -11,6 +11,7 @@ API version: 0.1
 package camundaapi
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -76,9 +77,13 @@ func (dst *VariableKeyFilterProperty) UnmarshalJSON(data []byte) error {
 	} else { // no match
 		// `{}` is a valid instance of the advanced-filter variant (all of its
 		// properties are optional), but the empty-struct check above nils the
-		// match out again. Treat a no-match decode as an unset wrapper rather
-		// than an error (orchestration-cluster-api-go#78).
-		return nil
+		// match out again. Accept exactly that case as an unset wrapper; any
+		// other no-match input is genuinely invalid and keeps the oneOf error
+		// (orchestration-cluster-api-go#78).
+		if string(bytes.TrimSpace(data)) == "{}" {
+			return nil
+		}
+		return fmt.Errorf("data failed to match schemas in oneOf(VariableKeyFilterProperty)")
 	}
 }
 
@@ -92,7 +97,10 @@ func (src VariableKeyFilterProperty) MarshalJSON() ([]byte, error) {
 		return json.Marshal(&src.VariableKeyExactMatch)
 	}
 
-	return nil, nil // no data in oneOf schemas
+	// An unset wrapper marshals to `null`: returning a nil slice here makes
+	// encoding/json fail with "unexpected end of JSON input"
+	// (orchestration-cluster-api-go#78).
+	return []byte("null"), nil // no data in oneOf schemas
 }
 
 // Get the actual instance
