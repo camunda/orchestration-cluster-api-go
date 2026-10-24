@@ -18,9 +18,11 @@ import (
 // forwarded query JSON into the Go request types could not round-trip it.
 //
 // The post-processing pipeline rewrites the generated no-match branch of the
-// filter-property unions to leave the wrapper unset instead of erroring. This
-// test scopes itself to the whole defect class — every filter-property union
-// listed in the spec metadata — not just the two examples from the issue.
+// filter-property unions to accept exactly `{}` as an unset wrapper (and to
+// marshal the unset state as `null` rather than failing), while every other
+// no-match input keeps the strict oneOf error. This test scopes itself to the
+// whole defect class — every filter-property union listed in the spec
+// metadata — not just the two examples from the issue.
 func TestOneOfFilterPropertyAcceptsEmptyObject(t *testing.T) {
 	t.Run("issue example: BasicStringFilterProperty", func(t *testing.T) {
 		var v camundaapi.BasicStringFilterProperty
@@ -74,6 +76,49 @@ func TestOneOfFilterPropertyAcceptsEmptyObject(t *testing.T) {
 		}
 		if got := v.GetActualInstance(); got != nil {
 			t.Errorf("GetActualInstance() = %v, want nil (wrapper treated as unset)", got)
+		}
+		out, err := json.Marshal(v)
+		if err != nil {
+			t.Fatalf("marshal unset wrapper: %v", err)
+		}
+		if string(out) != "null" {
+			t.Errorf("marshal unset wrapper = %s, want null", out)
+		}
+	})
+
+	t.Run("empty-object filter marshals inside a request", func(t *testing.T) {
+		// The full round trip from the issue: decode a stored query carrying an
+		// empty filter, then marshal the request again. The unset union must not
+		// fail encoding/json with "unexpected end of JSON input".
+		var req struct {
+			Filter struct {
+				Name *camundaapi.BasicStringFilterProperty `json:"name,omitempty"`
+			} `json:"filter"`
+		}
+		if err := json.Unmarshal([]byte(`{"filter":{"name":{}}}`), &req); err != nil {
+			t.Fatalf(`unmarshal {"filter":{"name":{}}}: %v`, err)
+		}
+		if _, err := json.Marshal(req); err != nil {
+			t.Fatalf("marshal request with empty-object filter: %v", err)
+		}
+	})
+
+	t.Run("invalid values are still rejected", func(t *testing.T) {
+		// Accepting `{}` must not turn the no-match branch into a fail-open:
+		// inputs that match no branch are invalid filter values and must keep
+		// the strict oneOf error instead of being silently discarded.
+		invalid := map[string]string{
+			"boolean":           `true`,
+			"number":            `42`,
+			"array":             `[]`,
+			"bad operator type": `{"$eq":42}`,
+			"unknown operator":  `{"$nope":"x"}`,
+		}
+		for name, data := range invalid {
+			var v camundaapi.BasicStringFilterProperty
+			if err := json.Unmarshal([]byte(data), &v); err == nil {
+				t.Errorf("unmarshal %s (%s) into BasicStringFilterProperty: expected error, got nil", name, data)
+			}
 		}
 	})
 
