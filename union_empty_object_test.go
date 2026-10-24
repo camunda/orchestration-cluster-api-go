@@ -84,6 +84,69 @@ func TestOneOfFilterPropertyAcceptsEmptyObject(t *testing.T) {
 		}
 	})
 
+	t.Run("replace semantics: unset or scalar/advanced decode clears a populated wrapper", func(t *testing.T) {
+		// UnmarshalJSON has replace semantics: decoding over a previously
+		// populated wrapper must never retain a stale branch that would then
+		// be serialized again. Covers both pointer branch types (scalar and
+		// advanced) being cleared/replaced (orchestration-cluster-api-go#78).
+		populate := map[string]string{
+			"scalar":   `"hello"`,
+			"advanced": `{"$eq":"foo"}`,
+		}
+		for branch, seed := range populate {
+			branch, seed := branch, seed
+			t.Run("decode null over "+branch, func(t *testing.T) {
+				var v camundaapi.BasicStringFilterProperty
+				if err := json.Unmarshal([]byte(seed), &v); err != nil {
+					t.Fatalf("seed unmarshal %s: %v", seed, err)
+				}
+				if v.GetActualInstance() == nil {
+					t.Fatalf("precondition: %s seed did not populate the wrapper", branch)
+				}
+				if err := json.Unmarshal([]byte(`null`), &v); err != nil {
+					t.Fatalf("unmarshal `null` over %s: %v", branch, err)
+				}
+				if got := v.GetActualInstance(); got != nil {
+					t.Errorf("after null over %s: GetActualInstance() = %v, want nil", branch, got)
+				}
+				if out, _ := json.Marshal(v); string(out) != "null" {
+					t.Errorf("after null over %s: marshal = %s, want null (stale branch retained)", branch, out)
+				}
+			})
+			t.Run("decode {} over "+branch, func(t *testing.T) {
+				var v camundaapi.BasicStringFilterProperty
+				if err := json.Unmarshal([]byte(seed), &v); err != nil {
+					t.Fatalf("seed unmarshal %s: %v", seed, err)
+				}
+				if err := json.Unmarshal([]byte(`{}`), &v); err != nil {
+					t.Fatalf("unmarshal `{}` over %s: %v", branch, err)
+				}
+				if got := v.GetActualInstance(); got != nil {
+					t.Errorf("after {} over %s: GetActualInstance() = %v, want nil", branch, got)
+				}
+				if out, _ := json.Marshal(v); string(out) != "null" {
+					t.Errorf("after {} over %s: marshal = %s, want null (stale branch retained)", branch, out)
+				}
+			})
+		}
+		t.Run("decode advanced over scalar and back", func(t *testing.T) {
+			var v camundaapi.BasicStringFilterProperty
+			if err := json.Unmarshal([]byte(`"hello"`), &v); err != nil {
+				t.Fatalf("seed scalar: %v", err)
+			}
+			if err := json.Unmarshal([]byte(`{"$eq":"foo"}`), &v); err != nil {
+				t.Fatalf("decode advanced over scalar: %v", err)
+			}
+			if v.String != nil {
+				t.Errorf("stale scalar branch retained after decoding advanced: %v", *v.String)
+			}
+			out, _ := json.Marshal(v)
+			if string(out) != `{"$eq":"foo"}` {
+				t.Errorf("advanced over scalar marshal = %s, want {\"$eq\":\"foo\"}", out)
+			}
+		})
+	})
+
 	t.Run("decode-marshal-decode round trip", func(t *testing.T) {
 		// The full cycle from the issue plus the serialized unset state:
 		// decode `{}`, marshal (emits `null`), decode again — the second

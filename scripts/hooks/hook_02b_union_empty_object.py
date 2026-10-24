@@ -72,6 +72,11 @@ _FUNC_DECL = re.compile(
 
 _NULL_SHORT_CIRCUIT = """\
 func (dst *%s) UnmarshalJSON(data []byte) error {
+\t// Replace semantics: start from a zero receiver so decoding over a
+\t// previously populated value never retains a stale branch that would be
+\t// serialized again. This matters for unset wrappers (`null`/`{}`) and for
+\t// one advanced/scalar branch decoded over another (orchestration-cluster-api-go#78).
+\t*dst = %s{}
 \t// An unset wrapper marshals to `null` (see MarshalJSON), so the decoder must
 \t// accept its own output: `null` unmarshals into every pointer branch and
 \t// would otherwise fail with "data matches more than one schema", breaking
@@ -134,7 +139,7 @@ def run(ctx) -> None:
                 f"expected exactly one nil-marshal fallback in {path.name}, found {marshal_count}"
             )
         new_text, func_count = _FUNC_DECL.subn(
-            lambda m: _NULL_SHORT_CIRCUIT % m.group("name") if m.group("name") == name else m.group(0),
+            lambda m: _NULL_SHORT_CIRCUIT % (m.group("name"), m.group("name")) if m.group("name") == name else m.group(0),
             new_text,
         )
         if func_count != 1:
