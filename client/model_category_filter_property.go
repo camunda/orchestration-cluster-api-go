@@ -38,6 +38,11 @@ func CategoryExactMatchAsCategoryFilterProperty(v *CategoryExactMatch) CategoryF
 
 // Unmarshal JSON data into one of the pointers in the struct
 func (dst *CategoryFilterProperty) UnmarshalJSON(data []byte) error {
+	// Replace semantics: start from a zero receiver so decoding over a
+	// previously populated value never retains a stale branch that would be
+	// serialized again. This matters for unset wrappers (`null`/`{}`) and for
+	// one advanced/scalar branch decoded over another (orchestration-cluster-api-go#78).
+	*dst = CategoryFilterProperty{}
 	// An unset wrapper marshals to `null` (see MarshalJSON), so the decoder must
 	// accept its own output: `null` unmarshals into every pointer branch and
 	// would otherwise fail with "data matches more than one schema", breaking
