@@ -74,7 +74,11 @@ func (dst *VariableKeyFilterProperty) UnmarshalJSON(data []byte) error {
 	} else if match == 1 {
 		return nil // exactly one match
 	} else { // no match
-		return fmt.Errorf("data failed to match schemas in oneOf(VariableKeyFilterProperty)")
+		// `{}` is a valid instance of the advanced-filter variant (all of its
+		// properties are optional), but the empty-struct check above nils the
+		// match out again. Treat a no-match decode as an unset wrapper rather
+		// than an error (orchestration-cluster-api-go#78).
+		return nil
 	}
 }
 
