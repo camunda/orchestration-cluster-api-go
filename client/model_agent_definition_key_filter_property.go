@@ -38,6 +38,14 @@ func AgentDefinitionKeyExactMatchAsAgentDefinitionKeyFilterProperty(v *AgentDefi
 
 // Unmarshal JSON data into one of the pointers in the struct
 func (dst *AgentDefinitionKeyFilterProperty) UnmarshalJSON(data []byte) error {
+	// An unset wrapper marshals to `null` (see MarshalJSON), so the decoder must
+	// accept its own output: `null` unmarshals into every pointer branch and
+	// would otherwise fail with "data matches more than one schema", breaking
+	// the decode-marshal-decode round trip (orchestration-cluster-api-go#78).
+	var raw bytes.Buffer
+	if err := json.Compact(&raw, data); err == nil && raw.String() == "null" {
+		return nil
+	}
 	var err error
 	match := 0
 	// try to unmarshal data into AdvancedAgentDefinitionKeyFilter
@@ -77,10 +85,13 @@ func (dst *AgentDefinitionKeyFilterProperty) UnmarshalJSON(data []byte) error {
 	} else { // no match
 		// `{}` is a valid instance of the advanced-filter variant (all of its
 		// properties are optional), but the empty-struct check above nils the
-		// match out again. Accept exactly that case as an unset wrapper; any
-		// other no-match input is genuinely invalid and keeps the oneOf error
+		// match out again. Accept exactly that case as an unset wrapper,
+		// comparing whitespace-insensitively so pretty-printed stored queries
+		// (`{ }`, `{\n\t}`, …) decode the same as `{}`. Any other no-match
+		// input is genuinely invalid and keeps the oneOf error
 		// (orchestration-cluster-api-go#78).
-		if string(bytes.TrimSpace(data)) == "{}" {
+		var compacted bytes.Buffer
+		if err := json.Compact(&compacted, data); err == nil && compacted.String() == "{}" {
 			return nil
 		}
 		return fmt.Errorf("data failed to match schemas in oneOf(AgentDefinitionKeyFilterProperty)")
