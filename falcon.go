@@ -254,6 +254,9 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 		// Unknown union shape: let REST handle (and report) it.
 		return nil, false, nil
 	}
+	// The effective tenant must reach the gateway, not just the result: an
+	// explicit tenant always wins; with none set, the configured default applies.
+	args.TenantID = c.resolveTenant(tenant)
 
 	caps := c.falconCapsV
 	prod, err := c.falconProducer(caps)

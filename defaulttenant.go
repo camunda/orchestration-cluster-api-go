@@ -77,33 +77,47 @@ func (c *CamundaClient) withDefaultTenantExpressionEvaluation(body ExpressionEva
 }
 
 // withDefaultTenantDecisionEvaluation injects the default tenant into whichever
-// variant of the decision-evaluation union is set.
+// variant of the decision-evaluation union is set. The union carries pointers,
+// so the variant is copied before mutation: the caller's instruction must stay
+// untouched (reusing it across clients would otherwise retain the first client's
+// tenant, and concurrent reuse would race).
 func (c *CamundaClient) withDefaultTenantDecisionEvaluation(body DecisionEvaluationInstruction) DecisionEvaluationInstruction {
 	d := c.defaultTenant()
 	if d == "" {
 		return body
 	}
 	if b := body.DecisionEvaluationById; b != nil && b.TenantId == nil {
-		b.SetTenantId(camundaapi.MustTenantId(d))
+		cp := *b
+		cp.SetTenantId(camundaapi.MustTenantId(d))
+		body.DecisionEvaluationById = &cp
 	}
 	if b := body.DecisionEvaluationByKey; b != nil && b.TenantId == nil {
-		b.SetTenantId(camundaapi.MustTenantId(d))
+		cp := *b
+		cp.SetTenantId(camundaapi.MustTenantId(d))
+		body.DecisionEvaluationByKey = &cp
 	}
 	return body
 }
 
 // withDefaultTenantProcessInstanceCreation injects the default tenant into
-// whichever variant of the process-instance-creation union is set.
+// whichever variant of the process-instance-creation union is set. The union
+// carries pointers, so the variant is copied before mutation: the caller's
+// instruction must stay untouched (reusing it across clients would otherwise
+// retain the first client's tenant, and concurrent reuse would race).
 func (c *CamundaClient) withDefaultTenantProcessInstanceCreation(body ProcessInstanceCreationInstruction) ProcessInstanceCreationInstruction {
 	d := c.defaultTenant()
 	if d == "" {
 		return body
 	}
 	if b := body.ProcessInstanceCreationInstructionById; b != nil && b.TenantId == nil {
-		b.SetTenantId(camundaapi.MustTenantId(d))
+		cp := *b
+		cp.SetTenantId(camundaapi.MustTenantId(d))
+		body.ProcessInstanceCreationInstructionById = &cp
 	}
 	if b := body.ProcessInstanceCreationInstructionByKey; b != nil && b.TenantId == nil {
-		b.SetTenantId(camundaapi.MustTenantId(d))
+		cp := *b
+		cp.SetTenantId(camundaapi.MustTenantId(d))
+		body.ProcessInstanceCreationInstructionByKey = &cp
 	}
 	return body
 }

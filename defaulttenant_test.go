@@ -3,6 +3,7 @@ package camunda_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -247,4 +248,134 @@ func TestDefaultTenantFromEnv(t *testing.T) {
 	if got := bc.tenantOf(); got != "env-tenant" {
 		t.Errorf("tenantId = %q, want %q", got, "env-tenant")
 	}
+}
+
+// TestDefaultTenantDoesNotMutateCallerInstruction: the decision and
+// process-creation unions carry pointers, so injecting the default tenant must
+// copy the variant — mutating it in place would leak the first client's tenant
+// into every reuse of the caller's instruction (and race on concurrent reuse).
+func TestDefaultTenantDoesNotMutateCallerInstruction(t *testing.T) {
+	t.Run("DecisionEvaluationById", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"))
+		byID := camundaapi.NewDecisionEvaluationById(camundaapi.MustDecisionDefinitionId("dec"))
+		instruction := camundaapi.DecisionEvaluationByIdAsDecisionEvaluationInstruction(byID)
+		_, _ = client.EvaluateDecision(context.Background(), instruction)
+		if got := bc.tenantOf(); got != "acme" {
+			t.Errorf("request tenantId = %q, want %q", got, "acme")
+		}
+		if byID.TenantId != nil {
+			t.Errorf("caller's variant mutated: TenantId = %q, want nil", *byID.TenantId)
+		}
+	})
+
+	t.Run("DecisionEvaluationByKey", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"))
+		byKey := camundaapi.NewDecisionEvaluationByKey(camundaapi.MustDecisionDefinitionKey("2251799813685360"))
+		instruction := camundaapi.DecisionEvaluationByKeyAsDecisionEvaluationInstruction(byKey)
+		_, _ = client.EvaluateDecision(context.Background(), instruction)
+		if got := bc.tenantOf(); got != "acme" {
+			t.Errorf("request tenantId = %q, want %q", got, "acme")
+		}
+		if byKey.TenantId != nil {
+			t.Errorf("caller's variant mutated: TenantId = %q, want nil", *byKey.TenantId)
+		}
+	})
+
+	t.Run("ProcessInstanceCreationById", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"), camunda.WithFalcon(false))
+		byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.MustProcessDefinitionId("proc"))
+		instruction := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
+		_, _ = client.CreateProcessInstance(context.Background(), instruction)
+		if got := bc.tenantOf(); got != "acme" {
+			t.Errorf("request tenantId = %q, want %q", got, "acme")
+		}
+		if byID.TenantId != nil {
+			t.Errorf("caller's variant mutated: TenantId = %q, want nil", *byID.TenantId)
+		}
+	})
+
+	t.Run("ProcessInstanceCreationByKey", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"), camunda.WithFalcon(false))
+		byKey := camundaapi.NewProcessInstanceCreationInstructionByKey(camundaapi.MustProcessDefinitionKey("2251799813685360"))
+		instruction := camundaapi.ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction(byKey)
+		_, _ = client.CreateProcessInstance(context.Background(), instruction)
+		if got := bc.tenantOf(); got != "acme" {
+			t.Errorf("request tenantId = %q, want %q", got, "acme")
+		}
+		if byKey.TenantId != nil {
+			t.Errorf("caller's variant mutated: TenantId = %q, want nil", *byKey.TenantId)
+		}
+	})
+
+	// Reusing one instruction across two clients with different defaults must
+	// send each client's tenant — only possible when the first call left the
+	// caller's instruction untouched.
+	t.Run("ReuseAcrossClients", func(t *testing.T) {
+		bcA, bcB := newBodyCapture(t), newBodyCapture(t)
+		clientA := bcA.client(t, camunda.WithDefaultTenantID("tenant-a"))
+		clientB := bcB.client(t, camunda.WithDefaultTenantID("tenant-b"))
+		byID := camundaapi.NewDecisionEvaluationById(camundaapi.MustDecisionDefinitionId("dec"))
+		instruction := camundaapi.DecisionEvaluationByIdAsDecisionEvaluationInstruction(byID)
+		_, _ = clientA.EvaluateDecision(context.Background(), instruction)
+		_, _ = clientB.EvaluateDecision(context.Background(), instruction)
+		if got := bcA.tenantOf(); got != "tenant-a" {
+			t.Errorf("client A request tenantId = %q, want %q", got, "tenant-a")
+		}
+		if got := bcB.tenantOf(); got != "tenant-b" {
+			t.Errorf("client B request tenantId = %q, want %q (first client's tenant leaked)", got, "tenant-b")
+		}
+	})
+}
+
+// TestInvalidDefaultTenantIDRejectedAtConfig: an invalid default tenant must be
+// rejected with ErrConfig at configuration time — otherwise the first
+// tenant-accepting operation panics in MustTenantId instead of returning an
+// error.
+func TestInvalidDefaultTenantIDRejectedAtConfig(t *testing.T) {
+	t.Run("Option", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		_, err := camunda.New(
+			camunda.WithRestAddress(bc.srv.URL),
+			camunda.WithLogLevel(camunda.LogOff),
+			camunda.WithDefaultTenantID("acme/eu"),
+		)
+		if err == nil {
+			t.Fatal("New with an invalid default tenant id should fail")
+		}
+		if !errors.Is(err, camunda.ErrConfig) {
+			t.Errorf("error = %v, want it to wrap ErrConfig", err)
+		}
+	})
+
+	t.Run("Environment", func(t *testing.T) {
+		t.Setenv("CAMUNDA_DEFAULT_TENANT_ID", "acme/eu")
+		bc := newBodyCapture(t)
+		_, err := camunda.New(
+			camunda.WithRestAddress(bc.srv.URL),
+			camunda.WithLogLevel(camunda.LogOff),
+		)
+		if err == nil {
+			t.Fatal("New with an invalid CAMUNDA_DEFAULT_TENANT_ID should fail")
+		}
+		if !errors.Is(err, camunda.ErrConfig) {
+			t.Errorf("error = %v, want it to wrap ErrConfig", err)
+		}
+	})
+
+	t.Run("ValidAndEmptyStillAccepted", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		for _, id := range []string{"", "<default>", "acme", "acme-eu.1"} {
+			if _, err := camunda.New(
+				camunda.WithRestAddress(bc.srv.URL),
+				camunda.WithLogLevel(camunda.LogOff),
+				camunda.WithDefaultTenantID(id),
+			); err != nil {
+				t.Errorf("New(WithDefaultTenantID(%q)) = %v, want nil", id, err)
+			}
+		}
+	})
 }
