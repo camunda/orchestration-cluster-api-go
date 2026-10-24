@@ -606,10 +606,13 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 		if hasOpts {
 			b.WriteString("\tfor _, opt := range opts {\n\t\treq = opt(req)\n\t}\n")
 		}
-		if helper, ok := defaultTenantBodyOps[op.name]; ok {
+		if helper, ok := defaultTenantBodyOps[op.name]; ok && op.bodyBuilder != "" {
 			// Runs after the opts so a body-replacing opt (e.g. r.Body(replacement))
 			// cannot discard the injected tenant: default the final body, then
 			// re-attach it. An explicit tenant on that final body still wins.
+			// Guarded on a nonempty body builder: without the optional metadata
+			// argument loadBodyInfo yields no builder, and emitting req.Get()/req.()
+			// here would overwrite the facade with invalid Go.
 			fmt.Fprintf(&b, "\tif b := req.Get%s(); b != nil {\n\t\treq = req.%s(c.%s(*b))\n\t}\n", op.bodyBuilder, op.bodyBuilder, helper)
 		}
 		if helper, ok := defaultTenantReqOps[op.name]; ok {

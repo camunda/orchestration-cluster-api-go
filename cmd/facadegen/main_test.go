@@ -77,6 +77,22 @@ func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 	}
 }
 
+// Without the optional metadata argument loadBodyInfo yields no body builder, so
+// a tenant-body op has bodyBuilder == "". The tenant hook must then be skipped
+// entirely: emitting req.Get()/req.() would overwrite the facade with invalid Go.
+func TestEmitSkipsTenantBodyHookWhenBodyBuilderMissing(t *testing.T) {
+	ops := []operation{
+		{field: "MessageAPI", name: "PublishMessage", reqType: "ApiPublishMessageRequest"},
+	}
+	src := emit(ops, nil, false)
+
+	for _, bad := range []string{"req.Get()", "req.(c.withDefaultTenantMessagePublication", "c.withDefaultTenantMessagePublication"} {
+		if strings.Contains(src, bad) {
+			t.Errorf("tenant-body hook must be skipped when bodyBuilder is empty, found %q\n%s", bad, src)
+		}
+	}
+}
+
 func TestTypeStringQualifiesOnlyTypesThatAreNotReexported(t *testing.T) {
 	r := &renderer{
 		clientTypes: map[string]bool{"Widget": true, "Configuration": true},
