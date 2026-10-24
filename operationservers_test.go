@@ -6,9 +6,11 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
 )
 
 // TestOperationServersHonorRestAddress is the regression test for
@@ -45,8 +47,10 @@ func TestOperationServersHonorRestAddress(t *testing.T) {
 // TestOperationServersCoverEveryOperationServerEndpoint guards the whole defect
 // class: every endpoint the generator registered in OperationServers (Backup /
 // Cluster / Exporting / Recovery cluster-admin operations) must resolve to the
-// configured REST origin, so a future spec change cannot silently reintroduce a
-// template-default endpoint.
+// configured REST origin when no context overrides are supplied, so a future
+// spec change cannot silently reintroduce a template-default endpoint. The
+// templates themselves are retained ("{schema}://{host}:{port}") so
+// context-based server variables keep working; only their defaults are rebased.
 func TestOperationServersCoverEveryOperationServerEndpoint(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -74,6 +78,113 @@ func TestOperationServersCoverEveryOperationServerEndpoint(t *testing.T) {
 				t.Errorf("OperationServers[%q][%d] = %q, want configured REST origin %q", endpoint, i, got, srv.URL)
 			}
 		}
+	}
+}
+
+// TestOperationServersContextServerVariablesStillApply is the regression test
+// for the review finding on PR #80: rebasing operation servers onto the
+// configured REST address must not disable ContextServerVariables. A caller
+// that supplies schema/host/port via context must still override the rebased
+// defaults at request time.
+func TestOperationServersContextServerVariablesStillApply(t *testing.T) {
+	var gotHost string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotHost = r.Host
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"brokers":[],"clusterId":null,"clusterSize":0,"gatewayVersion":null,"physicalTenants":[]}`)
+	}))
+	defer srv.Close()
+
+	// Configure the client against an origin that is NOT the test server; the
+	// context variables below must win over it.
+	client, err := camunda.New(camunda.WithRestAddress("http://configured-origin:1111"), camunda.WithLogLevel(camunda.LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	override, err := url.Parse(srv.URL)
+	if err != nil {
+		t.Fatalf("parse test server URL: %v", err)
+	}
+	ctx := context.WithValue(context.Background(), camundaapi.ContextServerVariables, map[string]string{
+		"schema": override.Scheme,
+		"host":   override.Hostname(),
+		"port":   override.Port(),
+	})
+
+	if _, err := client.GetClusterTopology(ctx); err != nil {
+		t.Fatalf("GetClusterTopology: %v", err)
+	}
+	if gotHost != override.Host {
+		t.Errorf("request host = %q, want context override %q", gotHost, override.Host)
+	}
+}
+
+// TestOperationServersContextOperationServerVariablesStillApply covers the
+// per-operation variant of the same defect class:
+// ContextOperationServerVariables must override the rebased defaults for the
+// named endpoint only.
+func TestOperationServersContextOperationServerVariablesStillApply(t *testing.T) {
+	var gotHost string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotHost = r.Host
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"brokers":[],"clusterId":null,"clusterSize":0,"gatewayVersion":null,"physicalTenants":[]}`)
+	}))
+	defer srv.Close()
+
+	client, err := camunda.New(camunda.WithRestAddress("http://configured-origin:1111"), camunda.WithLogLevel(camunda.LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	override, err := url.Parse(srv.URL)
+	if err != nil {
+		t.Fatalf("parse test server URL: %v", err)
+	}
+	ctx := context.WithValue(context.Background(), camundaapi.ContextOperationServerVariables, map[string]map[string]string{
+		"ClusterAPIService.GetClusterTopology": {
+			"schema": override.Scheme,
+			"host":   override.Hostname(),
+			"port":   override.Port(),
+		},
+	})
+
+	if _, err := client.GetClusterTopology(ctx); err != nil {
+		t.Fatalf("GetClusterTopology: %v", err)
+	}
+	if gotHost != override.Host {
+		t.Errorf("request host = %q, want operation context override %q", gotHost, override.Host)
+	}
+}
+
+// TestRebaseOperationServersRejectsForeignTemplate pins the fail-closed
+// contract: an operation-server entry whose URL template does not declare the
+// expected {schema}/{host}/{port} variables is a configuration error, never
+// silently left pointing at the spec defaults (localhost:8080).
+func TestRebaseOperationServersRejectsForeignTemplate(t *testing.T) {
+	cfg := camundaapi.NewConfiguration()
+	cfg.OperationServers["ForeignAPIService.DoThings"] = camundaapi.ServerConfigurations{
+		{URL: "https://hardcoded.example:9443"},
+	}
+	if _, err := camunda.RebaseOperationServersForTesting(cfg, "http://my-cluster:9999", false); err == nil {
+		t.Fatal("expected an error for a template without variables, got nil")
+	} else if !errors.Is(err, camunda.ErrConfig) {
+		t.Errorf("error = %v, want it to wrap ErrConfig", err)
+	}
+}
+
+// TestOperationServerOriginOmitsDefaultPort documents the origin shape that
+// feeds the rebased variable defaults: an explicit :443 on an https address
+// (or :80 on http) survives as-is, and the template default fills in the
+// standard port when the address omits one.
+func TestOperationServerOriginOmitsDefaultPort(t *testing.T) {
+	got, err := camunda.OperationServerOrigin("https://cluster.example:443/v2", false)
+	if err != nil {
+		t.Fatalf("OperationServerOrigin: %v", err)
+	}
+	if want := "https://cluster.example:443"; got != want {
+		t.Errorf("OperationServerOrigin = %q, want %q", got, want)
 	}
 }
 
