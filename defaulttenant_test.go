@@ -237,6 +237,68 @@ func TestNoDefaultTenantLeavesTenantUnset(t *testing.T) {
 	}
 }
 
+// TestDefaultTenantSurvivesBodyReplacingOpt: a body-builder opt that REPLACES
+// the request body (r.<Body>(replacement)) must not discard the configured
+// default tenant — the facade defaults the tenant on the final body, after the
+// opts run, so the replacement still gets the default. This is the regression
+// test for the "defaulting before opts" ordering bug.
+func TestDefaultTenantSurvivesBodyReplacingOpt(t *testing.T) {
+	// A body-replacing opt swaps in a fresh body whose tenant is unset; the
+	// configured default must still be applied to that final body.
+	t.Run("BodyReplacingOptGetsDefault", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"))
+		replacement := camundaapi.NewMessagePublicationRequest("replaced")
+		_, _ = client.PublishMessage(context.Background(), *camundaapi.NewMessagePublicationRequest("original"),
+			func(r camundaapi.ApiPublishMessageRequest) camundaapi.ApiPublishMessageRequest {
+				return r.MessagePublicationRequest(*replacement)
+			})
+		if got := bc.tenantOf(); got != "acme" {
+			t.Errorf("tenantId = %q, want %q (default must apply to the opt-replaced body)", got, "acme")
+		}
+		// The replacement body is what was actually sent.
+		if got, _ := bc.body["name"].(string); got != "replaced" {
+			t.Errorf("body name = %q, want %q (the opt's replacement body)", got, "replaced")
+		}
+	})
+
+	// An explicit tenant set on the replacement body always wins over the default.
+	t.Run("BodyReplacingOptExplicitTenantWins", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"))
+		replacement := camundaapi.NewMessagePublicationRequest("replaced")
+		replacement.SetTenantId(camundaapi.MustTenantId("explicit"))
+		_, _ = client.PublishMessage(context.Background(), *camundaapi.NewMessagePublicationRequest("original"),
+			func(r camundaapi.ApiPublishMessageRequest) camundaapi.ApiPublishMessageRequest {
+				return r.MessagePublicationRequest(*replacement)
+			})
+		if got := bc.tenantOf(); got != "explicit" {
+			t.Errorf("tenantId = %q, want %q (explicit tenant on the replaced body must win)", got, "explicit")
+		}
+	})
+
+	// The same ordering holds on the hand-written REST path for
+	// CreateProcessInstance (falcon.go): a body-replacing opt gets the default.
+	t.Run("CreateProcessInstanceBodyReplacingOptGetsDefault", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"), camunda.WithFalcon(false))
+		replacement := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+			camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.MustProcessDefinitionId("replaced-proc")))
+		original := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+			camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.MustProcessDefinitionId("original-proc")))
+		_, _ = client.CreateProcessInstance(context.Background(), original,
+			func(r camundaapi.ApiCreateProcessInstanceRequest) camundaapi.ApiCreateProcessInstanceRequest {
+				return r.ProcessInstanceCreationInstruction(replacement)
+			})
+		if got := bc.tenantOf(); got != "acme" {
+			t.Errorf("tenantId = %q, want %q (default must apply to the opt-replaced body)", got, "acme")
+		}
+		if got, _ := bc.body["processDefinitionId"].(string); got != "replaced-proc" {
+			t.Errorf("processDefinitionId = %q, want %q (the opt's replacement body)", got, "replaced-proc")
+		}
+	})
+}
+
 // TestDefaultTenantFromEnv: CAMUNDA_TENANT_ID (the cross-SDK variable) feeds the
 // same injection path as WithDefaultTenantID.
 func TestDefaultTenantFromEnv(t *testing.T) {

@@ -156,6 +156,80 @@ func TestCreateProcessInstanceRoutesOverFalcon(t *testing.T) {
 	}
 }
 
+// captureCreateFrame runs a FALCON create and returns the raw createInstance
+// frame the gateway received, so tests can assert exactly which fields were sent.
+func captureCreateFrame(t *testing.T, clientOpts []camunda.Option, instr camundaapi.ProcessInstanceCreationInstruction) map[string]any {
+	t.Helper()
+	frameCh := make(chan map[string]any, 1)
+	srv := falconGateway(t, nil, func(ctx context.Context, c *websocket.Conn) {
+		wsWriteJSON(ctx, c, map[string]any{"type": "welcome", "submissionCredits": 5, "heartbeatMs": 15000})
+		for {
+			f, err := wsReadJSON(ctx, c)
+			if err != nil {
+				return
+			}
+			if f["type"] == "createInstance" {
+				frameCh <- f
+				wsWriteJSON(ctx, c, map[string]any{
+					"type": "commandResult", "corr": f["corr"], "status": 200,
+					"body": map[string]any{"processInstanceKey": "2251799813685340"},
+				})
+			}
+		}
+	})
+	opts := append([]camunda.Option{camunda.WithRestAddress(srv.URL + "/v2"), camunda.WithFalcon(true)}, clientOpts...)
+	c, err := camunda.New(opts...)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if _, err := c.CreateProcessInstance(context.Background(), instr); err != nil {
+		t.Fatalf("CreateProcessInstance: %v", err)
+	}
+	select {
+	case f := <-frameCh:
+		return f
+	case <-time.After(5 * time.Second):
+		t.Fatal("no createInstance frame reached the gateway")
+		return nil
+	}
+}
+
+// TestCreateProcessInstanceFalconOmitsTenantWhenUnset: with neither an
+// instruction tenant nor a configured default, the create frame must leave
+// tenantId absent so the gateway applies its own default — sending the
+// "<default>" marker would pin a literal tenant.
+func TestCreateProcessInstanceFalconOmitsTenantWhenUnset(t *testing.T) {
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+		camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process")))
+	frame := captureCreateFrame(t, nil, instr)
+	if _, present := frame["tenantId"]; present {
+		t.Errorf("tenantId present in create frame (%v), want absent so the gateway defaults it", frame["tenantId"])
+	}
+}
+
+// TestCreateProcessInstanceFalconSendsConfiguredDefault: a configured default
+// tenant is sent explicitly on the create frame.
+func TestCreateProcessInstanceFalconSendsConfiguredDefault(t *testing.T) {
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+		camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process")))
+	frame := captureCreateFrame(t, []camunda.Option{camunda.WithDefaultTenantID("acme")}, instr)
+	if got := frame["tenantId"]; got != "acme" {
+		t.Errorf("tenantId = %v, want %q", got, "acme")
+	}
+}
+
+// TestCreateProcessInstanceFalconSendsExplicitTenant: an explicit tenant on the
+// instruction always wins over the configured default.
+func TestCreateProcessInstanceFalconSendsExplicitTenant(t *testing.T) {
+	byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process"))
+	byID.SetTenantId(camundaapi.MustTenantId("explicit"))
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
+	frame := captureCreateFrame(t, []camunda.Option{camunda.WithDefaultTenantID("acme")}, instr)
+	if got := frame["tenantId"]; got != "explicit" {
+		t.Errorf("tenantId = %v, want %q (explicit tenant must win over the default)", got, "explicit")
+	}
+}
+
 func TestCreateProcessInstanceForceRESTBypassesFalcon(t *testing.T) {
 	var restHit atomic.Bool
 	srv := falconGateway(t, &restHit, func(ctx context.Context, c *websocket.Conn) {

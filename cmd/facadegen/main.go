@@ -601,13 +601,16 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 		fmt.Fprintf(&b, "func (c *CamundaClient) %s(%s) %s {\n", op.name, sig, retSig)
 		fmt.Fprintf(&b, "\treq := c.raw.%s.%s(%s)\n", op.field, op.name, call)
 		if op.bodyBuilder != "" {
-			if helper, ok := defaultTenantBodyOps[op.name]; ok {
-				fmt.Fprintf(&b, "\tbody = c.%s(body)\n", helper)
-			}
 			fmt.Fprintf(&b, "\treq = req.%s(body)\n", op.bodyBuilder)
 		}
 		if hasOpts {
 			b.WriteString("\tfor _, opt := range opts {\n\t\treq = opt(req)\n\t}\n")
+		}
+		if helper, ok := defaultTenantBodyOps[op.name]; ok {
+			// Runs after the opts so a body-replacing opt (e.g. r.Body(replacement))
+			// cannot discard the injected tenant: default the final body, then
+			// re-attach it. An explicit tenant on that final body still wins.
+			fmt.Fprintf(&b, "\tif b := req.Get%s(); b != nil {\n\t\treq = req.%s(c.%s(*b))\n\t}\n", op.bodyBuilder, op.bodyBuilder, helper)
 		}
 		if helper, ok := defaultTenantReqOps[op.name]; ok {
 			// Runs after the opts so an explicit tenant (direct or via an opt) wins.

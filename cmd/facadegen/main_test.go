@@ -45,9 +45,10 @@ func TestGenerateFacade(t *testing.T) {
 }
 
 // TestEmitInjectsDefaultTenantHooks locks the emission of the default-tenant
-// injection (issue #79): body ops route the body through their withDefaultTenant*
-// helper before the body builder, and request ops adjust the request after the
-// opts so an explicit tenant always wins.
+// injection (issue #79): body ops default the tenant on the FINAL body — after
+// the opts, read back via the request's Get<Body>() accessor — so a
+// body-replacing opt cannot discard the injected tenant; request ops adjust the
+// request after the opts so an explicit tenant always wins.
 func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 	ops := []operation{
 		{field: "MessageAPI", name: "PublishMessage", reqType: "ApiPublishMessageRequest",
@@ -57,12 +58,16 @@ func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 	}
 	src := emit(ops, nil, false)
 
-	bodyIdx := strings.Index(src, "body = c.withDefaultTenantMessagePublication(body)")
+	// The body is attached first, opts run, then the final body is defaulted and
+	// re-attached — so the default survives a body-replacing opt.
 	builderIdx := strings.Index(src, "req = req.MessagePublicationRequest(body)")
-	if bodyIdx == -1 || builderIdx == -1 || bodyIdx > builderIdx {
-		t.Errorf("PublishMessage must default the tenant on the body before the body builder\n%s", src)
-	}
 	optIdx := strings.Index(src, "req = opt(req)")
+	defaultIdx := strings.Index(src, "req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublication(*b))")
+	getIdx := strings.Index(src, "req.GetMessagePublicationRequest()")
+	if builderIdx == -1 || optIdx == -1 || defaultIdx == -1 || getIdx == -1 ||
+		!(builderIdx < optIdx && optIdx < defaultIdx) {
+		t.Errorf("PublishMessage must attach the body, run opts, then default the final body\n%s", src)
+	}
 	reqHookIdx := strings.Index(src, "req = c.withDefaultTenantCreateDeployment(req)")
 	if reqHookIdx == -1 || optIdx == -1 || reqHookIdx < optIdx {
 		t.Errorf("CreateDeployment must default the tenant after the opts\n%s", src)

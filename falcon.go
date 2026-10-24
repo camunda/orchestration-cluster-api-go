@@ -201,9 +201,15 @@ func (c *CamundaClient) CreateProcessInstance(ctx context.Context, body ProcessI
 	}
 
 	req := c.raw.ProcessInstanceAPI.CreateProcessInstance(ctx)
-	req = req.ProcessInstanceCreationInstruction(c.withDefaultTenantProcessInstanceCreation(body))
+	req = req.ProcessInstanceCreationInstruction(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	// Default the tenant on the FINAL body, after the opts, so a body-replacing
+	// opt (r.ProcessInstanceCreationInstruction(replacement)) cannot discard the
+	// injected tenant. An explicit tenant on that final body still wins.
+	if b := req.GetProcessInstanceCreationInstruction(); b != nil {
+		req = req.ProcessInstanceCreationInstruction(c.withDefaultTenantProcessInstanceCreation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -256,7 +262,11 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	}
 	// The effective tenant must reach the gateway, not just the result: an
 	// explicit tenant always wins; with none set, the configured default applies.
-	args.TenantID = c.resolveTenant(tenant)
+	// When neither is present the tenantId is left absent so the gateway applies
+	// its own default — sending the "<default>" marker would pin a literal tenant.
+	if tenant != nil && *tenant != "" {
+		args.TenantID = *tenant
+	}
 
 	caps := c.falconCapsV
 	prod, err := c.falconProducer(caps)
@@ -334,10 +344,11 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	return result, true, nil
 }
 
-// resolveTenant resolves the effective tenant for a create routed over the
-// command stream: the tenant the instruction carried (already defaulted by
-// tenantIDOrDefault), then the configured default, then the server-side
-// default marker.
+// resolveTenant resolves the tenant shown on a synthesized create result: the
+// tenant the instruction carried (already defaulted by tenantIDOrDefault), then
+// the configured default, then the server-side default marker. It is only a
+// display fallback for the result — the create frame itself omits tenantId when
+// no tenant is set so the gateway applies its own default.
 func (c *CamundaClient) resolveTenant(provided *string) string {
 	if provided != nil && *provided != "" {
 		return *provided
