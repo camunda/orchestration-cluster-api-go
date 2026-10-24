@@ -1305,10 +1305,12 @@ func (c *CamundaClient) UpdateTenantClusterVariable(ctx context.Context, tenantI
 //	fmt.Printf("%v\n", result)
 func (c *CamundaClient) EvaluateConditionals(ctx context.Context, body ConditionalEvaluationInstruction, opts ...func(ApiEvaluateConditionalsRequest) ApiEvaluateConditionalsRequest) (*EvaluateConditionalResult, error) {
 	req := c.raw.ConditionalAPI.EvaluateConditionals(ctx)
-	body = c.withDefaultTenantConditionalEvaluation(body)
 	req = req.ConditionalEvaluationInstruction(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetConditionalEvaluationInstruction(); b != nil {
+		req = req.ConditionalEvaluationInstruction(c.withDefaultTenantConditionalEvaluation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -1330,10 +1332,12 @@ func (c *CamundaClient) EvaluateConditionals(ctx context.Context, body Condition
 //	fmt.Printf("%v\n", result)
 func (c *CamundaClient) EvaluateDecision(ctx context.Context, body DecisionEvaluationInstruction, opts ...func(ApiEvaluateDecisionRequest) ApiEvaluateDecisionRequest) (*EvaluateDecisionResult, error) {
 	req := c.raw.DecisionDefinitionAPI.EvaluateDecision(ctx)
-	body = c.withDefaultTenantDecisionEvaluation(body)
 	req = req.DecisionEvaluationInstruction(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetDecisionEvaluationInstruction(); b != nil {
+		req = req.DecisionEvaluationInstruction(c.withDefaultTenantDecisionEvaluation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -1841,10 +1845,12 @@ func (c *CamundaClient) ResumeExporting(ctx context.Context, opts ...func(ApiRes
 //	fmt.Printf("result: %v\n", result.GetResult())
 func (c *CamundaClient) EvaluateExpression(ctx context.Context, body ExpressionEvaluationRequest, opts ...func(ApiEvaluateExpressionRequest) ApiEvaluateExpressionRequest) (*ExpressionEvaluationResult, error) {
 	req := c.raw.ExpressionAPI.EvaluateExpression(ctx)
-	body = c.withDefaultTenantExpressionEvaluation(body)
 	req = req.ExpressionEvaluationRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetExpressionEvaluationRequest(); b != nil {
+		req = req.ExpressionEvaluationRequest(c.withDefaultTenantExpressionEvaluation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -2687,10 +2693,12 @@ func (c *CamundaClient) UpdateMappingRule(ctx context.Context, mappingRuleId str
 //	fmt.Printf("%v\n", result)
 func (c *CamundaClient) CorrelateMessage(ctx context.Context, body MessageCorrelationRequest, opts ...func(ApiCorrelateMessageRequest) ApiCorrelateMessageRequest) (*MessageCorrelationResult, error) {
 	req := c.raw.MessageAPI.CorrelateMessage(ctx)
-	body = c.withDefaultTenantMessageCorrelation(body)
 	req = req.MessageCorrelationRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetMessageCorrelationRequest(); b != nil {
+		req = req.MessageCorrelationRequest(c.withDefaultTenantMessageCorrelation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -2711,10 +2719,12 @@ func (c *CamundaClient) CorrelateMessage(ctx context.Context, body MessageCorrel
 //	fmt.Printf("%v\n", result)
 func (c *CamundaClient) PublishMessage(ctx context.Context, body MessagePublicationRequest, opts ...func(ApiPublishMessageRequest) ApiPublishMessageRequest) (*MessagePublicationResult, error) {
 	req := c.raw.MessageAPI.PublishMessage(ctx)
-	body = c.withDefaultTenantMessagePublication(body)
 	req = req.MessagePublicationRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetMessagePublicationRequest(); b != nil {
+		req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublication(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -3965,10 +3975,12 @@ func (c *CamundaClient) CreateAdminUser(ctx context.Context, body UserRequest, o
 //	fmt.Printf("%v\n", result)
 func (c *CamundaClient) BroadcastSignal(ctx context.Context, body SignalBroadcastRequest, opts ...func(ApiBroadcastSignalRequest) ApiBroadcastSignalRequest) (*SignalBroadcastResult, error) {
 	req := c.raw.SignalAPI.BroadcastSignal(ctx)
-	body = c.withDefaultTenantSignalBroadcast(body)
 	req = req.SignalBroadcastRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetSignalBroadcastRequest(); b != nil {
+		req = req.SignalBroadcastRequest(c.withDefaultTenantSignalBroadcast(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
