@@ -201,7 +201,7 @@ func (c *CamundaClient) CreateProcessInstance(ctx context.Context, body ProcessI
 	}
 
 	req := c.raw.ProcessInstanceAPI.CreateProcessInstance(ctx)
-	req = req.ProcessInstanceCreationInstruction(body)
+	req = req.ProcessInstanceCreationInstruction(c.withDefaultTenantProcessInstanceCreation(body))
 	for _, opt := range opts {
 		req = opt(req)
 	}
@@ -226,7 +226,7 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 		b := body.ProcessInstanceCreationInstructionById
 		id = b.ProcessDefinitionId.String()
 		version = b.ProcessDefinitionVersion
-		tenant = tenantIDPtr(b.TenantId)
+		tenant = c.tenantIDOrDefault(b.TenantId)
 		args = falcon.CreateArgs{
 			ProcessDefinitionID: b.ProcessDefinitionId.String(),
 			Variables:           b.Variables,
@@ -240,7 +240,7 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 		b := body.ProcessInstanceCreationInstructionByKey
 		key = string(b.ProcessDefinitionKey)
 		version = b.ProcessDefinitionVersion
-		tenant = tenantIDPtr(b.TenantId)
+		tenant = c.tenantIDOrDefault(b.TenantId)
 		args = falcon.CreateArgs{
 			ProcessDefinitionKey: key,
 			Variables:            b.Variables,
@@ -331,18 +331,10 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	return result, true, nil
 }
 
-// tenantIDPtr converts an optional branded TenantId into the plain *string the
-// falcon producer and resolveTenant operate on.
-func tenantIDPtr(t *camundaapi.TenantId) *string {
-	if t == nil {
-		return nil
-	}
-	s := string(*t)
-	return &s
-}
-
-// resolveTenant applies the configured default tenant when the instruction did not
-// specify one, matching the REST path's server-side default.
+// resolveTenant resolves the effective tenant for a create routed over the
+// command stream: the tenant the instruction carried (already defaulted by
+// tenantIDOrDefault), then the configured default, then the server-side
+// default marker.
 func (c *CamundaClient) resolveTenant(provided *string) string {
 	if provided != nil && *provided != "" {
 		return *provided
