@@ -745,3 +745,41 @@ func (a *DocumentAPIService) GetDocumentExecute(r ApiGetDocumentRequest) (*os.Fi
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetFile returns the file field value, or nil when unset.
+func (r ApiCreateDocumentRequest) GetFile() *os.File { return r.file }
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiCreateDocumentRequest) GetStoreId() *string { return r.storeId }
+
+// GetDocumentId returns the documentId field value, or nil when unset.
+func (r ApiCreateDocumentRequest) GetDocumentId() *string { return r.documentId }
+
+// GetMetadata returns the metadata field value, or nil when unset.
+func (r ApiCreateDocumentRequest) GetMetadata() *DocumentMetadata { return r.metadata }
+
+// GetDocumentLinkRequest returns the documentLinkRequest field value, or nil when unset.
+func (r ApiCreateDocumentLinkRequest) GetDocumentLinkRequest() *DocumentLinkRequest {
+	return r.documentLinkRequest
+}
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiCreateDocumentLinkRequest) GetStoreId() *string { return r.storeId }
+
+// GetContentHash returns the contentHash field value, or nil when unset.
+func (r ApiCreateDocumentLinkRequest) GetContentHash() *string { return r.contentHash }
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiCreateDocumentsRequest) GetStoreId() *string { return r.storeId }
+
+// GetMetadataList returns the metadataList field value, or nil when unset.
+func (r ApiCreateDocumentsRequest) GetMetadataList() *[]DocumentMetadata { return r.metadataList }
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiDeleteDocumentRequest) GetStoreId() *string { return r.storeId }
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiGetDocumentRequest) GetStoreId() *string { return r.storeId }
+
+// GetContentHash returns the contentHash field value, or nil when unset.
+func (r ApiGetDocumentRequest) GetContentHash() *string { return r.contentHash }

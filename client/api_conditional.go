@@ -155,3 +155,8 @@ func (a *ConditionalAPIService) EvaluateConditionalsExecute(r ApiEvaluateConditi
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetConditionalEvaluationInstruction returns the conditionalEvaluationInstruction field value, or nil when unset.
+func (r ApiEvaluateConditionalsRequest) GetConditionalEvaluationInstruction() *ConditionalEvaluationInstruction {
+	return r.conditionalEvaluationInstruction
+}

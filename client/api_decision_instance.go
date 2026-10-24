@@ -484,3 +484,18 @@ func (a *DecisionInstanceAPIService) SearchDecisionInstancesExecute(r ApiSearchD
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetDeleteDecisionInstanceRequest returns the deleteDecisionInstanceRequest field value, or nil when unset.
+func (r ApiDeleteDecisionInstanceRequest) GetDeleteDecisionInstanceRequest() *DeleteDecisionInstanceRequest {
+	return r.deleteDecisionInstanceRequest
+}
+
+// GetDecisionInstanceDeletionBatchOperationRequest returns the decisionInstanceDeletionBatchOperationRequest field value, or nil when unset.
+func (r ApiDeleteDecisionInstancesBatchOperationRequest) GetDecisionInstanceDeletionBatchOperationRequest() *DecisionInstanceDeletionBatchOperationRequest {
+	return r.decisionInstanceDeletionBatchOperationRequest
+}
+
+// GetDecisionInstanceSearchQuery returns the decisionInstanceSearchQuery field value, or nil when unset.
+func (r ApiSearchDecisionInstancesRequest) GetDecisionInstanceSearchQuery() *DecisionInstanceSearchQuery {
+	return r.decisionInstanceSearchQuery
+}

@@ -961,3 +961,11 @@ func (a *ClusterAPIService) TriggerClusterRebalanceExecute(r ApiTriggerClusterRe
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetDryRun returns the dryRun field value, or nil when unset.
+func (r ApiTriggerClusterRebalanceRequest) GetDryRun() *bool { return r.dryRun }
+
+// GetClusterRebalanceRequest returns the clusterRebalanceRequest field value, or nil when unset.
+func (r ApiTriggerClusterRebalanceRequest) GetClusterRebalanceRequest() *ClusterRebalanceRequest {
+	return r.clusterRebalanceRequest
+}

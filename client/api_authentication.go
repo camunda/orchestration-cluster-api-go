@@ -228,3 +228,8 @@ func (a *AuthenticationAPIService) SearchOwnAuthorizationsExecute(r ApiSearchOwn
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetAuthorizationSearchQuery returns the authorizationSearchQuery field value, or nil when unset.
+func (r ApiSearchOwnAuthorizationsRequest) GetAuthorizationSearchQuery() *AuthorizationSearchQuery {
+	return r.authorizationSearchQuery
+}

@@ -583,3 +583,18 @@ func (a *AuthorizationAPIService) UpdateAuthorizationExecute(r ApiUpdateAuthoriz
 
 	return localVarHTTPResponse, nil
 }
+
+// GetAuthorizationRequest returns the authorizationRequest field value, or nil when unset.
+func (r ApiCreateAuthorizationRequest) GetAuthorizationRequest() *AuthorizationRequest {
+	return r.authorizationRequest
+}
+
+// GetAuthorizationSearchQuery returns the authorizationSearchQuery field value, or nil when unset.
+func (r ApiSearchAuthorizationsRequest) GetAuthorizationSearchQuery() *AuthorizationSearchQuery {
+	return r.authorizationSearchQuery
+}
+
+// GetAuthorizationRequest returns the authorizationRequest field value, or nil when unset.
+func (r ApiUpdateAuthorizationRequest) GetAuthorizationRequest() *AuthorizationRequest {
+	return r.authorizationRequest
+}

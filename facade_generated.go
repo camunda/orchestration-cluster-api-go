@@ -1309,6 +1309,9 @@ func (c *CamundaClient) EvaluateConditionals(ctx context.Context, body Condition
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	if b := req.GetConditionalEvaluationInstruction(); b != nil {
+		req = req.ConditionalEvaluationInstruction(c.withDefaultTenantConditionalEvaluation(*b))
+	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }
@@ -1332,6 +1335,9 @@ func (c *CamundaClient) EvaluateDecision(ctx context.Context, body DecisionEvalu
 	req = req.DecisionEvaluationInstruction(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetDecisionEvaluationInstruction(); b != nil {
+		req = req.DecisionEvaluationInstruction(c.withDefaultTenantDecisionEvaluation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -1842,6 +1848,9 @@ func (c *CamundaClient) EvaluateExpression(ctx context.Context, body ExpressionE
 	req = req.ExpressionEvaluationRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetExpressionEvaluationRequest(); b != nil {
+		req = req.ExpressionEvaluationRequest(c.withDefaultTenantExpressionEvaluation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -2688,6 +2697,9 @@ func (c *CamundaClient) CorrelateMessage(ctx context.Context, body MessageCorrel
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	if b := req.GetMessageCorrelationRequest(); b != nil {
+		req = req.MessageCorrelationRequest(c.withDefaultTenantMessageCorrelation(*b))
+	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }
@@ -2710,6 +2722,9 @@ func (c *CamundaClient) PublishMessage(ctx context.Context, body MessagePublicat
 	req = req.MessagePublicationRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetMessagePublicationRequest(); b != nil {
+		req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublication(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -3500,6 +3515,7 @@ func (c *CamundaClient) CreateDeployment(ctx context.Context, opts ...func(ApiCr
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	req = c.withDefaultTenantCreateDeployment(req)
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }
@@ -3962,6 +3978,9 @@ func (c *CamundaClient) BroadcastSignal(ctx context.Context, body SignalBroadcas
 	req = req.SignalBroadcastRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetSignalBroadcastRequest(); b != nil {
+		req = req.SignalBroadcastRequest(c.withDefaultTenantSignalBroadcast(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)

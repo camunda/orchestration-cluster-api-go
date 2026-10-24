@@ -484,3 +484,13 @@ func (a *DecisionDefinitionAPIService) SearchDecisionDefinitionsExecute(r ApiSea
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetDecisionEvaluationInstruction returns the decisionEvaluationInstruction field value, or nil when unset.
+func (r ApiEvaluateDecisionRequest) GetDecisionEvaluationInstruction() *DecisionEvaluationInstruction {
+	return r.decisionEvaluationInstruction
+}
+
+// GetDecisionDefinitionSearchQuery returns the decisionDefinitionSearchQuery field value, or nil when unset.
+func (r ApiSearchDecisionDefinitionsRequest) GetDecisionDefinitionSearchQuery() *DecisionDefinitionSearchQuery {
+	return r.decisionDefinitionSearchQuery
+}

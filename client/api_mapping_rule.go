@@ -640,3 +640,18 @@ func (a *MappingRuleAPIService) UpdateMappingRuleExecute(r ApiUpdateMappingRuleR
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetMappingRuleCreateRequest returns the mappingRuleCreateRequest field value, or nil when unset.
+func (r ApiCreateMappingRuleRequest) GetMappingRuleCreateRequest() *MappingRuleCreateRequest {
+	return r.mappingRuleCreateRequest
+}
+
+// GetMappingRuleSearchQueryRequest returns the mappingRuleSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchMappingRuleRequest) GetMappingRuleSearchQueryRequest() *MappingRuleSearchQueryRequest {
+	return r.mappingRuleSearchQueryRequest
+}
+
+// GetMappingRuleUpdateRequest returns the mappingRuleUpdateRequest field value, or nil when unset.
+func (r ApiUpdateMappingRuleRequest) GetMappingRuleUpdateRequest() *MappingRuleUpdateRequest {
+	return r.mappingRuleUpdateRequest
+}

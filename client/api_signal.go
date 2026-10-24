@@ -142,3 +142,8 @@ func (a *SignalAPIService) BroadcastSignalExecute(r ApiBroadcastSignalRequest) (
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetSignalBroadcastRequest returns the signalBroadcastRequest field value, or nil when unset.
+func (r ApiBroadcastSignalRequest) GetSignalBroadcastRequest() *SignalBroadcastRequest {
+	return r.signalBroadcastRequest
+}

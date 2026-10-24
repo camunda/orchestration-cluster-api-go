@@ -264,3 +264,8 @@ func (a *SecretAPIService) ResolveSecretsExecute(r ApiResolveSecretsRequest) (*S
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetSecretResolveRequest returns the secretResolveRequest field value, or nil when unset.
+func (r ApiResolveSecretsRequest) GetSecretResolveRequest() *SecretResolveRequest {
+	return r.secretResolveRequest
+}

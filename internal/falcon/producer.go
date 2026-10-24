@@ -28,10 +28,14 @@ func (e *RemoteError) Error() string {
 type CreateArgs struct {
 	ProcessDefinitionID  string
 	ProcessDefinitionKey string
-	Variables            map[string]any
-	AwaitCompletion      bool
-	FetchVariables       []string
-	RequestTimeoutMs     int64
+	// TenantID is the effective tenant the instance is created under (already
+	// resolved by the caller: explicit tenant, else the configured default).
+	// Empty leaves the gateway-side default in force.
+	TenantID         string
+	Variables        map[string]any
+	AwaitCompletion  bool
+	FetchVariables   []string
+	RequestTimeoutMs int64
 }
 
 // CreateOutcome is the result of a create over the command stream.
@@ -220,6 +224,9 @@ func (p *Producer) Create(ctx context.Context, args CreateArgs) (*CreateOutcome,
 	}
 	if args.ProcessDefinitionKey != "" {
 		frame["processDefinitionKey"] = args.ProcessDefinitionKey
+	}
+	if args.TenantID != "" {
+		frame["tenantId"] = args.TenantID
 	}
 	if len(args.Variables) > 0 {
 		frame["variables"] = args.Variables

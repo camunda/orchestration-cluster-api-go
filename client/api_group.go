@@ -1892,3 +1892,38 @@ func (a *GroupAPIService) UpdateGroupExecute(r ApiUpdateGroupRequest) (*GroupUpd
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetGroupCreateRequest returns the groupCreateRequest field value, or nil when unset.
+func (r ApiCreateGroupRequest) GetGroupCreateRequest() *GroupCreateRequest {
+	return r.groupCreateRequest
+}
+
+// GetGroupClientSearchQueryRequest returns the groupClientSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchClientsForGroupRequest) GetGroupClientSearchQueryRequest() *GroupClientSearchQueryRequest {
+	return r.groupClientSearchQueryRequest
+}
+
+// GetGroupSearchQueryRequest returns the groupSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchGroupsRequest) GetGroupSearchQueryRequest() *GroupSearchQueryRequest {
+	return r.groupSearchQueryRequest
+}
+
+// GetMappingRuleSearchQueryRequest returns the mappingRuleSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchMappingRulesForGroupRequest) GetMappingRuleSearchQueryRequest() *MappingRuleSearchQueryRequest {
+	return r.mappingRuleSearchQueryRequest
+}
+
+// GetRoleSearchQueryRequest returns the roleSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchRolesForGroupRequest) GetRoleSearchQueryRequest() *RoleSearchQueryRequest {
+	return r.roleSearchQueryRequest
+}
+
+// GetGroupUserSearchQueryRequest returns the groupUserSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchUsersForGroupRequest) GetGroupUserSearchQueryRequest() *GroupUserSearchQueryRequest {
+	return r.groupUserSearchQueryRequest
+}
+
+// GetGroupUpdateRequest returns the groupUpdateRequest field value, or nil when unset.
+func (r ApiUpdateGroupRequest) GetGroupUpdateRequest() *GroupUpdateRequest {
+	return r.groupUpdateRequest
+}

@@ -205,6 +205,12 @@ func (c *CamundaClient) CreateProcessInstance(ctx context.Context, body ProcessI
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	// Default the tenant on the FINAL body, after the opts, so a body-replacing
+	// opt (r.ProcessInstanceCreationInstruction(replacement)) cannot discard the
+	// injected tenant. An explicit tenant on that final body still wins.
+	if b := req.GetProcessInstanceCreationInstruction(); b != nil {
+		req = req.ProcessInstanceCreationInstruction(c.withDefaultTenantProcessInstanceCreation(*b))
+	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }
@@ -226,7 +232,7 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 		b := body.ProcessInstanceCreationInstructionById
 		id = b.ProcessDefinitionId.String()
 		version = b.ProcessDefinitionVersion
-		tenant = tenantIDPtr(b.TenantId)
+		tenant = c.tenantIDOrDefault(b.TenantId)
 		args = falcon.CreateArgs{
 			ProcessDefinitionID: b.ProcessDefinitionId.String(),
 			Variables:           b.Variables,
@@ -240,7 +246,7 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 		b := body.ProcessInstanceCreationInstructionByKey
 		key = string(b.ProcessDefinitionKey)
 		version = b.ProcessDefinitionVersion
-		tenant = tenantIDPtr(b.TenantId)
+		tenant = c.tenantIDOrDefault(b.TenantId)
 		args = falcon.CreateArgs{
 			ProcessDefinitionKey: key,
 			Variables:            b.Variables,
@@ -253,6 +259,13 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	default:
 		// Unknown union shape: let REST handle (and report) it.
 		return nil, false, nil
+	}
+	// The effective tenant must reach the gateway, not just the result: an
+	// explicit tenant always wins; with none set, the configured default applies.
+	// When neither is present the tenantId is left absent so the gateway applies
+	// its own default — sending the "<default>" marker would pin a literal tenant.
+	if tenant != nil && *tenant != "" {
+		args.TenantID = *tenant
 	}
 
 	caps := c.falconCapsV
@@ -331,18 +344,11 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	return result, true, nil
 }
 
-// tenantIDPtr converts an optional branded TenantId into the plain *string the
-// falcon producer and resolveTenant operate on.
-func tenantIDPtr(t *camundaapi.TenantId) *string {
-	if t == nil {
-		return nil
-	}
-	s := string(*t)
-	return &s
-}
-
-// resolveTenant applies the configured default tenant when the instruction did not
-// specify one, matching the REST path's server-side default.
+// resolveTenant resolves the tenant shown on a synthesized create result: the
+// tenant the instruction carried (already defaulted by tenantIDOrDefault), then
+// the configured default, then the server-side default marker. It is only a
+// display fallback for the result — the create frame itself omits tenantId when
+// no tenant is set so the gateway applies its own default.
 func (c *CamundaClient) resolveTenant(provided *string) string {
 	if provided != nil && *provided != "" {
 		return *provided

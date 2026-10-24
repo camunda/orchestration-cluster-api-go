@@ -1435,3 +1435,59 @@ func (a *JobAPIService) UpdateJobsBatchOperationExecute(r ApiUpdateJobsBatchOper
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetJobActivationRequest returns the jobActivationRequest field value, or nil when unset.
+func (r ApiActivateJobsRequest) GetJobActivationRequest() *JobActivationRequest {
+	return r.jobActivationRequest
+}
+
+// GetJobCompletionRequest returns the jobCompletionRequest field value, or nil when unset.
+func (r ApiCompleteJobRequest) GetJobCompletionRequest() *JobCompletionRequest {
+	return r.jobCompletionRequest
+}
+
+// GetJobFailRequest returns the jobFailRequest field value, or nil when unset.
+func (r ApiFailJobRequest) GetJobFailRequest() *JobFailRequest { return r.jobFailRequest }
+
+// GetFrom returns the from field value, or nil when unset.
+func (r ApiGetGlobalJobStatisticsRequest) GetFrom() *time.Time { return r.from }
+
+// GetTo returns the to field value, or nil when unset.
+func (r ApiGetGlobalJobStatisticsRequest) GetTo() *time.Time { return r.to }
+
+// GetJobType returns the jobType field value, or nil when unset.
+func (r ApiGetGlobalJobStatisticsRequest) GetJobType() *string { return r.jobType }
+
+// GetJobErrorStatisticsQuery returns the jobErrorStatisticsQuery field value, or nil when unset.
+func (r ApiGetJobErrorStatisticsRequest) GetJobErrorStatisticsQuery() *JobErrorStatisticsQuery {
+	return r.jobErrorStatisticsQuery
+}
+
+// GetJobTimeSeriesStatisticsQuery returns the jobTimeSeriesStatisticsQuery field value, or nil when unset.
+func (r ApiGetJobTimeSeriesStatisticsRequest) GetJobTimeSeriesStatisticsQuery() *JobTimeSeriesStatisticsQuery {
+	return r.jobTimeSeriesStatisticsQuery
+}
+
+// GetJobTypeStatisticsQuery returns the jobTypeStatisticsQuery field value, or nil when unset.
+func (r ApiGetJobTypeStatisticsRequest) GetJobTypeStatisticsQuery() *JobTypeStatisticsQuery {
+	return r.jobTypeStatisticsQuery
+}
+
+// GetJobWorkerStatisticsQuery returns the jobWorkerStatisticsQuery field value, or nil when unset.
+func (r ApiGetJobWorkerStatisticsRequest) GetJobWorkerStatisticsQuery() *JobWorkerStatisticsQuery {
+	return r.jobWorkerStatisticsQuery
+}
+
+// GetJobSearchQuery returns the jobSearchQuery field value, or nil when unset.
+func (r ApiSearchJobsRequest) GetJobSearchQuery() *JobSearchQuery { return r.jobSearchQuery }
+
+// GetJobErrorRequest returns the jobErrorRequest field value, or nil when unset.
+func (r ApiThrowJobErrorRequest) GetJobErrorRequest() *JobErrorRequest { return r.jobErrorRequest }
+
+// GetJobUpdateRequest returns the jobUpdateRequest field value, or nil when unset.
+func (r ApiUpdateJobRequest) GetJobUpdateRequest() *JobUpdateRequest { return r.jobUpdateRequest }
+
+// GetJobBatchUpdateRequest returns the jobBatchUpdateRequest field value, or nil when unset.
+func (r ApiUpdateJobsBatchOperationRequest) GetJobBatchUpdateRequest() *JobBatchUpdateRequest {
+	return r.jobBatchUpdateRequest
+}

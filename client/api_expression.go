@@ -134,3 +134,8 @@ func (a *ExpressionAPIService) EvaluateExpressionExecute(r ApiEvaluateExpression
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetExpressionEvaluationRequest returns the expressionEvaluationRequest field value, or nil when unset.
+func (r ApiEvaluateExpressionRequest) GetExpressionEvaluationRequest() *ExpressionEvaluationRequest {
+	return r.expressionEvaluationRequest
+}

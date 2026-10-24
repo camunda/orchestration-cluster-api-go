@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
 )
 
 // Default configuration values.
@@ -439,6 +441,14 @@ func (c *Config) Validate() error {
 	}
 	if c.EventualPollDefault <= 0 {
 		return configErrorf("eventual poll default must be > 0")
+	}
+	// A default tenant that violates the TenantId constraints would otherwise
+	// surface far from configuration as a panic in MustTenantId the first time a
+	// tenant-accepting operation injects it — fail fast here instead.
+	if c.DefaultTenantID != "" {
+		if _, err := camundaapi.NewTenantId(c.DefaultTenantID); err != nil {
+			return configErrorf("invalid default tenant id (WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID) %q: %v", c.DefaultTenantID, err)
+		}
 	}
 	return nil
 }
