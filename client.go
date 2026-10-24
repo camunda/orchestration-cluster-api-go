@@ -356,20 +356,21 @@ func rebaseServerVariables(server *camundaapi.ServerConfiguration, origin *url.U
 
 // hostVariableDefault renders origin's host as a URL-authority host fragment
 // for the {host} variable default. url.URL.Hostname strips IPv6 brackets and
-// decodes the zone identifier's %25 escape, so a raw Hostname() default would
-// resolve the retained template to an invalid authority ("http://::1:9999")
-// or lose the zone's escaping. An IPv6 literal (identified by the colons a
-// reg-name can never contain) is re-wrapped in brackets and its zone
-// identifier re-escaped; anything else is already a valid host fragment.
+// decodes every %XX escape in the zone identifier, so a raw Hostname()
+// default would resolve the retained template to an invalid authority
+// ("http://::1:9999", or a zone containing a raw "%"/" "). An IPv6 literal
+// (identified by the colons a reg-name can never contain) is re-serialized
+// through url.URL — the same escaping authority OperationServerOrigin uses —
+// which re-wraps it in brackets and percent-escapes the zone delimiter *and*
+// any escaped characters within the zone name; the scheme-less URL carries a
+// "//" prefix that the fragment must not keep. Anything else is already a
+// valid host fragment.
 func hostVariableDefault(origin *url.URL) string {
 	host := origin.Hostname()
 	if !strings.Contains(host, ":") {
 		return host
 	}
-	if i := strings.LastIndex(host, "%"); i >= 0 {
-		return "[" + host[:i] + "%25" + host[i+1:] + "]"
-	}
-	return "[" + host + "]"
+	return strings.TrimPrefix((&url.URL{Host: "[" + host + "]"}).String(), "//")
 }
 
 func backpressureProfile(p BackpressureProfile) backpressure.Profile {

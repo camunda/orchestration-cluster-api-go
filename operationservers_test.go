@@ -210,6 +210,11 @@ func TestOperationServerOriginFromRestAddress(t *testing.T) {
 		// invalid URL containing a raw "%eth0" (PR #80 review finding).
 		{"ipv6 literal", "http://[::1]:9999", false, "http://[::1]:9999"},
 		{"scoped ipv6 literal", "http://[fe80::1%25eth0]:9999", false, "http://[fe80::1%25eth0]:9999"},
+		// Escaped characters *inside* the zone identifier (a literal percent
+		// as "%25", a space as "%20") must survive origin derivation in their
+		// escaped form too (PR #80 review finding r4367297435).
+		{"scoped ipv6 literal, percent in zone", "http://[fe80::1%25eth%250]:9999", false, "http://[fe80::1%25eth%250]:9999"},
+		{"scoped ipv6 literal, space in zone", "http://[fe80::1%25Ethernet%202]:9999", false, "http://[fe80::1%25Ethernet%202]:9999"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -253,23 +258,36 @@ func TestOperationServersIPv6RestAddress(t *testing.T) {
 // class: a zone identifier ("%25eth0" on the wire) must survive origin
 // derivation and rebasing in its percent-escaped form, so client construction
 // succeeds and the resolved template carries the valid escaped authority.
+// The table also pins zone identifiers that themselves contain escaped
+// characters — a literal percent ("%25" → zone "eth%0") and a space ("%20" →
+// zone "Ethernet 2"): escaping only the zone delimiter and re-emitting the
+// rest of the zone verbatim would resolve the template to an authority with a
+// raw "%"/" " that url.Parse rejects (PR #80 review finding r4367297435).
 func TestOperationServersScopedIPv6RestAddress(t *testing.T) {
-	cfg := camundaapi.NewConfiguration()
-	rebased, err := camunda.RebaseOperationServersForTesting(cfg, "http://[fe80::1%25eth0]:9999", false)
-	if err != nil {
-		t.Fatalf("RebaseOperationServersForTesting: %v", err)
-	}
-	for endpoint, servers := range rebased.OperationServers {
-		for i := range servers {
-			got, err := servers.URL(i, nil)
+	for _, addr := range []string{
+		"http://[fe80::1%25eth0]:9999",
+		"http://[fe80::1%25eth%250]:9999",
+		"http://[fe80::1%25Ethernet%202]:9999",
+	} {
+		t.Run(addr, func(t *testing.T) {
+			cfg := camundaapi.NewConfiguration()
+			rebased, err := camunda.RebaseOperationServersForTesting(cfg, addr, false)
 			if err != nil {
-				t.Errorf("OperationServers[%q][%d]: %v", endpoint, i, err)
-				continue
+				t.Fatalf("RebaseOperationServersForTesting: %v", err)
 			}
-			if want := "http://[fe80::1%25eth0]:9999"; got != want {
-				t.Errorf("OperationServers[%q][%d] = %q, want %q", endpoint, i, got, want)
+			for endpoint, servers := range rebased.OperationServers {
+				for i := range servers {
+					got, err := servers.URL(i, nil)
+					if err != nil {
+						t.Errorf("OperationServers[%q][%d]: %v", endpoint, i, err)
+						continue
+					}
+					if got != addr {
+						t.Errorf("OperationServers[%q][%d] = %q, want %q", endpoint, i, got, addr)
+					}
+				}
 			}
-		}
+		})
 	}
 }
 
