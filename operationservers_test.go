@@ -204,6 +204,12 @@ func TestOperationServerOriginFromRestAddress(t *testing.T) {
 		{"base path", "https://gw.example/camunda", false, "https://gw.example"},
 		{"exact base path", "https://gw.example/camunda", true, "https://gw.example"},
 		{"trailing slash", "http://my-cluster:9999/", false, "http://my-cluster:9999"},
+		// IPv6 literals keep their brackets, and a scoped (zoned) literal keeps
+		// its percent-escaped zone identifier — url.Parse decodes %25 in
+		// u.Host, so a plain scheme+"://"+host concatenation would emit an
+		// invalid URL containing a raw "%eth0" (PR #80 review finding).
+		{"ipv6 literal", "http://[::1]:9999", false, "http://[::1]:9999"},
+		{"scoped ipv6 literal", "http://[fe80::1%25eth0]:9999", false, "http://[fe80::1%25eth0]:9999"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -215,6 +221,55 @@ func TestOperationServerOriginFromRestAddress(t *testing.T) {
 				t.Errorf("OperationServerOrigin(%q, %v) = %q, want %q", tc.addr, tc.exact, got, tc.want)
 			}
 		})
+	}
+}
+
+// TestOperationServersIPv6RestAddress pins the IPv6 defect class end to end:
+// configuring a bracketed IPv6 REST address must (a) construct the client
+// (OperationServerOrigin emits a re-parseable origin) and (b) rebase the
+// {host} default with its brackets intact, so the retained template resolves
+// to a valid HTTP authority ("http://[::1]:9999", not "http://::1:9999").
+func TestOperationServersIPv6RestAddress(t *testing.T) {
+	cfg := camundaapi.NewConfiguration()
+	rebased, err := camunda.RebaseOperationServersForTesting(cfg, "http://[::1]:9999", false)
+	if err != nil {
+		t.Fatalf("RebaseOperationServersForTesting: %v", err)
+	}
+	for endpoint, servers := range rebased.OperationServers {
+		for i := range servers {
+			got, err := servers.URL(i, nil)
+			if err != nil {
+				t.Errorf("OperationServers[%q][%d]: %v", endpoint, i, err)
+				continue
+			}
+			if want := "http://[::1]:9999"; got != want {
+				t.Errorf("OperationServers[%q][%d] = %q, want %q", endpoint, i, got, want)
+			}
+		}
+	}
+}
+
+// TestOperationServersScopedIPv6RestAddress is the scoped variant of the same
+// class: a zone identifier ("%25eth0" on the wire) must survive origin
+// derivation and rebasing in its percent-escaped form, so client construction
+// succeeds and the resolved template carries the valid escaped authority.
+func TestOperationServersScopedIPv6RestAddress(t *testing.T) {
+	cfg := camundaapi.NewConfiguration()
+	rebased, err := camunda.RebaseOperationServersForTesting(cfg, "http://[fe80::1%25eth0]:9999", false)
+	if err != nil {
+		t.Fatalf("RebaseOperationServersForTesting: %v", err)
+	}
+	for endpoint, servers := range rebased.OperationServers {
+		for i := range servers {
+			got, err := servers.URL(i, nil)
+			if err != nil {
+				t.Errorf("OperationServers[%q][%d]: %v", endpoint, i, err)
+				continue
+			}
+			if want := "http://[fe80::1%25eth0]:9999"; got != want {
+				t.Errorf("OperationServers[%q][%d] = %q, want %q", endpoint, i, got, want)
+			}
+		}
 	}
 }
 

@@ -275,14 +275,18 @@ func v2BaseURL(addr string, exact bool) string {
 // It is the configured REST address with any base path stripped: the spec paths
 // for these operations already carry their own prefix, so appending the REST
 // base path (/v2, or a gateway-fronted path under ExactRestAddress) would
-// double it. A REST address that is not a valid http(s) URL is an error, never
-// a best-guess origin.
+// double it. The origin is serialized through url.URL, not concatenated, so an
+// IPv6 literal keeps its brackets and a scoped literal keeps its
+// percent-escaped zone identifier (url.Parse decodes %25 in u.Host; a plain
+// scheme+"://"+host join would emit an invalid URL containing a raw "%eth0").
+// A REST address that is not a valid http(s) URL is an error, never a
+// best-guess origin.
 func OperationServerOrigin(restAddress string, exact bool) (string, error) {
 	u, err := url.Parse(v2BaseURL(restAddress, exact))
 	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
 		return "", configErrorf("CAMUNDA_REST_ADDRESS %q is not a valid http(s) URL", restAddress)
 	}
-	return u.Scheme + "://" + u.Host, nil
+	return (&url.URL{Scheme: u.Scheme, Host: u.Host}).String(), nil
 }
 
 // rebaseOperationServers rewrites every operation-level server the generator
@@ -336,7 +340,7 @@ func rebaseServerVariables(server *camundaapi.ServerConfiguration, origin *url.U
 	}
 	defaults := map[string]string{
 		"schema": origin.Scheme,
-		"host":   origin.Hostname(),
+		"host":   hostVariableDefault(origin),
 		"port":   port,
 	}
 	for name, value := range defaults {
@@ -348,6 +352,24 @@ func rebaseServerVariables(server *camundaapi.ServerConfiguration, origin *url.U
 		server.Variables[name] = v
 	}
 	return nil
+}
+
+// hostVariableDefault renders origin's host as a URL-authority host fragment
+// for the {host} variable default. url.URL.Hostname strips IPv6 brackets and
+// decodes the zone identifier's %25 escape, so a raw Hostname() default would
+// resolve the retained template to an invalid authority ("http://::1:9999")
+// or lose the zone's escaping. An IPv6 literal (identified by the colons a
+// reg-name can never contain) is re-wrapped in brackets and its zone
+// identifier re-escaped; anything else is already a valid host fragment.
+func hostVariableDefault(origin *url.URL) string {
+	host := origin.Hostname()
+	if !strings.Contains(host, ":") {
+		return host
+	}
+	if i := strings.LastIndex(host, "%"); i >= 0 {
+		return "[" + host[:i] + "%25" + host[i+1:] + "]"
+	}
+	return "[" + host + "]"
 }
 
 func backpressureProfile(p BackpressureProfile) backpressure.Profile {
