@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -88,6 +89,9 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	oc := camundaapi.NewConfiguration()
 	oc.HTTPClient = &http.Client{Transport: rt}
 	oc.Servers = camundaapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress, cfg.ExactRestAddress)}}
+	if err := rebaseOperationServers(oc, cfg); err != nil {
+		return nil, err
+	}
 
 	return &CamundaClient{
 		cfg:    cfg,
@@ -262,6 +266,45 @@ func v2BaseURL(addr string, exact bool) string {
 		return addr
 	}
 	return addr + "/v2"
+}
+
+// OperationServerOrigin derives the origin (scheme://host[:port]) that
+// operation-level servers — the cluster-admin /cluster/v2/* operations, whose
+// spec template is "{schema}://{host}:{port}" with no path — resolve against.
+// It is the configured REST address with any base path stripped: the spec paths
+// for these operations already carry their own prefix, so appending the REST
+// base path (/v2, or a gateway-fronted path under ExactRestAddress) would
+// double it. A REST address that is not a valid http(s) URL is an error, never
+// a best-guess origin.
+func OperationServerOrigin(restAddress string, exact bool) (string, error) {
+	u, err := url.Parse(v2BaseURL(restAddress, exact))
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		return "", configErrorf("CAMUNDA_REST_ADDRESS %q is not a valid http(s) URL", restAddress)
+	}
+	return u.Scheme + "://" + u.Host, nil
+}
+
+// rebaseOperationServers rewrites every operation-level server the generator
+// registered on cfg (the cluster-admin operations) so it resolves against the
+// configured REST address instead of the spec template defaults
+// (http://localhost:8080). The generated entries are left structurally intact —
+// only the URL is replaced — so context-based server variables
+// (ContextServerVariables / ContextOperationServerVariables) keep working.
+func rebaseOperationServers(oc *camundaapi.Configuration, cfg *Config) error {
+	if len(oc.OperationServers) == 0 {
+		return nil
+	}
+	origin, err := OperationServerOrigin(cfg.RestAddress, cfg.ExactRestAddress)
+	if err != nil {
+		return err
+	}
+	for name, servers := range oc.OperationServers {
+		for i := range servers {
+			servers[i].URL = origin
+		}
+		oc.OperationServers[name] = servers
+	}
+	return nil
 }
 
 func backpressureProfile(p BackpressureProfile) backpressure.Profile {
