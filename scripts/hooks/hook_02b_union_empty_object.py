@@ -11,17 +11,25 @@ to ``{}`` ("empty struct") and then, when no branch matched, errors with
 fails to decode even though it is spec-valid.
 
 For each filter-property union named in the spec metadata this hook rewrites
-the generated no-match branch to re-check the raw input: an exact empty object
-(``{}``, the input the generated empty-struct check just nilled out) leaves the
-wrapper unset instead of erroring; anything else keeps the strict oneOf error,
-so invalid filter values (``true``, ``{"$eq":42}``, …) are still rejected
-instead of being silently discarded.
+the generated no-match branch to re-check the raw input: an empty object,
+compared whitespace-insensitively via ``json.Compact`` so pretty-printed
+variants (``{ }``, ``{\n\t}``, …) decode the same as ``{}``, leaves the wrapper
+unset instead of erroring; anything else keeps the strict oneOf error, so
+invalid filter values (``true``, ``{"$eq":42}``, …) are still rejected instead
+of being silently discarded.
 
 It also rewrites the generated ``MarshalJSON`` fallback, which returns
 ``(nil, nil)`` for an unset wrapper — ``encoding/json`` rejects a nil slice
 with ``unexpected end of JSON input``, so a decoded ``{}`` filter could not be
 marshaled back into a request. The fallback now returns the ``null`` literal,
 the same wire value ``omitempty``-less unset fields produce.
+
+Because the unset state now marshals to ``null``, the decoder must accept its
+own output: ``null`` unmarshals successfully into *every* pointer branch, so
+the generated code rejects it with ``data matches more than one schema`` and
+the serialized unset state could not round-trip. The rewrite therefore also
+short-circuits a JSON ``null`` input (compared via the same compaction) to an
+unset wrapper before any branch matching.
 
 Unions whose branches all have required properties (e.g.
 ``ProcessInstanceCreationInstruction``, ``AuthorizationRequest``) keep the
@@ -45,15 +53,34 @@ _UNSET_BRANCH = """\
 } else { // no match
 \t\t// `{}` is a valid instance of the advanced-filter variant (all of its
 \t\t// properties are optional), but the empty-struct check above nils the
-\t\t// match out again. Accept exactly that case as an unset wrapper; any
-\t\t// other no-match input is genuinely invalid and keeps the oneOf error
+\t\t// match out again. Accept exactly that case as an unset wrapper,
+\t\t// comparing whitespace-insensitively so pretty-printed stored queries
+\t\t// (`{ }`, `{\\n\\t}`, …) decode the same as `{}`. Any other no-match
+\t\t// input is genuinely invalid and keeps the oneOf error
 \t\t// (orchestration-cluster-api-go#78).
-\t\tif string(bytes.TrimSpace(data)) == "{}" {
+\t\tvar compacted bytes.Buffer
+\t\tif err := json.Compact(&compacted, data); err == nil && compacted.String() == "{}" {
 \t\t\treturn nil
 \t\t}
 \t\treturn fmt.Errorf("data failed to match schemas in oneOf(%s)")
 \t}
 }"""
+
+_FUNC_DECL = re.compile(
+    r"func \(dst \*(?P<name>\w+)\) UnmarshalJSON\(data \[\]byte\) error \{\n"
+)
+
+_NULL_SHORT_CIRCUIT = """\
+func (dst *%s) UnmarshalJSON(data []byte) error {
+\t// An unset wrapper marshals to `null` (see MarshalJSON), so the decoder must
+\t// accept its own output: `null` unmarshals into every pointer branch and
+\t// would otherwise fail with "data matches more than one schema", breaking
+\t// the decode-marshal-decode round trip (orchestration-cluster-api-go#78).
+\tvar raw bytes.Buffer
+\tif err := json.Compact(&raw, data); err == nil && raw.String() == "null" {
+\t\treturn nil
+\t}
+"""
 
 _NIL_MARSHAL = re.compile(
     r"\treturn nil, nil // no data in oneOf schemas\n"
@@ -105,6 +132,14 @@ def run(ctx) -> None:
         if marshal_count != 1:
             raise RuntimeError(
                 f"expected exactly one nil-marshal fallback in {path.name}, found {marshal_count}"
+            )
+        new_text, func_count = _FUNC_DECL.subn(
+            lambda m: _NULL_SHORT_CIRCUIT % m.group("name") if m.group("name") == name else m.group(0),
+            new_text,
+        )
+        if func_count != 1:
+            raise RuntimeError(
+                f"expected exactly one UnmarshalJSON declaration in {path.name}, found {func_count}"
             )
         if new_text != text:
             new_text = _ensure_bytes_import(new_text)

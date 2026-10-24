@@ -49,6 +49,62 @@ func TestOneOfFilterPropertyAcceptsEmptyObject(t *testing.T) {
 		}
 	})
 
+	t.Run("whitespace-only empty objects decode as unset", func(t *testing.T) {
+		// Pretty-printed or hand-formatted stored queries carry empty objects
+		// with internal or surrounding whitespace; they are the same JSON
+		// value as `{}` and must decode the same way.
+		variants := []string{
+			`{ }`,
+			"{\n\t}",
+			"{\n  \n}",
+			" { } ",
+			"{\r\n}",
+		}
+		for _, data := range variants {
+			var v camundaapi.BasicStringFilterProperty
+			if err := json.Unmarshal([]byte(data), &v); err != nil {
+				t.Errorf("unmarshal %q into BasicStringFilterProperty: %v", data, err)
+			}
+		}
+	})
+
+	t.Run("null decodes as unset and round-trips", func(t *testing.T) {
+		// The unset wrapper marshals to `null` (see below), so the decoder
+		// must accept its own output: `null` unmarshals into every pointer
+		// branch and the generated code would otherwise reject it with
+		// "data matches more than one schema".
+		for _, data := range []string{`null`, ` null `} {
+			var v camundaapi.BasicStringFilterProperty
+			if err := json.Unmarshal([]byte(data), &v); err != nil {
+				t.Errorf("unmarshal %q into BasicStringFilterProperty: %v", data, err)
+			}
+			if got := v.GetActualInstance(); got != nil {
+				t.Errorf("unmarshal %q: GetActualInstance() = %v, want nil (wrapper treated as unset)", data, got)
+			}
+		}
+	})
+
+	t.Run("decode-marshal-decode round trip", func(t *testing.T) {
+		// The full cycle from the issue plus the serialized unset state:
+		// decode `{}`, marshal (emits `null`), decode again — the second
+		// decode must succeed and stay unset.
+		var v camundaapi.BasicStringFilterProperty
+		if err := json.Unmarshal([]byte(`{}`), &v); err != nil {
+			t.Fatalf("unmarshal `{}`: %v", err)
+		}
+		out, err := json.Marshal(v)
+		if err != nil {
+			t.Fatalf("marshal: %v", err)
+		}
+		var w camundaapi.BasicStringFilterProperty
+		if err := json.Unmarshal(out, &w); err != nil {
+			t.Fatalf("re-unmarshal %s: %v", out, err)
+		}
+		if got := w.GetActualInstance(); got != nil {
+			t.Errorf("after round trip: GetActualInstance() = %v, want nil", got)
+		}
+	})
+
 	t.Run("defect class: every filter-property union", func(t *testing.T) {
 		cases := map[string]json.Unmarshaler{
 			"BasicStringFilterProperty":          &camundaapi.BasicStringFilterProperty{},
@@ -108,11 +164,13 @@ func TestOneOfFilterPropertyAcceptsEmptyObject(t *testing.T) {
 		// inputs that match no branch are invalid filter values and must keep
 		// the strict oneOf error instead of being silently discarded.
 		invalid := map[string]string{
-			"boolean":           `true`,
-			"number":            `42`,
-			"array":             `[]`,
-			"bad operator type": `{"$eq":42}`,
-			"unknown operator":  `{"$nope":"x"}`,
+			"boolean":              `true`,
+			"number":               `42`,
+			"array":                `[]`,
+			"bad operator type":    `{"$eq":42}`,
+			"unknown operator":     `{"$nope":"x"}`,
+			"empty array with ws":  ` [ ] `,
+			"null-adjacent scalar": `0`,
 		}
 		for name, data := range invalid {
 			var v camundaapi.BasicStringFilterProperty
@@ -151,6 +209,23 @@ func TestOneOfFilterPropertyAcceptsEmptyObject(t *testing.T) {
 		for name, v := range strict {
 			if err := json.Unmarshal([]byte(`{}`), v); err == nil {
 				t.Errorf("unmarshal `{}` into %s: expected error, got nil", name)
+			}
+		}
+	})
+
+	t.Run("non-filter oneOf unions still reject null", func(t *testing.T) {
+		// The null short-circuit is scoped to the filter-property unions
+		// (whose unset state marshals to `null` and must round-trip). Other
+		// unions keep the generated behaviour: `null` matches every pointer
+		// branch and is rejected as ambiguous.
+		strict := map[string]json.Unmarshaler{
+			"ProcessInstanceCreationInstruction": &camundaapi.ProcessInstanceCreationInstruction{},
+			"DecisionEvaluationInstruction":      &camundaapi.DecisionEvaluationInstruction{},
+			"AuthorizationRequest":               &camundaapi.AuthorizationRequest{},
+		}
+		for name, v := range strict {
+			if err := json.Unmarshal([]byte(`null`), v); err == nil {
+				t.Errorf("unmarshal `null` into %s: expected error, got nil", name)
 			}
 		}
 	})
