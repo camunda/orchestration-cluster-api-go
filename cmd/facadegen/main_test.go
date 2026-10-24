@@ -65,7 +65,7 @@ func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 	defaultIdx := strings.Index(src, "req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublication(*b))")
 	getIdx := strings.Index(src, "req.GetMessagePublicationRequest()")
 	if builderIdx == -1 || optIdx == -1 || defaultIdx == -1 || getIdx == -1 ||
-		!(builderIdx < optIdx && optIdx < defaultIdx) {
+		builderIdx >= optIdx || optIdx >= defaultIdx {
 		t.Errorf("PublishMessage must attach the body, run opts, then default the final body\n%s", src)
 	}
 	reqHookIdx := strings.Index(src, "req = c.withDefaultTenantCreateDeployment(req)")
