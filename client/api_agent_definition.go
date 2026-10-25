@@ -244,3 +244,8 @@ func (a *AgentDefinitionAPIService) SearchAgentDefinitionsExecute(r ApiSearchAge
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetAgentDefinitionSearchQuery returns the agentDefinitionSearchQuery field value, or nil when unset.
+func (r ApiSearchAgentDefinitionsRequest) GetAgentDefinitionSearchQuery() *AgentDefinitionSearchQuery {
+	return r.agentDefinitionSearchQuery
+}

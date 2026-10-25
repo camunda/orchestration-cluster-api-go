@@ -44,6 +44,55 @@ func TestGenerateFacade(t *testing.T) {
 	}
 }
 
+// TestEmitInjectsDefaultTenantHooks locks the emission of the default-tenant
+// injection (issue #79): body ops default the tenant on the FINAL body — after
+// the opts, read back via the request's Get<Body>() accessor — so a
+// body-replacing opt cannot discard the injected tenant; request ops adjust the
+// request after the opts so an explicit tenant always wins.
+func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
+	ops := []operation{
+		{field: "MessageAPI", name: "PublishMessage", reqType: "ApiPublishMessageRequest",
+			bodyType: "MessagePublicationRequest", bodyBuilder: "MessagePublicationRequest"},
+		{field: "ResourceAPI", name: "CreateDeployment", reqType: "ApiCreateDeploymentRequest"},
+		{field: "MessageAPI", name: "GetMessage", reqType: "ApiGetMessageRequest"},
+	}
+	src := emit(ops, nil, false)
+
+	// The body is attached first, opts run, then the final body is defaulted and
+	// re-attached — so the default survives a body-replacing opt.
+	builderIdx := strings.Index(src, "req = req.MessagePublicationRequest(body)")
+	optIdx := strings.Index(src, "req = opt(req)")
+	defaultIdx := strings.Index(src, "req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublication(*b))")
+	getIdx := strings.Index(src, "req.GetMessagePublicationRequest()")
+	if builderIdx == -1 || optIdx == -1 || defaultIdx == -1 || getIdx == -1 ||
+		builderIdx >= optIdx || optIdx >= defaultIdx {
+		t.Errorf("PublishMessage must attach the body, run opts, then default the final body\n%s", src)
+	}
+	reqHookIdx := strings.Index(src, "req = c.withDefaultTenantCreateDeployment(req)")
+	if reqHookIdx == -1 || optIdx == -1 || reqHookIdx < optIdx {
+		t.Errorf("CreateDeployment must default the tenant after the opts\n%s", src)
+	}
+	if strings.Contains(src, "withDefaultTenantGetMessage") || strings.Contains(src, "withDefaultTenantMessageCorrelation") {
+		t.Errorf("operations outside the default-tenant set must not be hooked\n%s", src)
+	}
+}
+
+// Without the optional metadata argument loadBodyInfo yields no body builder, so
+// a tenant-body op has bodyBuilder == "". The tenant hook must then be skipped
+// entirely: emitting req.Get()/req.() would overwrite the facade with invalid Go.
+func TestEmitSkipsTenantBodyHookWhenBodyBuilderMissing(t *testing.T) {
+	ops := []operation{
+		{field: "MessageAPI", name: "PublishMessage", reqType: "ApiPublishMessageRequest"},
+	}
+	src := emit(ops, nil, false)
+
+	for _, bad := range []string{"req.Get()", "req.(c.withDefaultTenantMessagePublication", "c.withDefaultTenantMessagePublication"} {
+		if strings.Contains(src, bad) {
+			t.Errorf("tenant-body hook must be skipped when bodyBuilder is empty, found %q\n%s", bad, src)
+		}
+	}
+}
+
 func TestTypeStringQualifiesOnlyTypesThatAreNotReexported(t *testing.T) {
 	r := &renderer{
 		clientTypes: map[string]bool{"Widget": true, "Configuration": true},

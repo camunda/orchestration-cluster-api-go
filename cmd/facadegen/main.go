@@ -85,6 +85,28 @@ var handwrittenOps = map[string]bool{
 	"CreateProcessInstance": true,
 }
 
+// defaultTenantBodyOps are operations whose JSON body carries an optional
+// tenantId field. The facade injects the configured default tenant
+// (WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID) when the caller left the
+// field unset, matching the other Camunda SDKs; the withDefaultTenant* helpers
+// are hand-written in defaulttenant.go.
+var defaultTenantBodyOps = map[string]string{
+	"CorrelateMessage":     "withDefaultTenantMessageCorrelation",
+	"PublishMessage":       "withDefaultTenantMessagePublication",
+	"BroadcastSignal":      "withDefaultTenantSignalBroadcast",
+	"EvaluateConditionals": "withDefaultTenantConditionalEvaluation",
+	"EvaluateExpression":   "withDefaultTenantExpressionEvaluation",
+	"EvaluateDecision":     "withDefaultTenantDecisionEvaluation",
+}
+
+// defaultTenantReqOps are operations whose tenant id is an optional request
+// parameter rather than a JSON body field (CreateDeployment sends it as a
+// multipart form field). The facade injects the configured default tenant when
+// neither the caller nor an opt set one.
+var defaultTenantReqOps = map[string]string{
+	"CreateDeployment": "withDefaultTenantCreateDeployment",
+}
+
 type param struct {
 	name string
 	typ  string
@@ -583,6 +605,19 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 		}
 		if hasOpts {
 			b.WriteString("\tfor _, opt := range opts {\n\t\treq = opt(req)\n\t}\n")
+		}
+		if helper, ok := defaultTenantBodyOps[op.name]; ok && op.bodyBuilder != "" {
+			// Runs after the opts so a body-replacing opt (e.g. r.Body(replacement))
+			// cannot discard the injected tenant: default the final body, then
+			// re-attach it. An explicit tenant on that final body still wins.
+			// Guarded on a nonempty body builder: without the optional metadata
+			// argument loadBodyInfo yields no builder, and emitting req.Get()/req.()
+			// here would overwrite the facade with invalid Go.
+			fmt.Fprintf(&b, "\tif b := req.Get%s(); b != nil {\n\t\treq = req.%s(c.%s(*b))\n\t}\n", op.bodyBuilder, op.bodyBuilder, helper)
+		}
+		if helper, ok := defaultTenantReqOps[op.name]; ok {
+			// Runs after the opts so an explicit tenant (direct or via an opt) wins.
+			fmt.Fprintf(&b, "\treq = c.%s(req)\n", helper)
 		}
 		if op.retType != "" {
 			b.WriteString("\tvalue, resp, err := req.Execute()\n")

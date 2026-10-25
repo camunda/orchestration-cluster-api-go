@@ -795,3 +795,16 @@ func (a *ResourceAPIService) SearchResourcesExecute(r ApiSearchResourcesRequest)
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetTenantId returns the tenantId field value, or nil when unset.
+func (r ApiCreateDeploymentRequest) GetTenantId() *string { return r.tenantId }
+
+// GetDeleteResourceRequest returns the deleteResourceRequest field value, or nil when unset.
+func (r ApiDeleteResourceRequest) GetDeleteResourceRequest() *DeleteResourceRequest {
+	return r.deleteResourceRequest
+}
+
+// GetResourceSearchQuery returns the resourceSearchQuery field value, or nil when unset.
+func (r ApiSearchResourcesRequest) GetResourceSearchQuery() *ResourceSearchQuery {
+	return r.resourceSearchQuery
+}

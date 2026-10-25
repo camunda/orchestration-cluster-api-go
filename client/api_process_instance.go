@@ -2810,3 +2810,88 @@ func (a *ProcessInstanceAPIService) SuspendProcessInstancesBatchOperationExecute
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetProcessInstanceBusinessIdAssignmentInstruction returns the processInstanceBusinessIdAssignmentInstruction field value, or nil when unset.
+func (r ApiAssignProcessInstanceBusinessIdRequest) GetProcessInstanceBusinessIdAssignmentInstruction() *ProcessInstanceBusinessIdAssignmentInstruction {
+	return r.processInstanceBusinessIdAssignmentInstruction
+}
+
+// GetCancelProcessInstanceRequest returns the cancelProcessInstanceRequest field value, or nil when unset.
+func (r ApiCancelProcessInstanceRequest) GetCancelProcessInstanceRequest() *CancelProcessInstanceRequest {
+	return r.cancelProcessInstanceRequest
+}
+
+// GetProcessInstanceCancellationBatchOperationRequest returns the processInstanceCancellationBatchOperationRequest field value, or nil when unset.
+func (r ApiCancelProcessInstancesBatchOperationRequest) GetProcessInstanceCancellationBatchOperationRequest() *ProcessInstanceCancellationBatchOperationRequest {
+	return r.processInstanceCancellationBatchOperationRequest
+}
+
+// GetProcessInstanceCreationInstruction returns the processInstanceCreationInstruction field value, or nil when unset.
+func (r ApiCreateProcessInstanceRequest) GetProcessInstanceCreationInstruction() *ProcessInstanceCreationInstruction {
+	return r.processInstanceCreationInstruction
+}
+
+// GetDeleteProcessInstanceRequest returns the deleteProcessInstanceRequest field value, or nil when unset.
+func (r ApiDeleteProcessInstanceRequest) GetDeleteProcessInstanceRequest() *DeleteProcessInstanceRequest {
+	return r.deleteProcessInstanceRequest
+}
+
+// GetProcessInstanceDeletionBatchOperationRequest returns the processInstanceDeletionBatchOperationRequest field value, or nil when unset.
+func (r ApiDeleteProcessInstancesBatchOperationRequest) GetProcessInstanceDeletionBatchOperationRequest() *ProcessInstanceDeletionBatchOperationRequest {
+	return r.processInstanceDeletionBatchOperationRequest
+}
+
+// GetProcessInstanceMigrationInstruction returns the processInstanceMigrationInstruction field value, or nil when unset.
+func (r ApiMigrateProcessInstanceRequest) GetProcessInstanceMigrationInstruction() *ProcessInstanceMigrationInstruction {
+	return r.processInstanceMigrationInstruction
+}
+
+// GetProcessInstanceMigrationBatchOperationRequest returns the processInstanceMigrationBatchOperationRequest field value, or nil when unset.
+func (r ApiMigrateProcessInstancesBatchOperationRequest) GetProcessInstanceMigrationBatchOperationRequest() *ProcessInstanceMigrationBatchOperationRequest {
+	return r.processInstanceMigrationBatchOperationRequest
+}
+
+// GetProcessInstanceModificationInstruction returns the processInstanceModificationInstruction field value, or nil when unset.
+func (r ApiModifyProcessInstanceRequest) GetProcessInstanceModificationInstruction() *ProcessInstanceModificationInstruction {
+	return r.processInstanceModificationInstruction
+}
+
+// GetProcessInstanceModificationBatchOperationRequest returns the processInstanceModificationBatchOperationRequest field value, or nil when unset.
+func (r ApiModifyProcessInstancesBatchOperationRequest) GetProcessInstanceModificationBatchOperationRequest() *ProcessInstanceModificationBatchOperationRequest {
+	return r.processInstanceModificationBatchOperationRequest
+}
+
+// GetProcessInstanceIncidentResolutionBatchOperationRequest returns the processInstanceIncidentResolutionBatchOperationRequest field value, or nil when unset.
+func (r ApiResolveIncidentsBatchOperationRequest) GetProcessInstanceIncidentResolutionBatchOperationRequest() *ProcessInstanceIncidentResolutionBatchOperationRequest {
+	return r.processInstanceIncidentResolutionBatchOperationRequest
+}
+
+// GetResumeProcessInstanceRequest returns the resumeProcessInstanceRequest field value, or nil when unset.
+func (r ApiResumeProcessInstanceRequest) GetResumeProcessInstanceRequest() *ResumeProcessInstanceRequest {
+	return r.resumeProcessInstanceRequest
+}
+
+// GetProcessInstanceResumptionBatchOperationRequest returns the processInstanceResumptionBatchOperationRequest field value, or nil when unset.
+func (r ApiResumeProcessInstancesBatchOperationRequest) GetProcessInstanceResumptionBatchOperationRequest() *ProcessInstanceResumptionBatchOperationRequest {
+	return r.processInstanceResumptionBatchOperationRequest
+}
+
+// GetIncidentSearchQuery returns the incidentSearchQuery field value, or nil when unset.
+func (r ApiSearchProcessInstanceIncidentsRequest) GetIncidentSearchQuery() *IncidentSearchQuery {
+	return r.incidentSearchQuery
+}
+
+// GetProcessInstanceSearchQuery returns the processInstanceSearchQuery field value, or nil when unset.
+func (r ApiSearchProcessInstancesRequest) GetProcessInstanceSearchQuery() *ProcessInstanceSearchQuery {
+	return r.processInstanceSearchQuery
+}
+
+// GetSuspendProcessInstanceRequest returns the suspendProcessInstanceRequest field value, or nil when unset.
+func (r ApiSuspendProcessInstanceRequest) GetSuspendProcessInstanceRequest() *SuspendProcessInstanceRequest {
+	return r.suspendProcessInstanceRequest
+}
+
+// GetProcessInstanceSuspensionBatchOperationRequest returns the processInstanceSuspensionBatchOperationRequest field value, or nil when unset.
+func (r ApiSuspendProcessInstancesBatchOperationRequest) GetProcessInstanceSuspensionBatchOperationRequest() *ProcessInstanceSuspensionBatchOperationRequest {
+	return r.processInstanceSuspensionBatchOperationRequest
+}

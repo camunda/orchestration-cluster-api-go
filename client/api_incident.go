@@ -589,3 +589,23 @@ func (a *IncidentAPIService) SearchIncidentsExecute(r ApiSearchIncidentsRequest)
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetIncidentProcessInstanceStatisticsByDefinitionQuery returns the incidentProcessInstanceStatisticsByDefinitionQuery field value, or nil when unset.
+func (r ApiGetProcessInstanceStatisticsByDefinitionRequest) GetIncidentProcessInstanceStatisticsByDefinitionQuery() *IncidentProcessInstanceStatisticsByDefinitionQuery {
+	return r.incidentProcessInstanceStatisticsByDefinitionQuery
+}
+
+// GetIncidentProcessInstanceStatisticsByErrorQuery returns the incidentProcessInstanceStatisticsByErrorQuery field value, or nil when unset.
+func (r ApiGetProcessInstanceStatisticsByErrorRequest) GetIncidentProcessInstanceStatisticsByErrorQuery() *IncidentProcessInstanceStatisticsByErrorQuery {
+	return r.incidentProcessInstanceStatisticsByErrorQuery
+}
+
+// GetIncidentResolutionRequest returns the incidentResolutionRequest field value, or nil when unset.
+func (r ApiResolveIncidentRequest) GetIncidentResolutionRequest() *IncidentResolutionRequest {
+	return r.incidentResolutionRequest
+}
+
+// GetIncidentSearchQuery returns the incidentSearchQuery field value, or nil when unset.
+func (r ApiSearchIncidentsRequest) GetIncidentSearchQuery() *IncidentSearchQuery {
+	return r.incidentSearchQuery
+}

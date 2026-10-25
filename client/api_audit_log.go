@@ -244,3 +244,8 @@ func (a *AuditLogAPIService) SearchAuditLogsExecute(r ApiSearchAuditLogsRequest)
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetAuditLogSearchQueryRequest returns the auditLogSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchAuditLogsRequest) GetAuditLogSearchQueryRequest() *AuditLogSearchQueryRequest {
+	return r.auditLogSearchQueryRequest
+}

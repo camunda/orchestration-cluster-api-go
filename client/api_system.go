@@ -271,3 +271,15 @@ func (a *SystemAPIService) GetUsageMetricsExecute(r ApiGetUsageMetricsRequest) (
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetStartTime returns the startTime field value, or nil when unset.
+func (r ApiGetUsageMetricsRequest) GetStartTime() *time.Time { return r.startTime }
+
+// GetEndTime returns the endTime field value, or nil when unset.
+func (r ApiGetUsageMetricsRequest) GetEndTime() *time.Time { return r.endTime }
+
+// GetTenantId returns the tenantId field value, or nil when unset.
+func (r ApiGetUsageMetricsRequest) GetTenantId() *string { return r.tenantId }
+
+// GetWithTenants returns the withTenants field value, or nil when unset.
+func (r ApiGetUsageMetricsRequest) GetWithTenants() *bool { return r.withTenants }

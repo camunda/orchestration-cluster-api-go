@@ -2423,3 +2423,43 @@ func (a *TenantAPIService) UpdateTenantExecute(r ApiUpdateTenantRequest) (*Tenan
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetTenantCreateRequest returns the tenantCreateRequest field value, or nil when unset.
+func (r ApiCreateTenantRequest) GetTenantCreateRequest() *TenantCreateRequest {
+	return r.tenantCreateRequest
+}
+
+// GetTenantClientSearchQueryRequest returns the tenantClientSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchClientsForTenantRequest) GetTenantClientSearchQueryRequest() *TenantClientSearchQueryRequest {
+	return r.tenantClientSearchQueryRequest
+}
+
+// GetTenantGroupSearchQueryRequest returns the tenantGroupSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchGroupIdsForTenantRequest) GetTenantGroupSearchQueryRequest() *TenantGroupSearchQueryRequest {
+	return r.tenantGroupSearchQueryRequest
+}
+
+// GetMappingRuleSearchQueryRequest returns the mappingRuleSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchMappingRulesForTenantRequest) GetMappingRuleSearchQueryRequest() *MappingRuleSearchQueryRequest {
+	return r.mappingRuleSearchQueryRequest
+}
+
+// GetRoleSearchQueryRequest returns the roleSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchRolesForTenantRequest) GetRoleSearchQueryRequest() *RoleSearchQueryRequest {
+	return r.roleSearchQueryRequest
+}
+
+// GetTenantSearchQueryRequest returns the tenantSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchTenantsRequest) GetTenantSearchQueryRequest() *TenantSearchQueryRequest {
+	return r.tenantSearchQueryRequest
+}
+
+// GetTenantUserSearchQueryRequest returns the tenantUserSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchUsersForTenantRequest) GetTenantUserSearchQueryRequest() *TenantUserSearchQueryRequest {
+	return r.tenantUserSearchQueryRequest
+}
+
+// GetTenantUpdateRequest returns the tenantUpdateRequest field value, or nil when unset.
+func (r ApiUpdateTenantRequest) GetTenantUpdateRequest() *TenantUpdateRequest {
+	return r.tenantUpdateRequest
+}

@@ -630,3 +630,23 @@ func (a *AgentInstanceAPIService) UpdateAgentInstanceExecute(r ApiUpdateAgentIns
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetAgentInstanceCreationRequest returns the agentInstanceCreationRequest field value, or nil when unset.
+func (r ApiCreateAgentInstanceRequest) GetAgentInstanceCreationRequest() *AgentInstanceCreationRequest {
+	return r.agentInstanceCreationRequest
+}
+
+// GetAgentInstanceHistorySearchQuery returns the agentInstanceHistorySearchQuery field value, or nil when unset.
+func (r ApiSearchAgentInstanceHistoryRequest) GetAgentInstanceHistorySearchQuery() *AgentInstanceHistorySearchQuery {
+	return r.agentInstanceHistorySearchQuery
+}
+
+// GetAgentInstanceSearchQuery returns the agentInstanceSearchQuery field value, or nil when unset.
+func (r ApiSearchAgentInstancesRequest) GetAgentInstanceSearchQuery() *AgentInstanceSearchQuery {
+	return r.agentInstanceSearchQuery
+}
+
+// GetAgentInstanceUpdateRequest returns the agentInstanceUpdateRequest field value, or nil when unset.
+func (r ApiUpdateAgentInstanceRequest) GetAgentInstanceUpdateRequest() *AgentInstanceUpdateRequest {
+	return r.agentInstanceUpdateRequest
+}

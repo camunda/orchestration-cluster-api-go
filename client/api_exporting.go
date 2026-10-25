@@ -618,3 +618,9 @@ func (a *ExportingAPIService) ResumeExportingExecute(r ApiResumeExportingRequest
 
 	return localVarHTTPResponse, nil
 }
+
+// GetSoft returns the soft field value, or nil when unset.
+func (r ApiPauseClusterExportingRequest) GetSoft() *bool { return r.soft }
+
+// GetSoft returns the soft field value, or nil when unset.
+func (r ApiPauseExportingRequest) GetSoft() *bool { return r.soft }

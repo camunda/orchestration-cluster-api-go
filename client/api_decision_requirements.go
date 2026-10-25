@@ -359,3 +359,8 @@ func (a *DecisionRequirementsAPIService) SearchDecisionRequirementsExecute(r Api
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetDecisionRequirementsSearchQuery returns the decisionRequirementsSearchQuery field value, or nil when unset.
+func (r ApiSearchDecisionRequirementsRequest) GetDecisionRequirementsSearchQuery() *DecisionRequirementsSearchQuery {
+	return r.decisionRequirementsSearchQuery
+}
