@@ -1027,3 +1027,33 @@ func (a *ProcessDefinitionAPIService) SearchProcessDefinitionsExecute(r ApiSearc
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetProcessDefinitionInstanceStatisticsQuery returns the processDefinitionInstanceStatisticsQuery field value, or nil when unset.
+func (r ApiGetProcessDefinitionInstanceStatisticsRequest) GetProcessDefinitionInstanceStatisticsQuery() *ProcessDefinitionInstanceStatisticsQuery {
+	return r.processDefinitionInstanceStatisticsQuery
+}
+
+// GetProcessDefinitionInstanceVersionStatisticsQuery returns the processDefinitionInstanceVersionStatisticsQuery field value, or nil when unset.
+func (r ApiGetProcessDefinitionInstanceVersionStatisticsRequest) GetProcessDefinitionInstanceVersionStatisticsQuery() *ProcessDefinitionInstanceVersionStatisticsQuery {
+	return r.processDefinitionInstanceVersionStatisticsQuery
+}
+
+// GetProcessDefinitionMessageSubscriptionStatisticsQuery returns the processDefinitionMessageSubscriptionStatisticsQuery field value, or nil when unset.
+func (r ApiGetProcessDefinitionMessageSubscriptionStatisticsRequest) GetProcessDefinitionMessageSubscriptionStatisticsQuery() *ProcessDefinitionMessageSubscriptionStatisticsQuery {
+	return r.processDefinitionMessageSubscriptionStatisticsQuery
+}
+
+// GetProcessDefinitionElementStatisticsQuery returns the processDefinitionElementStatisticsQuery field value, or nil when unset.
+func (r ApiGetProcessDefinitionStatisticsRequest) GetProcessDefinitionElementStatisticsQuery() *ProcessDefinitionElementStatisticsQuery {
+	return r.processDefinitionElementStatisticsQuery
+}
+
+// GetProcessDefinitionVariableNameSearchQuery returns the processDefinitionVariableNameSearchQuery field value, or nil when unset.
+func (r ApiSearchProcessDefinitionVariableNamesRequest) GetProcessDefinitionVariableNameSearchQuery() *ProcessDefinitionVariableNameSearchQuery {
+	return r.processDefinitionVariableNameSearchQuery
+}
+
+// GetProcessDefinitionSearchQuery returns the processDefinitionSearchQuery field value, or nil when unset.
+func (r ApiSearchProcessDefinitionsRequest) GetProcessDefinitionSearchQuery() *ProcessDefinitionSearchQuery {
+	return r.processDefinitionSearchQuery
+}

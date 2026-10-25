@@ -142,3 +142,6 @@ func (a *SetupAPIService) CreateAdminUserExecute(r ApiCreateAdminUserRequest) (*
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetUserRequest returns the userRequest field value, or nil when unset.
+func (r ApiCreateAdminUserRequest) GetUserRequest() *UserRequest { return r.userRequest }

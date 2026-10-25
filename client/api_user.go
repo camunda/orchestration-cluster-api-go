@@ -613,3 +613,14 @@ func (a *UserAPIService) UpdateUserExecute(r ApiUpdateUserRequest) (*UserUpdateR
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetUserRequest returns the userRequest field value, or nil when unset.
+func (r ApiCreateUserRequest) GetUserRequest() *UserRequest { return r.userRequest }
+
+// GetUserSearchQueryRequest returns the userSearchQueryRequest field value, or nil when unset.
+func (r ApiSearchUsersRequest) GetUserSearchQueryRequest() *UserSearchQueryRequest {
+	return r.userSearchQueryRequest
+}
+
+// GetUserUpdateRequest returns the userUpdateRequest field value, or nil when unset.
+func (r ApiUpdateUserRequest) GetUserUpdateRequest() *UserUpdateRequest { return r.userUpdateRequest }

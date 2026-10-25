@@ -251,3 +251,13 @@ func (a *MessageSubscriptionAPIService) SearchMessageSubscriptionsExecute(r ApiS
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetCorrelatedMessageSubscriptionSearchQuery returns the correlatedMessageSubscriptionSearchQuery field value, or nil when unset.
+func (r ApiSearchCorrelatedMessageSubscriptionsRequest) GetCorrelatedMessageSubscriptionSearchQuery() *CorrelatedMessageSubscriptionSearchQuery {
+	return r.correlatedMessageSubscriptionSearchQuery
+}
+
+// GetMessageSubscriptionSearchQuery returns the messageSubscriptionSearchQuery field value, or nil when unset.
+func (r ApiSearchMessageSubscriptionsRequest) GetMessageSubscriptionSearchQuery() *MessageSubscriptionSearchQuery {
+	return r.messageSubscriptionSearchQuery
+}

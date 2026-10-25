@@ -260,3 +260,13 @@ func (a *MessageAPIService) PublishMessageExecute(r ApiPublishMessageRequest) (*
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetMessageCorrelationRequest returns the messageCorrelationRequest field value, or nil when unset.
+func (r ApiCorrelateMessageRequest) GetMessageCorrelationRequest() *MessageCorrelationRequest {
+	return r.messageCorrelationRequest
+}
+
+// GetMessagePublicationRequest returns the messagePublicationRequest field value, or nil when unset.
+func (r ApiPublishMessageRequest) GetMessagePublicationRequest() *MessagePublicationRequest {
+	return r.messagePublicationRequest
+}
