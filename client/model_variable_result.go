@@ -292,7 +292,6 @@ func (o *VariableResult) UnmarshalJSON(data []byte) (err error) {
 		"scopeKey",
 		"processInstanceKey",
 		"rootProcessInstanceKey",
-		"metadata",
 		"value",
 	}
 

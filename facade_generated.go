@@ -925,6 +925,15 @@ func (c *CamundaClient) SuspendBatchOperation(ctx context.Context, batchOperatio
 }
 
 // AddClock calls the AddClock operation.
+//
+// Example:
+//
+//	// Move the cluster clock forward by an ISO 8601 duration (negative moves it back).
+//	clock, err := client.AddClock(ctx, *camunda.NewClockAddRequest("PT1H"))
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Println("cluster clock is now:", clock.GetTimestamp().Format(time.RFC3339))
 func (c *CamundaClient) AddClock(ctx context.Context, body ClockAddRequest, opts ...func(ApiAddClockRequest) ApiAddClockRequest) (*ClockResult, error) {
 	req := c.raw.ClockAPI.AddClock(ctx)
 	req = req.ClockAddRequest(body)
@@ -936,6 +945,15 @@ func (c *CamundaClient) AddClock(ctx context.Context, body ClockAddRequest, opts
 }
 
 // GetClock calls the GetClock operation.
+//
+// Example:
+//
+//	// Read the cluster clock. While the clock is pinned this reports the pinned instant.
+//	clock, err := client.GetClock(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Println("cluster clock:", clock.GetTimestamp().Format(time.RFC3339))
 func (c *CamundaClient) GetClock(ctx context.Context, opts ...func(ApiGetClockRequest) ApiGetClockRequest) (*ClockResult, error) {
 	req := c.raw.ClockAPI.GetClock(ctx)
 	for _, opt := range opts {

@@ -2544,33 +2544,6 @@ func NewNullableAgentDefinitionFilter(val *AgentDefinitionFilter) *NullableAgent
 	return camundaapi.NewNullableAgentDefinitionFilter(val)
 }
 
-// AgentDefinitionKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AgentDefinitionKeyExactMatch].
-type AgentDefinitionKeyExactMatch = camundaapi.AgentDefinitionKeyExactMatch
-
-// NewAgentDefinitionKeyExactMatch instantiates a new AgentDefinitionKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAgentDefinitionKeyExactMatch() *AgentDefinitionKeyExactMatch {
-	return camundaapi.NewAgentDefinitionKeyExactMatch()
-}
-
-// NewAgentDefinitionKeyExactMatchWithDefaults instantiates a new AgentDefinitionKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAgentDefinitionKeyExactMatchWithDefaults() *AgentDefinitionKeyExactMatch {
-	return camundaapi.NewAgentDefinitionKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAgentDefinitionKeyExactMatch].
-type NullableAgentDefinitionKeyExactMatch = camundaapi.NullableAgentDefinitionKeyExactMatch
-
-func NewNullableAgentDefinitionKeyExactMatch(val *AgentDefinitionKeyExactMatch) *NullableAgentDefinitionKeyExactMatch {
-	return camundaapi.NewNullableAgentDefinitionKeyExactMatch(val)
-}
-
 // AgentDefinitionKeyFilterProperty - AgentDefinitionKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.AgentDefinitionKeyFilterProperty].
@@ -2731,33 +2704,6 @@ func NewNullableAgentDefinitionTypeEnum(val *AgentDefinitionTypeEnum) *NullableA
 	return camundaapi.NewNullableAgentDefinitionTypeEnum(val)
 }
 
-// AgentDefinitionTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AgentDefinitionTypeExactMatch].
-type AgentDefinitionTypeExactMatch = camundaapi.AgentDefinitionTypeExactMatch
-
-// NewAgentDefinitionTypeExactMatch instantiates a new AgentDefinitionTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAgentDefinitionTypeExactMatch() *AgentDefinitionTypeExactMatch {
-	return camundaapi.NewAgentDefinitionTypeExactMatch()
-}
-
-// NewAgentDefinitionTypeExactMatchWithDefaults instantiates a new AgentDefinitionTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAgentDefinitionTypeExactMatchWithDefaults() *AgentDefinitionTypeExactMatch {
-	return camundaapi.NewAgentDefinitionTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAgentDefinitionTypeExactMatch].
-type NullableAgentDefinitionTypeExactMatch = camundaapi.NullableAgentDefinitionTypeExactMatch
-
-func NewNullableAgentDefinitionTypeExactMatch(val *AgentDefinitionTypeExactMatch) *NullableAgentDefinitionTypeExactMatch {
-	return camundaapi.NewNullableAgentDefinitionTypeExactMatch(val)
-}
-
 // AgentDefinitionTypeFilterProperty - AgentDefinitionTypeEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.AgentDefinitionTypeFilterProperty].
@@ -2778,33 +2724,6 @@ type NullableAgentDefinitionTypeFilterProperty = camundaapi.NullableAgentDefinit
 
 func NewNullableAgentDefinitionTypeFilterProperty(val *AgentDefinitionTypeFilterProperty) *NullableAgentDefinitionTypeFilterProperty {
 	return camundaapi.NewNullableAgentDefinitionTypeFilterProperty(val)
-}
-
-// AgentHistoryItemKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AgentHistoryItemKeyExactMatch].
-type AgentHistoryItemKeyExactMatch = camundaapi.AgentHistoryItemKeyExactMatch
-
-// NewAgentHistoryItemKeyExactMatch instantiates a new AgentHistoryItemKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAgentHistoryItemKeyExactMatch() *AgentHistoryItemKeyExactMatch {
-	return camundaapi.NewAgentHistoryItemKeyExactMatch()
-}
-
-// NewAgentHistoryItemKeyExactMatchWithDefaults instantiates a new AgentHistoryItemKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAgentHistoryItemKeyExactMatchWithDefaults() *AgentHistoryItemKeyExactMatch {
-	return camundaapi.NewAgentHistoryItemKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAgentHistoryItemKeyExactMatch].
-type NullableAgentHistoryItemKeyExactMatch = camundaapi.NullableAgentHistoryItemKeyExactMatch
-
-func NewNullableAgentHistoryItemKeyExactMatch(val *AgentHistoryItemKeyExactMatch) *NullableAgentHistoryItemKeyExactMatch {
-	return camundaapi.NewNullableAgentHistoryItemKeyExactMatch(val)
 }
 
 // AgentHistoryItemKeyFilterProperty - AgentHistoryItemKey property with full advanced search capabilities.
@@ -3021,33 +2940,6 @@ func NewNullableAgentInstanceHistoryCommitStatusEnum(val *AgentInstanceHistoryCo
 	return camundaapi.NewNullableAgentInstanceHistoryCommitStatusEnum(val)
 }
 
-// AgentInstanceHistoryCommitStatusExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AgentInstanceHistoryCommitStatusExactMatch].
-type AgentInstanceHistoryCommitStatusExactMatch = camundaapi.AgentInstanceHistoryCommitStatusExactMatch
-
-// NewAgentInstanceHistoryCommitStatusExactMatch instantiates a new AgentInstanceHistoryCommitStatusExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAgentInstanceHistoryCommitStatusExactMatch() *AgentInstanceHistoryCommitStatusExactMatch {
-	return camundaapi.NewAgentInstanceHistoryCommitStatusExactMatch()
-}
-
-// NewAgentInstanceHistoryCommitStatusExactMatchWithDefaults instantiates a new AgentInstanceHistoryCommitStatusExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAgentInstanceHistoryCommitStatusExactMatchWithDefaults() *AgentInstanceHistoryCommitStatusExactMatch {
-	return camundaapi.NewAgentInstanceHistoryCommitStatusExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAgentInstanceHistoryCommitStatusExactMatch].
-type NullableAgentInstanceHistoryCommitStatusExactMatch = camundaapi.NullableAgentInstanceHistoryCommitStatusExactMatch
-
-func NewNullableAgentInstanceHistoryCommitStatusExactMatch(val *AgentInstanceHistoryCommitStatusExactMatch) *NullableAgentInstanceHistoryCommitStatusExactMatch {
-	return camundaapi.NewNullableAgentInstanceHistoryCommitStatusExactMatch(val)
-}
-
 // AgentInstanceHistoryCommitStatusFilterProperty - AgentInstanceHistoryCommitStatusEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.AgentInstanceHistoryCommitStatusFilterProperty].
@@ -3236,33 +3128,6 @@ func NewNullableAgentInstanceHistoryRoleEnum(val *AgentInstanceHistoryRoleEnum) 
 	return camundaapi.NewNullableAgentInstanceHistoryRoleEnum(val)
 }
 
-// AgentInstanceHistoryRoleExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AgentInstanceHistoryRoleExactMatch].
-type AgentInstanceHistoryRoleExactMatch = camundaapi.AgentInstanceHistoryRoleExactMatch
-
-// NewAgentInstanceHistoryRoleExactMatch instantiates a new AgentInstanceHistoryRoleExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAgentInstanceHistoryRoleExactMatch() *AgentInstanceHistoryRoleExactMatch {
-	return camundaapi.NewAgentInstanceHistoryRoleExactMatch()
-}
-
-// NewAgentInstanceHistoryRoleExactMatchWithDefaults instantiates a new AgentInstanceHistoryRoleExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAgentInstanceHistoryRoleExactMatchWithDefaults() *AgentInstanceHistoryRoleExactMatch {
-	return camundaapi.NewAgentInstanceHistoryRoleExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAgentInstanceHistoryRoleExactMatch].
-type NullableAgentInstanceHistoryRoleExactMatch = camundaapi.NullableAgentInstanceHistoryRoleExactMatch
-
-func NewNullableAgentInstanceHistoryRoleExactMatch(val *AgentInstanceHistoryRoleExactMatch) *NullableAgentInstanceHistoryRoleExactMatch {
-	return camundaapi.NewNullableAgentInstanceHistoryRoleExactMatch(val)
-}
-
 // AgentInstanceHistoryRoleFilterProperty - AgentInstanceHistoryRoleEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.AgentInstanceHistoryRoleFilterProperty].
@@ -3364,33 +3229,6 @@ type NullableAgentInstanceHistorySearchQuerySortRequest = camundaapi.NullableAge
 
 func NewNullableAgentInstanceHistorySearchQuerySortRequest(val *AgentInstanceHistorySearchQuerySortRequest) *NullableAgentInstanceHistorySearchQuerySortRequest {
 	return camundaapi.NewNullableAgentInstanceHistorySearchQuerySortRequest(val)
-}
-
-// AgentInstanceKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AgentInstanceKeyExactMatch].
-type AgentInstanceKeyExactMatch = camundaapi.AgentInstanceKeyExactMatch
-
-// NewAgentInstanceKeyExactMatch instantiates a new AgentInstanceKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAgentInstanceKeyExactMatch() *AgentInstanceKeyExactMatch {
-	return camundaapi.NewAgentInstanceKeyExactMatch()
-}
-
-// NewAgentInstanceKeyExactMatchWithDefaults instantiates a new AgentInstanceKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAgentInstanceKeyExactMatchWithDefaults() *AgentInstanceKeyExactMatch {
-	return camundaapi.NewAgentInstanceKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAgentInstanceKeyExactMatch].
-type NullableAgentInstanceKeyExactMatch = camundaapi.NullableAgentInstanceKeyExactMatch
-
-func NewNullableAgentInstanceKeyExactMatch(val *AgentInstanceKeyExactMatch) *NullableAgentInstanceKeyExactMatch {
-	return camundaapi.NewNullableAgentInstanceKeyExactMatch(val)
 }
 
 // AgentInstanceKeyFilterProperty - AgentInstanceKey property with full advanced search capabilities.
@@ -3695,33 +3533,6 @@ func NewNullableAgentInstanceStatusEnum(val *AgentInstanceStatusEnum) *NullableA
 	return camundaapi.NewNullableAgentInstanceStatusEnum(val)
 }
 
-// AgentInstanceStatusExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AgentInstanceStatusExactMatch].
-type AgentInstanceStatusExactMatch = camundaapi.AgentInstanceStatusExactMatch
-
-// NewAgentInstanceStatusExactMatch instantiates a new AgentInstanceStatusExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAgentInstanceStatusExactMatch() *AgentInstanceStatusExactMatch {
-	return camundaapi.NewAgentInstanceStatusExactMatch()
-}
-
-// NewAgentInstanceStatusExactMatchWithDefaults instantiates a new AgentInstanceStatusExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAgentInstanceStatusExactMatchWithDefaults() *AgentInstanceStatusExactMatch {
-	return camundaapi.NewAgentInstanceStatusExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAgentInstanceStatusExactMatch].
-type NullableAgentInstanceStatusExactMatch = camundaapi.NullableAgentInstanceStatusExactMatch
-
-func NewNullableAgentInstanceStatusExactMatch(val *AgentInstanceStatusExactMatch) *NullableAgentInstanceStatusExactMatch {
-	return camundaapi.NewNullableAgentInstanceStatusExactMatch(val)
-}
-
 // AgentInstanceStatusFilterProperty - AgentInstanceStatusEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.AgentInstanceStatusFilterProperty].
@@ -3968,33 +3779,6 @@ func NewNullableAuditLogActorTypeEnum(val *AuditLogActorTypeEnum) *NullableAudit
 	return camundaapi.NewNullableAuditLogActorTypeEnum(val)
 }
 
-// AuditLogActorTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AuditLogActorTypeExactMatch].
-type AuditLogActorTypeExactMatch = camundaapi.AuditLogActorTypeExactMatch
-
-// NewAuditLogActorTypeExactMatch instantiates a new AuditLogActorTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAuditLogActorTypeExactMatch() *AuditLogActorTypeExactMatch {
-	return camundaapi.NewAuditLogActorTypeExactMatch()
-}
-
-// NewAuditLogActorTypeExactMatchWithDefaults instantiates a new AuditLogActorTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAuditLogActorTypeExactMatchWithDefaults() *AuditLogActorTypeExactMatch {
-	return camundaapi.NewAuditLogActorTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAuditLogActorTypeExactMatch].
-type NullableAuditLogActorTypeExactMatch = camundaapi.NullableAuditLogActorTypeExactMatch
-
-func NewNullableAuditLogActorTypeExactMatch(val *AuditLogActorTypeExactMatch) *NullableAuditLogActorTypeExactMatch {
-	return camundaapi.NewNullableAuditLogActorTypeExactMatch(val)
-}
-
 // AuditLogActorTypeFilterProperty - AuditLogActorTypeEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.AuditLogActorTypeFilterProperty].
@@ -4138,33 +3922,6 @@ func NewNullableAuditLogFilter(val *AuditLogFilter) *NullableAuditLogFilter {
 	return camundaapi.NewNullableAuditLogFilter(val)
 }
 
-// AuditLogKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AuditLogKeyExactMatch].
-type AuditLogKeyExactMatch = camundaapi.AuditLogKeyExactMatch
-
-// NewAuditLogKeyExactMatch instantiates a new AuditLogKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAuditLogKeyExactMatch() *AuditLogKeyExactMatch {
-	return camundaapi.NewAuditLogKeyExactMatch()
-}
-
-// NewAuditLogKeyExactMatchWithDefaults instantiates a new AuditLogKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAuditLogKeyExactMatchWithDefaults() *AuditLogKeyExactMatch {
-	return camundaapi.NewAuditLogKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAuditLogKeyExactMatch].
-type NullableAuditLogKeyExactMatch = camundaapi.NullableAuditLogKeyExactMatch
-
-func NewNullableAuditLogKeyExactMatch(val *AuditLogKeyExactMatch) *NullableAuditLogKeyExactMatch {
-	return camundaapi.NewNullableAuditLogKeyExactMatch(val)
-}
-
 // AuditLogKeyFilterProperty - AuditLogKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.AuditLogKeyFilterProperty].
@@ -4282,33 +4039,6 @@ type NullableAuditLogResultEnum = camundaapi.NullableAuditLogResultEnum
 
 func NewNullableAuditLogResultEnum(val *AuditLogResultEnum) *NullableAuditLogResultEnum {
 	return camundaapi.NewNullableAuditLogResultEnum(val)
-}
-
-// AuditLogResultExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.AuditLogResultExactMatch].
-type AuditLogResultExactMatch = camundaapi.AuditLogResultExactMatch
-
-// NewAuditLogResultExactMatch instantiates a new AuditLogResultExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewAuditLogResultExactMatch() *AuditLogResultExactMatch {
-	return camundaapi.NewAuditLogResultExactMatch()
-}
-
-// NewAuditLogResultExactMatchWithDefaults instantiates a new AuditLogResultExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewAuditLogResultExactMatchWithDefaults() *AuditLogResultExactMatch {
-	return camundaapi.NewAuditLogResultExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableAuditLogResultExactMatch].
-type NullableAuditLogResultExactMatch = camundaapi.NullableAuditLogResultExactMatch
-
-func NewNullableAuditLogResultExactMatch(val *AuditLogResultExactMatch) *NullableAuditLogResultExactMatch {
-	return camundaapi.NewNullableAuditLogResultExactMatch(val)
 }
 
 // AuditLogResultFilterProperty - AuditLogResultEnum property with full advanced search capabilities.
@@ -5085,33 +4815,6 @@ func NewNullableBatchOperationItemStateEnum(val *BatchOperationItemStateEnum) *N
 	return camundaapi.NewNullableBatchOperationItemStateEnum(val)
 }
 
-// BatchOperationItemStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.BatchOperationItemStateExactMatch].
-type BatchOperationItemStateExactMatch = camundaapi.BatchOperationItemStateExactMatch
-
-// NewBatchOperationItemStateExactMatch instantiates a new BatchOperationItemStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewBatchOperationItemStateExactMatch() *BatchOperationItemStateExactMatch {
-	return camundaapi.NewBatchOperationItemStateExactMatch()
-}
-
-// NewBatchOperationItemStateExactMatchWithDefaults instantiates a new BatchOperationItemStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewBatchOperationItemStateExactMatchWithDefaults() *BatchOperationItemStateExactMatch {
-	return camundaapi.NewBatchOperationItemStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableBatchOperationItemStateExactMatch].
-type NullableBatchOperationItemStateExactMatch = camundaapi.NullableBatchOperationItemStateExactMatch
-
-func NewNullableBatchOperationItemStateExactMatch(val *BatchOperationItemStateExactMatch) *NullableBatchOperationItemStateExactMatch {
-	return camundaapi.NewNullableBatchOperationItemStateExactMatch(val)
-}
-
 // BatchOperationItemStateFilterProperty - BatchOperationItemStateEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.BatchOperationItemStateFilterProperty].
@@ -5276,33 +4979,6 @@ func NewNullableBatchOperationStateEnum(val *BatchOperationStateEnum) *NullableB
 	return camundaapi.NewNullableBatchOperationStateEnum(val)
 }
 
-// BatchOperationStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.BatchOperationStateExactMatch].
-type BatchOperationStateExactMatch = camundaapi.BatchOperationStateExactMatch
-
-// NewBatchOperationStateExactMatch instantiates a new BatchOperationStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewBatchOperationStateExactMatch() *BatchOperationStateExactMatch {
-	return camundaapi.NewBatchOperationStateExactMatch()
-}
-
-// NewBatchOperationStateExactMatchWithDefaults instantiates a new BatchOperationStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewBatchOperationStateExactMatchWithDefaults() *BatchOperationStateExactMatch {
-	return camundaapi.NewBatchOperationStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableBatchOperationStateExactMatch].
-type NullableBatchOperationStateExactMatch = camundaapi.NullableBatchOperationStateExactMatch
-
-func NewNullableBatchOperationStateExactMatch(val *BatchOperationStateExactMatch) *NullableBatchOperationStateExactMatch {
-	return camundaapi.NewNullableBatchOperationStateExactMatch(val)
-}
-
 // BatchOperationStateFilterProperty - BatchOperationStateEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.BatchOperationStateFilterProperty].
@@ -5363,33 +5039,6 @@ type NullableBatchOperationTypeEnum = camundaapi.NullableBatchOperationTypeEnum
 
 func NewNullableBatchOperationTypeEnum(val *BatchOperationTypeEnum) *NullableBatchOperationTypeEnum {
 	return camundaapi.NewNullableBatchOperationTypeEnum(val)
-}
-
-// BatchOperationTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.BatchOperationTypeExactMatch].
-type BatchOperationTypeExactMatch = camundaapi.BatchOperationTypeExactMatch
-
-// NewBatchOperationTypeExactMatch instantiates a new BatchOperationTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewBatchOperationTypeExactMatch() *BatchOperationTypeExactMatch {
-	return camundaapi.NewBatchOperationTypeExactMatch()
-}
-
-// NewBatchOperationTypeExactMatchWithDefaults instantiates a new BatchOperationTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewBatchOperationTypeExactMatchWithDefaults() *BatchOperationTypeExactMatch {
-	return camundaapi.NewBatchOperationTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableBatchOperationTypeExactMatch].
-type NullableBatchOperationTypeExactMatch = camundaapi.NullableBatchOperationTypeExactMatch
-
-func NewNullableBatchOperationTypeExactMatch(val *BatchOperationTypeExactMatch) *NullableBatchOperationTypeExactMatch {
-	return camundaapi.NewNullableBatchOperationTypeExactMatch(val)
 }
 
 // BatchOperationTypeFilterProperty - BatchOperationTypeEnum property with full advanced search capabilities.
@@ -5493,33 +5142,6 @@ type NullableCancelProcessInstanceRequest = camundaapi.NullableCancelProcessInst
 
 func NewNullableCancelProcessInstanceRequest(val *CancelProcessInstanceRequest) *NullableCancelProcessInstanceRequest {
 	return camundaapi.NewNullableCancelProcessInstanceRequest(val)
-}
-
-// CategoryExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.CategoryExactMatch].
-type CategoryExactMatch = camundaapi.CategoryExactMatch
-
-// NewCategoryExactMatch instantiates a new CategoryExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewCategoryExactMatch() *CategoryExactMatch {
-	return camundaapi.NewCategoryExactMatch()
-}
-
-// NewCategoryExactMatchWithDefaults instantiates a new CategoryExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewCategoryExactMatchWithDefaults() *CategoryExactMatch {
-	return camundaapi.NewCategoryExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableCategoryExactMatch].
-type NullableCategoryExactMatch = camundaapi.NullableCategoryExactMatch
-
-func NewNullableCategoryExactMatch(val *CategoryExactMatch) *NullableCategoryExactMatch {
-	return camundaapi.NewNullableCategoryExactMatch(val)
 }
 
 // CategoryFilterProperty - AuditLogCategoryEnum property with full advanced search capabilities.
@@ -6732,33 +6354,6 @@ func NewNullableClusterVariableKindEnum(val *ClusterVariableKindEnum) *NullableC
 	return camundaapi.NewNullableClusterVariableKindEnum(val)
 }
 
-// ClusterVariableKindExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ClusterVariableKindExactMatch].
-type ClusterVariableKindExactMatch = camundaapi.ClusterVariableKindExactMatch
-
-// NewClusterVariableKindExactMatch instantiates a new ClusterVariableKindExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewClusterVariableKindExactMatch() *ClusterVariableKindExactMatch {
-	return camundaapi.NewClusterVariableKindExactMatch()
-}
-
-// NewClusterVariableKindExactMatchWithDefaults instantiates a new ClusterVariableKindExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewClusterVariableKindExactMatchWithDefaults() *ClusterVariableKindExactMatch {
-	return camundaapi.NewClusterVariableKindExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableClusterVariableKindExactMatch].
-type NullableClusterVariableKindExactMatch = camundaapi.NullableClusterVariableKindExactMatch
-
-func NewNullableClusterVariableKindExactMatch(val *ClusterVariableKindExactMatch) *NullableClusterVariableKindExactMatch {
-	return camundaapi.NewNullableClusterVariableKindExactMatch(val)
-}
-
 // ClusterVariableKindFilterProperty - ClusterVariableKindEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.ClusterVariableKindFilterProperty].
@@ -6862,33 +6457,6 @@ type NullableClusterVariableScopeEnum = camundaapi.NullableClusterVariableScopeE
 
 func NewNullableClusterVariableScopeEnum(val *ClusterVariableScopeEnum) *NullableClusterVariableScopeEnum {
 	return camundaapi.NewNullableClusterVariableScopeEnum(val)
-}
-
-// ClusterVariableScopeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ClusterVariableScopeExactMatch].
-type ClusterVariableScopeExactMatch = camundaapi.ClusterVariableScopeExactMatch
-
-// NewClusterVariableScopeExactMatch instantiates a new ClusterVariableScopeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewClusterVariableScopeExactMatch() *ClusterVariableScopeExactMatch {
-	return camundaapi.NewClusterVariableScopeExactMatch()
-}
-
-// NewClusterVariableScopeExactMatchWithDefaults instantiates a new ClusterVariableScopeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewClusterVariableScopeExactMatchWithDefaults() *ClusterVariableScopeExactMatch {
-	return camundaapi.NewClusterVariableScopeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableClusterVariableScopeExactMatch].
-type NullableClusterVariableScopeExactMatch = camundaapi.NullableClusterVariableScopeExactMatch
-
-func NewNullableClusterVariableScopeExactMatch(val *ClusterVariableScopeExactMatch) *NullableClusterVariableScopeExactMatch {
-	return camundaapi.NewNullableClusterVariableScopeExactMatch(val)
 }
 
 // ClusterVariableScopeFilterProperty - ClusterVariableScopeEnum property with full advanced search capabilities.
@@ -7470,33 +7038,6 @@ func NewNullableDecisionDefinitionFilter(val *DecisionDefinitionFilter) *Nullabl
 	return camundaapi.NewNullableDecisionDefinitionFilter(val)
 }
 
-// DecisionDefinitionKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.DecisionDefinitionKeyExactMatch].
-type DecisionDefinitionKeyExactMatch = camundaapi.DecisionDefinitionKeyExactMatch
-
-// NewDecisionDefinitionKeyExactMatch instantiates a new DecisionDefinitionKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewDecisionDefinitionKeyExactMatch() *DecisionDefinitionKeyExactMatch {
-	return camundaapi.NewDecisionDefinitionKeyExactMatch()
-}
-
-// NewDecisionDefinitionKeyExactMatchWithDefaults instantiates a new DecisionDefinitionKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewDecisionDefinitionKeyExactMatchWithDefaults() *DecisionDefinitionKeyExactMatch {
-	return camundaapi.NewDecisionDefinitionKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableDecisionDefinitionKeyExactMatch].
-type NullableDecisionDefinitionKeyExactMatch = camundaapi.NullableDecisionDefinitionKeyExactMatch
-
-func NewNullableDecisionDefinitionKeyExactMatch(val *DecisionDefinitionKeyExactMatch) *NullableDecisionDefinitionKeyExactMatch {
-	return camundaapi.NewNullableDecisionDefinitionKeyExactMatch(val)
-}
-
 // DecisionDefinitionKeyFilterProperty - DecisionDefinitionKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.DecisionDefinitionKeyFilterProperty].
@@ -7756,33 +7297,6 @@ func NewNullableDecisionEvaluationInstruction(val *DecisionEvaluationInstruction
 	return camundaapi.NewNullableDecisionEvaluationInstruction(val)
 }
 
-// DecisionEvaluationKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.DecisionEvaluationKeyExactMatch].
-type DecisionEvaluationKeyExactMatch = camundaapi.DecisionEvaluationKeyExactMatch
-
-// NewDecisionEvaluationKeyExactMatch instantiates a new DecisionEvaluationKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewDecisionEvaluationKeyExactMatch() *DecisionEvaluationKeyExactMatch {
-	return camundaapi.NewDecisionEvaluationKeyExactMatch()
-}
-
-// NewDecisionEvaluationKeyExactMatchWithDefaults instantiates a new DecisionEvaluationKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewDecisionEvaluationKeyExactMatchWithDefaults() *DecisionEvaluationKeyExactMatch {
-	return camundaapi.NewDecisionEvaluationKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableDecisionEvaluationKeyExactMatch].
-type NullableDecisionEvaluationKeyExactMatch = camundaapi.NullableDecisionEvaluationKeyExactMatch
-
-func NewNullableDecisionEvaluationKeyExactMatch(val *DecisionEvaluationKeyExactMatch) *NullableDecisionEvaluationKeyExactMatch {
-	return camundaapi.NewNullableDecisionEvaluationKeyExactMatch(val)
-}
-
 // DecisionEvaluationKeyFilterProperty - DecisionEvaluationKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.DecisionEvaluationKeyFilterProperty].
@@ -8025,33 +7539,6 @@ func NewNullableDecisionInstanceStateEnum(val *DecisionInstanceStateEnum) *Nulla
 	return camundaapi.NewNullableDecisionInstanceStateEnum(val)
 }
 
-// DecisionInstanceStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.DecisionInstanceStateExactMatch].
-type DecisionInstanceStateExactMatch = camundaapi.DecisionInstanceStateExactMatch
-
-// NewDecisionInstanceStateExactMatch instantiates a new DecisionInstanceStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewDecisionInstanceStateExactMatch() *DecisionInstanceStateExactMatch {
-	return camundaapi.NewDecisionInstanceStateExactMatch()
-}
-
-// NewDecisionInstanceStateExactMatchWithDefaults instantiates a new DecisionInstanceStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewDecisionInstanceStateExactMatchWithDefaults() *DecisionInstanceStateExactMatch {
-	return camundaapi.NewDecisionInstanceStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableDecisionInstanceStateExactMatch].
-type NullableDecisionInstanceStateExactMatch = camundaapi.NullableDecisionInstanceStateExactMatch
-
-func NewNullableDecisionInstanceStateExactMatch(val *DecisionInstanceStateExactMatch) *NullableDecisionInstanceStateExactMatch {
-	return camundaapi.NewNullableDecisionInstanceStateExactMatch(val)
-}
-
 // DecisionInstanceStateFilterProperty - DecisionInstanceStateEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.DecisionInstanceStateFilterProperty].
@@ -8099,33 +7586,6 @@ type NullableDecisionRequirementsFilter = camundaapi.NullableDecisionRequirement
 
 func NewNullableDecisionRequirementsFilter(val *DecisionRequirementsFilter) *NullableDecisionRequirementsFilter {
 	return camundaapi.NewNullableDecisionRequirementsFilter(val)
-}
-
-// DecisionRequirementsKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.DecisionRequirementsKeyExactMatch].
-type DecisionRequirementsKeyExactMatch = camundaapi.DecisionRequirementsKeyExactMatch
-
-// NewDecisionRequirementsKeyExactMatch instantiates a new DecisionRequirementsKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewDecisionRequirementsKeyExactMatch() *DecisionRequirementsKeyExactMatch {
-	return camundaapi.NewDecisionRequirementsKeyExactMatch()
-}
-
-// NewDecisionRequirementsKeyExactMatchWithDefaults instantiates a new DecisionRequirementsKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewDecisionRequirementsKeyExactMatchWithDefaults() *DecisionRequirementsKeyExactMatch {
-	return camundaapi.NewDecisionRequirementsKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableDecisionRequirementsKeyExactMatch].
-type NullableDecisionRequirementsKeyExactMatch = camundaapi.NullableDecisionRequirementsKeyExactMatch
-
-func NewNullableDecisionRequirementsKeyExactMatch(val *DecisionRequirementsKeyExactMatch) *NullableDecisionRequirementsKeyExactMatch {
-	return camundaapi.NewNullableDecisionRequirementsKeyExactMatch(val)
 }
 
 // DecisionRequirementsKeyFilterProperty - DecisionRequirementsKey property with full advanced search capabilities.
@@ -8472,33 +7932,6 @@ type NullableDeploymentFormResult = camundaapi.NullableDeploymentFormResult
 
 func NewNullableDeploymentFormResult(val *DeploymentFormResult) *NullableDeploymentFormResult {
 	return camundaapi.NewNullableDeploymentFormResult(val)
-}
-
-// DeploymentKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.DeploymentKeyExactMatch].
-type DeploymentKeyExactMatch = camundaapi.DeploymentKeyExactMatch
-
-// NewDeploymentKeyExactMatch instantiates a new DeploymentKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewDeploymentKeyExactMatch() *DeploymentKeyExactMatch {
-	return camundaapi.NewDeploymentKeyExactMatch()
-}
-
-// NewDeploymentKeyExactMatchWithDefaults instantiates a new DeploymentKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewDeploymentKeyExactMatchWithDefaults() *DeploymentKeyExactMatch {
-	return camundaapi.NewDeploymentKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableDeploymentKeyExactMatch].
-type NullableDeploymentKeyExactMatch = camundaapi.NullableDeploymentKeyExactMatch
-
-func NewNullableDeploymentKeyExactMatch(val *DeploymentKeyExactMatch) *NullableDeploymentKeyExactMatch {
-	return camundaapi.NewNullableDeploymentKeyExactMatch(val)
 }
 
 // DeploymentKeyFilterProperty - DeploymentKey property with full advanced search capabilities.
@@ -8923,33 +8356,6 @@ func NewNullableElementInstanceFilterFields(val *ElementInstanceFilterFields) *N
 	return camundaapi.NewNullableElementInstanceFilterFields(val)
 }
 
-// ElementInstanceKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ElementInstanceKeyExactMatch].
-type ElementInstanceKeyExactMatch = camundaapi.ElementInstanceKeyExactMatch
-
-// NewElementInstanceKeyExactMatch instantiates a new ElementInstanceKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewElementInstanceKeyExactMatch() *ElementInstanceKeyExactMatch {
-	return camundaapi.NewElementInstanceKeyExactMatch()
-}
-
-// NewElementInstanceKeyExactMatchWithDefaults instantiates a new ElementInstanceKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewElementInstanceKeyExactMatchWithDefaults() *ElementInstanceKeyExactMatch {
-	return camundaapi.NewElementInstanceKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableElementInstanceKeyExactMatch].
-type NullableElementInstanceKeyExactMatch = camundaapi.NullableElementInstanceKeyExactMatch
-
-func NewNullableElementInstanceKeyExactMatch(val *ElementInstanceKeyExactMatch) *NullableElementInstanceKeyExactMatch {
-	return camundaapi.NewNullableElementInstanceKeyExactMatch(val)
-}
-
 // ElementInstanceKeyFilterProperty - ElementInstanceKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.ElementInstanceKeyFilterProperty].
@@ -9110,33 +8516,6 @@ func NewNullableElementInstanceStateEnum(val *ElementInstanceStateEnum) *Nullabl
 	return camundaapi.NewNullableElementInstanceStateEnum(val)
 }
 
-// ElementInstanceStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ElementInstanceStateExactMatch].
-type ElementInstanceStateExactMatch = camundaapi.ElementInstanceStateExactMatch
-
-// NewElementInstanceStateExactMatch instantiates a new ElementInstanceStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewElementInstanceStateExactMatch() *ElementInstanceStateExactMatch {
-	return camundaapi.NewElementInstanceStateExactMatch()
-}
-
-// NewElementInstanceStateExactMatchWithDefaults instantiates a new ElementInstanceStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewElementInstanceStateExactMatchWithDefaults() *ElementInstanceStateExactMatch {
-	return camundaapi.NewElementInstanceStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableElementInstanceStateExactMatch].
-type NullableElementInstanceStateExactMatch = camundaapi.NullableElementInstanceStateExactMatch
-
-func NewNullableElementInstanceStateExactMatch(val *ElementInstanceStateExactMatch) *NullableElementInstanceStateExactMatch {
-	return camundaapi.NewNullableElementInstanceStateExactMatch(val)
-}
-
 // ElementInstanceStateFilterProperty - ElementInstanceStateEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.ElementInstanceStateFilterProperty].
@@ -9292,33 +8671,6 @@ type NullableElementInstanceWaitStateResult = camundaapi.NullableElementInstance
 
 func NewNullableElementInstanceWaitStateResult(val *ElementInstanceWaitStateResult) *NullableElementInstanceWaitStateResult {
 	return camundaapi.NewNullableElementInstanceWaitStateResult(val)
-}
-
-// EntityTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.EntityTypeExactMatch].
-type EntityTypeExactMatch = camundaapi.EntityTypeExactMatch
-
-// NewEntityTypeExactMatch instantiates a new EntityTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewEntityTypeExactMatch() *EntityTypeExactMatch {
-	return camundaapi.NewEntityTypeExactMatch()
-}
-
-// NewEntityTypeExactMatchWithDefaults instantiates a new EntityTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewEntityTypeExactMatchWithDefaults() *EntityTypeExactMatch {
-	return camundaapi.NewEntityTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableEntityTypeExactMatch].
-type NullableEntityTypeExactMatch = camundaapi.NullableEntityTypeExactMatch
-
-func NewNullableEntityTypeExactMatch(val *EntityTypeExactMatch) *NullableEntityTypeExactMatch {
-	return camundaapi.NewNullableEntityTypeExactMatch(val)
 }
 
 // EntityTypeFilterProperty - AuditLogEntityTypeEnum property with full advanced search capabilities.
@@ -9644,33 +8996,6 @@ func NewNullableExpressionSecretReferenceItem(val *ExpressionSecretReferenceItem
 	return camundaapi.NewNullableExpressionSecretReferenceItem(val)
 }
 
-// FormKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.FormKeyExactMatch].
-type FormKeyExactMatch = camundaapi.FormKeyExactMatch
-
-// NewFormKeyExactMatch instantiates a new FormKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewFormKeyExactMatch() *FormKeyExactMatch {
-	return camundaapi.NewFormKeyExactMatch()
-}
-
-// NewFormKeyExactMatchWithDefaults instantiates a new FormKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewFormKeyExactMatchWithDefaults() *FormKeyExactMatch {
-	return camundaapi.NewFormKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableFormKeyExactMatch].
-type NullableFormKeyExactMatch = camundaapi.NullableFormKeyExactMatch
-
-func NewNullableFormKeyExactMatch(val *FormKeyExactMatch) *NullableFormKeyExactMatch {
-	return camundaapi.NewNullableFormKeyExactMatch(val)
-}
-
 // FormKeyFilterProperty - FormKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.FormKeyFilterProperty].
@@ -9803,33 +9128,6 @@ func NewNullableGlobalListenerSourceEnum(val *GlobalListenerSourceEnum) *Nullabl
 	return camundaapi.NewNullableGlobalListenerSourceEnum(val)
 }
 
-// GlobalListenerSourceExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.GlobalListenerSourceExactMatch].
-type GlobalListenerSourceExactMatch = camundaapi.GlobalListenerSourceExactMatch
-
-// NewGlobalListenerSourceExactMatch instantiates a new GlobalListenerSourceExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewGlobalListenerSourceExactMatch() *GlobalListenerSourceExactMatch {
-	return camundaapi.NewGlobalListenerSourceExactMatch()
-}
-
-// NewGlobalListenerSourceExactMatchWithDefaults instantiates a new GlobalListenerSourceExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewGlobalListenerSourceExactMatchWithDefaults() *GlobalListenerSourceExactMatch {
-	return camundaapi.NewGlobalListenerSourceExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableGlobalListenerSourceExactMatch].
-type NullableGlobalListenerSourceExactMatch = camundaapi.NullableGlobalListenerSourceExactMatch
-
-func NewNullableGlobalListenerSourceExactMatch(val *GlobalListenerSourceExactMatch) *NullableGlobalListenerSourceExactMatch {
-	return camundaapi.NewNullableGlobalListenerSourceExactMatch(val)
-}
-
 // GlobalListenerSourceFilterProperty - Global listener source property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.GlobalListenerSourceFilterProperty].
@@ -9910,33 +9208,6 @@ type NullableGlobalTaskListenerEventTypeEnum = camundaapi.NullableGlobalTaskList
 
 func NewNullableGlobalTaskListenerEventTypeEnum(val *GlobalTaskListenerEventTypeEnum) *NullableGlobalTaskListenerEventTypeEnum {
 	return camundaapi.NewNullableGlobalTaskListenerEventTypeEnum(val)
-}
-
-// GlobalTaskListenerEventTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.GlobalTaskListenerEventTypeExactMatch].
-type GlobalTaskListenerEventTypeExactMatch = camundaapi.GlobalTaskListenerEventTypeExactMatch
-
-// NewGlobalTaskListenerEventTypeExactMatch instantiates a new GlobalTaskListenerEventTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewGlobalTaskListenerEventTypeExactMatch() *GlobalTaskListenerEventTypeExactMatch {
-	return camundaapi.NewGlobalTaskListenerEventTypeExactMatch()
-}
-
-// NewGlobalTaskListenerEventTypeExactMatchWithDefaults instantiates a new GlobalTaskListenerEventTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewGlobalTaskListenerEventTypeExactMatchWithDefaults() *GlobalTaskListenerEventTypeExactMatch {
-	return camundaapi.NewGlobalTaskListenerEventTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableGlobalTaskListenerEventTypeExactMatch].
-type NullableGlobalTaskListenerEventTypeExactMatch = camundaapi.NullableGlobalTaskListenerEventTypeExactMatch
-
-func NewNullableGlobalTaskListenerEventTypeExactMatch(val *GlobalTaskListenerEventTypeExactMatch) *NullableGlobalTaskListenerEventTypeExactMatch {
-	return camundaapi.NewNullableGlobalTaskListenerEventTypeExactMatch(val)
 }
 
 // GlobalTaskListenerEventTypeFilterProperty - Global listener event type property with full advanced search capabilities.
@@ -10766,33 +10037,6 @@ func NewNullableIncidentErrorTypeEnum(val *IncidentErrorTypeEnum) *NullableIncid
 	return camundaapi.NewNullableIncidentErrorTypeEnum(val)
 }
 
-// IncidentErrorTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.IncidentErrorTypeExactMatch].
-type IncidentErrorTypeExactMatch = camundaapi.IncidentErrorTypeExactMatch
-
-// NewIncidentErrorTypeExactMatch instantiates a new IncidentErrorTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewIncidentErrorTypeExactMatch() *IncidentErrorTypeExactMatch {
-	return camundaapi.NewIncidentErrorTypeExactMatch()
-}
-
-// NewIncidentErrorTypeExactMatchWithDefaults instantiates a new IncidentErrorTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewIncidentErrorTypeExactMatchWithDefaults() *IncidentErrorTypeExactMatch {
-	return camundaapi.NewIncidentErrorTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableIncidentErrorTypeExactMatch].
-type NullableIncidentErrorTypeExactMatch = camundaapi.NullableIncidentErrorTypeExactMatch
-
-func NewNullableIncidentErrorTypeExactMatch(val *IncidentErrorTypeExactMatch) *NullableIncidentErrorTypeExactMatch {
-	return camundaapi.NewNullableIncidentErrorTypeExactMatch(val)
-}
-
 // IncidentErrorTypeFilterProperty - IncidentErrorTypeEnum with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.IncidentErrorTypeFilterProperty].
@@ -11252,33 +10496,6 @@ func NewNullableIncidentStateEnum(val *IncidentStateEnum) *NullableIncidentState
 	return camundaapi.NewNullableIncidentStateEnum(val)
 }
 
-// IncidentStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.IncidentStateExactMatch].
-type IncidentStateExactMatch = camundaapi.IncidentStateExactMatch
-
-// NewIncidentStateExactMatch instantiates a new IncidentStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewIncidentStateExactMatch() *IncidentStateExactMatch {
-	return camundaapi.NewIncidentStateExactMatch()
-}
-
-// NewIncidentStateExactMatchWithDefaults instantiates a new IncidentStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewIncidentStateExactMatchWithDefaults() *IncidentStateExactMatch {
-	return camundaapi.NewIncidentStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableIncidentStateExactMatch].
-type NullableIncidentStateExactMatch = camundaapi.NullableIncidentStateExactMatch
-
-func NewNullableIncidentStateExactMatch(val *IncidentStateExactMatch) *NullableIncidentStateExactMatch {
-	return camundaapi.NewNullableIncidentStateExactMatch(val)
-}
-
 // IncidentStateFilterProperty - IncidentStateEnum with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.IncidentStateFilterProperty].
@@ -11674,33 +10891,6 @@ func NewNullableJobFilter(val *JobFilter) *NullableJobFilter {
 	return camundaapi.NewNullableJobFilter(val)
 }
 
-// JobKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.JobKeyExactMatch].
-type JobKeyExactMatch = camundaapi.JobKeyExactMatch
-
-// NewJobKeyExactMatch instantiates a new JobKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewJobKeyExactMatch() *JobKeyExactMatch {
-	return camundaapi.NewJobKeyExactMatch()
-}
-
-// NewJobKeyExactMatchWithDefaults instantiates a new JobKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewJobKeyExactMatchWithDefaults() *JobKeyExactMatch {
-	return camundaapi.NewJobKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableJobKeyExactMatch].
-type NullableJobKeyExactMatch = camundaapi.NullableJobKeyExactMatch
-
-func NewNullableJobKeyExactMatch(val *JobKeyExactMatch) *NullableJobKeyExactMatch {
-	return camundaapi.NewNullableJobKeyExactMatch(val)
-}
-
 // JobKeyFilterProperty - JobKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.JobKeyFilterProperty].
@@ -11752,33 +10942,6 @@ type NullableJobKindEnum = camundaapi.NullableJobKindEnum
 
 func NewNullableJobKindEnum(val *JobKindEnum) *NullableJobKindEnum {
 	return camundaapi.NewNullableJobKindEnum(val)
-}
-
-// JobKindExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.JobKindExactMatch].
-type JobKindExactMatch = camundaapi.JobKindExactMatch
-
-// NewJobKindExactMatch instantiates a new JobKindExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewJobKindExactMatch() *JobKindExactMatch {
-	return camundaapi.NewJobKindExactMatch()
-}
-
-// NewJobKindExactMatchWithDefaults instantiates a new JobKindExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewJobKindExactMatchWithDefaults() *JobKindExactMatch {
-	return camundaapi.NewJobKindExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableJobKindExactMatch].
-type NullableJobKindExactMatch = camundaapi.NullableJobKindExactMatch
-
-func NewNullableJobKindExactMatch(val *JobKindExactMatch) *NullableJobKindExactMatch {
-	return camundaapi.NewNullableJobKindExactMatch(val)
 }
 
 // JobKindFilterProperty - JobKindEnum property with full advanced search capabilities.
@@ -11838,33 +11001,6 @@ type NullableJobListenerEventTypeEnum = camundaapi.NullableJobListenerEventTypeE
 
 func NewNullableJobListenerEventTypeEnum(val *JobListenerEventTypeEnum) *NullableJobListenerEventTypeEnum {
 	return camundaapi.NewNullableJobListenerEventTypeEnum(val)
-}
-
-// JobListenerEventTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.JobListenerEventTypeExactMatch].
-type JobListenerEventTypeExactMatch = camundaapi.JobListenerEventTypeExactMatch
-
-// NewJobListenerEventTypeExactMatch instantiates a new JobListenerEventTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewJobListenerEventTypeExactMatch() *JobListenerEventTypeExactMatch {
-	return camundaapi.NewJobListenerEventTypeExactMatch()
-}
-
-// NewJobListenerEventTypeExactMatchWithDefaults instantiates a new JobListenerEventTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewJobListenerEventTypeExactMatchWithDefaults() *JobListenerEventTypeExactMatch {
-	return camundaapi.NewJobListenerEventTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableJobListenerEventTypeExactMatch].
-type NullableJobListenerEventTypeExactMatch = camundaapi.NullableJobListenerEventTypeExactMatch
-
-func NewNullableJobListenerEventTypeExactMatch(val *JobListenerEventTypeExactMatch) *NullableJobListenerEventTypeExactMatch {
-	return camundaapi.NewNullableJobListenerEventTypeExactMatch(val)
 }
 
 // JobListenerEventTypeFilterProperty - JobListenerEventTypeEnum property with full advanced search capabilities.
@@ -12189,33 +11325,6 @@ type NullableJobStateEnum = camundaapi.NullableJobStateEnum
 
 func NewNullableJobStateEnum(val *JobStateEnum) *NullableJobStateEnum {
 	return camundaapi.NewNullableJobStateEnum(val)
-}
-
-// JobStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.JobStateExactMatch].
-type JobStateExactMatch = camundaapi.JobStateExactMatch
-
-// NewJobStateExactMatch instantiates a new JobStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewJobStateExactMatch() *JobStateExactMatch {
-	return camundaapi.NewJobStateExactMatch()
-}
-
-// NewJobStateExactMatchWithDefaults instantiates a new JobStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewJobStateExactMatchWithDefaults() *JobStateExactMatch {
-	return camundaapi.NewJobStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableJobStateExactMatch].
-type NullableJobStateExactMatch = camundaapi.NullableJobStateExactMatch
-
-func NewNullableJobStateExactMatch(val *JobStateExactMatch) *NullableJobStateExactMatch {
-	return camundaapi.NewNullableJobStateExactMatch(val)
 }
 
 // JobStateFilterProperty - JobStateEnum property with full advanced search capabilities.
@@ -13158,33 +12267,6 @@ func NewNullableMessageSubscriptionFilter(val *MessageSubscriptionFilter) *Nulla
 	return camundaapi.NewNullableMessageSubscriptionFilter(val)
 }
 
-// MessageSubscriptionKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.MessageSubscriptionKeyExactMatch].
-type MessageSubscriptionKeyExactMatch = camundaapi.MessageSubscriptionKeyExactMatch
-
-// NewMessageSubscriptionKeyExactMatch instantiates a new MessageSubscriptionKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewMessageSubscriptionKeyExactMatch() *MessageSubscriptionKeyExactMatch {
-	return camundaapi.NewMessageSubscriptionKeyExactMatch()
-}
-
-// NewMessageSubscriptionKeyExactMatchWithDefaults instantiates a new MessageSubscriptionKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewMessageSubscriptionKeyExactMatchWithDefaults() *MessageSubscriptionKeyExactMatch {
-	return camundaapi.NewMessageSubscriptionKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableMessageSubscriptionKeyExactMatch].
-type NullableMessageSubscriptionKeyExactMatch = camundaapi.NullableMessageSubscriptionKeyExactMatch
-
-func NewNullableMessageSubscriptionKeyExactMatch(val *MessageSubscriptionKeyExactMatch) *NullableMessageSubscriptionKeyExactMatch {
-	return camundaapi.NewNullableMessageSubscriptionKeyExactMatch(val)
-}
-
 // MessageSubscriptionKeyFilterProperty - MessageSubscriptionKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.MessageSubscriptionKeyFilterProperty].
@@ -13346,33 +12428,6 @@ func NewNullableMessageSubscriptionStateEnum(val *MessageSubscriptionStateEnum) 
 	return camundaapi.NewNullableMessageSubscriptionStateEnum(val)
 }
 
-// MessageSubscriptionStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.MessageSubscriptionStateExactMatch].
-type MessageSubscriptionStateExactMatch = camundaapi.MessageSubscriptionStateExactMatch
-
-// NewMessageSubscriptionStateExactMatch instantiates a new MessageSubscriptionStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewMessageSubscriptionStateExactMatch() *MessageSubscriptionStateExactMatch {
-	return camundaapi.NewMessageSubscriptionStateExactMatch()
-}
-
-// NewMessageSubscriptionStateExactMatchWithDefaults instantiates a new MessageSubscriptionStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewMessageSubscriptionStateExactMatchWithDefaults() *MessageSubscriptionStateExactMatch {
-	return camundaapi.NewMessageSubscriptionStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableMessageSubscriptionStateExactMatch].
-type NullableMessageSubscriptionStateExactMatch = camundaapi.NullableMessageSubscriptionStateExactMatch
-
-func NewNullableMessageSubscriptionStateExactMatch(val *MessageSubscriptionStateExactMatch) *NullableMessageSubscriptionStateExactMatch {
-	return camundaapi.NewNullableMessageSubscriptionStateExactMatch(val)
-}
-
 // MessageSubscriptionStateFilterProperty - MessageSubscriptionStateEnum with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.MessageSubscriptionStateFilterProperty].
@@ -13422,33 +12477,6 @@ type NullableMessageSubscriptionTypeEnum = camundaapi.NullableMessageSubscriptio
 
 func NewNullableMessageSubscriptionTypeEnum(val *MessageSubscriptionTypeEnum) *NullableMessageSubscriptionTypeEnum {
 	return camundaapi.NewNullableMessageSubscriptionTypeEnum(val)
-}
-
-// MessageSubscriptionTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.MessageSubscriptionTypeExactMatch].
-type MessageSubscriptionTypeExactMatch = camundaapi.MessageSubscriptionTypeExactMatch
-
-// NewMessageSubscriptionTypeExactMatch instantiates a new MessageSubscriptionTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewMessageSubscriptionTypeExactMatch() *MessageSubscriptionTypeExactMatch {
-	return camundaapi.NewMessageSubscriptionTypeExactMatch()
-}
-
-// NewMessageSubscriptionTypeExactMatchWithDefaults instantiates a new MessageSubscriptionTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewMessageSubscriptionTypeExactMatchWithDefaults() *MessageSubscriptionTypeExactMatch {
-	return camundaapi.NewMessageSubscriptionTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableMessageSubscriptionTypeExactMatch].
-type NullableMessageSubscriptionTypeExactMatch = camundaapi.NullableMessageSubscriptionTypeExactMatch
-
-func NewNullableMessageSubscriptionTypeExactMatch(val *MessageSubscriptionTypeExactMatch) *NullableMessageSubscriptionTypeExactMatch {
-	return camundaapi.NewNullableMessageSubscriptionTypeExactMatch(val)
 }
 
 // MessageSubscriptionTypeFilterProperty - MessageSubscriptionTypeEnum with full advanced search capabilities.
@@ -13608,33 +12636,6 @@ type NullableOffsetPagination = camundaapi.NullableOffsetPagination
 
 func NewNullableOffsetPagination(val *OffsetPagination) *NullableOffsetPagination {
 	return camundaapi.NewNullableOffsetPagination(val)
-}
-
-// OperationTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.OperationTypeExactMatch].
-type OperationTypeExactMatch = camundaapi.OperationTypeExactMatch
-
-// NewOperationTypeExactMatch instantiates a new OperationTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewOperationTypeExactMatch() *OperationTypeExactMatch {
-	return camundaapi.NewOperationTypeExactMatch()
-}
-
-// NewOperationTypeExactMatchWithDefaults instantiates a new OperationTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewOperationTypeExactMatchWithDefaults() *OperationTypeExactMatch {
-	return camundaapi.NewOperationTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableOperationTypeExactMatch].
-type NullableOperationTypeExactMatch = camundaapi.NullableOperationTypeExactMatch
-
-func NewNullableOperationTypeExactMatch(val *OperationTypeExactMatch) *NullableOperationTypeExactMatch {
-	return camundaapi.NewNullableOperationTypeExactMatch(val)
 }
 
 // OperationTypeFilterProperty - AuditLogOperationTypeEnum property with full advanced search capabilities.
@@ -14353,33 +13354,6 @@ type NullableProcessDefinitionInstanceVersionStatisticsResult = camundaapi.Nulla
 
 func NewNullableProcessDefinitionInstanceVersionStatisticsResult(val *ProcessDefinitionInstanceVersionStatisticsResult) *NullableProcessDefinitionInstanceVersionStatisticsResult {
 	return camundaapi.NewNullableProcessDefinitionInstanceVersionStatisticsResult(val)
-}
-
-// ProcessDefinitionKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ProcessDefinitionKeyExactMatch].
-type ProcessDefinitionKeyExactMatch = camundaapi.ProcessDefinitionKeyExactMatch
-
-// NewProcessDefinitionKeyExactMatch instantiates a new ProcessDefinitionKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewProcessDefinitionKeyExactMatch() *ProcessDefinitionKeyExactMatch {
-	return camundaapi.NewProcessDefinitionKeyExactMatch()
-}
-
-// NewProcessDefinitionKeyExactMatchWithDefaults instantiates a new ProcessDefinitionKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewProcessDefinitionKeyExactMatchWithDefaults() *ProcessDefinitionKeyExactMatch {
-	return camundaapi.NewProcessDefinitionKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableProcessDefinitionKeyExactMatch].
-type NullableProcessDefinitionKeyExactMatch = camundaapi.NullableProcessDefinitionKeyExactMatch
-
-func NewNullableProcessDefinitionKeyExactMatch(val *ProcessDefinitionKeyExactMatch) *NullableProcessDefinitionKeyExactMatch {
-	return camundaapi.NewNullableProcessDefinitionKeyExactMatch(val)
 }
 
 // ProcessDefinitionKeyFilterProperty - ProcessDefinitionKey property with full advanced search capabilities.
@@ -15160,33 +14134,6 @@ func NewNullableProcessInstanceIncidentResolutionBatchOperationRequest(val *Proc
 	return camundaapi.NewNullableProcessInstanceIncidentResolutionBatchOperationRequest(val)
 }
 
-// ProcessInstanceKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ProcessInstanceKeyExactMatch].
-type ProcessInstanceKeyExactMatch = camundaapi.ProcessInstanceKeyExactMatch
-
-// NewProcessInstanceKeyExactMatch instantiates a new ProcessInstanceKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewProcessInstanceKeyExactMatch() *ProcessInstanceKeyExactMatch {
-	return camundaapi.NewProcessInstanceKeyExactMatch()
-}
-
-// NewProcessInstanceKeyExactMatchWithDefaults instantiates a new ProcessInstanceKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewProcessInstanceKeyExactMatchWithDefaults() *ProcessInstanceKeyExactMatch {
-	return camundaapi.NewProcessInstanceKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableProcessInstanceKeyExactMatch].
-type NullableProcessInstanceKeyExactMatch = camundaapi.NullableProcessInstanceKeyExactMatch
-
-func NewNullableProcessInstanceKeyExactMatch(val *ProcessInstanceKeyExactMatch) *NullableProcessInstanceKeyExactMatch {
-	return camundaapi.NewNullableProcessInstanceKeyExactMatch(val)
-}
-
 // ProcessInstanceKeyFilterProperty - ProcessInstanceKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.ProcessInstanceKeyFilterProperty].
@@ -15748,33 +14695,6 @@ func NewNullableProcessInstanceStateEnum(val *ProcessInstanceStateEnum) *Nullabl
 	return camundaapi.NewNullableProcessInstanceStateEnum(val)
 }
 
-// ProcessInstanceStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ProcessInstanceStateExactMatch].
-type ProcessInstanceStateExactMatch = camundaapi.ProcessInstanceStateExactMatch
-
-// NewProcessInstanceStateExactMatch instantiates a new ProcessInstanceStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewProcessInstanceStateExactMatch() *ProcessInstanceStateExactMatch {
-	return camundaapi.NewProcessInstanceStateExactMatch()
-}
-
-// NewProcessInstanceStateExactMatchWithDefaults instantiates a new ProcessInstanceStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewProcessInstanceStateExactMatchWithDefaults() *ProcessInstanceStateExactMatch {
-	return camundaapi.NewProcessInstanceStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableProcessInstanceStateExactMatch].
-type NullableProcessInstanceStateExactMatch = camundaapi.NullableProcessInstanceStateExactMatch
-
-func NewNullableProcessInstanceStateExactMatch(val *ProcessInstanceStateExactMatch) *NullableProcessInstanceStateExactMatch {
-	return camundaapi.NewNullableProcessInstanceStateExactMatch(val)
-}
-
 // ProcessInstanceStateFilterProperty - ProcessInstanceStateEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.ProcessInstanceStateFilterProperty].
@@ -15906,33 +14826,6 @@ func NewNullableProtectionModeEnum(val *ProtectionModeEnum) *NullableProtectionM
 	return camundaapi.NewNullableProtectionModeEnum(val)
 }
 
-// ProtectionModeExactMatch Matches variables that have this protection mode.
-//
-// Fields and methods are documented on [camundaapi.ProtectionModeExactMatch].
-type ProtectionModeExactMatch = camundaapi.ProtectionModeExactMatch
-
-// NewProtectionModeExactMatch instantiates a new ProtectionModeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewProtectionModeExactMatch() *ProtectionModeExactMatch {
-	return camundaapi.NewProtectionModeExactMatch()
-}
-
-// NewProtectionModeExactMatchWithDefaults instantiates a new ProtectionModeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewProtectionModeExactMatchWithDefaults() *ProtectionModeExactMatch {
-	return camundaapi.NewProtectionModeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableProtectionModeExactMatch].
-type NullableProtectionModeExactMatch = camundaapi.NullableProtectionModeExactMatch
-
-func NewNullableProtectionModeExactMatch(val *ProtectionModeExactMatch) *NullableProtectionModeExactMatch {
-	return camundaapi.NewNullableProtectionModeExactMatch(val)
-}
-
 // ProtectionModeFilterProperty - ProtectionModeEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.ProtectionModeFilterProperty].
@@ -16034,33 +14927,6 @@ type NullableResourceFilter = camundaapi.NullableResourceFilter
 
 func NewNullableResourceFilter(val *ResourceFilter) *NullableResourceFilter {
 	return camundaapi.NewNullableResourceFilter(val)
-}
-
-// ResourceKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ResourceKeyExactMatch].
-type ResourceKeyExactMatch = camundaapi.ResourceKeyExactMatch
-
-// NewResourceKeyExactMatch instantiates a new ResourceKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewResourceKeyExactMatch() *ResourceKeyExactMatch {
-	return camundaapi.NewResourceKeyExactMatch()
-}
-
-// NewResourceKeyExactMatchWithDefaults instantiates a new ResourceKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewResourceKeyExactMatchWithDefaults() *ResourceKeyExactMatch {
-	return camundaapi.NewResourceKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableResourceKeyExactMatch].
-type NullableResourceKeyExactMatch = camundaapi.NullableResourceKeyExactMatch
-
-func NewNullableResourceKeyExactMatch(val *ResourceKeyExactMatch) *NullableResourceKeyExactMatch {
-	return camundaapi.NewNullableResourceKeyExactMatch(val)
 }
 
 // ResourceKeyFilterProperty - ResourceKey property with full advanced search capabilities.
@@ -17051,33 +15917,6 @@ type NullableRuntimeBackupState = camundaapi.NullableRuntimeBackupState
 
 func NewNullableRuntimeBackupState(val *RuntimeBackupState) *NullableRuntimeBackupState {
 	return camundaapi.NewNullableRuntimeBackupState(val)
-}
-
-// ScopeKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.ScopeKeyExactMatch].
-type ScopeKeyExactMatch = camundaapi.ScopeKeyExactMatch
-
-// NewScopeKeyExactMatch instantiates a new ScopeKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewScopeKeyExactMatch() *ScopeKeyExactMatch {
-	return camundaapi.NewScopeKeyExactMatch()
-}
-
-// NewScopeKeyExactMatchWithDefaults instantiates a new ScopeKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewScopeKeyExactMatchWithDefaults() *ScopeKeyExactMatch {
-	return camundaapi.NewScopeKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableScopeKeyExactMatch].
-type NullableScopeKeyExactMatch = camundaapi.NullableScopeKeyExactMatch
-
-func NewNullableScopeKeyExactMatch(val *ScopeKeyExactMatch) *NullableScopeKeyExactMatch {
-	return camundaapi.NewNullableScopeKeyExactMatch(val)
 }
 
 // ScopeKeyFilterProperty - ScopeKey property with full advanced search capabilities. Filter by the key of the element instance or process instance that defines the scope of a variable.
@@ -19226,33 +18065,6 @@ func NewNullableUserTaskStateEnum(val *UserTaskStateEnum) *NullableUserTaskState
 	return camundaapi.NewNullableUserTaskStateEnum(val)
 }
 
-// UserTaskStateExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.UserTaskStateExactMatch].
-type UserTaskStateExactMatch = camundaapi.UserTaskStateExactMatch
-
-// NewUserTaskStateExactMatch instantiates a new UserTaskStateExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewUserTaskStateExactMatch() *UserTaskStateExactMatch {
-	return camundaapi.NewUserTaskStateExactMatch()
-}
-
-// NewUserTaskStateExactMatchWithDefaults instantiates a new UserTaskStateExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewUserTaskStateExactMatchWithDefaults() *UserTaskStateExactMatch {
-	return camundaapi.NewUserTaskStateExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableUserTaskStateExactMatch].
-type NullableUserTaskStateExactMatch = camundaapi.NullableUserTaskStateExactMatch
-
-func NewNullableUserTaskStateExactMatch(val *UserTaskStateExactMatch) *NullableUserTaskStateExactMatch {
-	return camundaapi.NewNullableUserTaskStateExactMatch(val)
-}
-
 // UserTaskStateFilterProperty - UserTaskStateEnum property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.UserTaskStateFilterProperty].
@@ -19489,33 +18301,6 @@ type NullableVariableFilter = camundaapi.NullableVariableFilter
 
 func NewNullableVariableFilter(val *VariableFilter) *NullableVariableFilter {
 	return camundaapi.NewNullableVariableFilter(val)
-}
-
-// VariableKeyExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.VariableKeyExactMatch].
-type VariableKeyExactMatch = camundaapi.VariableKeyExactMatch
-
-// NewVariableKeyExactMatch instantiates a new VariableKeyExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewVariableKeyExactMatch() *VariableKeyExactMatch {
-	return camundaapi.NewVariableKeyExactMatch()
-}
-
-// NewVariableKeyExactMatchWithDefaults instantiates a new VariableKeyExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewVariableKeyExactMatchWithDefaults() *VariableKeyExactMatch {
-	return camundaapi.NewVariableKeyExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableVariableKeyExactMatch].
-type NullableVariableKeyExactMatch = camundaapi.NullableVariableKeyExactMatch
-
-func NewNullableVariableKeyExactMatch(val *VariableKeyExactMatch) *NullableVariableKeyExactMatch {
-	return camundaapi.NewNullableVariableKeyExactMatch(val)
 }
 
 // VariableKeyFilterProperty - VariableKey property with full advanced search capabilities.
@@ -19852,33 +18637,6 @@ func NewNullableWaitStateElementTypeEnum(val *WaitStateElementTypeEnum) *Nullabl
 	return camundaapi.NewNullableWaitStateElementTypeEnum(val)
 }
 
-// WaitStateElementTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.WaitStateElementTypeExactMatch].
-type WaitStateElementTypeExactMatch = camundaapi.WaitStateElementTypeExactMatch
-
-// NewWaitStateElementTypeExactMatch instantiates a new WaitStateElementTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewWaitStateElementTypeExactMatch() *WaitStateElementTypeExactMatch {
-	return camundaapi.NewWaitStateElementTypeExactMatch()
-}
-
-// NewWaitStateElementTypeExactMatchWithDefaults instantiates a new WaitStateElementTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewWaitStateElementTypeExactMatchWithDefaults() *WaitStateElementTypeExactMatch {
-	return camundaapi.NewWaitStateElementTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableWaitStateElementTypeExactMatch].
-type NullableWaitStateElementTypeExactMatch = camundaapi.NullableWaitStateElementTypeExactMatch
-
-func NewNullableWaitStateElementTypeExactMatch(val *WaitStateElementTypeExactMatch) *NullableWaitStateElementTypeExactMatch {
-	return camundaapi.NewNullableWaitStateElementTypeExactMatch(val)
-}
-
 // WaitStateElementTypeFilterProperty - Element type property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.WaitStateElementTypeFilterProperty].
@@ -19932,33 +18690,6 @@ type NullableWaitStateTypeEnum = camundaapi.NullableWaitStateTypeEnum
 
 func NewNullableWaitStateTypeEnum(val *WaitStateTypeEnum) *NullableWaitStateTypeEnum {
 	return camundaapi.NewNullableWaitStateTypeEnum(val)
-}
-
-// WaitStateTypeExactMatch Matches the value exactly.
-//
-// Fields and methods are documented on [camundaapi.WaitStateTypeExactMatch].
-type WaitStateTypeExactMatch = camundaapi.WaitStateTypeExactMatch
-
-// NewWaitStateTypeExactMatch instantiates a new WaitStateTypeExactMatch object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewWaitStateTypeExactMatch() *WaitStateTypeExactMatch {
-	return camundaapi.NewWaitStateTypeExactMatch()
-}
-
-// NewWaitStateTypeExactMatchWithDefaults instantiates a new WaitStateTypeExactMatch object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewWaitStateTypeExactMatchWithDefaults() *WaitStateTypeExactMatch {
-	return camundaapi.NewWaitStateTypeExactMatchWithDefaults()
-}
-
-// Fields and methods are documented on [camundaapi.NullableWaitStateTypeExactMatch].
-type NullableWaitStateTypeExactMatch = camundaapi.NullableWaitStateTypeExactMatch
-
-func NewNullableWaitStateTypeExactMatch(val *WaitStateTypeExactMatch) *NullableWaitStateTypeExactMatch {
-	return camundaapi.NewNullableWaitStateTypeExactMatch(val)
 }
 
 // WaitStateTypeFilterProperty - Wait state type property with full advanced search capabilities.
@@ -21079,18 +19810,159 @@ func NewNullableUserTaskKey(val *UserTaskKey) *NullableUserTaskKey {
 	return camundaapi.NewNullableUserTaskKey(val)
 }
 
-// *ExactMatch union branches are exact-value matches on a semantic key. Each is
-// an alias to its base key type (hook 01) so the generated union structs compile
-// and (un)marshal as the underlying scalar.
+// *ExactMatch union branches are exact-value matches on a key or enum. Each is
+// an alias to its base type so the generated union structs compile and
+// (un)marshal as the underlying scalar.
 //
+// Fields and methods are documented on [camundaapi.AgentDefinitionKeyExactMatch].
+type AgentDefinitionKeyExactMatch = camundaapi.AgentDefinitionKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.AgentDefinitionTypeExactMatch].
+type AgentDefinitionTypeExactMatch = camundaapi.AgentDefinitionTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.AgentHistoryItemKeyExactMatch].
+type AgentHistoryItemKeyExactMatch = camundaapi.AgentHistoryItemKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.AgentInstanceHistoryCommitStatusExactMatch].
+type AgentInstanceHistoryCommitStatusExactMatch = camundaapi.AgentInstanceHistoryCommitStatusExactMatch
+
+// Fields and methods are documented on [camundaapi.AgentInstanceHistoryRoleExactMatch].
+type AgentInstanceHistoryRoleExactMatch = camundaapi.AgentInstanceHistoryRoleExactMatch
+
+// Fields and methods are documented on [camundaapi.AgentInstanceKeyExactMatch].
+type AgentInstanceKeyExactMatch = camundaapi.AgentInstanceKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.AgentInstanceStatusExactMatch].
+type AgentInstanceStatusExactMatch = camundaapi.AgentInstanceStatusExactMatch
+
+// Fields and methods are documented on [camundaapi.AuditLogActorTypeExactMatch].
+type AuditLogActorTypeExactMatch = camundaapi.AuditLogActorTypeExactMatch
+
 // Fields and methods are documented on [camundaapi.AuditLogEntityKeyExactMatch].
 type AuditLogEntityKeyExactMatch = camundaapi.AuditLogEntityKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.AuditLogKeyExactMatch].
+type AuditLogKeyExactMatch = camundaapi.AuditLogKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.AuditLogResultExactMatch].
+type AuditLogResultExactMatch = camundaapi.AuditLogResultExactMatch
+
+// Fields and methods are documented on [camundaapi.BatchOperationItemStateExactMatch].
+type BatchOperationItemStateExactMatch = camundaapi.BatchOperationItemStateExactMatch
+
+// Fields and methods are documented on [camundaapi.BatchOperationStateExactMatch].
+type BatchOperationStateExactMatch = camundaapi.BatchOperationStateExactMatch
+
+// Fields and methods are documented on [camundaapi.BatchOperationTypeExactMatch].
+type BatchOperationTypeExactMatch = camundaapi.BatchOperationTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.CategoryExactMatch].
+type CategoryExactMatch = camundaapi.CategoryExactMatch
+
+// Fields and methods are documented on [camundaapi.ClusterVariableKindExactMatch].
+type ClusterVariableKindExactMatch = camundaapi.ClusterVariableKindExactMatch
+
+// Fields and methods are documented on [camundaapi.ClusterVariableScopeExactMatch].
+type ClusterVariableScopeExactMatch = camundaapi.ClusterVariableScopeExactMatch
+
+// Fields and methods are documented on [camundaapi.DecisionDefinitionKeyExactMatch].
+type DecisionDefinitionKeyExactMatch = camundaapi.DecisionDefinitionKeyExactMatch
 
 // Fields and methods are documented on [camundaapi.DecisionEvaluationInstanceKeyExactMatch].
 type DecisionEvaluationInstanceKeyExactMatch = camundaapi.DecisionEvaluationInstanceKeyExactMatch
 
+// Fields and methods are documented on [camundaapi.DecisionEvaluationKeyExactMatch].
+type DecisionEvaluationKeyExactMatch = camundaapi.DecisionEvaluationKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.DecisionInstanceStateExactMatch].
+type DecisionInstanceStateExactMatch = camundaapi.DecisionInstanceStateExactMatch
+
+// Fields and methods are documented on [camundaapi.DecisionRequirementsKeyExactMatch].
+type DecisionRequirementsKeyExactMatch = camundaapi.DecisionRequirementsKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.DeploymentKeyExactMatch].
+type DeploymentKeyExactMatch = camundaapi.DeploymentKeyExactMatch
+
 // Fields and methods are documented on [camundaapi.ElementIdExactMatch].
 type ElementIdExactMatch = camundaapi.ElementIdExactMatch
 
+// Fields and methods are documented on [camundaapi.ElementInstanceKeyExactMatch].
+type ElementInstanceKeyExactMatch = camundaapi.ElementInstanceKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.ElementInstanceStateExactMatch].
+type ElementInstanceStateExactMatch = camundaapi.ElementInstanceStateExactMatch
+
+// Fields and methods are documented on [camundaapi.EntityTypeExactMatch].
+type EntityTypeExactMatch = camundaapi.EntityTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.FormKeyExactMatch].
+type FormKeyExactMatch = camundaapi.FormKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.GlobalListenerSourceExactMatch].
+type GlobalListenerSourceExactMatch = camundaapi.GlobalListenerSourceExactMatch
+
+// Fields and methods are documented on [camundaapi.GlobalTaskListenerEventTypeExactMatch].
+type GlobalTaskListenerEventTypeExactMatch = camundaapi.GlobalTaskListenerEventTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.IncidentErrorTypeExactMatch].
+type IncidentErrorTypeExactMatch = camundaapi.IncidentErrorTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.IncidentStateExactMatch].
+type IncidentStateExactMatch = camundaapi.IncidentStateExactMatch
+
+// Fields and methods are documented on [camundaapi.JobKeyExactMatch].
+type JobKeyExactMatch = camundaapi.JobKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.JobKindExactMatch].
+type JobKindExactMatch = camundaapi.JobKindExactMatch
+
+// Fields and methods are documented on [camundaapi.JobListenerEventTypeExactMatch].
+type JobListenerEventTypeExactMatch = camundaapi.JobListenerEventTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.JobStateExactMatch].
+type JobStateExactMatch = camundaapi.JobStateExactMatch
+
+// Fields and methods are documented on [camundaapi.MessageSubscriptionKeyExactMatch].
+type MessageSubscriptionKeyExactMatch = camundaapi.MessageSubscriptionKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.MessageSubscriptionStateExactMatch].
+type MessageSubscriptionStateExactMatch = camundaapi.MessageSubscriptionStateExactMatch
+
+// Fields and methods are documented on [camundaapi.MessageSubscriptionTypeExactMatch].
+type MessageSubscriptionTypeExactMatch = camundaapi.MessageSubscriptionTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.OperationTypeExactMatch].
+type OperationTypeExactMatch = camundaapi.OperationTypeExactMatch
+
 // Fields and methods are documented on [camundaapi.ProcessDefinitionIdExactMatch].
 type ProcessDefinitionIdExactMatch = camundaapi.ProcessDefinitionIdExactMatch
+
+// Fields and methods are documented on [camundaapi.ProcessDefinitionKeyExactMatch].
+type ProcessDefinitionKeyExactMatch = camundaapi.ProcessDefinitionKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.ProcessInstanceKeyExactMatch].
+type ProcessInstanceKeyExactMatch = camundaapi.ProcessInstanceKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.ProcessInstanceStateExactMatch].
+type ProcessInstanceStateExactMatch = camundaapi.ProcessInstanceStateExactMatch
+
+// Fields and methods are documented on [camundaapi.ProtectionModeExactMatch].
+type ProtectionModeExactMatch = camundaapi.ProtectionModeExactMatch
+
+// Fields and methods are documented on [camundaapi.ResourceKeyExactMatch].
+type ResourceKeyExactMatch = camundaapi.ResourceKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.ScopeKeyExactMatch].
+type ScopeKeyExactMatch = camundaapi.ScopeKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.UserTaskStateExactMatch].
+type UserTaskStateExactMatch = camundaapi.UserTaskStateExactMatch
+
+// Fields and methods are documented on [camundaapi.VariableKeyExactMatch].
+type VariableKeyExactMatch = camundaapi.VariableKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.WaitStateElementTypeExactMatch].
+type WaitStateElementTypeExactMatch = camundaapi.WaitStateElementTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.WaitStateTypeExactMatch].
+type WaitStateTypeExactMatch = camundaapi.WaitStateTypeExactMatch

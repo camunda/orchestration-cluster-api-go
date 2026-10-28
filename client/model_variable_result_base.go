@@ -264,7 +264,6 @@ func (o *VariableResultBase) UnmarshalJSON(data []byte) (err error) {
 		"scopeKey",
 		"processInstanceKey",
 		"rootProcessInstanceKey",
-		"metadata",
 	}
 
 	allProperties := make(map[string]interface{})

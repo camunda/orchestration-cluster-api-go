@@ -320,7 +320,6 @@ func (o *VariableSearchResult) UnmarshalJSON(data []byte) (err error) {
 		"scopeKey",
 		"processInstanceKey",
 		"rootProcessInstanceKey",
-		"metadata",
 		"value",
 		"isTruncated",
 	}
