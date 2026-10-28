@@ -119,6 +119,11 @@ func (c *CamundaClient) withDefaultTenantProcessInstanceCreation(body ProcessIns
 		cp.SetTenantId(camundaapi.MustTenantId(d))
 		body.ProcessInstanceCreationInstructionByKey = &cp
 	}
+	if b := body.ProcessInstanceCreationInstructionByVersionTag; b != nil && b.TenantId == nil {
+		cp := *b
+		cp.SetTenantId(camundaapi.MustTenantId(d))
+		body.ProcessInstanceCreationInstructionByVersionTag = &cp
+	}
 	return body
 }
 
