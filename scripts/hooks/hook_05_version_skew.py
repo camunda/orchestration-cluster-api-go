@@ -48,6 +48,12 @@ VERSION_SKEW_OPTIONAL = [
     # emitted by 8.10.0-alpha3. Blocks CreateProcessInstance/searches/reads.
     # Drop when the pinned server emits it.
     "suspendedDate",
+    # TEMPORARY: added on camunda `main` (2026-10-22..27) and required on
+    # ProcessInstanceResult, IncidentResult, DecisionInstanceResult and
+    # DecisionInstanceGetQueryResult, but not emitted by 8.10.0-alpha3. Blocks
+    # process-instance, incident and decision-instance reads/searches. Drop when
+    # the pinned server emits it.
+    "storageOrdinal",
 ]
 
 # Fields relaxed only within a specific model file. DeploymentMetadataResult
