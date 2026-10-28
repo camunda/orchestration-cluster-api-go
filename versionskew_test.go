@@ -192,3 +192,29 @@ func TestProcessInstanceResultDecodesWithoutSuspendedDate(t *testing.T) {
 		t.Error("omitted suspendedDate should be unset")
 	}
 }
+
+// TestVariableResultsDecodeWithoutMetadata guards variable `metadata`: required on
+// camunda `main` but not emitted by 8.10.0-alpha3, so GetVariable and non-empty
+// SearchVariables failed to decode. Relaxed per model (not globally) because
+// `metadata` is genuinely required on cluster-variable and document models.
+func TestVariableResultsDecodeWithoutMetadata(t *testing.T) {
+	const base = `"name": "orderId", "tenantId": "<default>", "variableKey": "2251799813685300",
+  "scopeKey": "2251799813685251", "processInstanceKey": "2251799813685251",
+  "rootProcessInstanceKey": "2251799813685251"`
+
+	cases := map[string]struct {
+		body string
+		into any
+	}{
+		"VariableResult":       {`{` + base + `, "value": "\"A-1\""}`, &camundaapi.VariableResult{}},
+		"VariableSearchResult": {`{` + base + `, "value": "\"A-1\"", "isTruncated": false}`, &camundaapi.VariableSearchResult{}},
+		"VariableResultBase":   {`{` + base + `}`, &camundaapi.VariableResultBase{}},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			if err := json.Unmarshal([]byte(tc.body), tc.into); err != nil {
+				t.Fatalf("a variable response must decode without metadata: %v", err)
+			}
+		})
+	}
+}

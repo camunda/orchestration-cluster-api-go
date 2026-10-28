@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -162,6 +163,17 @@ func TestDefaultTenantInjectedIntoRequestBodies(t *testing.T) {
 		client := bc.client(t, camunda.WithDefaultTenantID("acme"), camunda.WithFalcon(false))
 		byKey := camundaapi.NewProcessInstanceCreationInstructionByKey(camundaapi.MustProcessDefinitionKey("2251799813685360"))
 		instruction := camundaapi.ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction(byKey)
+		_, _ = client.CreateProcessInstance(context.Background(), instruction)
+		if got := bc.tenantOf(); got != "acme" {
+			t.Errorf("tenantId = %q, want %q", got, "acme")
+		}
+	})
+
+	t.Run("CreateProcessInstanceByVersionTag", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"), camunda.WithFalcon(false))
+		byTag := camundaapi.NewProcessInstanceCreationInstructionByVersionTag(camundaapi.MustProcessDefinitionId("proc"), "v2")
+		instruction := camundaapi.ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction(byTag)
 		_, _ = client.CreateProcessInstance(context.Background(), instruction)
 		if got := bc.tenantOf(); got != "acme" {
 			t.Errorf("tenantId = %q, want %q", got, "acme")
@@ -373,6 +385,20 @@ func TestDefaultTenantDoesNotMutateCallerInstruction(t *testing.T) {
 		}
 	})
 
+	t.Run("ProcessInstanceCreationByVersionTag", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"), camunda.WithFalcon(false))
+		byTag := camundaapi.NewProcessInstanceCreationInstructionByVersionTag(camundaapi.MustProcessDefinitionId("proc"), "v2")
+		instruction := camundaapi.ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction(byTag)
+		_, _ = client.CreateProcessInstance(context.Background(), instruction)
+		if got := bc.tenantOf(); got != "acme" {
+			t.Errorf("request tenantId = %q, want %q", got, "acme")
+		}
+		if byTag.TenantId != nil {
+			t.Errorf("caller's variant mutated: TenantId = %q, want nil", *byTag.TenantId)
+		}
+	})
+
 	// Reusing one instruction across two clients with different defaults must
 	// send each client's tenant — only possible when the first call left the
 	// caller's instruction untouched.
@@ -440,4 +466,38 @@ func TestInvalidDefaultTenantIDRejectedAtConfig(t *testing.T) {
 			}
 		}
 	})
+}
+
+// Every variant of the creation union — including ones a future spec adds —
+// must receive the default tenant without mutating the caller's variant.
+func TestDefaultTenantReachesEveryProcessInstanceCreationVariant(t *testing.T) {
+	union := reflect.TypeOf(camundaapi.ProcessInstanceCreationInstruction{})
+	checked := 0
+	for i := 0; i < union.NumField(); i++ {
+		field := union.Field(i)
+		if field.Type.Kind() != reflect.Pointer || field.Type.Elem().Kind() != reflect.Struct {
+			continue
+		}
+		if _, ok := field.Type.Elem().FieldByName("TenantId"); !ok {
+			t.Fatalf("%s has no TenantId field", field.Name)
+		}
+		checked++
+		t.Run(field.Name, func(t *testing.T) {
+			bc := newBodyCapture(t)
+			client := bc.client(t, camunda.WithDefaultTenantID("acme"), camunda.WithFalcon(false))
+			variant := reflect.New(field.Type.Elem())
+			var instruction camundaapi.ProcessInstanceCreationInstruction
+			reflect.ValueOf(&instruction).Elem().Field(i).Set(variant)
+			_, _ = client.CreateProcessInstance(context.Background(), instruction)
+			if got := bc.tenantOf(); got != "acme" {
+				t.Errorf("request tenantId = %q, want %q", got, "acme")
+			}
+			if !variant.Elem().FieldByName("TenantId").IsNil() {
+				t.Errorf("caller's variant mutated")
+			}
+		})
+	}
+	if checked < 3 {
+		t.Fatalf("found %d union variants, want at least 3", checked)
+	}
 }

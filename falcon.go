@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 
 	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
@@ -215,6 +216,36 @@ func (c *CamundaClient) CreateProcessInstance(ctx context.Context, body ProcessI
 	return value, c.wrapError(resp, err)
 }
 
+// falconCreateFields are the creation-instruction fields the command stream carries.
+var falconCreateFields = map[string]bool{
+	"ProcessDefinitionId":  true,
+	"ProcessDefinitionKey": true,
+	"TenantId":             true,
+	"Variables":            true,
+	"AwaitCompletion":      true,
+	"FetchVariables":       true,
+	"RequestTimeout":       true,
+}
+
+// falconUnsupportedField names the first set field of a creation-instruction variant
+// that the command stream cannot carry, or "" if there is none. Fields a future spec
+// adds are unsupported by default, so they route to REST instead of being dropped.
+func falconUnsupportedField(variant any) string {
+	v := reflect.ValueOf(variant).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Type().Field(i)
+		if !f.IsExported() || falconCreateFields[f.Name] || v.Field(i).IsZero() {
+			continue
+		}
+		// The stream always resolves the latest version, which is what -1 asks for.
+		if f.Name == "ProcessDefinitionVersion" && v.Field(i).Elem().Int() == -1 {
+			continue
+		}
+		return f.Name
+	}
+	return ""
+}
+
 // createProcessInstanceFalcon routes a create over the command stream. It returns
 // (result, true, nil) on success, (nil, false, nil) to signal a transparent
 // fall-back to REST (the producer could not be started), or (nil, false, err) for
@@ -230,6 +261,10 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	switch {
 	case body.ProcessInstanceCreationInstructionById != nil:
 		b := body.ProcessInstanceCreationInstructionById
+		if f := falconUnsupportedField(b); f != "" {
+			c.logger.Debug("create sets a field the command stream cannot carry; using REST", "field", f)
+			return nil, false, nil
+		}
 		id = b.ProcessDefinitionId.String()
 		version = b.ProcessDefinitionVersion
 		tenant = c.tenantIDOrDefault(b.TenantId)
@@ -244,6 +279,10 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 		}
 	case body.ProcessInstanceCreationInstructionByKey != nil:
 		b := body.ProcessInstanceCreationInstructionByKey
+		if f := falconUnsupportedField(b); f != "" {
+			c.logger.Debug("create sets a field the command stream cannot carry; using REST", "field", f)
+			return nil, false, nil
+		}
 		key = string(b.ProcessDefinitionKey)
 		version = b.ProcessDefinitionVersion
 		tenant = c.tenantIDOrDefault(b.TenantId)

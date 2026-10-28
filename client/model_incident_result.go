@@ -48,6 +48,8 @@ type IncidentResult struct {
 	ElementInstanceKey ElementInstanceKey `json:"elementInstanceKey"`
 	// The job key, if exists, associated with this incident.
 	JobKey NullableJobKey `json:"jobKey"`
+	// The storage ordinal this incident's data belongs to. This is `null` for data exported before storage ordinals were introduced in version 8.11.
+	StorageOrdinal NullableInt32 `json:"storageOrdinal"`
 }
 
 type _IncidentResult IncidentResult
@@ -56,7 +58,7 @@ type _IncidentResult IncidentResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewIncidentResult(processDefinitionId ProcessDefinitionId, errorType IncidentErrorTypeEnum, errorMessage string, elementId ElementId, creationTime time.Time, state IncidentStateEnum, tenantId TenantId, incidentKey IncidentKey, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, elementInstanceKey ElementInstanceKey, jobKey NullableJobKey) *IncidentResult {
+func NewIncidentResult(processDefinitionId ProcessDefinitionId, errorType IncidentErrorTypeEnum, errorMessage string, elementId ElementId, creationTime time.Time, state IncidentStateEnum, tenantId TenantId, incidentKey IncidentKey, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, elementInstanceKey ElementInstanceKey, jobKey NullableJobKey, storageOrdinal NullableInt32) *IncidentResult {
 	this := IncidentResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ErrorType = errorType
@@ -71,6 +73,7 @@ func NewIncidentResult(processDefinitionId ProcessDefinitionId, errorType Incide
 	this.RootProcessInstanceKey = rootProcessInstanceKey
 	this.ElementInstanceKey = elementInstanceKey
 	this.JobKey = jobKey
+	this.StorageOrdinal = storageOrdinal
 	return &this
 }
 
@@ -398,6 +401,32 @@ func (o *IncidentResult) SetJobKey(v JobKey) {
 	o.JobKey.Set(&v)
 }
 
+// GetStorageOrdinal returns the StorageOrdinal field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *IncidentResult) GetStorageOrdinal() int32 {
+	if o == nil || o.StorageOrdinal.Get() == nil {
+		var ret int32
+		return ret
+	}
+
+	return *o.StorageOrdinal.Get()
+}
+
+// GetStorageOrdinalOk returns a tuple with the StorageOrdinal field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *IncidentResult) GetStorageOrdinalOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.StorageOrdinal.Get(), o.StorageOrdinal.IsSet()
+}
+
+// SetStorageOrdinal sets field value
+func (o *IncidentResult) SetStorageOrdinal(v int32) {
+	o.StorageOrdinal.Set(&v)
+}
+
 func (o IncidentResult) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -421,6 +450,7 @@ func (o IncidentResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
 	toSerialize["elementInstanceKey"] = o.ElementInstanceKey
 	toSerialize["jobKey"] = o.JobKey.Get()
+	toSerialize["storageOrdinal"] = o.StorageOrdinal.Get()
 	return toSerialize, nil
 }
 
