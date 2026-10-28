@@ -299,8 +299,9 @@ Only ACTIVE and SUSPENDED root instances can be cancelled. A state filter narrow
 to the given states. Requesting any state other than ACTIVE or SUSPENDED through the `$eq` or
 `$in` operators is rejected. Other state operators (`$neq`, `$exists`, `$like`) are applied as
 given, and the batch remains limited to ACTIVE and SUSPENDED instances. Without a state filter,
-both ACTIVE and SUSPENDED instances are selected. Any given filter for parentProcessInstanceKey
-is ignored and overridden during this batch operation.
+both ACTIVE and SUSPENDED instances are selected. Filters on parentProcessInstanceKey are
+preserved and combined with the root-only restriction. Filters selecting only child instances
+therefore match no instances, as children are cancelled together with their root instance.
 This is done asynchronously, the progress can be tracked using the batchOperationKey from the response and the batch operation status endpoint (/batch-operations/{batchOperationKey}).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -425,7 +426,7 @@ CreateProcessInstance Create process instance
 
 Creates and starts an instance of the specified process.
 The process definition to use to create the instance can be specified either using its unique key
-(as returned by Deploy resources), or using the BPMN process id and a version.
+(as returned by Deploy resources), or using the BPMN process id and either a version or a version tag.
 If only the process definition id is given, the latest ACTIVE version is used.
 If no ACTIVE version exists, the request is rejected as not found.
 
