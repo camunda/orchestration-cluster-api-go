@@ -21,30 +21,32 @@ var _ MappedNullable = &ProcessInstanceCreationInstructionByKey{}
 
 // ProcessInstanceCreationInstructionByKey struct for ProcessInstanceCreationInstructionByKey
 type ProcessInstanceCreationInstructionByKey struct {
-	// The unique key identifying the process definition, for example, returned for a process in the deploy resources endpoint.
-	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
-	// As the version is already identified by the `processDefinitionKey`, the value of this field is ignored. It's here for backwards-compatibility only as previous releases accepted it in request bodies.
-	ProcessDefinitionVersion *int32 `json:"processDefinitionVersion,omitempty"`
-	// Set of variables as JSON object to instantiate in the root variable scope of the process instance. Can include nested complex objects.
+	// JSON object that will instantiate the variables for the root variable scope of the process instance.
 	Variables map[string]interface{} `json:"variables,omitempty"`
-	// List of start instructions. By default, the process instance will start at the start event. If provided, the process instance will apply start instructions after it has been created.
-	StartInstructions []ProcessInstanceCreationStartInstruction `json:"startInstructions,omitempty"`
-	// Runtime instructions (alpha). List of instructions that affect the runtime behavior of the process instance. Refer to specific instruction types for more details.  This parameter is an alpha feature and may be subject to change in future releases.
-	RuntimeInstructions []ProcessInstanceCreationTerminateInstruction `json:"runtimeInstructions,omitempty"`
+	// Metadata of the variables, keyed by variable name. Use it to set how a variable is treated, for example to protect its value. A variable without an entry has no metadata.
+	VariablesMetadata *map[string]VariableMetadata `json:"variablesMetadata,omitempty"`
 	// The tenant id of the process definition. If multi-tenancy is enabled, provide the tenant id of the process definition to start a process instance of. If multi-tenancy is disabled, don't provide this parameter.
 	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// A reference key chosen by the user that will be part of all records resulting from this operation. Must be > 0 if provided.
 	OperationReference *int64 `json:"operationReference,omitempty"`
+	// List of start instructions. By default, the process instance will start at the start event. If provided, the process instance will apply start instructions after it has been created.
+	StartInstructions []ProcessInstanceCreationStartInstruction `json:"startInstructions,omitempty"`
+	// Runtime instructions (alpha). List of instructions that affect the runtime behavior of the process instance. Refer to specific instruction types for more details.  This parameter is an alpha feature and may be subject to change in future releases.
+	RuntimeInstructions []ProcessInstanceCreationTerminateInstruction `json:"runtimeInstructions,omitempty"`
 	// Wait for the process instance to complete. If the process instance does not complete within the request timeout limit, a 504 response status will be returned. The process instance will continue to run in the background regardless of the timeout. Disabled by default.
 	AwaitCompletion *bool `json:"awaitCompletion,omitempty"`
-	// Timeout (in ms) the request waits for the process to complete. By default or when set to 0, the generic request timeout configured in the cluster is applied.
-	RequestTimeout *int64 `json:"requestTimeout,omitempty"`
 	// List of variables by name to be included in the response when awaitCompletion is set to true. If empty, all visible variables in the root scope will be returned.
 	FetchVariables []string `json:"fetchVariables,omitempty"`
+	// Timeout (in ms) the request waits for the process to complete. By default or when set to 0, the generic request timeout configured in the cluster is applied.
+	RequestTimeout *int64 `json:"requestTimeout,omitempty"`
 	// List of tags. Tags need to start with a letter; then alphanumerics, `_`, `-`, `:`, or `.`; length ≤ 100.
 	Tags []Tag `json:"tags,omitempty"`
 	// An optional, user-defined string identifier that identifies the process instance within the scope of a process definition (scoped by tenant). If provided and uniqueness enforcement is enabled, the engine will reject creation if another root process instance with the same business id is already active for the same process definition. Note that any active child process instances with the same business id are not taken into account.
 	BusinessId *BusinessId `json:"businessId,omitempty"`
+	// The unique key identifying the process definition, for example, returned for a process in the deploy resources endpoint.
+	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
+	// As the version is already identified by the `processDefinitionKey`, the value of this field is ignored. It's here for backwards-compatibility only as previous releases accepted it in request bodies.
+	ProcessDefinitionVersion *int32 `json:"processDefinitionVersion,omitempty"`
 }
 
 type _ProcessInstanceCreationInstructionByKey ProcessInstanceCreationInstructionByKey
@@ -55,13 +57,13 @@ type _ProcessInstanceCreationInstructionByKey ProcessInstanceCreationInstruction
 // will change when the set of required properties is changed
 func NewProcessInstanceCreationInstructionByKey(processDefinitionKey ProcessDefinitionKey) *ProcessInstanceCreationInstructionByKey {
 	this := ProcessInstanceCreationInstructionByKey{}
-	this.ProcessDefinitionKey = processDefinitionKey
-	var processDefinitionVersion int32 = -1
-	this.ProcessDefinitionVersion = &processDefinitionVersion
 	var awaitCompletion bool = false
 	this.AwaitCompletion = &awaitCompletion
 	var requestTimeout int64 = 0
 	this.RequestTimeout = &requestTimeout
+	this.ProcessDefinitionKey = processDefinitionKey
+	var processDefinitionVersion int32 = -1
+	this.ProcessDefinitionVersion = &processDefinitionVersion
 	return &this
 }
 
@@ -70,69 +72,13 @@ func NewProcessInstanceCreationInstructionByKey(processDefinitionKey ProcessDefi
 // but it doesn't guarantee that properties required by API are set
 func NewProcessInstanceCreationInstructionByKeyWithDefaults() *ProcessInstanceCreationInstructionByKey {
 	this := ProcessInstanceCreationInstructionByKey{}
-	var processDefinitionVersion int32 = -1
-	this.ProcessDefinitionVersion = &processDefinitionVersion
 	var awaitCompletion bool = false
 	this.AwaitCompletion = &awaitCompletion
 	var requestTimeout int64 = 0
 	this.RequestTimeout = &requestTimeout
+	var processDefinitionVersion int32 = -1
+	this.ProcessDefinitionVersion = &processDefinitionVersion
 	return &this
-}
-
-// GetProcessDefinitionKey returns the ProcessDefinitionKey field value
-func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKey() ProcessDefinitionKey {
-	if o == nil {
-		var ret ProcessDefinitionKey
-		return ret
-	}
-
-	return o.ProcessDefinitionKey
-}
-
-// GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
-// and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ProcessDefinitionKey, true
-}
-
-// SetProcessDefinitionKey sets field value
-func (o *ProcessInstanceCreationInstructionByKey) SetProcessDefinitionKey(v ProcessDefinitionKey) {
-	o.ProcessDefinitionKey = v
-}
-
-// GetProcessDefinitionVersion returns the ProcessDefinitionVersion field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionVersion() int32 {
-	if o == nil || IsNil(o.ProcessDefinitionVersion) {
-		var ret int32
-		return ret
-	}
-	return *o.ProcessDefinitionVersion
-}
-
-// GetProcessDefinitionVersionOk returns a tuple with the ProcessDefinitionVersion field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionVersionOk() (*int32, bool) {
-	if o == nil || IsNil(o.ProcessDefinitionVersion) {
-		return nil, false
-	}
-	return o.ProcessDefinitionVersion, true
-}
-
-// HasProcessDefinitionVersion returns a boolean if a field has been set.
-func (o *ProcessInstanceCreationInstructionByKey) HasProcessDefinitionVersion() bool {
-	if o != nil && !IsNil(o.ProcessDefinitionVersion) {
-		return true
-	}
-
-	return false
-}
-
-// SetProcessDefinitionVersion gets a reference to the given int32 and assigns it to the ProcessDefinitionVersion field.
-func (o *ProcessInstanceCreationInstructionByKey) SetProcessDefinitionVersion(v int32) {
-	o.ProcessDefinitionVersion = &v
 }
 
 // GetVariables returns the Variables field value if set, zero value otherwise.
@@ -167,68 +113,36 @@ func (o *ProcessInstanceCreationInstructionByKey) SetVariables(v map[string]inte
 	o.Variables = v
 }
 
-// GetStartInstructions returns the StartInstructions field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionByKey) GetStartInstructions() []ProcessInstanceCreationStartInstruction {
-	if o == nil || IsNil(o.StartInstructions) {
-		var ret []ProcessInstanceCreationStartInstruction
+// GetVariablesMetadata returns the VariablesMetadata field value if set, zero value otherwise.
+func (o *ProcessInstanceCreationInstructionByKey) GetVariablesMetadata() map[string]VariableMetadata {
+	if o == nil || IsNil(o.VariablesMetadata) {
+		var ret map[string]VariableMetadata
 		return ret
 	}
-	return o.StartInstructions
+	return *o.VariablesMetadata
 }
 
-// GetStartInstructionsOk returns a tuple with the StartInstructions field value if set, nil otherwise
+// GetVariablesMetadataOk returns a tuple with the VariablesMetadata field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetStartInstructionsOk() ([]ProcessInstanceCreationStartInstruction, bool) {
-	if o == nil || IsNil(o.StartInstructions) {
+func (o *ProcessInstanceCreationInstructionByKey) GetVariablesMetadataOk() (*map[string]VariableMetadata, bool) {
+	if o == nil || IsNil(o.VariablesMetadata) {
 		return nil, false
 	}
-	return o.StartInstructions, true
+	return o.VariablesMetadata, true
 }
 
-// HasStartInstructions returns a boolean if a field has been set.
-func (o *ProcessInstanceCreationInstructionByKey) HasStartInstructions() bool {
-	if o != nil && !IsNil(o.StartInstructions) {
+// HasVariablesMetadata returns a boolean if a field has been set.
+func (o *ProcessInstanceCreationInstructionByKey) HasVariablesMetadata() bool {
+	if o != nil && !IsNil(o.VariablesMetadata) {
 		return true
 	}
 
 	return false
 }
 
-// SetStartInstructions gets a reference to the given []ProcessInstanceCreationStartInstruction and assigns it to the StartInstructions field.
-func (o *ProcessInstanceCreationInstructionByKey) SetStartInstructions(v []ProcessInstanceCreationStartInstruction) {
-	o.StartInstructions = v
-}
-
-// GetRuntimeInstructions returns the RuntimeInstructions field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionByKey) GetRuntimeInstructions() []ProcessInstanceCreationTerminateInstruction {
-	if o == nil || IsNil(o.RuntimeInstructions) {
-		var ret []ProcessInstanceCreationTerminateInstruction
-		return ret
-	}
-	return o.RuntimeInstructions
-}
-
-// GetRuntimeInstructionsOk returns a tuple with the RuntimeInstructions field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetRuntimeInstructionsOk() ([]ProcessInstanceCreationTerminateInstruction, bool) {
-	if o == nil || IsNil(o.RuntimeInstructions) {
-		return nil, false
-	}
-	return o.RuntimeInstructions, true
-}
-
-// HasRuntimeInstructions returns a boolean if a field has been set.
-func (o *ProcessInstanceCreationInstructionByKey) HasRuntimeInstructions() bool {
-	if o != nil && !IsNil(o.RuntimeInstructions) {
-		return true
-	}
-
-	return false
-}
-
-// SetRuntimeInstructions gets a reference to the given []ProcessInstanceCreationTerminateInstruction and assigns it to the RuntimeInstructions field.
-func (o *ProcessInstanceCreationInstructionByKey) SetRuntimeInstructions(v []ProcessInstanceCreationTerminateInstruction) {
-	o.RuntimeInstructions = v
+// SetVariablesMetadata gets a reference to the given map[string]VariableMetadata and assigns it to the VariablesMetadata field.
+func (o *ProcessInstanceCreationInstructionByKey) SetVariablesMetadata(v map[string]VariableMetadata) {
+	o.VariablesMetadata = &v
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
@@ -295,6 +209,70 @@ func (o *ProcessInstanceCreationInstructionByKey) SetOperationReference(v int64)
 	o.OperationReference = &v
 }
 
+// GetStartInstructions returns the StartInstructions field value if set, zero value otherwise.
+func (o *ProcessInstanceCreationInstructionByKey) GetStartInstructions() []ProcessInstanceCreationStartInstruction {
+	if o == nil || IsNil(o.StartInstructions) {
+		var ret []ProcessInstanceCreationStartInstruction
+		return ret
+	}
+	return o.StartInstructions
+}
+
+// GetStartInstructionsOk returns a tuple with the StartInstructions field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProcessInstanceCreationInstructionByKey) GetStartInstructionsOk() ([]ProcessInstanceCreationStartInstruction, bool) {
+	if o == nil || IsNil(o.StartInstructions) {
+		return nil, false
+	}
+	return o.StartInstructions, true
+}
+
+// HasStartInstructions returns a boolean if a field has been set.
+func (o *ProcessInstanceCreationInstructionByKey) HasStartInstructions() bool {
+	if o != nil && !IsNil(o.StartInstructions) {
+		return true
+	}
+
+	return false
+}
+
+// SetStartInstructions gets a reference to the given []ProcessInstanceCreationStartInstruction and assigns it to the StartInstructions field.
+func (o *ProcessInstanceCreationInstructionByKey) SetStartInstructions(v []ProcessInstanceCreationStartInstruction) {
+	o.StartInstructions = v
+}
+
+// GetRuntimeInstructions returns the RuntimeInstructions field value if set, zero value otherwise.
+func (o *ProcessInstanceCreationInstructionByKey) GetRuntimeInstructions() []ProcessInstanceCreationTerminateInstruction {
+	if o == nil || IsNil(o.RuntimeInstructions) {
+		var ret []ProcessInstanceCreationTerminateInstruction
+		return ret
+	}
+	return o.RuntimeInstructions
+}
+
+// GetRuntimeInstructionsOk returns a tuple with the RuntimeInstructions field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProcessInstanceCreationInstructionByKey) GetRuntimeInstructionsOk() ([]ProcessInstanceCreationTerminateInstruction, bool) {
+	if o == nil || IsNil(o.RuntimeInstructions) {
+		return nil, false
+	}
+	return o.RuntimeInstructions, true
+}
+
+// HasRuntimeInstructions returns a boolean if a field has been set.
+func (o *ProcessInstanceCreationInstructionByKey) HasRuntimeInstructions() bool {
+	if o != nil && !IsNil(o.RuntimeInstructions) {
+		return true
+	}
+
+	return false
+}
+
+// SetRuntimeInstructions gets a reference to the given []ProcessInstanceCreationTerminateInstruction and assigns it to the RuntimeInstructions field.
+func (o *ProcessInstanceCreationInstructionByKey) SetRuntimeInstructions(v []ProcessInstanceCreationTerminateInstruction) {
+	o.RuntimeInstructions = v
+}
+
 // GetAwaitCompletion returns the AwaitCompletion field value if set, zero value otherwise.
 func (o *ProcessInstanceCreationInstructionByKey) GetAwaitCompletion() bool {
 	if o == nil || IsNil(o.AwaitCompletion) {
@@ -327,38 +305,6 @@ func (o *ProcessInstanceCreationInstructionByKey) SetAwaitCompletion(v bool) {
 	o.AwaitCompletion = &v
 }
 
-// GetRequestTimeout returns the RequestTimeout field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionByKey) GetRequestTimeout() int64 {
-	if o == nil || IsNil(o.RequestTimeout) {
-		var ret int64
-		return ret
-	}
-	return *o.RequestTimeout
-}
-
-// GetRequestTimeoutOk returns a tuple with the RequestTimeout field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionByKey) GetRequestTimeoutOk() (*int64, bool) {
-	if o == nil || IsNil(o.RequestTimeout) {
-		return nil, false
-	}
-	return o.RequestTimeout, true
-}
-
-// HasRequestTimeout returns a boolean if a field has been set.
-func (o *ProcessInstanceCreationInstructionByKey) HasRequestTimeout() bool {
-	if o != nil && !IsNil(o.RequestTimeout) {
-		return true
-	}
-
-	return false
-}
-
-// SetRequestTimeout gets a reference to the given int64 and assigns it to the RequestTimeout field.
-func (o *ProcessInstanceCreationInstructionByKey) SetRequestTimeout(v int64) {
-	o.RequestTimeout = &v
-}
-
 // GetFetchVariables returns the FetchVariables field value if set, zero value otherwise.
 func (o *ProcessInstanceCreationInstructionByKey) GetFetchVariables() []string {
 	if o == nil || IsNil(o.FetchVariables) {
@@ -389,6 +335,38 @@ func (o *ProcessInstanceCreationInstructionByKey) HasFetchVariables() bool {
 // SetFetchVariables gets a reference to the given []string and assigns it to the FetchVariables field.
 func (o *ProcessInstanceCreationInstructionByKey) SetFetchVariables(v []string) {
 	o.FetchVariables = v
+}
+
+// GetRequestTimeout returns the RequestTimeout field value if set, zero value otherwise.
+func (o *ProcessInstanceCreationInstructionByKey) GetRequestTimeout() int64 {
+	if o == nil || IsNil(o.RequestTimeout) {
+		var ret int64
+		return ret
+	}
+	return *o.RequestTimeout
+}
+
+// GetRequestTimeoutOk returns a tuple with the RequestTimeout field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProcessInstanceCreationInstructionByKey) GetRequestTimeoutOk() (*int64, bool) {
+	if o == nil || IsNil(o.RequestTimeout) {
+		return nil, false
+	}
+	return o.RequestTimeout, true
+}
+
+// HasRequestTimeout returns a boolean if a field has been set.
+func (o *ProcessInstanceCreationInstructionByKey) HasRequestTimeout() bool {
+	if o != nil && !IsNil(o.RequestTimeout) {
+		return true
+	}
+
+	return false
+}
+
+// SetRequestTimeout gets a reference to the given int64 and assigns it to the RequestTimeout field.
+func (o *ProcessInstanceCreationInstructionByKey) SetRequestTimeout(v int64) {
+	o.RequestTimeout = &v
 }
 
 // GetTags returns the Tags field value if set, zero value otherwise.
@@ -455,6 +433,62 @@ func (o *ProcessInstanceCreationInstructionByKey) SetBusinessId(v BusinessId) {
 	o.BusinessId = &v
 }
 
+// GetProcessDefinitionKey returns the ProcessDefinitionKey field value
+func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKey() ProcessDefinitionKey {
+	if o == nil {
+		var ret ProcessDefinitionKey
+		return ret
+	}
+
+	return o.ProcessDefinitionKey
+}
+
+// GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
+// and a boolean to check if the value has been set.
+func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ProcessDefinitionKey, true
+}
+
+// SetProcessDefinitionKey sets field value
+func (o *ProcessInstanceCreationInstructionByKey) SetProcessDefinitionKey(v ProcessDefinitionKey) {
+	o.ProcessDefinitionKey = v
+}
+
+// GetProcessDefinitionVersion returns the ProcessDefinitionVersion field value if set, zero value otherwise.
+func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionVersion() int32 {
+	if o == nil || IsNil(o.ProcessDefinitionVersion) {
+		var ret int32
+		return ret
+	}
+	return *o.ProcessDefinitionVersion
+}
+
+// GetProcessDefinitionVersionOk returns a tuple with the ProcessDefinitionVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProcessInstanceCreationInstructionByKey) GetProcessDefinitionVersionOk() (*int32, bool) {
+	if o == nil || IsNil(o.ProcessDefinitionVersion) {
+		return nil, false
+	}
+	return o.ProcessDefinitionVersion, true
+}
+
+// HasProcessDefinitionVersion returns a boolean if a field has been set.
+func (o *ProcessInstanceCreationInstructionByKey) HasProcessDefinitionVersion() bool {
+	if o != nil && !IsNil(o.ProcessDefinitionVersion) {
+		return true
+	}
+
+	return false
+}
+
+// SetProcessDefinitionVersion gets a reference to the given int32 and assigns it to the ProcessDefinitionVersion field.
+func (o *ProcessInstanceCreationInstructionByKey) SetProcessDefinitionVersion(v int32) {
+	o.ProcessDefinitionVersion = &v
+}
+
 func (o ProcessInstanceCreationInstructionByKey) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -465,18 +499,11 @@ func (o ProcessInstanceCreationInstructionByKey) MarshalJSON() ([]byte, error) {
 
 func (o ProcessInstanceCreationInstructionByKey) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey
-	if !IsNil(o.ProcessDefinitionVersion) {
-		toSerialize["processDefinitionVersion"] = o.ProcessDefinitionVersion
-	}
 	if !IsNil(o.Variables) {
 		toSerialize["variables"] = o.Variables
 	}
-	if !IsNil(o.StartInstructions) {
-		toSerialize["startInstructions"] = o.StartInstructions
-	}
-	if !IsNil(o.RuntimeInstructions) {
-		toSerialize["runtimeInstructions"] = o.RuntimeInstructions
+	if !IsNil(o.VariablesMetadata) {
+		toSerialize["variablesMetadata"] = o.VariablesMetadata
 	}
 	if !IsNil(o.TenantId) {
 		toSerialize["tenantId"] = o.TenantId
@@ -484,20 +511,30 @@ func (o ProcessInstanceCreationInstructionByKey) ToMap() (map[string]interface{}
 	if !IsNil(o.OperationReference) {
 		toSerialize["operationReference"] = o.OperationReference
 	}
+	if !IsNil(o.StartInstructions) {
+		toSerialize["startInstructions"] = o.StartInstructions
+	}
+	if !IsNil(o.RuntimeInstructions) {
+		toSerialize["runtimeInstructions"] = o.RuntimeInstructions
+	}
 	if !IsNil(o.AwaitCompletion) {
 		toSerialize["awaitCompletion"] = o.AwaitCompletion
 	}
-	if !IsNil(o.RequestTimeout) {
-		toSerialize["requestTimeout"] = o.RequestTimeout
-	}
 	if !IsNil(o.FetchVariables) {
 		toSerialize["fetchVariables"] = o.FetchVariables
+	}
+	if !IsNil(o.RequestTimeout) {
+		toSerialize["requestTimeout"] = o.RequestTimeout
 	}
 	if !IsNil(o.Tags) {
 		toSerialize["tags"] = o.Tags
 	}
 	if !IsNil(o.BusinessId) {
 		toSerialize["businessId"] = o.BusinessId
+	}
+	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey
+	if !IsNil(o.ProcessDefinitionVersion) {
+		toSerialize["processDefinitionVersion"] = o.ProcessDefinitionVersion
 	}
 	return toSerialize, nil
 }

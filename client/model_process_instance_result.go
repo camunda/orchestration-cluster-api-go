@@ -55,6 +55,8 @@ type ProcessInstanceResult struct {
 	Tags []Tag `json:"tags"`
 	// The business id associated with this process instance.
 	BusinessId NullableBusinessId `json:"businessId"`
+	// The storage ordinal this process instance's data belongs to. This is `null` for data exported before storage ordinals were introduced in version 8.11.
+	StorageOrdinal NullableInt32 `json:"storageOrdinal"`
 }
 
 type _ProcessInstanceResult ProcessInstanceResult
@@ -63,7 +65,7 @@ type _ProcessInstanceResult ProcessInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId TenantId, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, parentProcessInstanceKey NullableProcessInstanceKey, parentElementInstanceKey NullableElementInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, tags []Tag, businessId NullableBusinessId) *ProcessInstanceResult {
+func NewProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId TenantId, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, parentProcessInstanceKey NullableProcessInstanceKey, parentElementInstanceKey NullableElementInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, tags []Tag, businessId NullableBusinessId, storageOrdinal NullableInt32) *ProcessInstanceResult {
 	this := ProcessInstanceResult{}
 	this.ProcessDefinitionId = processDefinitionId
 	this.ProcessDefinitionName = processDefinitionName
@@ -82,6 +84,7 @@ func NewProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDe
 	this.RootProcessInstanceKey = rootProcessInstanceKey
 	this.Tags = tags
 	this.BusinessId = businessId
+	this.StorageOrdinal = storageOrdinal
 	return &this
 }
 
@@ -517,6 +520,32 @@ func (o *ProcessInstanceResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 
+// GetStorageOrdinal returns the StorageOrdinal field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *ProcessInstanceResult) GetStorageOrdinal() int32 {
+	if o == nil || o.StorageOrdinal.Get() == nil {
+		var ret int32
+		return ret
+	}
+
+	return *o.StorageOrdinal.Get()
+}
+
+// GetStorageOrdinalOk returns a tuple with the StorageOrdinal field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ProcessInstanceResult) GetStorageOrdinalOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.StorageOrdinal.Get(), o.StorageOrdinal.IsSet()
+}
+
+// SetStorageOrdinal sets field value
+func (o *ProcessInstanceResult) SetStorageOrdinal(v int32) {
+	o.StorageOrdinal.Set(&v)
+}
+
 func (o ProcessInstanceResult) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -544,6 +573,7 @@ func (o ProcessInstanceResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
 	toSerialize["tags"] = o.Tags
 	toSerialize["businessId"] = o.BusinessId.Get()
+	toSerialize["storageOrdinal"] = o.StorageOrdinal.Get()
 	return toSerialize, nil
 }
 

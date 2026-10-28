@@ -33,6 +33,8 @@ type VariableResult struct {
 	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
+	// Metadata of this variable.
+	Metadata VariableMetadata `json:"metadata"`
 	// Full value of this variable.
 	Value string `json:"value"`
 }
@@ -43,7 +45,7 @@ type _VariableResult VariableResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVariableResult(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, value string) *VariableResult {
+func NewVariableResult(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, metadata VariableMetadata, value string) *VariableResult {
 	this := VariableResult{}
 	this.Name = name
 	this.TenantId = tenantId
@@ -51,6 +53,7 @@ func NewVariableResult(name string, tenantId TenantId, variableKey VariableKey, 
 	this.ScopeKey = scopeKey
 	this.ProcessInstanceKey = processInstanceKey
 	this.RootProcessInstanceKey = rootProcessInstanceKey
+	this.Metadata = metadata
 	this.Value = value
 	return &this
 }
@@ -209,6 +212,30 @@ func (o *VariableResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
+// GetMetadata returns the Metadata field value
+func (o *VariableResult) GetMetadata() VariableMetadata {
+	if o == nil {
+		var ret VariableMetadata
+		return ret
+	}
+
+	return o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value
+// and a boolean to check if the value has been set.
+func (o *VariableResult) GetMetadataOk() (*VariableMetadata, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Metadata, true
+}
+
+// SetMetadata sets field value
+func (o *VariableResult) SetMetadata(v VariableMetadata) {
+	o.Metadata = v
+}
+
 // GetValue returns the Value field value
 func (o *VariableResult) GetValue() string {
 	if o == nil {
@@ -249,6 +276,7 @@ func (o VariableResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["scopeKey"] = o.ScopeKey
 	toSerialize["processInstanceKey"] = o.ProcessInstanceKey
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
+	toSerialize["metadata"] = o.Metadata
 	toSerialize["value"] = o.Value
 	return toSerialize, nil
 }
@@ -264,6 +292,7 @@ func (o *VariableResult) UnmarshalJSON(data []byte) (err error) {
 		"scopeKey",
 		"processInstanceKey",
 		"rootProcessInstanceKey",
+		"metadata",
 		"value",
 	}
 

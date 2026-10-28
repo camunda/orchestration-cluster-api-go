@@ -54,6 +54,8 @@ type DecisionInstanceGetQueryResult struct {
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	State                  DecisionInstanceStateEnum  `json:"state"`
+	// The storage ordinal this decision instance's data belongs to. This is `null` for data exported before storage ordinals were introduced in version 8.11.
+	StorageOrdinal NullableInt32 `json:"storageOrdinal"`
 	// The tenant ID of the decision instance.
 	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The evaluated inputs of the decision instance.
@@ -68,7 +70,7 @@ type _DecisionInstanceGetQueryResult DecisionInstanceGetQueryResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDecisionInstanceGetQueryResult(businessId NullableBusinessId, decisionDefinitionId DecisionDefinitionId, decisionDefinitionKey DecisionDefinitionKey, decisionDefinitionName string, decisionDefinitionType DecisionDefinitionTypeEnum, decisionDefinitionVersion int32, decisionEvaluationInstanceKey DecisionEvaluationInstanceKey, decisionEvaluationKey DecisionEvaluationKey, elementInstanceKey NullableElementInstanceKey, evaluationDate time.Time, evaluationFailure NullableString, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, result string, rootDecisionDefinitionKey DecisionDefinitionKey, rootProcessInstanceKey NullableProcessInstanceKey, state DecisionInstanceStateEnum, tenantId TenantId, evaluatedInputs []EvaluatedDecisionInputItem, matchedRules []MatchedDecisionRuleItem) *DecisionInstanceGetQueryResult {
+func NewDecisionInstanceGetQueryResult(businessId NullableBusinessId, decisionDefinitionId DecisionDefinitionId, decisionDefinitionKey DecisionDefinitionKey, decisionDefinitionName string, decisionDefinitionType DecisionDefinitionTypeEnum, decisionDefinitionVersion int32, decisionEvaluationInstanceKey DecisionEvaluationInstanceKey, decisionEvaluationKey DecisionEvaluationKey, elementInstanceKey NullableElementInstanceKey, evaluationDate time.Time, evaluationFailure NullableString, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, result string, rootDecisionDefinitionKey DecisionDefinitionKey, rootProcessInstanceKey NullableProcessInstanceKey, state DecisionInstanceStateEnum, storageOrdinal NullableInt32, tenantId TenantId, evaluatedInputs []EvaluatedDecisionInputItem, matchedRules []MatchedDecisionRuleItem) *DecisionInstanceGetQueryResult {
 	this := DecisionInstanceGetQueryResult{}
 	this.BusinessId = businessId
 	this.DecisionDefinitionId = decisionDefinitionId
@@ -87,6 +89,7 @@ func NewDecisionInstanceGetQueryResult(businessId NullableBusinessId, decisionDe
 	this.RootDecisionDefinitionKey = rootDecisionDefinitionKey
 	this.RootProcessInstanceKey = rootProcessInstanceKey
 	this.State = state
+	this.StorageOrdinal = storageOrdinal
 	this.TenantId = tenantId
 	this.EvaluatedInputs = evaluatedInputs
 	this.MatchedRules = matchedRules
@@ -521,6 +524,32 @@ func (o *DecisionInstanceGetQueryResult) SetState(v DecisionInstanceStateEnum) {
 	o.State = v
 }
 
+// GetStorageOrdinal returns the StorageOrdinal field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *DecisionInstanceGetQueryResult) GetStorageOrdinal() int32 {
+	if o == nil || o.StorageOrdinal.Get() == nil {
+		var ret int32
+		return ret
+	}
+
+	return *o.StorageOrdinal.Get()
+}
+
+// GetStorageOrdinalOk returns a tuple with the StorageOrdinal field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DecisionInstanceGetQueryResult) GetStorageOrdinalOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.StorageOrdinal.Get(), o.StorageOrdinal.IsSet()
+}
+
+// SetStorageOrdinal sets field value
+func (o *DecisionInstanceGetQueryResult) SetStorageOrdinal(v int32) {
+	o.StorageOrdinal.Set(&v)
+}
+
 // GetTenantId returns the TenantId field value
 func (o *DecisionInstanceGetQueryResult) GetTenantId() TenantId {
 	if o == nil {
@@ -620,6 +649,7 @@ func (o DecisionInstanceGetQueryResult) ToMap() (map[string]interface{}, error) 
 	toSerialize["rootDecisionDefinitionKey"] = o.RootDecisionDefinitionKey
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
 	toSerialize["state"] = o.State
+	toSerialize["storageOrdinal"] = o.StorageOrdinal.Get()
 	toSerialize["tenantId"] = o.TenantId
 	toSerialize["evaluatedInputs"] = o.EvaluatedInputs
 	toSerialize["matchedRules"] = o.MatchedRules

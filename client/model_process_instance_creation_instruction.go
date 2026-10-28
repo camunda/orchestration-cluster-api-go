@@ -15,10 +15,11 @@ import (
 	"fmt"
 )
 
-// ProcessInstanceCreationInstruction - Instructions for creating a process instance. The process definition can be specified either by id or by key.
+// ProcessInstanceCreationInstruction - Instructions for creating a process instance. The process definition can be specified either by id, by id and version tag, or by key.
 type ProcessInstanceCreationInstruction struct {
-	ProcessInstanceCreationInstructionById  *ProcessInstanceCreationInstructionById
-	ProcessInstanceCreationInstructionByKey *ProcessInstanceCreationInstructionByKey
+	ProcessInstanceCreationInstructionById         *ProcessInstanceCreationInstructionById
+	ProcessInstanceCreationInstructionByKey        *ProcessInstanceCreationInstructionByKey
+	ProcessInstanceCreationInstructionByVersionTag *ProcessInstanceCreationInstructionByVersionTag
 }
 
 // ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction is a convenience function that returns ProcessInstanceCreationInstructionById wrapped in ProcessInstanceCreationInstruction
@@ -32,6 +33,13 @@ func ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
 func ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction(v *ProcessInstanceCreationInstructionByKey) ProcessInstanceCreationInstruction {
 	return ProcessInstanceCreationInstruction{
 		ProcessInstanceCreationInstructionByKey: v,
+	}
+}
+
+// ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction is a convenience function that returns ProcessInstanceCreationInstructionByVersionTag wrapped in ProcessInstanceCreationInstruction
+func ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction(v *ProcessInstanceCreationInstructionByVersionTag) ProcessInstanceCreationInstruction {
+	return ProcessInstanceCreationInstruction{
+		ProcessInstanceCreationInstructionByVersionTag: v,
 	}
 }
 
@@ -65,10 +73,24 @@ func (dst *ProcessInstanceCreationInstruction) UnmarshalJSON(data []byte) error 
 		dst.ProcessInstanceCreationInstructionByKey = nil
 	}
 
+	// try to unmarshal data into ProcessInstanceCreationInstructionByVersionTag
+	err = json.Unmarshal(data, &dst.ProcessInstanceCreationInstructionByVersionTag)
+	if err == nil {
+		jsonProcessInstanceCreationInstructionByVersionTag, _ := json.Marshal(dst.ProcessInstanceCreationInstructionByVersionTag)
+		if string(jsonProcessInstanceCreationInstructionByVersionTag) == "{}" { // empty struct
+			dst.ProcessInstanceCreationInstructionByVersionTag = nil
+		} else {
+			match++
+		}
+	} else {
+		dst.ProcessInstanceCreationInstructionByVersionTag = nil
+	}
+
 	if match > 1 { // more than 1 match
 		// reset to nil
 		dst.ProcessInstanceCreationInstructionById = nil
 		dst.ProcessInstanceCreationInstructionByKey = nil
+		dst.ProcessInstanceCreationInstructionByVersionTag = nil
 
 		return fmt.Errorf("data matches more than one schema in oneOf(ProcessInstanceCreationInstruction)")
 	} else if match == 1 {
@@ -88,6 +110,10 @@ func (src ProcessInstanceCreationInstruction) MarshalJSON() ([]byte, error) {
 		return json.Marshal(&src.ProcessInstanceCreationInstructionByKey)
 	}
 
+	if src.ProcessInstanceCreationInstructionByVersionTag != nil {
+		return json.Marshal(&src.ProcessInstanceCreationInstructionByVersionTag)
+	}
+
 	return nil, nil // no data in oneOf schemas
 }
 
@@ -104,6 +130,10 @@ func (obj *ProcessInstanceCreationInstruction) GetActualInstance() interface{} {
 		return obj.ProcessInstanceCreationInstructionByKey
 	}
 
+	if obj.ProcessInstanceCreationInstructionByVersionTag != nil {
+		return obj.ProcessInstanceCreationInstructionByVersionTag
+	}
+
 	// all schemas are nil
 	return nil
 }
@@ -116,6 +146,10 @@ func (obj ProcessInstanceCreationInstruction) GetActualInstanceValue() interface
 
 	if obj.ProcessInstanceCreationInstructionByKey != nil {
 		return *obj.ProcessInstanceCreationInstructionByKey
+	}
+
+	if obj.ProcessInstanceCreationInstructionByVersionTag != nil {
+		return *obj.ProcessInstanceCreationInstructionByVersionTag
 	}
 
 	// all schemas are nil

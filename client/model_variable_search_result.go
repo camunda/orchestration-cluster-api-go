@@ -33,6 +33,8 @@ type VariableSearchResult struct {
 	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
+	// Metadata of this variable.
+	Metadata VariableMetadata `json:"metadata"`
 	// Value of this variable. Can be truncated.
 	Value string `json:"value"`
 	// Whether the value is truncated or not.
@@ -45,7 +47,7 @@ type _VariableSearchResult VariableSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVariableSearchResult(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, value string, isTruncated bool) *VariableSearchResult {
+func NewVariableSearchResult(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, metadata VariableMetadata, value string, isTruncated bool) *VariableSearchResult {
 	this := VariableSearchResult{}
 	this.Name = name
 	this.TenantId = tenantId
@@ -53,6 +55,7 @@ func NewVariableSearchResult(name string, tenantId TenantId, variableKey Variabl
 	this.ScopeKey = scopeKey
 	this.ProcessInstanceKey = processInstanceKey
 	this.RootProcessInstanceKey = rootProcessInstanceKey
+	this.Metadata = metadata
 	this.Value = value
 	this.IsTruncated = isTruncated
 	return &this
@@ -212,6 +215,30 @@ func (o *VariableSearchResult) SetRootProcessInstanceKey(v ProcessInstanceKey) {
 	o.RootProcessInstanceKey.Set(&v)
 }
 
+// GetMetadata returns the Metadata field value
+func (o *VariableSearchResult) GetMetadata() VariableMetadata {
+	if o == nil {
+		var ret VariableMetadata
+		return ret
+	}
+
+	return o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value
+// and a boolean to check if the value has been set.
+func (o *VariableSearchResult) GetMetadataOk() (*VariableMetadata, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Metadata, true
+}
+
+// SetMetadata sets field value
+func (o *VariableSearchResult) SetMetadata(v VariableMetadata) {
+	o.Metadata = v
+}
+
 // GetValue returns the Value field value
 func (o *VariableSearchResult) GetValue() string {
 	if o == nil {
@@ -276,6 +303,7 @@ func (o VariableSearchResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["scopeKey"] = o.ScopeKey
 	toSerialize["processInstanceKey"] = o.ProcessInstanceKey
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
+	toSerialize["metadata"] = o.Metadata
 	toSerialize["value"] = o.Value
 	toSerialize["isTruncated"] = o.IsTruncated
 	return toSerialize, nil
@@ -292,6 +320,7 @@ func (o *VariableSearchResult) UnmarshalJSON(data []byte) (err error) {
 		"scopeKey",
 		"processInstanceKey",
 		"rootProcessInstanceKey",
+		"metadata",
 		"value",
 		"isTruncated",
 	}

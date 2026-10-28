@@ -188,6 +188,12 @@ type ApiSuspendBatchOperationRequest = camundaapi.ApiSuspendBatchOperationReques
 // Fields and methods are documented on [camundaapi.ClockAPIService].
 type ClockAPIService = camundaapi.ClockAPIService
 
+// Fields and methods are documented on [camundaapi.ApiAddClockRequest].
+type ApiAddClockRequest = camundaapi.ApiAddClockRequest
+
+// Fields and methods are documented on [camundaapi.ApiGetClockRequest].
+type ApiGetClockRequest = camundaapi.ApiGetClockRequest
+
 // Fields and methods are documented on [camundaapi.ApiPinClockRequest].
 type ApiPinClockRequest = camundaapi.ApiPinClockRequest
 
@@ -2266,6 +2272,33 @@ type NullableAdvancedProcessInstanceStateFilter = camundaapi.NullableAdvancedPro
 
 func NewNullableAdvancedProcessInstanceStateFilter(val *AdvancedProcessInstanceStateFilter) *NullableAdvancedProcessInstanceStateFilter {
 	return camundaapi.NewNullableAdvancedProcessInstanceStateFilter(val)
+}
+
+// AdvancedProtectionModeFilter Advanced ProtectionModeEnum filter.
+//
+// Fields and methods are documented on [camundaapi.AdvancedProtectionModeFilter].
+type AdvancedProtectionModeFilter = camundaapi.AdvancedProtectionModeFilter
+
+// NewAdvancedProtectionModeFilter instantiates a new AdvancedProtectionModeFilter object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewAdvancedProtectionModeFilter() *AdvancedProtectionModeFilter {
+	return camundaapi.NewAdvancedProtectionModeFilter()
+}
+
+// NewAdvancedProtectionModeFilterWithDefaults instantiates a new AdvancedProtectionModeFilter object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewAdvancedProtectionModeFilterWithDefaults() *AdvancedProtectionModeFilter {
+	return camundaapi.NewAdvancedProtectionModeFilterWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableAdvancedProtectionModeFilter].
+type NullableAdvancedProtectionModeFilter = camundaapi.NullableAdvancedProtectionModeFilter
+
+func NewNullableAdvancedProtectionModeFilter(val *AdvancedProtectionModeFilter) *NullableAdvancedProtectionModeFilter {
+	return camundaapi.NewNullableAdvancedProtectionModeFilter(val)
 }
 
 // AdvancedResourceKeyFilter Advanced ResourceKey filter.
@@ -5568,6 +5601,33 @@ func NewNullableCheckpointType(val *CheckpointType) *NullableCheckpointType {
 	return camundaapi.NewNullableCheckpointType(val)
 }
 
+// ClockAddRequest struct for ClockAddRequest
+//
+// Fields and methods are documented on [camundaapi.ClockAddRequest].
+type ClockAddRequest = camundaapi.ClockAddRequest
+
+// NewClockAddRequest instantiates a new ClockAddRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewClockAddRequest(offset string) *ClockAddRequest {
+	return camundaapi.NewClockAddRequest(offset)
+}
+
+// NewClockAddRequestWithDefaults instantiates a new ClockAddRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewClockAddRequestWithDefaults() *ClockAddRequest {
+	return camundaapi.NewClockAddRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableClockAddRequest].
+type NullableClockAddRequest = camundaapi.NullableClockAddRequest
+
+func NewNullableClockAddRequest(val *ClockAddRequest) *NullableClockAddRequest {
+	return camundaapi.NewNullableClockAddRequest(val)
+}
+
 // ClockPinRequest struct for ClockPinRequest
 //
 // Fields and methods are documented on [camundaapi.ClockPinRequest].
@@ -5593,6 +5653,33 @@ type NullableClockPinRequest = camundaapi.NullableClockPinRequest
 
 func NewNullableClockPinRequest(val *ClockPinRequest) *NullableClockPinRequest {
 	return camundaapi.NewNullableClockPinRequest(val)
+}
+
+// ClockResult struct for ClockResult
+//
+// Fields and methods are documented on [camundaapi.ClockResult].
+type ClockResult = camundaapi.ClockResult
+
+// NewClockResult instantiates a new ClockResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewClockResult(timestamp time.Time) *ClockResult {
+	return camundaapi.NewClockResult(timestamp)
+}
+
+// NewClockResultWithDefaults instantiates a new ClockResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewClockResultWithDefaults() *ClockResult {
+	return camundaapi.NewClockResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableClockResult].
+type NullableClockResult = camundaapi.NullableClockResult
+
+func NewNullableClockResult(val *ClockResult) *NullableClockResult {
+	return camundaapi.NewNullableClockResult(val)
 }
 
 // CloudConfigurationResponse Configuration for SaaS/cloud-specific settings.
@@ -7781,8 +7868,8 @@ type DecisionInstanceGetQueryResult = camundaapi.DecisionInstanceGetQueryResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDecisionInstanceGetQueryResult(businessId NullableBusinessId, decisionDefinitionId DecisionDefinitionId, decisionDefinitionKey DecisionDefinitionKey, decisionDefinitionName string, decisionDefinitionType DecisionDefinitionTypeEnum, decisionDefinitionVersion int32, decisionEvaluationInstanceKey DecisionEvaluationInstanceKey, decisionEvaluationKey DecisionEvaluationKey, elementInstanceKey NullableElementInstanceKey, evaluationDate time.Time, evaluationFailure NullableString, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, result string, rootDecisionDefinitionKey DecisionDefinitionKey, rootProcessInstanceKey NullableProcessInstanceKey, state DecisionInstanceStateEnum, tenantId TenantId, evaluatedInputs []EvaluatedDecisionInputItem, matchedRules []MatchedDecisionRuleItem) *DecisionInstanceGetQueryResult {
-	return camundaapi.NewDecisionInstanceGetQueryResult(businessId, decisionDefinitionId, decisionDefinitionKey, decisionDefinitionName, decisionDefinitionType, decisionDefinitionVersion, decisionEvaluationInstanceKey, decisionEvaluationKey, elementInstanceKey, evaluationDate, evaluationFailure, processDefinitionKey, processInstanceKey, result, rootDecisionDefinitionKey, rootProcessInstanceKey, state, tenantId, evaluatedInputs, matchedRules)
+func NewDecisionInstanceGetQueryResult(businessId NullableBusinessId, decisionDefinitionId DecisionDefinitionId, decisionDefinitionKey DecisionDefinitionKey, decisionDefinitionName string, decisionDefinitionType DecisionDefinitionTypeEnum, decisionDefinitionVersion int32, decisionEvaluationInstanceKey DecisionEvaluationInstanceKey, decisionEvaluationKey DecisionEvaluationKey, elementInstanceKey NullableElementInstanceKey, evaluationDate time.Time, evaluationFailure NullableString, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, result string, rootDecisionDefinitionKey DecisionDefinitionKey, rootProcessInstanceKey NullableProcessInstanceKey, state DecisionInstanceStateEnum, storageOrdinal NullableInt32, tenantId TenantId, evaluatedInputs []EvaluatedDecisionInputItem, matchedRules []MatchedDecisionRuleItem) *DecisionInstanceGetQueryResult {
+	return camundaapi.NewDecisionInstanceGetQueryResult(businessId, decisionDefinitionId, decisionDefinitionKey, decisionDefinitionName, decisionDefinitionType, decisionDefinitionVersion, decisionEvaluationInstanceKey, decisionEvaluationKey, elementInstanceKey, evaluationDate, evaluationFailure, processDefinitionKey, processInstanceKey, result, rootDecisionDefinitionKey, rootProcessInstanceKey, state, storageOrdinal, tenantId, evaluatedInputs, matchedRules)
 }
 
 // NewDecisionInstanceGetQueryResultWithDefaults instantiates a new DecisionInstanceGetQueryResult object
@@ -7808,8 +7895,8 @@ type DecisionInstanceResult = camundaapi.DecisionInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDecisionInstanceResult(businessId NullableBusinessId, decisionDefinitionId DecisionDefinitionId, decisionDefinitionKey DecisionDefinitionKey, decisionDefinitionName string, decisionDefinitionType DecisionDefinitionTypeEnum, decisionDefinitionVersion int32, decisionEvaluationInstanceKey DecisionEvaluationInstanceKey, decisionEvaluationKey DecisionEvaluationKey, elementInstanceKey NullableElementInstanceKey, evaluationDate time.Time, evaluationFailure NullableString, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, result string, rootDecisionDefinitionKey DecisionDefinitionKey, rootProcessInstanceKey NullableProcessInstanceKey, state DecisionInstanceStateEnum, tenantId TenantId) *DecisionInstanceResult {
-	return camundaapi.NewDecisionInstanceResult(businessId, decisionDefinitionId, decisionDefinitionKey, decisionDefinitionName, decisionDefinitionType, decisionDefinitionVersion, decisionEvaluationInstanceKey, decisionEvaluationKey, elementInstanceKey, evaluationDate, evaluationFailure, processDefinitionKey, processInstanceKey, result, rootDecisionDefinitionKey, rootProcessInstanceKey, state, tenantId)
+func NewDecisionInstanceResult(businessId NullableBusinessId, decisionDefinitionId DecisionDefinitionId, decisionDefinitionKey DecisionDefinitionKey, decisionDefinitionName string, decisionDefinitionType DecisionDefinitionTypeEnum, decisionDefinitionVersion int32, decisionEvaluationInstanceKey DecisionEvaluationInstanceKey, decisionEvaluationKey DecisionEvaluationKey, elementInstanceKey NullableElementInstanceKey, evaluationDate time.Time, evaluationFailure NullableString, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey NullableProcessInstanceKey, result string, rootDecisionDefinitionKey DecisionDefinitionKey, rootProcessInstanceKey NullableProcessInstanceKey, state DecisionInstanceStateEnum, storageOrdinal NullableInt32, tenantId TenantId) *DecisionInstanceResult {
+	return camundaapi.NewDecisionInstanceResult(businessId, decisionDefinitionId, decisionDefinitionKey, decisionDefinitionName, decisionDefinitionType, decisionDefinitionVersion, decisionEvaluationInstanceKey, decisionEvaluationKey, elementInstanceKey, evaluationDate, evaluationFailure, processDefinitionKey, processInstanceKey, result, rootDecisionDefinitionKey, rootProcessInstanceKey, state, storageOrdinal, tenantId)
 }
 
 // NewDecisionInstanceResultWithDefaults instantiates a new DecisionInstanceResult object
@@ -11034,8 +11121,8 @@ type IncidentResult = camundaapi.IncidentResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewIncidentResult(processDefinitionId ProcessDefinitionId, errorType IncidentErrorTypeEnum, errorMessage string, elementId ElementId, creationTime time.Time, state IncidentStateEnum, tenantId TenantId, incidentKey IncidentKey, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, elementInstanceKey ElementInstanceKey, jobKey NullableJobKey) *IncidentResult {
-	return camundaapi.NewIncidentResult(processDefinitionId, errorType, errorMessage, elementId, creationTime, state, tenantId, incidentKey, processDefinitionKey, processInstanceKey, rootProcessInstanceKey, elementInstanceKey, jobKey)
+func NewIncidentResult(processDefinitionId ProcessDefinitionId, errorType IncidentErrorTypeEnum, errorMessage string, elementId ElementId, creationTime time.Time, state IncidentStateEnum, tenantId TenantId, incidentKey IncidentKey, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, elementInstanceKey ElementInstanceKey, jobKey NullableJobKey, storageOrdinal NullableInt32) *IncidentResult {
+	return camundaapi.NewIncidentResult(processDefinitionId, errorType, errorMessage, elementId, creationTime, state, tenantId, incidentKey, processDefinitionKey, processInstanceKey, rootProcessInstanceKey, elementInstanceKey, jobKey, storageOrdinal)
 }
 
 // NewIncidentResultWithDefaults instantiates a new IncidentResult object
@@ -14749,7 +14836,7 @@ func NewNullableProcessInstanceCancellationBatchOperationRequest(val *ProcessIns
 	return camundaapi.NewNullableProcessInstanceCancellationBatchOperationRequest(val)
 }
 
-// ProcessInstanceCreationInstruction - Instructions for creating a process instance. The process definition can be specified either by id or by key.
+// ProcessInstanceCreationInstruction - Instructions for creating a process instance. The process definition can be specified either by id, by id and version tag, or by key.
 //
 // Fields and methods are documented on [camundaapi.ProcessInstanceCreationInstruction].
 type ProcessInstanceCreationInstruction = camundaapi.ProcessInstanceCreationInstruction
@@ -14764,11 +14851,43 @@ func ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction
 	return camundaapi.ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction(v)
 }
 
+// ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction is a convenience function that returns ProcessInstanceCreationInstructionByVersionTag wrapped in ProcessInstanceCreationInstruction
+func ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction(v *ProcessInstanceCreationInstructionByVersionTag) ProcessInstanceCreationInstruction {
+	return camundaapi.ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction(v)
+}
+
 // Fields and methods are documented on [camundaapi.NullableProcessInstanceCreationInstruction].
 type NullableProcessInstanceCreationInstruction = camundaapi.NullableProcessInstanceCreationInstruction
 
 func NewNullableProcessInstanceCreationInstruction(val *ProcessInstanceCreationInstruction) *NullableProcessInstanceCreationInstruction {
 	return camundaapi.NewNullableProcessInstanceCreationInstruction(val)
+}
+
+// ProcessInstanceCreationInstructionBase Fields shared by all process instance creation instructions.
+//
+// Fields and methods are documented on [camundaapi.ProcessInstanceCreationInstructionBase].
+type ProcessInstanceCreationInstructionBase = camundaapi.ProcessInstanceCreationInstructionBase
+
+// NewProcessInstanceCreationInstructionBase instantiates a new ProcessInstanceCreationInstructionBase object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessInstanceCreationInstructionBase() *ProcessInstanceCreationInstructionBase {
+	return camundaapi.NewProcessInstanceCreationInstructionBase()
+}
+
+// NewProcessInstanceCreationInstructionBaseWithDefaults instantiates a new ProcessInstanceCreationInstructionBase object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessInstanceCreationInstructionBaseWithDefaults() *ProcessInstanceCreationInstructionBase {
+	return camundaapi.NewProcessInstanceCreationInstructionBaseWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessInstanceCreationInstructionBase].
+type NullableProcessInstanceCreationInstructionBase = camundaapi.NullableProcessInstanceCreationInstructionBase
+
+func NewNullableProcessInstanceCreationInstructionBase(val *ProcessInstanceCreationInstructionBase) *NullableProcessInstanceCreationInstructionBase {
+	return camundaapi.NewNullableProcessInstanceCreationInstructionBase(val)
 }
 
 // ProcessInstanceCreationInstructionById struct for ProcessInstanceCreationInstructionById
@@ -14823,6 +14942,33 @@ type NullableProcessInstanceCreationInstructionByKey = camundaapi.NullableProces
 
 func NewNullableProcessInstanceCreationInstructionByKey(val *ProcessInstanceCreationInstructionByKey) *NullableProcessInstanceCreationInstructionByKey {
 	return camundaapi.NewNullableProcessInstanceCreationInstructionByKey(val)
+}
+
+// ProcessInstanceCreationInstructionByVersionTag struct for ProcessInstanceCreationInstructionByVersionTag
+//
+// Fields and methods are documented on [camundaapi.ProcessInstanceCreationInstructionByVersionTag].
+type ProcessInstanceCreationInstructionByVersionTag = camundaapi.ProcessInstanceCreationInstructionByVersionTag
+
+// NewProcessInstanceCreationInstructionByVersionTag instantiates a new ProcessInstanceCreationInstructionByVersionTag object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessInstanceCreationInstructionByVersionTag(processDefinitionId ProcessDefinitionId, processDefinitionVersionTag string) *ProcessInstanceCreationInstructionByVersionTag {
+	return camundaapi.NewProcessInstanceCreationInstructionByVersionTag(processDefinitionId, processDefinitionVersionTag)
+}
+
+// NewProcessInstanceCreationInstructionByVersionTagWithDefaults instantiates a new ProcessInstanceCreationInstructionByVersionTag object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessInstanceCreationInstructionByVersionTagWithDefaults() *ProcessInstanceCreationInstructionByVersionTag {
+	return camundaapi.NewProcessInstanceCreationInstructionByVersionTagWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessInstanceCreationInstructionByVersionTag].
+type NullableProcessInstanceCreationInstructionByVersionTag = camundaapi.NullableProcessInstanceCreationInstructionByVersionTag
+
+func NewNullableProcessInstanceCreationInstructionByVersionTag(val *ProcessInstanceCreationInstructionByVersionTag) *NullableProcessInstanceCreationInstructionByVersionTag {
+	return camundaapi.NewNullableProcessInstanceCreationInstructionByVersionTag(val)
 }
 
 // ProcessInstanceCreationStartInstruction struct for ProcessInstanceCreationStartInstruction
@@ -15391,8 +15537,8 @@ type ProcessInstanceResult = camundaapi.ProcessInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId TenantId, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, parentProcessInstanceKey NullableProcessInstanceKey, parentElementInstanceKey NullableElementInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, tags []Tag, businessId NullableBusinessId) *ProcessInstanceResult {
-	return camundaapi.NewProcessInstanceResult(processDefinitionId, processDefinitionName, processDefinitionVersion, processDefinitionVersionTag, startDate, endDate, state, suspendedDate, hasIncident, tenantId, processInstanceKey, processDefinitionKey, parentProcessInstanceKey, parentElementInstanceKey, rootProcessInstanceKey, tags, businessId)
+func NewProcessInstanceResult(processDefinitionId ProcessDefinitionId, processDefinitionName NullableString, processDefinitionVersion int32, processDefinitionVersionTag NullableString, startDate time.Time, endDate NullableTime, state ProcessInstanceStateEnum, suspendedDate NullableTime, hasIncident bool, tenantId TenantId, processInstanceKey ProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, parentProcessInstanceKey NullableProcessInstanceKey, parentElementInstanceKey NullableElementInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, tags []Tag, businessId NullableBusinessId, storageOrdinal NullableInt32) *ProcessInstanceResult {
+	return camundaapi.NewProcessInstanceResult(processDefinitionId, processDefinitionName, processDefinitionVersion, processDefinitionVersionTag, startDate, endDate, state, suspendedDate, hasIncident, tenantId, processInstanceKey, processDefinitionKey, parentProcessInstanceKey, parentElementInstanceKey, rootProcessInstanceKey, tags, businessId, storageOrdinal)
 }
 
 // NewProcessInstanceResultWithDefaults instantiates a new ProcessInstanceResult object
@@ -15730,6 +15876,83 @@ type NullableProcessInstanceWaitStateStatisticsResult = camundaapi.NullableProce
 
 func NewNullableProcessInstanceWaitStateStatisticsResult(val *ProcessInstanceWaitStateStatisticsResult) *NullableProcessInstanceWaitStateStatisticsResult {
 	return camundaapi.NewNullableProcessInstanceWaitStateStatisticsResult(val)
+}
+
+// ProtectionModeEnum The kind of protection applied to a variable value. `REDACT` irrecoverably replaces the value before it reaches secondary storage.
+//
+// Fields and methods are documented on [camundaapi.ProtectionModeEnum].
+type ProtectionModeEnum = camundaapi.ProtectionModeEnum
+
+// List of ProtectionModeEnum
+const (
+	PROTECTIONMODEENUM_REDACT ProtectionModeEnum = "REDACT"
+)
+
+// All allowed values of ProtectionModeEnum enum
+var (
+	AllowedProtectionModeEnumEnumValues = camundaapi.AllowedProtectionModeEnumEnumValues
+)
+
+// NewProtectionModeEnumFromValue returns a pointer to a valid ProtectionModeEnum
+// for the value passed as argument, or an error if the value passed is not allowed by the enum
+func NewProtectionModeEnumFromValue(v string) (*ProtectionModeEnum, error) {
+	return camundaapi.NewProtectionModeEnumFromValue(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableProtectionModeEnum].
+type NullableProtectionModeEnum = camundaapi.NullableProtectionModeEnum
+
+func NewNullableProtectionModeEnum(val *ProtectionModeEnum) *NullableProtectionModeEnum {
+	return camundaapi.NewNullableProtectionModeEnum(val)
+}
+
+// ProtectionModeExactMatch Matches variables that have this protection mode.
+//
+// Fields and methods are documented on [camundaapi.ProtectionModeExactMatch].
+type ProtectionModeExactMatch = camundaapi.ProtectionModeExactMatch
+
+// NewProtectionModeExactMatch instantiates a new ProtectionModeExactMatch object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProtectionModeExactMatch() *ProtectionModeExactMatch {
+	return camundaapi.NewProtectionModeExactMatch()
+}
+
+// NewProtectionModeExactMatchWithDefaults instantiates a new ProtectionModeExactMatch object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProtectionModeExactMatchWithDefaults() *ProtectionModeExactMatch {
+	return camundaapi.NewProtectionModeExactMatchWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProtectionModeExactMatch].
+type NullableProtectionModeExactMatch = camundaapi.NullableProtectionModeExactMatch
+
+func NewNullableProtectionModeExactMatch(val *ProtectionModeExactMatch) *NullableProtectionModeExactMatch {
+	return camundaapi.NewNullableProtectionModeExactMatch(val)
+}
+
+// ProtectionModeFilterProperty - ProtectionModeEnum property with full advanced search capabilities.
+//
+// Fields and methods are documented on [camundaapi.ProtectionModeFilterProperty].
+type ProtectionModeFilterProperty = camundaapi.ProtectionModeFilterProperty
+
+// AdvancedProtectionModeFilterAsProtectionModeFilterProperty is a convenience function that returns AdvancedProtectionModeFilter wrapped in ProtectionModeFilterProperty
+func AdvancedProtectionModeFilterAsProtectionModeFilterProperty(v *AdvancedProtectionModeFilter) ProtectionModeFilterProperty {
+	return camundaapi.AdvancedProtectionModeFilterAsProtectionModeFilterProperty(v)
+}
+
+// ProtectionModeExactMatchAsProtectionModeFilterProperty is a convenience function that returns ProtectionModeExactMatch wrapped in ProtectionModeFilterProperty
+func ProtectionModeExactMatchAsProtectionModeFilterProperty(v *ProtectionModeExactMatch) ProtectionModeFilterProperty {
+	return camundaapi.ProtectionModeExactMatchAsProtectionModeFilterProperty(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableProtectionModeFilterProperty].
+type NullableProtectionModeFilterProperty = camundaapi.NullableProtectionModeFilterProperty
+
+func NewNullableProtectionModeFilterProperty(val *ProtectionModeFilterProperty) *NullableProtectionModeFilterProperty {
+	return camundaapi.NewNullableProtectionModeFilterProperty(val)
 }
 
 // RebalanceCancellationResponse Response to a rebalance cancellation request.
@@ -19317,6 +19540,33 @@ func NewNullableVariableKeyFilterProperty(val *VariableKeyFilterProperty) *Nulla
 	return camundaapi.NewNullableVariableKeyFilterProperty(val)
 }
 
+// VariableMetadata Metadata describing how a variable is treated.
+//
+// Fields and methods are documented on [camundaapi.VariableMetadata].
+type VariableMetadata = camundaapi.VariableMetadata
+
+// NewVariableMetadata instantiates a new VariableMetadata object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewVariableMetadata(protectionModes []ProtectionModeEnum) *VariableMetadata {
+	return camundaapi.NewVariableMetadata(protectionModes)
+}
+
+// NewVariableMetadataWithDefaults instantiates a new VariableMetadata object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewVariableMetadataWithDefaults() *VariableMetadata {
+	return camundaapi.NewVariableMetadataWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableMetadata].
+type NullableVariableMetadata = camundaapi.NullableVariableMetadata
+
+func NewNullableVariableMetadata(val *VariableMetadata) *NullableVariableMetadata {
+	return camundaapi.NewNullableVariableMetadata(val)
+}
+
 // VariableResult struct for VariableResult
 //
 // Fields and methods are documented on [camundaapi.VariableResult].
@@ -19326,8 +19576,8 @@ type VariableResult = camundaapi.VariableResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVariableResult(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, value string) *VariableResult {
-	return camundaapi.NewVariableResult(name, tenantId, variableKey, scopeKey, processInstanceKey, rootProcessInstanceKey, value)
+func NewVariableResult(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, metadata VariableMetadata, value string) *VariableResult {
+	return camundaapi.NewVariableResult(name, tenantId, variableKey, scopeKey, processInstanceKey, rootProcessInstanceKey, metadata, value)
 }
 
 // NewVariableResultWithDefaults instantiates a new VariableResult object
@@ -19353,8 +19603,8 @@ type VariableResultBase = camundaapi.VariableResultBase
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVariableResultBase(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey) *VariableResultBase {
-	return camundaapi.NewVariableResultBase(name, tenantId, variableKey, scopeKey, processInstanceKey, rootProcessInstanceKey)
+func NewVariableResultBase(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, metadata VariableMetadata) *VariableResultBase {
+	return camundaapi.NewVariableResultBase(name, tenantId, variableKey, scopeKey, processInstanceKey, rootProcessInstanceKey, metadata)
 }
 
 // NewVariableResultBaseWithDefaults instantiates a new VariableResultBase object
@@ -19461,8 +19711,8 @@ type VariableSearchResult = camundaapi.VariableSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVariableSearchResult(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, value string, isTruncated bool) *VariableSearchResult {
-	return camundaapi.NewVariableSearchResult(name, tenantId, variableKey, scopeKey, processInstanceKey, rootProcessInstanceKey, value, isTruncated)
+func NewVariableSearchResult(name string, tenantId TenantId, variableKey VariableKey, scopeKey ScopeKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, metadata VariableMetadata, value string, isTruncated bool) *VariableSearchResult {
+	return camundaapi.NewVariableSearchResult(name, tenantId, variableKey, scopeKey, processInstanceKey, rootProcessInstanceKey, metadata, value, isTruncated)
 }
 
 // NewVariableSearchResultWithDefaults instantiates a new VariableSearchResult object
