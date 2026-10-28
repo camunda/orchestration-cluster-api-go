@@ -40,8 +40,8 @@ type CorrelatedMessageSubscriptionResult struct {
 	PartitionId int32 `json:"partitionId"`
 	// The process definition ID associated with this correlated message subscription.
 	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
-	// The process definition key associated with this correlated message subscription.
-	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
+	// The process definition key associated with this correlated message subscription. This field is not present for correlations to message subscriptions of a running process instance (catch, boundary and receive task events) written by version 8.8.
+	ProcessDefinitionKey NullableProcessDefinitionKey `json:"processDefinitionKey"`
 	// The process instance key associated with this correlated message subscription.
 	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
@@ -58,7 +58,7 @@ type _CorrelatedMessageSubscriptionResult CorrelatedMessageSubscriptionResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCorrelatedMessageSubscriptionResult(businessId NullableBusinessId, correlationKey NullableString, correlationTime time.Time, elementId ElementId, elementInstanceKey NullableElementInstanceKey, messageKey MessageKey, messageName string, partitionId int32, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, subscriptionKey MessageSubscriptionKey, tenantId TenantId) *CorrelatedMessageSubscriptionResult {
+func NewCorrelatedMessageSubscriptionResult(businessId NullableBusinessId, correlationKey NullableString, correlationTime time.Time, elementId ElementId, elementInstanceKey NullableElementInstanceKey, messageKey MessageKey, messageName string, partitionId int32, processDefinitionId ProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, subscriptionKey MessageSubscriptionKey, tenantId TenantId) *CorrelatedMessageSubscriptionResult {
 	this := CorrelatedMessageSubscriptionResult{}
 	this.BusinessId = businessId
 	this.CorrelationKey = correlationKey
@@ -308,27 +308,29 @@ func (o *CorrelatedMessageSubscriptionResult) SetProcessDefinitionId(v ProcessDe
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
+// If the value is explicit nil, the zero value for ProcessDefinitionKey will be returned
 func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionKey() ProcessDefinitionKey {
-	if o == nil {
+	if o == nil || o.ProcessDefinitionKey.Get() == nil {
 		var ret ProcessDefinitionKey
 		return ret
 	}
 
-	return o.ProcessDefinitionKey
+	return *o.ProcessDefinitionKey.Get()
 }
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *CorrelatedMessageSubscriptionResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ProcessDefinitionKey, true
+	return o.ProcessDefinitionKey.Get(), o.ProcessDefinitionKey.IsSet()
 }
 
 // SetProcessDefinitionKey sets field value
 func (o *CorrelatedMessageSubscriptionResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
-	o.ProcessDefinitionKey = v
+	o.ProcessDefinitionKey.Set(&v)
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
@@ -448,7 +450,7 @@ func (o CorrelatedMessageSubscriptionResult) ToMap() (map[string]interface{}, er
 	toSerialize["messageName"] = o.MessageName
 	toSerialize["partitionId"] = o.PartitionId
 	toSerialize["processDefinitionId"] = o.ProcessDefinitionId
-	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey
+	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey.Get()
 	toSerialize["processInstanceKey"] = o.ProcessInstanceKey
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
 	toSerialize["subscriptionKey"] = o.SubscriptionKey

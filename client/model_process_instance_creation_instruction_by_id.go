@@ -21,10 +21,6 @@ var _ MappedNullable = &ProcessInstanceCreationInstructionById{}
 
 // ProcessInstanceCreationInstructionById struct for ProcessInstanceCreationInstructionById
 type ProcessInstanceCreationInstructionById struct {
-	// The BPMN process id of the process definition to start an instance of.
-	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
-	// The version of the process. If omitted, the latest active version is used.
-	ProcessDefinitionVersion *int32 `json:"processDefinitionVersion,omitempty"`
 	// JSON object that will instantiate the variables for the root variable scope of the process instance.
 	Variables map[string]interface{} `json:"variables,omitempty"`
 	// The tenant id of the process definition. If multi-tenancy is enabled, provide the tenant id of the process definition to start a process instance of. If multi-tenancy is disabled, don't provide this parameter.
@@ -45,6 +41,10 @@ type ProcessInstanceCreationInstructionById struct {
 	Tags []Tag `json:"tags,omitempty"`
 	// An optional, user-defined string identifier that identifies the process instance within the scope of a process definition (scoped by tenant). If provided and uniqueness enforcement is enabled, the engine will reject creation if another root process instance with the same business id is already active for the same process definition. Note that any active child process instances with the same business id are not taken into account.
 	BusinessId *BusinessId `json:"businessId,omitempty"`
+	// The BPMN process id of the process definition to start an instance of.
+	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	// The version of the process. If omitted, the latest active version is used.
+	ProcessDefinitionVersion *int32 `json:"processDefinitionVersion,omitempty"`
 }
 
 type _ProcessInstanceCreationInstructionById ProcessInstanceCreationInstructionById
@@ -55,13 +55,13 @@ type _ProcessInstanceCreationInstructionById ProcessInstanceCreationInstructionB
 // will change when the set of required properties is changed
 func NewProcessInstanceCreationInstructionById(processDefinitionId ProcessDefinitionId) *ProcessInstanceCreationInstructionById {
 	this := ProcessInstanceCreationInstructionById{}
-	this.ProcessDefinitionId = processDefinitionId
-	var processDefinitionVersion int32 = -1
-	this.ProcessDefinitionVersion = &processDefinitionVersion
 	var awaitCompletion bool = false
 	this.AwaitCompletion = &awaitCompletion
 	var requestTimeout int64 = 0
 	this.RequestTimeout = &requestTimeout
+	this.ProcessDefinitionId = processDefinitionId
+	var processDefinitionVersion int32 = -1
+	this.ProcessDefinitionVersion = &processDefinitionVersion
 	return &this
 }
 
@@ -70,69 +70,13 @@ func NewProcessInstanceCreationInstructionById(processDefinitionId ProcessDefini
 // but it doesn't guarantee that properties required by API are set
 func NewProcessInstanceCreationInstructionByIdWithDefaults() *ProcessInstanceCreationInstructionById {
 	this := ProcessInstanceCreationInstructionById{}
-	var processDefinitionVersion int32 = -1
-	this.ProcessDefinitionVersion = &processDefinitionVersion
 	var awaitCompletion bool = false
 	this.AwaitCompletion = &awaitCompletion
 	var requestTimeout int64 = 0
 	this.RequestTimeout = &requestTimeout
+	var processDefinitionVersion int32 = -1
+	this.ProcessDefinitionVersion = &processDefinitionVersion
 	return &this
-}
-
-// GetProcessDefinitionId returns the ProcessDefinitionId field value
-func (o *ProcessInstanceCreationInstructionById) GetProcessDefinitionId() ProcessDefinitionId {
-	if o == nil {
-		var ret ProcessDefinitionId
-		return ret
-	}
-
-	return o.ProcessDefinitionId
-}
-
-// GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
-// and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionById) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ProcessDefinitionId, true
-}
-
-// SetProcessDefinitionId sets field value
-func (o *ProcessInstanceCreationInstructionById) SetProcessDefinitionId(v ProcessDefinitionId) {
-	o.ProcessDefinitionId = v
-}
-
-// GetProcessDefinitionVersion returns the ProcessDefinitionVersion field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionById) GetProcessDefinitionVersion() int32 {
-	if o == nil || IsNil(o.ProcessDefinitionVersion) {
-		var ret int32
-		return ret
-	}
-	return *o.ProcessDefinitionVersion
-}
-
-// GetProcessDefinitionVersionOk returns a tuple with the ProcessDefinitionVersion field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionById) GetProcessDefinitionVersionOk() (*int32, bool) {
-	if o == nil || IsNil(o.ProcessDefinitionVersion) {
-		return nil, false
-	}
-	return o.ProcessDefinitionVersion, true
-}
-
-// HasProcessDefinitionVersion returns a boolean if a field has been set.
-func (o *ProcessInstanceCreationInstructionById) HasProcessDefinitionVersion() bool {
-	if o != nil && !IsNil(o.ProcessDefinitionVersion) {
-		return true
-	}
-
-	return false
-}
-
-// SetProcessDefinitionVersion gets a reference to the given int32 and assigns it to the ProcessDefinitionVersion field.
-func (o *ProcessInstanceCreationInstructionById) SetProcessDefinitionVersion(v int32) {
-	o.ProcessDefinitionVersion = &v
 }
 
 // GetVariables returns the Variables field value if set, zero value otherwise.
@@ -455,6 +399,62 @@ func (o *ProcessInstanceCreationInstructionById) SetBusinessId(v BusinessId) {
 	o.BusinessId = &v
 }
 
+// GetProcessDefinitionId returns the ProcessDefinitionId field value
+func (o *ProcessInstanceCreationInstructionById) GetProcessDefinitionId() ProcessDefinitionId {
+	if o == nil {
+		var ret ProcessDefinitionId
+		return ret
+	}
+
+	return o.ProcessDefinitionId
+}
+
+// GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
+// and a boolean to check if the value has been set.
+func (o *ProcessInstanceCreationInstructionById) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ProcessDefinitionId, true
+}
+
+// SetProcessDefinitionId sets field value
+func (o *ProcessInstanceCreationInstructionById) SetProcessDefinitionId(v ProcessDefinitionId) {
+	o.ProcessDefinitionId = v
+}
+
+// GetProcessDefinitionVersion returns the ProcessDefinitionVersion field value if set, zero value otherwise.
+func (o *ProcessInstanceCreationInstructionById) GetProcessDefinitionVersion() int32 {
+	if o == nil || IsNil(o.ProcessDefinitionVersion) {
+		var ret int32
+		return ret
+	}
+	return *o.ProcessDefinitionVersion
+}
+
+// GetProcessDefinitionVersionOk returns a tuple with the ProcessDefinitionVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ProcessInstanceCreationInstructionById) GetProcessDefinitionVersionOk() (*int32, bool) {
+	if o == nil || IsNil(o.ProcessDefinitionVersion) {
+		return nil, false
+	}
+	return o.ProcessDefinitionVersion, true
+}
+
+// HasProcessDefinitionVersion returns a boolean if a field has been set.
+func (o *ProcessInstanceCreationInstructionById) HasProcessDefinitionVersion() bool {
+	if o != nil && !IsNil(o.ProcessDefinitionVersion) {
+		return true
+	}
+
+	return false
+}
+
+// SetProcessDefinitionVersion gets a reference to the given int32 and assigns it to the ProcessDefinitionVersion field.
+func (o *ProcessInstanceCreationInstructionById) SetProcessDefinitionVersion(v int32) {
+	o.ProcessDefinitionVersion = &v
+}
+
 func (o ProcessInstanceCreationInstructionById) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -465,10 +465,6 @@ func (o ProcessInstanceCreationInstructionById) MarshalJSON() ([]byte, error) {
 
 func (o ProcessInstanceCreationInstructionById) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["processDefinitionId"] = o.ProcessDefinitionId
-	if !IsNil(o.ProcessDefinitionVersion) {
-		toSerialize["processDefinitionVersion"] = o.ProcessDefinitionVersion
-	}
 	if !IsNil(o.Variables) {
 		toSerialize["variables"] = o.Variables
 	}
@@ -498,6 +494,10 @@ func (o ProcessInstanceCreationInstructionById) ToMap() (map[string]interface{},
 	}
 	if !IsNil(o.BusinessId) {
 		toSerialize["businessId"] = o.BusinessId
+	}
+	toSerialize["processDefinitionId"] = o.ProcessDefinitionId
+	if !IsNil(o.ProcessDefinitionVersion) {
+		toSerialize["processDefinitionVersion"] = o.ProcessDefinitionVersion
 	}
 	return toSerialize, nil
 }

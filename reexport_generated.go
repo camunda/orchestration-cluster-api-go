@@ -7078,7 +7078,7 @@ type CorrelatedMessageSubscriptionResult = camundaapi.CorrelatedMessageSubscript
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCorrelatedMessageSubscriptionResult(businessId NullableBusinessId, correlationKey NullableString, correlationTime time.Time, elementId ElementId, elementInstanceKey NullableElementInstanceKey, messageKey MessageKey, messageName string, partitionId int32, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, subscriptionKey MessageSubscriptionKey, tenantId TenantId) *CorrelatedMessageSubscriptionResult {
+func NewCorrelatedMessageSubscriptionResult(businessId NullableBusinessId, correlationKey NullableString, correlationTime time.Time, elementId ElementId, elementInstanceKey NullableElementInstanceKey, messageKey MessageKey, messageName string, partitionId int32, processDefinitionId ProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, subscriptionKey MessageSubscriptionKey, tenantId TenantId) *CorrelatedMessageSubscriptionResult {
 	return camundaapi.NewCorrelatedMessageSubscriptionResult(businessId, correlationKey, correlationTime, elementId, elementInstanceKey, messageKey, messageName, partitionId, processDefinitionId, processDefinitionKey, processInstanceKey, rootProcessInstanceKey, subscriptionKey, tenantId)
 }
 
@@ -8894,7 +8894,7 @@ type ElementInstanceResult = camundaapi.ElementInstanceResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewElementInstanceResult(processDefinitionId ProcessDefinitionId, startDate time.Time, endDate NullableTime, elementId ElementId, elementName string, type_ string, state ElementInstanceStateEnum, hasIncident bool, tenantId TenantId, elementInstanceKey ElementInstanceKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, incidentKey NullableIncidentKey) *ElementInstanceResult {
+func NewElementInstanceResult(processDefinitionId NullableProcessDefinitionId, startDate time.Time, endDate NullableTime, elementId ElementId, elementName string, type_ string, state ElementInstanceStateEnum, hasIncident bool, tenantId TenantId, elementInstanceKey ElementInstanceKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey NullableProcessDefinitionKey, incidentKey NullableIncidentKey) *ElementInstanceResult {
 	return camundaapi.NewElementInstanceResult(processDefinitionId, startDate, endDate, elementId, elementName, type_, state, hasIncident, tenantId, elementInstanceKey, processInstanceKey, rootProcessInstanceKey, processDefinitionKey, incidentKey)
 }
 
@@ -12049,7 +12049,7 @@ type JobSearchResult = camundaapi.JobSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
+func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId NullableProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
 	return camundaapi.NewJobSearchResult(customHeaders, deadline, deniedReason, elementId, elementInstanceKey, endTime, errorCode, errorMessage, hasFailedWithRetriesLeft, isDenied, jobKey, kind, listenerEventType, processDefinitionId, processDefinitionKey, processInstanceKey, rootProcessInstanceKey, businessId, retries, state, tenantId, type_, worker, creationTime, lastUpdateTime, priority)
 }
 
@@ -14749,7 +14749,7 @@ func NewNullableProcessInstanceCancellationBatchOperationRequest(val *ProcessIns
 	return camundaapi.NewNullableProcessInstanceCancellationBatchOperationRequest(val)
 }
 
-// ProcessInstanceCreationInstruction - Instructions for creating a process instance. The process definition can be specified either by id or by key.
+// ProcessInstanceCreationInstruction - Instructions for creating a process instance. The process definition can be specified either by id, by id and version tag, or by key.
 //
 // Fields and methods are documented on [camundaapi.ProcessInstanceCreationInstruction].
 type ProcessInstanceCreationInstruction = camundaapi.ProcessInstanceCreationInstruction
@@ -14764,11 +14764,43 @@ func ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction
 	return camundaapi.ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction(v)
 }
 
+// ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction is a convenience function that returns ProcessInstanceCreationInstructionByVersionTag wrapped in ProcessInstanceCreationInstruction
+func ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction(v *ProcessInstanceCreationInstructionByVersionTag) ProcessInstanceCreationInstruction {
+	return camundaapi.ProcessInstanceCreationInstructionByVersionTagAsProcessInstanceCreationInstruction(v)
+}
+
 // Fields and methods are documented on [camundaapi.NullableProcessInstanceCreationInstruction].
 type NullableProcessInstanceCreationInstruction = camundaapi.NullableProcessInstanceCreationInstruction
 
 func NewNullableProcessInstanceCreationInstruction(val *ProcessInstanceCreationInstruction) *NullableProcessInstanceCreationInstruction {
 	return camundaapi.NewNullableProcessInstanceCreationInstruction(val)
+}
+
+// ProcessInstanceCreationInstructionBase Fields shared by all process instance creation instructions.
+//
+// Fields and methods are documented on [camundaapi.ProcessInstanceCreationInstructionBase].
+type ProcessInstanceCreationInstructionBase = camundaapi.ProcessInstanceCreationInstructionBase
+
+// NewProcessInstanceCreationInstructionBase instantiates a new ProcessInstanceCreationInstructionBase object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessInstanceCreationInstructionBase() *ProcessInstanceCreationInstructionBase {
+	return camundaapi.NewProcessInstanceCreationInstructionBase()
+}
+
+// NewProcessInstanceCreationInstructionBaseWithDefaults instantiates a new ProcessInstanceCreationInstructionBase object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessInstanceCreationInstructionBaseWithDefaults() *ProcessInstanceCreationInstructionBase {
+	return camundaapi.NewProcessInstanceCreationInstructionBaseWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessInstanceCreationInstructionBase].
+type NullableProcessInstanceCreationInstructionBase = camundaapi.NullableProcessInstanceCreationInstructionBase
+
+func NewNullableProcessInstanceCreationInstructionBase(val *ProcessInstanceCreationInstructionBase) *NullableProcessInstanceCreationInstructionBase {
+	return camundaapi.NewNullableProcessInstanceCreationInstructionBase(val)
 }
 
 // ProcessInstanceCreationInstructionById struct for ProcessInstanceCreationInstructionById
@@ -14823,6 +14855,33 @@ type NullableProcessInstanceCreationInstructionByKey = camundaapi.NullableProces
 
 func NewNullableProcessInstanceCreationInstructionByKey(val *ProcessInstanceCreationInstructionByKey) *NullableProcessInstanceCreationInstructionByKey {
 	return camundaapi.NewNullableProcessInstanceCreationInstructionByKey(val)
+}
+
+// ProcessInstanceCreationInstructionByVersionTag struct for ProcessInstanceCreationInstructionByVersionTag
+//
+// Fields and methods are documented on [camundaapi.ProcessInstanceCreationInstructionByVersionTag].
+type ProcessInstanceCreationInstructionByVersionTag = camundaapi.ProcessInstanceCreationInstructionByVersionTag
+
+// NewProcessInstanceCreationInstructionByVersionTag instantiates a new ProcessInstanceCreationInstructionByVersionTag object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessInstanceCreationInstructionByVersionTag(processDefinitionId ProcessDefinitionId, processDefinitionVersionTag string) *ProcessInstanceCreationInstructionByVersionTag {
+	return camundaapi.NewProcessInstanceCreationInstructionByVersionTag(processDefinitionId, processDefinitionVersionTag)
+}
+
+// NewProcessInstanceCreationInstructionByVersionTagWithDefaults instantiates a new ProcessInstanceCreationInstructionByVersionTag object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessInstanceCreationInstructionByVersionTagWithDefaults() *ProcessInstanceCreationInstructionByVersionTag {
+	return camundaapi.NewProcessInstanceCreationInstructionByVersionTagWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessInstanceCreationInstructionByVersionTag].
+type NullableProcessInstanceCreationInstructionByVersionTag = camundaapi.NullableProcessInstanceCreationInstructionByVersionTag
+
+func NewNullableProcessInstanceCreationInstructionByVersionTag(val *ProcessInstanceCreationInstructionByVersionTag) *NullableProcessInstanceCreationInstructionByVersionTag {
+	return camundaapi.NewNullableProcessInstanceCreationInstructionByVersionTag(val)
 }
 
 // ProcessInstanceCreationStartInstruction struct for ProcessInstanceCreationStartInstruction
@@ -15526,7 +15585,7 @@ type ProcessInstanceSequenceFlowResult = camundaapi.ProcessInstanceSequenceFlowR
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProcessInstanceSequenceFlowResult(sequenceFlowId string, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, processDefinitionId ProcessDefinitionId, elementId ElementId, tenantId TenantId) *ProcessInstanceSequenceFlowResult {
+func NewProcessInstanceSequenceFlowResult(sequenceFlowId string, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey NullableProcessDefinitionKey, processDefinitionId NullableProcessDefinitionId, elementId ElementId, tenantId TenantId) *ProcessInstanceSequenceFlowResult {
 	return camundaapi.NewProcessInstanceSequenceFlowResult(sequenceFlowId, processInstanceKey, rootProcessInstanceKey, processDefinitionKey, processDefinitionId, elementId, tenantId)
 }
 
