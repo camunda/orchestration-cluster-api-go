@@ -47,7 +47,7 @@
     }
   ],
   "vulnerabilityAlerts": {
-    "description": "Vulnerability fixes are user-facing: commit them as fix(deps) so a patch release is cut on main and stable/*, and auto-merge once the required checks are green. Renovate appends this as the last package rule, so it overrides the chore commit type and the automerge/enabled rules above.",
+    "description": "Vulnerability fixes are user-facing: commit them as fix(deps) and auto-merge once the required checks are green. The fix commit marks the change for the next patch release, but merging it does not publish anything by itself: this repo releases only from a manual SemVer tag push (see .github/workflows/release.yml), so a maintainer still has to tag to ship the fix. Renovate appends this as the last package rule, so it overrides the chore commit type and the automerge/enabled rules above.",
     "enabled": true,
     "vulnerabilityFixStrategy": "lowest",
     "semanticCommitType": "fix",
