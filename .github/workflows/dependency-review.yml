@@ -26,3 +26,8 @@ jobs:
         with:
           fail-on-severity: high
           fail-on-scopes: runtime, development
+          # undici@6.29.0 bundled inside the npm CLI (semantic-release ->
+          # @semantic-release/npm -> npm). Bundled deps cannot be overridden, and the
+          # npm plugin is never loaded by release.config.cjs. Remove once npm bundles
+          # a fixed undici (node-gyp >= 13.1.0).
+          allow-ghsas: GHSA-xjj6-f33q-929c, GHSA-qrxm-fqhp-jwvm, GHSA-2m5v-pch6-74hx

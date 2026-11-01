@@ -116,16 +116,43 @@ review-comment fix-ups and regeneration commits.
 
 ## Versioning
 
-Semantic versioning via annotated `git` tags; `release.yml` gates the tag and creates
-the GitHub Release. The SDK major tracks the Camunda server minor (server 8.10 → SDK
-v10.x), and Go carries majors ≥ 2 in the module path: `stable/10` is `/v10`, `main`
-is `/v11`. Pre-v10 releases (`v0.x`) used the unsuffixed path.
+Releases are automatic. On every push to `main` or `stable/**`, `release.yml` runs the
+build/test gate and then semantic-release (`release.config.cjs`, extending the shared
+`@camunda8/sdk-infra` base): `fix`/`perf`/`revert` → patch, `feat` → minor. It pushes
+the `vX.Y.Z` tag, a `chore(release)` CHANGELOG.md commit and a GitHub Release as the
+`camunda-sdk-automation` App (a ruleset bypass actor). There is no registry publish:
+pkg.go.dev indexes the tag. Never push a release tag by hand.
+
+- `main` publishes `-alpha.N` prereleases; `stable/N` publishes `N.x`. The current
+  stable major comes from the `CAMUNDA_SDK_CURRENT_STABLE_MAJOR` repo variable.
+- The SDK major tracks the Camunda server minor (server 8.10 → SDK v10.x), and Go
+  carries majors ≥ 2 in the module path: `stable/10` is `/v10`, `main` is `/v11`.
+  Pre-v10 releases (`v0.x`) used the unsuffixed path.
+- `scripts/verify-release-major.sh` runs as the verifyRelease step and stops a release
+  whose major disagrees with the module path. A `BREAKING CHANGE:` footer would cause
+  exactly that, so CI's `breaking-change-guard` rejects it unless the PR carries the
+  `breaking-change-approved` label.
 
 When `main` moves to a new server line, cut `stable/N` first, then on `main`:
 `go mod edit -module` to the next `/vN`, rewrite the Go import strings, update the
 `go_package` in `buf.gen.yaml`, and regenerate `pb/` with `buf generate` (the
 descriptor embeds the path, so do not hand-edit it). Everything else reads the path
 from `go.mod`; `TestModulePathLiteralsMatchGoMod` flags any literal that was missed.
+
+semantic-release derives the next version from the last tag reachable on the branch,
+so after the module-path move `main` must be seeded with the first prerelease of the
+new major, or it computes the old major and the verify step rejects it. Tag the
+module-path commit and attach the channel note semantic-release expects (on the
+commit, not on an annotated tag object, or semantic-release does not see it):
+
+```bash
+git tag vN.0.0-alpha.1 <sha>
+git notes --ref semantic-release-vN.0.0-alpha.1 add -m '{"channels":["alpha"]}' <sha>
+git push origin vN.0.0-alpha.1 refs/notes/semantic-release-vN.0.0-alpha.1
+gh release create vN.0.0-alpha.1 --prerelease --generate-notes --verify-tag
+```
+
+Also set `CAMUNDA_SDK_CURRENT_STABLE_MAJOR` to the newly cut stable major.
 
 ## Go conventions
 
