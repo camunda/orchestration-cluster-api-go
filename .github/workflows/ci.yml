@@ -105,6 +105,9 @@ jobs:
   # fail. Bypass with the `breaking-change-approved` label.
   breaking-change-guard:
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
     uses: camunda/sdk-infra/.github/workflows/sdk-breaking-change-guard.yml@v1
 
   integration:
