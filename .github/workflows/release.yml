@@ -1,83 +1,105 @@
 name: Release
 
-# Go modules are consumed directly from a git tag — pkg.go.dev indexes the tag and
-# `go get` resolves it — so there is no package-registry publish step. A release is
-# simply a SemVer tag `vX.Y.Z` plus a GitHub Release carrying the generated notes.
+# Releases are cut by semantic-release from the Conventional Commits merged to `main`
+# or a `stable/**` branch (see release.config.cjs and the shared base config in
+# @camunda8/sdk-infra): `fix`/`perf`/`revert` -> patch, `feat` -> minor. `main`
+# publishes `-alpha.N` prereleases of the next line; `stable/N` publishes `N.x`.
 #
-# Release flow:
-#   1. Make sure `main` is green.
-#   2. Create and push an annotated SemVer tag, e.g. `git tag -a v10.0.0 -m v10.0.0 &&
-#      git push origin v10.0.0`.
-#   The tag push triggers this workflow, which re-runs the build/test gate, verifies
-#   the tag's major agrees with the module path, and publishes a GitHub Release.
+# Go modules are consumed directly from a git tag (pkg.go.dev indexes the tag and
+# `go get` resolves it), so there is no registry publish step: a release is the
+# `vX.Y.Z` tag, a CHANGELOG.md commit and a GitHub Release.
 #
-# Versioning policy (see AGENTS.md): the SDK major tracks the Camunda server minor
-# (server 8.10 -> SDK v10.x). Go requires majors >= 2 to carry a matching `/vN`
-# suffix in the module path; the version check below enforces that agreement so a
-# mismatched tag fails fast instead of shipping an unresolvable module.
-#
-# A manual workflow_dispatch run executes the gate only (no tag, no release) as a
-# smoke test.
+# The SDK major tracks the Camunda server minor and Go requires majors >= 2 to
+# carry a matching `/vN` module-path suffix. scripts/verify-release-major.sh runs
+# as semantic-release's verifyRelease step, so a mismatched major stops the
+# release before any tag is pushed.
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+      - "stable/**"
   workflow_dispatch:
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.ref_name }}
   cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  release:
-    name: Tag release
+  gate:
+    name: Build & test gate
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    permissions:
-      contents: write # create the GitHub Release
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
+      - name: Build
+        run: go build ./...
+      - name: Test
+        run: go test -race ./...
 
-      - name: Verify tag major agrees with the module path
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          set -euo pipefail
-          tag="${GITHUB_REF_NAME}"          # e.g. v0.2.0, v0.2.0-alpha.1, v9.0.0
-          module="$(go list -m)"            # module path declared in go.mod
-          ver="${tag#v}"
-          major="${ver%%.*}"
-          case "$module" in
-            */v[0-9]*) suffix_major="${module##*/v}" ;;
-            *) suffix_major="" ;;
-          esac
-          echo "tag=$tag module=$module major=$major suffix_major=${suffix_major:-<none>}"
-          if [ "$major" -ge 2 ]; then
-            if [ "$suffix_major" != "$major" ]; then
-              echo "::error::Tag $tag has major $major but module path is '$module'. Go requires a matching '/v$major' suffix on the module path before tagging this major."
-              exit 1
-            fi
-          elif [ -n "$suffix_major" ]; then
-            echo "::error::Tag $tag has major $major but module path carries a '/v$suffix_major' suffix; drop the suffix or tag a matching major."
-            exit 1
-          fi
+  release:
+    name: Version & release (${{ github.ref_name }})
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write # mint GitHub OIDC token for Vault JWT auth
+    steps:
+      # semantic-release pushes the release commit to a ruleset-protected branch.
+      # GITHUB_TOKEN can never bypass a ruleset, so it runs as camunda-sdk-automation,
+      # which is a bypass actor on both rulesets.
+      - name: Import secrets
+        id: secrets
+        uses: hashicorp/vault-action@v4.0.0
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          method: jwt
+          path: ${{ secrets.VAULT_JWT_PATH }}
+          role: ${{ secrets.VAULT_JWT_ROLE }}
+          jwtGithubAudience: ${{ secrets.VAULT_JWT_AUDIENCE }}
+          exportEnv: false
+          secrets: |
+            secret/data/products/agentic-experience/github.com/apps/camunda/camunda-sdk-automation GITHUB_APP_ID | APP_ID ;
+            secret/data/products/agentic-experience/github.com/apps/camunda/camunda-sdk-automation GITHUB_APP_PRIVATE_KEY | APP_PRIVATE_KEY ;
 
-      - name: Build & test gate
-        run: |
-          go build ./...
-          go test -race ./...
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ steps.secrets.outputs.APP_ID }}
+          private-key: ${{ steps.secrets.outputs.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Configure committer identity
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes --verify-tag
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+        run: |
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${APP_SLUG}[bot]@users.noreply.github.com"
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Install Node dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Release (semantic-release)
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          CAMUNDA_SDK_CURRENT_STABLE_MAJOR: ${{ vars.CAMUNDA_SDK_CURRENT_STABLE_MAJOR }}
+        run: npx semantic-release
