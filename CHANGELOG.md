@@ -1,3 +1,10 @@
+## [10.0.2](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.1...v10.0.2) (2026-11-02)
+
+
+### Bug Fixes
+
+* **deps:** update module golang.org/x/net to v0.62.0 [security] ([#100](https://github.com/camunda/orchestration-cluster-api-go/issues/100)) ([fd527be](https://github.com/camunda/orchestration-cluster-api-go/commit/fd527bed145cd7e45bcadedb0bf612b4b1ba0a68))
+
 ## [10.0.1](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.0...v10.0.1) (2026-11-01)
 
 
