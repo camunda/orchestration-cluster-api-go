@@ -4,6 +4,15 @@
 > https://raw.githubusercontent.com/camunda/.github/refs/heads/main/AGENTS.md
 > The instructions below extend those and take precedence on conflict.
 
+<!-- sdk-infra-delegation:start -->
+> **Note:** This file also delegates to the shared SDK AGENTS.md. Read and apply it too.
+
+**URL:**
+https://raw.githubusercontent.com/camunda/sdk-infra/refs/heads/main/policies/AGENTS.md
+
+It holds the conventions shared by all Camunda SDK repos (commits, bug fixes, tests, opening issues). Precedence on conflict: this file, then the shared SDK file, then the central Camunda file.
+<!-- sdk-infra-delegation:end -->
+
 ## Role & boundary
 
 This repo produces the **Go SDK** for the Camunda 8 Orchestration Cluster REST API,
