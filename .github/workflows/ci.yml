@@ -79,7 +79,7 @@ jobs:
           cache: true
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.15"
       # The README code blocks are injected from examples/readme.go; building the
       # examples type-checks them, and --check fails if the README drifted.
       - name: Build examples
@@ -166,7 +166,7 @@ jobs:
           java-version: 21
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.15"
       - name: Refresh upstream inputs
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
