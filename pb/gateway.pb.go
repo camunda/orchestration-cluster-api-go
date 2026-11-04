@@ -194,6 +194,51 @@ func (ActivatedJob_ListenerEventType) EnumDescriptor() ([]byte, []int) {
 	return file_gateway_proto_rawDescGZIP(), []int{3, 1}
 }
 
+// The kind of protection applied to a variable value.
+type VariableMetadata_ProtectionMode int32
+
+const (
+	// irrecoverably replaces the value before it reaches secondary storage
+	VariableMetadata_REDACT VariableMetadata_ProtectionMode = 0
+)
+
+// Enum value maps for VariableMetadata_ProtectionMode.
+var (
+	VariableMetadata_ProtectionMode_name = map[int32]string{
+		0: "REDACT",
+	}
+	VariableMetadata_ProtectionMode_value = map[string]int32{
+		"REDACT": 0,
+	}
+)
+
+func (x VariableMetadata_ProtectionMode) Enum() *VariableMetadata_ProtectionMode {
+	p := new(VariableMetadata_ProtectionMode)
+	*p = x
+	return p
+}
+
+func (x VariableMetadata_ProtectionMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (VariableMetadata_ProtectionMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_gateway_proto_enumTypes[3].Descriptor()
+}
+
+func (VariableMetadata_ProtectionMode) Type() protoreflect.EnumType {
+	return &file_gateway_proto_enumTypes[3]
+}
+
+func (x VariableMetadata_ProtectionMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use VariableMetadata_ProtectionMode.Descriptor instead.
+func (VariableMetadata_ProtectionMode) EnumDescriptor() ([]byte, []int) {
+	return file_gateway_proto_rawDescGZIP(), []int{14, 0}
+}
+
 // Describes the Raft role of the broker for a given partition
 type Partition_PartitionBrokerRole int32
 
@@ -228,11 +273,11 @@ func (x Partition_PartitionBrokerRole) String() string {
 }
 
 func (Partition_PartitionBrokerRole) Descriptor() protoreflect.EnumDescriptor {
-	return file_gateway_proto_enumTypes[3].Descriptor()
+	return file_gateway_proto_enumTypes[4].Descriptor()
 }
 
 func (Partition_PartitionBrokerRole) Type() protoreflect.EnumType {
-	return &file_gateway_proto_enumTypes[3]
+	return &file_gateway_proto_enumTypes[4]
 }
 
 func (x Partition_PartitionBrokerRole) Number() protoreflect.EnumNumber {
@@ -241,7 +286,7 @@ func (x Partition_PartitionBrokerRole) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Partition_PartitionBrokerRole.Descriptor instead.
 func (Partition_PartitionBrokerRole) EnumDescriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{48, 0}
+	return file_gateway_proto_rawDescGZIP(), []int{49, 0}
 }
 
 // Describes the current health of the partition
@@ -278,11 +323,11 @@ func (x Partition_PartitionBrokerHealth) String() string {
 }
 
 func (Partition_PartitionBrokerHealth) Descriptor() protoreflect.EnumDescriptor {
-	return file_gateway_proto_enumTypes[4].Descriptor()
+	return file_gateway_proto_enumTypes[5].Descriptor()
 }
 
 func (Partition_PartitionBrokerHealth) Type() protoreflect.EnumType {
-	return &file_gateway_proto_enumTypes[4]
+	return &file_gateway_proto_enumTypes[5]
 }
 
 func (x Partition_PartitionBrokerHealth) Number() protoreflect.EnumNumber {
@@ -291,7 +336,7 @@ func (x Partition_PartitionBrokerHealth) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Partition_PartitionBrokerHealth.Descriptor instead.
 func (Partition_PartitionBrokerHealth) EnumDescriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{48, 1}
+	return file_gateway_proto_rawDescGZIP(), []int{49, 1}
 }
 
 // The batch operation type
@@ -352,11 +397,11 @@ func (x BatchOperationCreatedResult_BatchOperationTypeEnum) String() string {
 }
 
 func (BatchOperationCreatedResult_BatchOperationTypeEnum) Descriptor() protoreflect.EnumDescriptor {
-	return file_gateway_proto_enumTypes[5].Descriptor()
+	return file_gateway_proto_enumTypes[6].Descriptor()
 }
 
 func (BatchOperationCreatedResult_BatchOperationTypeEnum) Type() protoreflect.EnumType {
-	return &file_gateway_proto_enumTypes[5]
+	return &file_gateway_proto_enumTypes[6]
 }
 
 func (x BatchOperationCreatedResult_BatchOperationTypeEnum) Number() protoreflect.EnumNumber {
@@ -365,7 +410,7 @@ func (x BatchOperationCreatedResult_BatchOperationTypeEnum) Number() protoreflec
 
 // Deprecated: Use BatchOperationCreatedResult_BatchOperationTypeEnum.Descriptor instead.
 func (BatchOperationCreatedResult_BatchOperationTypeEnum) EnumDescriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{65, 0}
+	return file_gateway_proto_rawDescGZIP(), []int{66, 0}
 }
 
 type StreamActivatedJobsRequest struct {
@@ -1545,7 +1590,8 @@ type CreateProcessInstanceRequest struct {
 	ProcessDefinitionKey int64 `protobuf:"varint,1,opt,name=processDefinitionKey,proto3" json:"processDefinitionKey,omitempty"`
 	// the BPMN process ID of the process definition
 	BpmnProcessId string `protobuf:"bytes,2,opt,name=bpmnProcessId,proto3" json:"bpmnProcessId,omitempty"`
-	// the version of the process; set to -1 to use the latest version
+	// the version of the process; set to -1 to use the latest version. When versionTag is set,
+	// 0 is treated as unset.
 	Version int32 `protobuf:"varint,3,opt,name=version,proto3" json:"version,omitempty"`
 	// JSON document that will instantiate the variables for the root variable scope of the
 	// process instance; it must be a JSON object, as variables will be mapped in a
@@ -1572,9 +1618,17 @@ type CreateProcessInstanceRequest struct {
 	// enforcement is enabled, the engine will reject creation if another root process instance
 	// with the same business id is already active for the same process definition.
 	// Note that any active child process instances with the same business id are not taken into account.
-	BusinessId    *string `protobuf:"bytes,10,opt,name=businessId,proto3,oneof" json:"businessId,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	BusinessId *string `protobuf:"bytes,10,opt,name=businessId,proto3,oneof" json:"businessId,omitempty"`
+	// creates an instance of the latest deployed version of the process (identified by bpmnProcessId)
+	// that carries this version tag. Cannot be combined with version or processDefinitionKey.
+	// Requires 8.11 or later; not supported by older gateways or brokers.
+	VersionTag *string `protobuf:"bytes,11,opt,name=versionTag,proto3,oneof" json:"versionTag,omitempty"`
+	// metadata of the variables, keyed by variable name. Use it to set how a variable is treated,
+	// for example to protect its value. A variable without an entry has no metadata.
+	// Requires 8.11 or later; not supported by older gateways or brokers.
+	VariablesMetadata map[string]*VariableMetadata `protobuf:"bytes,12,rep,name=variablesMetadata,proto3" json:"variablesMetadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *CreateProcessInstanceRequest) Reset() {
@@ -1677,6 +1731,66 @@ func (x *CreateProcessInstanceRequest) GetBusinessId() string {
 	return ""
 }
 
+func (x *CreateProcessInstanceRequest) GetVersionTag() string {
+	if x != nil && x.VersionTag != nil {
+		return *x.VersionTag
+	}
+	return ""
+}
+
+func (x *CreateProcessInstanceRequest) GetVariablesMetadata() map[string]*VariableMetadata {
+	if x != nil {
+		return x.VariablesMetadata
+	}
+	return nil
+}
+
+// Describes how a variable is treated.
+type VariableMetadata struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// the protections applied to the variable
+	ProtectionModes []VariableMetadata_ProtectionMode `protobuf:"varint,1,rep,packed,name=protectionModes,proto3,enum=gateway_protocol.VariableMetadata_ProtectionMode" json:"protectionModes,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *VariableMetadata) Reset() {
+	*x = VariableMetadata{}
+	mi := &file_gateway_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VariableMetadata) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VariableMetadata) ProtoMessage() {}
+
+func (x *VariableMetadata) ProtoReflect() protoreflect.Message {
+	mi := &file_gateway_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VariableMetadata.ProtoReflect.Descriptor instead.
+func (*VariableMetadata) Descriptor() ([]byte, []int) {
+	return file_gateway_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *VariableMetadata) GetProtectionModes() []VariableMetadata_ProtectionMode {
+	if x != nil {
+		return x.ProtectionModes
+	}
+	return nil
+}
+
 type ProcessInstanceCreationStartInstruction struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// element ID
@@ -1687,7 +1801,7 @@ type ProcessInstanceCreationStartInstruction struct {
 
 func (x *ProcessInstanceCreationStartInstruction) Reset() {
 	*x = ProcessInstanceCreationStartInstruction{}
-	mi := &file_gateway_proto_msgTypes[14]
+	mi := &file_gateway_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1699,7 +1813,7 @@ func (x *ProcessInstanceCreationStartInstruction) String() string {
 func (*ProcessInstanceCreationStartInstruction) ProtoMessage() {}
 
 func (x *ProcessInstanceCreationStartInstruction) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[14]
+	mi := &file_gateway_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1712,7 +1826,7 @@ func (x *ProcessInstanceCreationStartInstruction) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use ProcessInstanceCreationStartInstruction.ProtoReflect.Descriptor instead.
 func (*ProcessInstanceCreationStartInstruction) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{14}
+	return file_gateway_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ProcessInstanceCreationStartInstruction) GetElementId() string {
@@ -1734,7 +1848,7 @@ type ProcessInstanceCreationRuntimeInstruction struct {
 
 func (x *ProcessInstanceCreationRuntimeInstruction) Reset() {
 	*x = ProcessInstanceCreationRuntimeInstruction{}
-	mi := &file_gateway_proto_msgTypes[15]
+	mi := &file_gateway_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1746,7 +1860,7 @@ func (x *ProcessInstanceCreationRuntimeInstruction) String() string {
 func (*ProcessInstanceCreationRuntimeInstruction) ProtoMessage() {}
 
 func (x *ProcessInstanceCreationRuntimeInstruction) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[15]
+	mi := &file_gateway_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1759,7 +1873,7 @@ func (x *ProcessInstanceCreationRuntimeInstruction) ProtoReflect() protoreflect.
 
 // Deprecated: Use ProcessInstanceCreationRuntimeInstruction.ProtoReflect.Descriptor instead.
 func (*ProcessInstanceCreationRuntimeInstruction) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{15}
+	return file_gateway_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ProcessInstanceCreationRuntimeInstruction) GetInstruction() isProcessInstanceCreationRuntimeInstruction_Instruction {
@@ -1800,7 +1914,7 @@ type TerminateProcessInstanceInstruction struct {
 
 func (x *TerminateProcessInstanceInstruction) Reset() {
 	*x = TerminateProcessInstanceInstruction{}
-	mi := &file_gateway_proto_msgTypes[16]
+	mi := &file_gateway_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1812,7 +1926,7 @@ func (x *TerminateProcessInstanceInstruction) String() string {
 func (*TerminateProcessInstanceInstruction) ProtoMessage() {}
 
 func (x *TerminateProcessInstanceInstruction) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[16]
+	mi := &file_gateway_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1825,7 +1939,7 @@ func (x *TerminateProcessInstanceInstruction) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use TerminateProcessInstanceInstruction.ProtoReflect.Descriptor instead.
 func (*TerminateProcessInstanceInstruction) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{16}
+	return file_gateway_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *TerminateProcessInstanceInstruction) GetAfterElementId() string {
@@ -1859,7 +1973,7 @@ type CreateProcessInstanceResponse struct {
 
 func (x *CreateProcessInstanceResponse) Reset() {
 	*x = CreateProcessInstanceResponse{}
-	mi := &file_gateway_proto_msgTypes[17]
+	mi := &file_gateway_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1871,7 +1985,7 @@ func (x *CreateProcessInstanceResponse) String() string {
 func (*CreateProcessInstanceResponse) ProtoMessage() {}
 
 func (x *CreateProcessInstanceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[17]
+	mi := &file_gateway_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1884,7 +1998,7 @@ func (x *CreateProcessInstanceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateProcessInstanceResponse.ProtoReflect.Descriptor instead.
 func (*CreateProcessInstanceResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{17}
+	return file_gateway_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CreateProcessInstanceResponse) GetProcessDefinitionKey() int64 {
@@ -1952,7 +2066,7 @@ type CreateProcessInstanceWithResultRequest struct {
 
 func (x *CreateProcessInstanceWithResultRequest) Reset() {
 	*x = CreateProcessInstanceWithResultRequest{}
-	mi := &file_gateway_proto_msgTypes[18]
+	mi := &file_gateway_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1964,7 +2078,7 @@ func (x *CreateProcessInstanceWithResultRequest) String() string {
 func (*CreateProcessInstanceWithResultRequest) ProtoMessage() {}
 
 func (x *CreateProcessInstanceWithResultRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[18]
+	mi := &file_gateway_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1977,7 +2091,7 @@ func (x *CreateProcessInstanceWithResultRequest) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use CreateProcessInstanceWithResultRequest.ProtoReflect.Descriptor instead.
 func (*CreateProcessInstanceWithResultRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{18}
+	return file_gateway_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CreateProcessInstanceWithResultRequest) GetRequest() *CreateProcessInstanceRequest {
@@ -2028,7 +2142,7 @@ type CreateProcessInstanceWithResultResponse struct {
 
 func (x *CreateProcessInstanceWithResultResponse) Reset() {
 	*x = CreateProcessInstanceWithResultResponse{}
-	mi := &file_gateway_proto_msgTypes[19]
+	mi := &file_gateway_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2040,7 +2154,7 @@ func (x *CreateProcessInstanceWithResultResponse) String() string {
 func (*CreateProcessInstanceWithResultResponse) ProtoMessage() {}
 
 func (x *CreateProcessInstanceWithResultResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[19]
+	mi := &file_gateway_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2053,7 +2167,7 @@ func (x *CreateProcessInstanceWithResultResponse) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use CreateProcessInstanceWithResultResponse.ProtoReflect.Descriptor instead.
 func (*CreateProcessInstanceWithResultResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{19}
+	return file_gateway_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *CreateProcessInstanceWithResultResponse) GetProcessDefinitionKey() int64 {
@@ -2134,7 +2248,7 @@ type EvaluateDecisionRequest struct {
 
 func (x *EvaluateDecisionRequest) Reset() {
 	*x = EvaluateDecisionRequest{}
-	mi := &file_gateway_proto_msgTypes[20]
+	mi := &file_gateway_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2146,7 +2260,7 @@ func (x *EvaluateDecisionRequest) String() string {
 func (*EvaluateDecisionRequest) ProtoMessage() {}
 
 func (x *EvaluateDecisionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[20]
+	mi := &file_gateway_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2159,7 +2273,7 @@ func (x *EvaluateDecisionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluateDecisionRequest.ProtoReflect.Descriptor instead.
 func (*EvaluateDecisionRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{20}
+	return file_gateway_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *EvaluateDecisionRequest) GetDecisionKey() int64 {
@@ -2230,7 +2344,7 @@ type EvaluateDecisionResponse struct {
 
 func (x *EvaluateDecisionResponse) Reset() {
 	*x = EvaluateDecisionResponse{}
-	mi := &file_gateway_proto_msgTypes[21]
+	mi := &file_gateway_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2242,7 +2356,7 @@ func (x *EvaluateDecisionResponse) String() string {
 func (*EvaluateDecisionResponse) ProtoMessage() {}
 
 func (x *EvaluateDecisionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[21]
+	mi := &file_gateway_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2255,7 +2369,7 @@ func (x *EvaluateDecisionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluateDecisionResponse.ProtoReflect.Descriptor instead.
 func (*EvaluateDecisionResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{21}
+	return file_gateway_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *EvaluateDecisionResponse) GetDecisionKey() int64 {
@@ -2380,7 +2494,7 @@ type EvaluatedDecision struct {
 
 func (x *EvaluatedDecision) Reset() {
 	*x = EvaluatedDecision{}
-	mi := &file_gateway_proto_msgTypes[22]
+	mi := &file_gateway_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2392,7 +2506,7 @@ func (x *EvaluatedDecision) String() string {
 func (*EvaluatedDecision) ProtoMessage() {}
 
 func (x *EvaluatedDecision) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[22]
+	mi := &file_gateway_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2405,7 +2519,7 @@ func (x *EvaluatedDecision) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluatedDecision.ProtoReflect.Descriptor instead.
 func (*EvaluatedDecision) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{22}
+	return file_gateway_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *EvaluatedDecision) GetDecisionKey() int64 {
@@ -2492,7 +2606,7 @@ type EvaluatedDecisionInput struct {
 
 func (x *EvaluatedDecisionInput) Reset() {
 	*x = EvaluatedDecisionInput{}
-	mi := &file_gateway_proto_msgTypes[23]
+	mi := &file_gateway_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2504,7 +2618,7 @@ func (x *EvaluatedDecisionInput) String() string {
 func (*EvaluatedDecisionInput) ProtoMessage() {}
 
 func (x *EvaluatedDecisionInput) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[23]
+	mi := &file_gateway_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2517,7 +2631,7 @@ func (x *EvaluatedDecisionInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluatedDecisionInput.ProtoReflect.Descriptor instead.
 func (*EvaluatedDecisionInput) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{23}
+	return file_gateway_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *EvaluatedDecisionInput) GetInputId() string {
@@ -2555,7 +2669,7 @@ type EvaluatedDecisionOutput struct {
 
 func (x *EvaluatedDecisionOutput) Reset() {
 	*x = EvaluatedDecisionOutput{}
-	mi := &file_gateway_proto_msgTypes[24]
+	mi := &file_gateway_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2567,7 +2681,7 @@ func (x *EvaluatedDecisionOutput) String() string {
 func (*EvaluatedDecisionOutput) ProtoMessage() {}
 
 func (x *EvaluatedDecisionOutput) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[24]
+	mi := &file_gateway_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2580,7 +2694,7 @@ func (x *EvaluatedDecisionOutput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluatedDecisionOutput.ProtoReflect.Descriptor instead.
 func (*EvaluatedDecisionOutput) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{24}
+	return file_gateway_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *EvaluatedDecisionOutput) GetOutputId() string {
@@ -2618,7 +2732,7 @@ type MatchedDecisionRule struct {
 
 func (x *MatchedDecisionRule) Reset() {
 	*x = MatchedDecisionRule{}
-	mi := &file_gateway_proto_msgTypes[25]
+	mi := &file_gateway_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2630,7 +2744,7 @@ func (x *MatchedDecisionRule) String() string {
 func (*MatchedDecisionRule) ProtoMessage() {}
 
 func (x *MatchedDecisionRule) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[25]
+	mi := &file_gateway_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2643,7 +2757,7 @@ func (x *MatchedDecisionRule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MatchedDecisionRule.ProtoReflect.Descriptor instead.
 func (*MatchedDecisionRule) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{25}
+	return file_gateway_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *MatchedDecisionRule) GetRuleId() string {
@@ -2678,7 +2792,7 @@ type DeployProcessRequest struct {
 
 func (x *DeployProcessRequest) Reset() {
 	*x = DeployProcessRequest{}
-	mi := &file_gateway_proto_msgTypes[26]
+	mi := &file_gateway_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2690,7 +2804,7 @@ func (x *DeployProcessRequest) String() string {
 func (*DeployProcessRequest) ProtoMessage() {}
 
 func (x *DeployProcessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[26]
+	mi := &file_gateway_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2703,7 +2817,7 @@ func (x *DeployProcessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeployProcessRequest.ProtoReflect.Descriptor instead.
 func (*DeployProcessRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{26}
+	return file_gateway_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *DeployProcessRequest) GetProcesses() []*ProcessRequestObject {
@@ -2726,7 +2840,7 @@ type ProcessRequestObject struct {
 
 func (x *ProcessRequestObject) Reset() {
 	*x = ProcessRequestObject{}
-	mi := &file_gateway_proto_msgTypes[27]
+	mi := &file_gateway_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2738,7 +2852,7 @@ func (x *ProcessRequestObject) String() string {
 func (*ProcessRequestObject) ProtoMessage() {}
 
 func (x *ProcessRequestObject) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[27]
+	mi := &file_gateway_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2751,7 +2865,7 @@ func (x *ProcessRequestObject) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProcessRequestObject.ProtoReflect.Descriptor instead.
 func (*ProcessRequestObject) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{27}
+	return file_gateway_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ProcessRequestObject) GetName() string {
@@ -2781,7 +2895,7 @@ type DeployProcessResponse struct {
 
 func (x *DeployProcessResponse) Reset() {
 	*x = DeployProcessResponse{}
-	mi := &file_gateway_proto_msgTypes[28]
+	mi := &file_gateway_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2793,7 +2907,7 @@ func (x *DeployProcessResponse) String() string {
 func (*DeployProcessResponse) ProtoMessage() {}
 
 func (x *DeployProcessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[28]
+	mi := &file_gateway_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2806,7 +2920,7 @@ func (x *DeployProcessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeployProcessResponse.ProtoReflect.Descriptor instead.
 func (*DeployProcessResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{28}
+	return file_gateway_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *DeployProcessResponse) GetKey() int64 {
@@ -2835,7 +2949,7 @@ type DeployResourceRequest struct {
 
 func (x *DeployResourceRequest) Reset() {
 	*x = DeployResourceRequest{}
-	mi := &file_gateway_proto_msgTypes[29]
+	mi := &file_gateway_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2847,7 +2961,7 @@ func (x *DeployResourceRequest) String() string {
 func (*DeployResourceRequest) ProtoMessage() {}
 
 func (x *DeployResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[29]
+	mi := &file_gateway_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2860,7 +2974,7 @@ func (x *DeployResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeployResourceRequest.ProtoReflect.Descriptor instead.
 func (*DeployResourceRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{29}
+	return file_gateway_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *DeployResourceRequest) GetResources() []*Resource {
@@ -2889,7 +3003,7 @@ type Resource struct {
 
 func (x *Resource) Reset() {
 	*x = Resource{}
-	mi := &file_gateway_proto_msgTypes[30]
+	mi := &file_gateway_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2901,7 +3015,7 @@ func (x *Resource) String() string {
 func (*Resource) ProtoMessage() {}
 
 func (x *Resource) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[30]
+	mi := &file_gateway_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2914,7 +3028,7 @@ func (x *Resource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Resource.ProtoReflect.Descriptor instead.
 func (*Resource) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{30}
+	return file_gateway_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *Resource) GetName() string {
@@ -2945,7 +3059,7 @@ type DeployResourceResponse struct {
 
 func (x *DeployResourceResponse) Reset() {
 	*x = DeployResourceResponse{}
-	mi := &file_gateway_proto_msgTypes[31]
+	mi := &file_gateway_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2957,7 +3071,7 @@ func (x *DeployResourceResponse) String() string {
 func (*DeployResourceResponse) ProtoMessage() {}
 
 func (x *DeployResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[31]
+	mi := &file_gateway_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2970,7 +3084,7 @@ func (x *DeployResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeployResourceResponse.ProtoReflect.Descriptor instead.
 func (*DeployResourceResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{31}
+	return file_gateway_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *DeployResourceResponse) GetKey() int64 {
@@ -3011,7 +3125,7 @@ type Deployment struct {
 
 func (x *Deployment) Reset() {
 	*x = Deployment{}
-	mi := &file_gateway_proto_msgTypes[32]
+	mi := &file_gateway_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3023,7 +3137,7 @@ func (x *Deployment) String() string {
 func (*Deployment) ProtoMessage() {}
 
 func (x *Deployment) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[32]
+	mi := &file_gateway_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3036,7 +3150,7 @@ func (x *Deployment) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Deployment.ProtoReflect.Descriptor instead.
 func (*Deployment) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{32}
+	return file_gateway_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *Deployment) GetMetadata() isDeployment_Metadata {
@@ -3134,7 +3248,7 @@ type ProcessMetadata struct {
 
 func (x *ProcessMetadata) Reset() {
 	*x = ProcessMetadata{}
-	mi := &file_gateway_proto_msgTypes[33]
+	mi := &file_gateway_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3146,7 +3260,7 @@ func (x *ProcessMetadata) String() string {
 func (*ProcessMetadata) ProtoMessage() {}
 
 func (x *ProcessMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[33]
+	mi := &file_gateway_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3159,7 +3273,7 @@ func (x *ProcessMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProcessMetadata.ProtoReflect.Descriptor instead.
 func (*ProcessMetadata) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{33}
+	return file_gateway_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ProcessMetadata) GetBpmnProcessId() string {
@@ -3223,7 +3337,7 @@ type DecisionMetadata struct {
 
 func (x *DecisionMetadata) Reset() {
 	*x = DecisionMetadata{}
-	mi := &file_gateway_proto_msgTypes[34]
+	mi := &file_gateway_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3235,7 +3349,7 @@ func (x *DecisionMetadata) String() string {
 func (*DecisionMetadata) ProtoMessage() {}
 
 func (x *DecisionMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[34]
+	mi := &file_gateway_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3248,7 +3362,7 @@ func (x *DecisionMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecisionMetadata.ProtoReflect.Descriptor instead.
 func (*DecisionMetadata) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{34}
+	return file_gateway_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *DecisionMetadata) GetDmnDecisionId() string {
@@ -3323,7 +3437,7 @@ type DecisionRequirementsMetadata struct {
 
 func (x *DecisionRequirementsMetadata) Reset() {
 	*x = DecisionRequirementsMetadata{}
-	mi := &file_gateway_proto_msgTypes[35]
+	mi := &file_gateway_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3335,7 +3449,7 @@ func (x *DecisionRequirementsMetadata) String() string {
 func (*DecisionRequirementsMetadata) ProtoMessage() {}
 
 func (x *DecisionRequirementsMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[35]
+	mi := &file_gateway_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3348,7 +3462,7 @@ func (x *DecisionRequirementsMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecisionRequirementsMetadata.ProtoReflect.Descriptor instead.
 func (*DecisionRequirementsMetadata) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{35}
+	return file_gateway_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *DecisionRequirementsMetadata) GetDmnDecisionRequirementsId() string {
@@ -3412,7 +3526,7 @@ type FormMetadata struct {
 
 func (x *FormMetadata) Reset() {
 	*x = FormMetadata{}
-	mi := &file_gateway_proto_msgTypes[36]
+	mi := &file_gateway_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3424,7 +3538,7 @@ func (x *FormMetadata) String() string {
 func (*FormMetadata) ProtoMessage() {}
 
 func (x *FormMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[36]
+	mi := &file_gateway_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3437,7 +3551,7 @@ func (x *FormMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FormMetadata.ProtoReflect.Descriptor instead.
 func (*FormMetadata) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{36}
+	return file_gateway_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *FormMetadata) GetFormId() string {
@@ -3506,7 +3620,7 @@ type FailJobRequest struct {
 
 func (x *FailJobRequest) Reset() {
 	*x = FailJobRequest{}
-	mi := &file_gateway_proto_msgTypes[37]
+	mi := &file_gateway_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3518,7 +3632,7 @@ func (x *FailJobRequest) String() string {
 func (*FailJobRequest) ProtoMessage() {}
 
 func (x *FailJobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[37]
+	mi := &file_gateway_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3531,7 +3645,7 @@ func (x *FailJobRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FailJobRequest.ProtoReflect.Descriptor instead.
 func (*FailJobRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{37}
+	return file_gateway_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *FailJobRequest) GetJobKey() int64 {
@@ -3584,7 +3698,7 @@ type FailJobResponse struct {
 
 func (x *FailJobResponse) Reset() {
 	*x = FailJobResponse{}
-	mi := &file_gateway_proto_msgTypes[38]
+	mi := &file_gateway_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3596,7 +3710,7 @@ func (x *FailJobResponse) String() string {
 func (*FailJobResponse) ProtoMessage() {}
 
 func (x *FailJobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[38]
+	mi := &file_gateway_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3609,7 +3723,7 @@ func (x *FailJobResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FailJobResponse.ProtoReflect.Descriptor instead.
 func (*FailJobResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{38}
+	return file_gateway_proto_rawDescGZIP(), []int{39}
 }
 
 type ThrowErrorRequest struct {
@@ -3639,7 +3753,7 @@ type ThrowErrorRequest struct {
 
 func (x *ThrowErrorRequest) Reset() {
 	*x = ThrowErrorRequest{}
-	mi := &file_gateway_proto_msgTypes[39]
+	mi := &file_gateway_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3651,7 +3765,7 @@ func (x *ThrowErrorRequest) String() string {
 func (*ThrowErrorRequest) ProtoMessage() {}
 
 func (x *ThrowErrorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[39]
+	mi := &file_gateway_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3664,7 +3778,7 @@ func (x *ThrowErrorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThrowErrorRequest.ProtoReflect.Descriptor instead.
 func (*ThrowErrorRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{39}
+	return file_gateway_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ThrowErrorRequest) GetJobKey() int64 {
@@ -3710,7 +3824,7 @@ type ThrowErrorResponse struct {
 
 func (x *ThrowErrorResponse) Reset() {
 	*x = ThrowErrorResponse{}
-	mi := &file_gateway_proto_msgTypes[40]
+	mi := &file_gateway_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3722,7 +3836,7 @@ func (x *ThrowErrorResponse) String() string {
 func (*ThrowErrorResponse) ProtoMessage() {}
 
 func (x *ThrowErrorResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[40]
+	mi := &file_gateway_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3735,7 +3849,7 @@ func (x *ThrowErrorResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ThrowErrorResponse.ProtoReflect.Descriptor instead.
 func (*ThrowErrorResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{40}
+	return file_gateway_proto_rawDescGZIP(), []int{41}
 }
 
 type PublishMessageRequest struct {
@@ -3765,7 +3879,7 @@ type PublishMessageRequest struct {
 
 func (x *PublishMessageRequest) Reset() {
 	*x = PublishMessageRequest{}
-	mi := &file_gateway_proto_msgTypes[41]
+	mi := &file_gateway_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3777,7 +3891,7 @@ func (x *PublishMessageRequest) String() string {
 func (*PublishMessageRequest) ProtoMessage() {}
 
 func (x *PublishMessageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[41]
+	mi := &file_gateway_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3790,7 +3904,7 @@ func (x *PublishMessageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublishMessageRequest.ProtoReflect.Descriptor instead.
 func (*PublishMessageRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{41}
+	return file_gateway_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *PublishMessageRequest) GetName() string {
@@ -3854,7 +3968,7 @@ type PublishMessageResponse struct {
 
 func (x *PublishMessageResponse) Reset() {
 	*x = PublishMessageResponse{}
-	mi := &file_gateway_proto_msgTypes[42]
+	mi := &file_gateway_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3866,7 +3980,7 @@ func (x *PublishMessageResponse) String() string {
 func (*PublishMessageResponse) ProtoMessage() {}
 
 func (x *PublishMessageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[42]
+	mi := &file_gateway_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3879,7 +3993,7 @@ func (x *PublishMessageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublishMessageResponse.ProtoReflect.Descriptor instead.
 func (*PublishMessageResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{42}
+	return file_gateway_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *PublishMessageResponse) GetKey() int64 {
@@ -3908,7 +4022,7 @@ type ResolveIncidentRequest struct {
 
 func (x *ResolveIncidentRequest) Reset() {
 	*x = ResolveIncidentRequest{}
-	mi := &file_gateway_proto_msgTypes[43]
+	mi := &file_gateway_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3920,7 +4034,7 @@ func (x *ResolveIncidentRequest) String() string {
 func (*ResolveIncidentRequest) ProtoMessage() {}
 
 func (x *ResolveIncidentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[43]
+	mi := &file_gateway_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3933,7 +4047,7 @@ func (x *ResolveIncidentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveIncidentRequest.ProtoReflect.Descriptor instead.
 func (*ResolveIncidentRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{43}
+	return file_gateway_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *ResolveIncidentRequest) GetIncidentKey() int64 {
@@ -3958,7 +4072,7 @@ type ResolveIncidentResponse struct {
 
 func (x *ResolveIncidentResponse) Reset() {
 	*x = ResolveIncidentResponse{}
-	mi := &file_gateway_proto_msgTypes[44]
+	mi := &file_gateway_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3970,7 +4084,7 @@ func (x *ResolveIncidentResponse) String() string {
 func (*ResolveIncidentResponse) ProtoMessage() {}
 
 func (x *ResolveIncidentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[44]
+	mi := &file_gateway_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3983,7 +4097,7 @@ func (x *ResolveIncidentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolveIncidentResponse.ProtoReflect.Descriptor instead.
 func (*ResolveIncidentResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{44}
+	return file_gateway_proto_rawDescGZIP(), []int{45}
 }
 
 type TopologyRequest struct {
@@ -3994,7 +4108,7 @@ type TopologyRequest struct {
 
 func (x *TopologyRequest) Reset() {
 	*x = TopologyRequest{}
-	mi := &file_gateway_proto_msgTypes[45]
+	mi := &file_gateway_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4006,7 +4120,7 @@ func (x *TopologyRequest) String() string {
 func (*TopologyRequest) ProtoMessage() {}
 
 func (x *TopologyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[45]
+	mi := &file_gateway_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4019,7 +4133,7 @@ func (x *TopologyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TopologyRequest.ProtoReflect.Descriptor instead.
 func (*TopologyRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{45}
+	return file_gateway_proto_rawDescGZIP(), []int{46}
 }
 
 type TopologyResponse struct {
@@ -4042,7 +4156,7 @@ type TopologyResponse struct {
 
 func (x *TopologyResponse) Reset() {
 	*x = TopologyResponse{}
-	mi := &file_gateway_proto_msgTypes[46]
+	mi := &file_gateway_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4054,7 +4168,7 @@ func (x *TopologyResponse) String() string {
 func (*TopologyResponse) ProtoMessage() {}
 
 func (x *TopologyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[46]
+	mi := &file_gateway_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4067,7 +4181,7 @@ func (x *TopologyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TopologyResponse.ProtoReflect.Descriptor instead.
 func (*TopologyResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{46}
+	return file_gateway_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *TopologyResponse) GetBrokers() []*BrokerInfo {
@@ -4139,7 +4253,7 @@ type BrokerInfo struct {
 
 func (x *BrokerInfo) Reset() {
 	*x = BrokerInfo{}
-	mi := &file_gateway_proto_msgTypes[47]
+	mi := &file_gateway_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4151,7 +4265,7 @@ func (x *BrokerInfo) String() string {
 func (*BrokerInfo) ProtoMessage() {}
 
 func (x *BrokerInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[47]
+	mi := &file_gateway_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4164,7 +4278,7 @@ func (x *BrokerInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BrokerInfo.ProtoReflect.Descriptor instead.
 func (*BrokerInfo) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{47}
+	return file_gateway_proto_rawDescGZIP(), []int{48}
 }
 
 // Deprecated: Marked as deprecated in gateway.proto.
@@ -4231,7 +4345,7 @@ type Partition struct {
 
 func (x *Partition) Reset() {
 	*x = Partition{}
-	mi := &file_gateway_proto_msgTypes[48]
+	mi := &file_gateway_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4243,7 +4357,7 @@ func (x *Partition) String() string {
 func (*Partition) ProtoMessage() {}
 
 func (x *Partition) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[48]
+	mi := &file_gateway_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4256,7 +4370,7 @@ func (x *Partition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Partition.ProtoReflect.Descriptor instead.
 func (*Partition) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{48}
+	return file_gateway_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *Partition) GetPartitionId() int32 {
@@ -4303,7 +4417,7 @@ type UpdateJobRetriesRequest struct {
 
 func (x *UpdateJobRetriesRequest) Reset() {
 	*x = UpdateJobRetriesRequest{}
-	mi := &file_gateway_proto_msgTypes[49]
+	mi := &file_gateway_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4315,7 +4429,7 @@ func (x *UpdateJobRetriesRequest) String() string {
 func (*UpdateJobRetriesRequest) ProtoMessage() {}
 
 func (x *UpdateJobRetriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[49]
+	mi := &file_gateway_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4328,7 +4442,7 @@ func (x *UpdateJobRetriesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateJobRetriesRequest.ProtoReflect.Descriptor instead.
 func (*UpdateJobRetriesRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{49}
+	return file_gateway_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *UpdateJobRetriesRequest) GetJobKey() int64 {
@@ -4367,7 +4481,7 @@ type UpdateJobRetriesResponse struct {
 
 func (x *UpdateJobRetriesResponse) Reset() {
 	*x = UpdateJobRetriesResponse{}
-	mi := &file_gateway_proto_msgTypes[50]
+	mi := &file_gateway_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4379,7 +4493,7 @@ func (x *UpdateJobRetriesResponse) String() string {
 func (*UpdateJobRetriesResponse) ProtoMessage() {}
 
 func (x *UpdateJobRetriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[50]
+	mi := &file_gateway_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4392,7 +4506,7 @@ func (x *UpdateJobRetriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateJobRetriesResponse.ProtoReflect.Descriptor instead.
 func (*UpdateJobRetriesResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{50}
+	return file_gateway_proto_rawDescGZIP(), []int{51}
 }
 
 type UpdateJobTimeoutRequest struct {
@@ -4418,7 +4532,7 @@ type UpdateJobTimeoutRequest struct {
 
 func (x *UpdateJobTimeoutRequest) Reset() {
 	*x = UpdateJobTimeoutRequest{}
-	mi := &file_gateway_proto_msgTypes[51]
+	mi := &file_gateway_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4430,7 +4544,7 @@ func (x *UpdateJobTimeoutRequest) String() string {
 func (*UpdateJobTimeoutRequest) ProtoMessage() {}
 
 func (x *UpdateJobTimeoutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[51]
+	mi := &file_gateway_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4443,7 +4557,7 @@ func (x *UpdateJobTimeoutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateJobTimeoutRequest.ProtoReflect.Descriptor instead.
 func (*UpdateJobTimeoutRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{51}
+	return file_gateway_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *UpdateJobTimeoutRequest) GetJobKey() int64 {
@@ -4482,7 +4596,7 @@ type UpdateJobTimeoutResponse struct {
 
 func (x *UpdateJobTimeoutResponse) Reset() {
 	*x = UpdateJobTimeoutResponse{}
-	mi := &file_gateway_proto_msgTypes[52]
+	mi := &file_gateway_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4494,7 +4608,7 @@ func (x *UpdateJobTimeoutResponse) String() string {
 func (*UpdateJobTimeoutResponse) ProtoMessage() {}
 
 func (x *UpdateJobTimeoutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[52]
+	mi := &file_gateway_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4507,7 +4621,7 @@ func (x *UpdateJobTimeoutResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateJobTimeoutResponse.ProtoReflect.Descriptor instead.
 func (*UpdateJobTimeoutResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{52}
+	return file_gateway_proto_rawDescGZIP(), []int{53}
 }
 
 type UpdateJobPriorityRequest struct {
@@ -4533,7 +4647,7 @@ type UpdateJobPriorityRequest struct {
 
 func (x *UpdateJobPriorityRequest) Reset() {
 	*x = UpdateJobPriorityRequest{}
-	mi := &file_gateway_proto_msgTypes[53]
+	mi := &file_gateway_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4545,7 +4659,7 @@ func (x *UpdateJobPriorityRequest) String() string {
 func (*UpdateJobPriorityRequest) ProtoMessage() {}
 
 func (x *UpdateJobPriorityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[53]
+	mi := &file_gateway_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4558,7 +4672,7 @@ func (x *UpdateJobPriorityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateJobPriorityRequest.ProtoReflect.Descriptor instead.
 func (*UpdateJobPriorityRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{53}
+	return file_gateway_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *UpdateJobPriorityRequest) GetJobKey() int64 {
@@ -4597,7 +4711,7 @@ type UpdateJobPriorityResponse struct {
 
 func (x *UpdateJobPriorityResponse) Reset() {
 	*x = UpdateJobPriorityResponse{}
-	mi := &file_gateway_proto_msgTypes[54]
+	mi := &file_gateway_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4609,7 +4723,7 @@ func (x *UpdateJobPriorityResponse) String() string {
 func (*UpdateJobPriorityResponse) ProtoMessage() {}
 
 func (x *UpdateJobPriorityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[54]
+	mi := &file_gateway_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4622,7 +4736,7 @@ func (x *UpdateJobPriorityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateJobPriorityResponse.ProtoReflect.Descriptor instead.
 func (*UpdateJobPriorityResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{54}
+	return file_gateway_proto_rawDescGZIP(), []int{55}
 }
 
 type SetVariablesRequest struct {
@@ -4644,13 +4758,17 @@ type SetVariablesRequest struct {
 	Local bool `protobuf:"varint,3,opt,name=local,proto3" json:"local,omitempty"`
 	// a reference key chosen by the user and will be part of all records resulted from this operation
 	OperationReference *uint64 `protobuf:"varint,4,opt,name=operationReference,proto3,oneof" json:"operationReference,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	// metadata of the variables, keyed by variable name. Use it to set how a variable is treated,
+	// for example to protect its value. A variable without an entry has no metadata.
+	// Requires 8.11 or later; not supported by older gateways or brokers.
+	VariablesMetadata map[string]*VariableMetadata `protobuf:"bytes,5,rep,name=variablesMetadata,proto3" json:"variablesMetadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *SetVariablesRequest) Reset() {
 	*x = SetVariablesRequest{}
-	mi := &file_gateway_proto_msgTypes[55]
+	mi := &file_gateway_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4662,7 +4780,7 @@ func (x *SetVariablesRequest) String() string {
 func (*SetVariablesRequest) ProtoMessage() {}
 
 func (x *SetVariablesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[55]
+	mi := &file_gateway_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4675,7 +4793,7 @@ func (x *SetVariablesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetVariablesRequest.ProtoReflect.Descriptor instead.
 func (*SetVariablesRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{55}
+	return file_gateway_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *SetVariablesRequest) GetElementInstanceKey() int64 {
@@ -4706,6 +4824,13 @@ func (x *SetVariablesRequest) GetOperationReference() uint64 {
 	return 0
 }
 
+func (x *SetVariablesRequest) GetVariablesMetadata() map[string]*VariableMetadata {
+	if x != nil {
+		return x.VariablesMetadata
+	}
+	return nil
+}
+
 type SetVariablesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// the unique key of the set variables command
@@ -4716,7 +4841,7 @@ type SetVariablesResponse struct {
 
 func (x *SetVariablesResponse) Reset() {
 	*x = SetVariablesResponse{}
-	mi := &file_gateway_proto_msgTypes[56]
+	mi := &file_gateway_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4728,7 +4853,7 @@ func (x *SetVariablesResponse) String() string {
 func (*SetVariablesResponse) ProtoMessage() {}
 
 func (x *SetVariablesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[56]
+	mi := &file_gateway_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4741,7 +4866,7 @@ func (x *SetVariablesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetVariablesResponse.ProtoReflect.Descriptor instead.
 func (*SetVariablesResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{56}
+	return file_gateway_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *SetVariablesResponse) GetKey() int64 {
@@ -4770,7 +4895,7 @@ type ModifyProcessInstanceRequest struct {
 
 func (x *ModifyProcessInstanceRequest) Reset() {
 	*x = ModifyProcessInstanceRequest{}
-	mi := &file_gateway_proto_msgTypes[57]
+	mi := &file_gateway_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4782,7 +4907,7 @@ func (x *ModifyProcessInstanceRequest) String() string {
 func (*ModifyProcessInstanceRequest) ProtoMessage() {}
 
 func (x *ModifyProcessInstanceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[57]
+	mi := &file_gateway_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4795,7 +4920,7 @@ func (x *ModifyProcessInstanceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ModifyProcessInstanceRequest.ProtoReflect.Descriptor instead.
 func (*ModifyProcessInstanceRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{57}
+	return file_gateway_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *ModifyProcessInstanceRequest) GetProcessInstanceKey() int64 {
@@ -4841,7 +4966,7 @@ type ModifyProcessInstanceResponse struct {
 
 func (x *ModifyProcessInstanceResponse) Reset() {
 	*x = ModifyProcessInstanceResponse{}
-	mi := &file_gateway_proto_msgTypes[58]
+	mi := &file_gateway_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4853,7 +4978,7 @@ func (x *ModifyProcessInstanceResponse) String() string {
 func (*ModifyProcessInstanceResponse) ProtoMessage() {}
 
 func (x *ModifyProcessInstanceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[58]
+	mi := &file_gateway_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4866,7 +4991,7 @@ func (x *ModifyProcessInstanceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ModifyProcessInstanceResponse.ProtoReflect.Descriptor instead.
 func (*ModifyProcessInstanceResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{58}
+	return file_gateway_proto_rawDescGZIP(), []int{59}
 }
 
 type MigrateProcessInstanceRequest struct {
@@ -4883,7 +5008,7 @@ type MigrateProcessInstanceRequest struct {
 
 func (x *MigrateProcessInstanceRequest) Reset() {
 	*x = MigrateProcessInstanceRequest{}
-	mi := &file_gateway_proto_msgTypes[59]
+	mi := &file_gateway_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4895,7 +5020,7 @@ func (x *MigrateProcessInstanceRequest) String() string {
 func (*MigrateProcessInstanceRequest) ProtoMessage() {}
 
 func (x *MigrateProcessInstanceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[59]
+	mi := &file_gateway_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4908,7 +5033,7 @@ func (x *MigrateProcessInstanceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MigrateProcessInstanceRequest.ProtoReflect.Descriptor instead.
 func (*MigrateProcessInstanceRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{59}
+	return file_gateway_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *MigrateProcessInstanceRequest) GetProcessInstanceKey() int64 {
@@ -4940,7 +5065,7 @@ type MigrateProcessInstanceResponse struct {
 
 func (x *MigrateProcessInstanceResponse) Reset() {
 	*x = MigrateProcessInstanceResponse{}
-	mi := &file_gateway_proto_msgTypes[60]
+	mi := &file_gateway_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4952,7 +5077,7 @@ func (x *MigrateProcessInstanceResponse) String() string {
 func (*MigrateProcessInstanceResponse) ProtoMessage() {}
 
 func (x *MigrateProcessInstanceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[60]
+	mi := &file_gateway_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4965,7 +5090,7 @@ func (x *MigrateProcessInstanceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MigrateProcessInstanceResponse.ProtoReflect.Descriptor instead.
 func (*MigrateProcessInstanceResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{60}
+	return file_gateway_proto_rawDescGZIP(), []int{61}
 }
 
 type AssignProcessInstanceBusinessIdRequest struct {
@@ -4980,7 +5105,7 @@ type AssignProcessInstanceBusinessIdRequest struct {
 
 func (x *AssignProcessInstanceBusinessIdRequest) Reset() {
 	*x = AssignProcessInstanceBusinessIdRequest{}
-	mi := &file_gateway_proto_msgTypes[61]
+	mi := &file_gateway_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4992,7 +5117,7 @@ func (x *AssignProcessInstanceBusinessIdRequest) String() string {
 func (*AssignProcessInstanceBusinessIdRequest) ProtoMessage() {}
 
 func (x *AssignProcessInstanceBusinessIdRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[61]
+	mi := &file_gateway_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5005,7 +5130,7 @@ func (x *AssignProcessInstanceBusinessIdRequest) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use AssignProcessInstanceBusinessIdRequest.ProtoReflect.Descriptor instead.
 func (*AssignProcessInstanceBusinessIdRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{61}
+	return file_gateway_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *AssignProcessInstanceBusinessIdRequest) GetProcessInstanceKey() int64 {
@@ -5030,7 +5155,7 @@ type AssignProcessInstanceBusinessIdResponse struct {
 
 func (x *AssignProcessInstanceBusinessIdResponse) Reset() {
 	*x = AssignProcessInstanceBusinessIdResponse{}
-	mi := &file_gateway_proto_msgTypes[62]
+	mi := &file_gateway_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5042,7 +5167,7 @@ func (x *AssignProcessInstanceBusinessIdResponse) String() string {
 func (*AssignProcessInstanceBusinessIdResponse) ProtoMessage() {}
 
 func (x *AssignProcessInstanceBusinessIdResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[62]
+	mi := &file_gateway_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5055,7 +5180,7 @@ func (x *AssignProcessInstanceBusinessIdResponse) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use AssignProcessInstanceBusinessIdResponse.ProtoReflect.Descriptor instead.
 func (*AssignProcessInstanceBusinessIdResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{62}
+	return file_gateway_proto_rawDescGZIP(), []int{63}
 }
 
 type DeleteResourceRequest struct {
@@ -5079,7 +5204,7 @@ type DeleteResourceRequest struct {
 
 func (x *DeleteResourceRequest) Reset() {
 	*x = DeleteResourceRequest{}
-	mi := &file_gateway_proto_msgTypes[63]
+	mi := &file_gateway_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5091,7 +5216,7 @@ func (x *DeleteResourceRequest) String() string {
 func (*DeleteResourceRequest) ProtoMessage() {}
 
 func (x *DeleteResourceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[63]
+	mi := &file_gateway_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5104,7 +5229,7 @@ func (x *DeleteResourceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResourceRequest.ProtoReflect.Descriptor instead.
 func (*DeleteResourceRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{63}
+	return file_gateway_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *DeleteResourceRequest) GetResourceKey() int64 {
@@ -5144,7 +5269,7 @@ type DeleteResourceResponse struct {
 
 func (x *DeleteResourceResponse) Reset() {
 	*x = DeleteResourceResponse{}
-	mi := &file_gateway_proto_msgTypes[64]
+	mi := &file_gateway_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5156,7 +5281,7 @@ func (x *DeleteResourceResponse) String() string {
 func (*DeleteResourceResponse) ProtoMessage() {}
 
 func (x *DeleteResourceResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[64]
+	mi := &file_gateway_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5169,7 +5294,7 @@ func (x *DeleteResourceResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResourceResponse.ProtoReflect.Descriptor instead.
 func (*DeleteResourceResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{64}
+	return file_gateway_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *DeleteResourceResponse) GetResourceKey() string {
@@ -5197,7 +5322,7 @@ type BatchOperationCreatedResult struct {
 
 func (x *BatchOperationCreatedResult) Reset() {
 	*x = BatchOperationCreatedResult{}
-	mi := &file_gateway_proto_msgTypes[65]
+	mi := &file_gateway_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5209,7 +5334,7 @@ func (x *BatchOperationCreatedResult) String() string {
 func (*BatchOperationCreatedResult) ProtoMessage() {}
 
 func (x *BatchOperationCreatedResult) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[65]
+	mi := &file_gateway_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5222,7 +5347,7 @@ func (x *BatchOperationCreatedResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchOperationCreatedResult.ProtoReflect.Descriptor instead.
 func (*BatchOperationCreatedResult) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{65}
+	return file_gateway_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *BatchOperationCreatedResult) GetBatchOperationKey() string {
@@ -5254,7 +5379,7 @@ type BroadcastSignalRequest struct {
 
 func (x *BroadcastSignalRequest) Reset() {
 	*x = BroadcastSignalRequest{}
-	mi := &file_gateway_proto_msgTypes[66]
+	mi := &file_gateway_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5266,7 +5391,7 @@ func (x *BroadcastSignalRequest) String() string {
 func (*BroadcastSignalRequest) ProtoMessage() {}
 
 func (x *BroadcastSignalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[66]
+	mi := &file_gateway_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5279,7 +5404,7 @@ func (x *BroadcastSignalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BroadcastSignalRequest.ProtoReflect.Descriptor instead.
 func (*BroadcastSignalRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{66}
+	return file_gateway_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *BroadcastSignalRequest) GetSignalName() string {
@@ -5315,7 +5440,7 @@ type BroadcastSignalResponse struct {
 
 func (x *BroadcastSignalResponse) Reset() {
 	*x = BroadcastSignalResponse{}
-	mi := &file_gateway_proto_msgTypes[67]
+	mi := &file_gateway_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5327,7 +5452,7 @@ func (x *BroadcastSignalResponse) String() string {
 func (*BroadcastSignalResponse) ProtoMessage() {}
 
 func (x *BroadcastSignalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[67]
+	mi := &file_gateway_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5340,7 +5465,7 @@ func (x *BroadcastSignalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BroadcastSignalResponse.ProtoReflect.Descriptor instead.
 func (*BroadcastSignalResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{67}
+	return file_gateway_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *BroadcastSignalResponse) GetKey() int64 {
@@ -5372,7 +5497,7 @@ type EvaluateConditionalRequest struct {
 
 func (x *EvaluateConditionalRequest) Reset() {
 	*x = EvaluateConditionalRequest{}
-	mi := &file_gateway_proto_msgTypes[68]
+	mi := &file_gateway_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5384,7 +5509,7 @@ func (x *EvaluateConditionalRequest) String() string {
 func (*EvaluateConditionalRequest) ProtoMessage() {}
 
 func (x *EvaluateConditionalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[68]
+	mi := &file_gateway_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5397,7 +5522,7 @@ func (x *EvaluateConditionalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluateConditionalRequest.ProtoReflect.Descriptor instead.
 func (*EvaluateConditionalRequest) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{68}
+	return file_gateway_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *EvaluateConditionalRequest) GetTenantId() string {
@@ -5433,7 +5558,7 @@ type ProcessInstanceReference struct {
 
 func (x *ProcessInstanceReference) Reset() {
 	*x = ProcessInstanceReference{}
-	mi := &file_gateway_proto_msgTypes[69]
+	mi := &file_gateway_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5445,7 +5570,7 @@ func (x *ProcessInstanceReference) String() string {
 func (*ProcessInstanceReference) ProtoMessage() {}
 
 func (x *ProcessInstanceReference) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[69]
+	mi := &file_gateway_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5458,7 +5583,7 @@ func (x *ProcessInstanceReference) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProcessInstanceReference.ProtoReflect.Descriptor instead.
 func (*ProcessInstanceReference) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{69}
+	return file_gateway_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *ProcessInstanceReference) GetProcessDefinitionKey() int64 {
@@ -5489,7 +5614,7 @@ type EvaluateConditionalResponse struct {
 
 func (x *EvaluateConditionalResponse) Reset() {
 	*x = EvaluateConditionalResponse{}
-	mi := &file_gateway_proto_msgTypes[70]
+	mi := &file_gateway_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5501,7 +5626,7 @@ func (x *EvaluateConditionalResponse) String() string {
 func (*EvaluateConditionalResponse) ProtoMessage() {}
 
 func (x *EvaluateConditionalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[70]
+	mi := &file_gateway_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5514,7 +5639,7 @@ func (x *EvaluateConditionalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluateConditionalResponse.ProtoReflect.Descriptor instead.
 func (*EvaluateConditionalResponse) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{70}
+	return file_gateway_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *EvaluateConditionalResponse) GetProcessInstances() []*ProcessInstanceReference {
@@ -5554,7 +5679,7 @@ type ModifyProcessInstanceRequest_ActivateInstruction struct {
 
 func (x *ModifyProcessInstanceRequest_ActivateInstruction) Reset() {
 	*x = ModifyProcessInstanceRequest_ActivateInstruction{}
-	mi := &file_gateway_proto_msgTypes[71]
+	mi := &file_gateway_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5566,7 +5691,7 @@ func (x *ModifyProcessInstanceRequest_ActivateInstruction) String() string {
 func (*ModifyProcessInstanceRequest_ActivateInstruction) ProtoMessage() {}
 
 func (x *ModifyProcessInstanceRequest_ActivateInstruction) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[71]
+	mi := &file_gateway_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5579,7 +5704,7 @@ func (x *ModifyProcessInstanceRequest_ActivateInstruction) ProtoReflect() protor
 
 // Deprecated: Use ModifyProcessInstanceRequest_ActivateInstruction.ProtoReflect.Descriptor instead.
 func (*ModifyProcessInstanceRequest_ActivateInstruction) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{57, 0}
+	return file_gateway_proto_rawDescGZIP(), []int{58, 0}
 }
 
 func (x *ModifyProcessInstanceRequest_ActivateInstruction) GetElementId() string {
@@ -5620,7 +5745,7 @@ type ModifyProcessInstanceRequest_VariableInstruction struct {
 
 func (x *ModifyProcessInstanceRequest_VariableInstruction) Reset() {
 	*x = ModifyProcessInstanceRequest_VariableInstruction{}
-	mi := &file_gateway_proto_msgTypes[72]
+	mi := &file_gateway_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5632,7 +5757,7 @@ func (x *ModifyProcessInstanceRequest_VariableInstruction) String() string {
 func (*ModifyProcessInstanceRequest_VariableInstruction) ProtoMessage() {}
 
 func (x *ModifyProcessInstanceRequest_VariableInstruction) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[72]
+	mi := &file_gateway_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5645,7 +5770,7 @@ func (x *ModifyProcessInstanceRequest_VariableInstruction) ProtoReflect() protor
 
 // Deprecated: Use ModifyProcessInstanceRequest_VariableInstruction.ProtoReflect.Descriptor instead.
 func (*ModifyProcessInstanceRequest_VariableInstruction) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{57, 1}
+	return file_gateway_proto_rawDescGZIP(), []int{58, 1}
 }
 
 func (x *ModifyProcessInstanceRequest_VariableInstruction) GetVariables() string {
@@ -5674,7 +5799,7 @@ type ModifyProcessInstanceRequest_TerminateInstruction struct {
 
 func (x *ModifyProcessInstanceRequest_TerminateInstruction) Reset() {
 	*x = ModifyProcessInstanceRequest_TerminateInstruction{}
-	mi := &file_gateway_proto_msgTypes[73]
+	mi := &file_gateway_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5686,7 +5811,7 @@ func (x *ModifyProcessInstanceRequest_TerminateInstruction) String() string {
 func (*ModifyProcessInstanceRequest_TerminateInstruction) ProtoMessage() {}
 
 func (x *ModifyProcessInstanceRequest_TerminateInstruction) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[73]
+	mi := &file_gateway_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5699,7 +5824,7 @@ func (x *ModifyProcessInstanceRequest_TerminateInstruction) ProtoReflect() proto
 
 // Deprecated: Use ModifyProcessInstanceRequest_TerminateInstruction.ProtoReflect.Descriptor instead.
 func (*ModifyProcessInstanceRequest_TerminateInstruction) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{57, 2}
+	return file_gateway_proto_rawDescGZIP(), []int{58, 2}
 }
 
 func (x *ModifyProcessInstanceRequest_TerminateInstruction) GetElementInstanceKey() int64 {
@@ -5743,7 +5868,7 @@ type ModifyProcessInstanceRequest_MoveInstruction struct {
 
 func (x *ModifyProcessInstanceRequest_MoveInstruction) Reset() {
 	*x = ModifyProcessInstanceRequest_MoveInstruction{}
-	mi := &file_gateway_proto_msgTypes[74]
+	mi := &file_gateway_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5755,7 +5880,7 @@ func (x *ModifyProcessInstanceRequest_MoveInstruction) String() string {
 func (*ModifyProcessInstanceRequest_MoveInstruction) ProtoMessage() {}
 
 func (x *ModifyProcessInstanceRequest_MoveInstruction) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[74]
+	mi := &file_gateway_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5768,7 +5893,7 @@ func (x *ModifyProcessInstanceRequest_MoveInstruction) ProtoReflect() protorefle
 
 // Deprecated: Use ModifyProcessInstanceRequest_MoveInstruction.ProtoReflect.Descriptor instead.
 func (*ModifyProcessInstanceRequest_MoveInstruction) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{57, 3}
+	return file_gateway_proto_rawDescGZIP(), []int{58, 3}
 }
 
 func (x *ModifyProcessInstanceRequest_MoveInstruction) GetSourceElementInstanceKey() int64 {
@@ -5832,7 +5957,7 @@ type MigrateProcessInstanceRequest_MigrationPlan struct {
 
 func (x *MigrateProcessInstanceRequest_MigrationPlan) Reset() {
 	*x = MigrateProcessInstanceRequest_MigrationPlan{}
-	mi := &file_gateway_proto_msgTypes[75]
+	mi := &file_gateway_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5844,7 +5969,7 @@ func (x *MigrateProcessInstanceRequest_MigrationPlan) String() string {
 func (*MigrateProcessInstanceRequest_MigrationPlan) ProtoMessage() {}
 
 func (x *MigrateProcessInstanceRequest_MigrationPlan) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[75]
+	mi := &file_gateway_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5857,7 +5982,7 @@ func (x *MigrateProcessInstanceRequest_MigrationPlan) ProtoReflect() protoreflec
 
 // Deprecated: Use MigrateProcessInstanceRequest_MigrationPlan.ProtoReflect.Descriptor instead.
 func (*MigrateProcessInstanceRequest_MigrationPlan) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{59, 0}
+	return file_gateway_proto_rawDescGZIP(), []int{60, 0}
 }
 
 func (x *MigrateProcessInstanceRequest_MigrationPlan) GetTargetProcessDefinitionKey() int64 {
@@ -5886,7 +6011,7 @@ type MigrateProcessInstanceRequest_MappingInstruction struct {
 
 func (x *MigrateProcessInstanceRequest_MappingInstruction) Reset() {
 	*x = MigrateProcessInstanceRequest_MappingInstruction{}
-	mi := &file_gateway_proto_msgTypes[76]
+	mi := &file_gateway_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5898,7 +6023,7 @@ func (x *MigrateProcessInstanceRequest_MappingInstruction) String() string {
 func (*MigrateProcessInstanceRequest_MappingInstruction) ProtoMessage() {}
 
 func (x *MigrateProcessInstanceRequest_MappingInstruction) ProtoReflect() protoreflect.Message {
-	mi := &file_gateway_proto_msgTypes[76]
+	mi := &file_gateway_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5911,7 +6036,7 @@ func (x *MigrateProcessInstanceRequest_MappingInstruction) ProtoReflect() protor
 
 // Deprecated: Use MigrateProcessInstanceRequest_MappingInstruction.ProtoReflect.Descriptor instead.
 func (*MigrateProcessInstanceRequest_MappingInstruction) Descriptor() ([]byte, []int) {
-	return file_gateway_proto_rawDescGZIP(), []int{59, 1}
+	return file_gateway_proto_rawDescGZIP(), []int{60, 1}
 }
 
 func (x *MigrateProcessInstanceRequest_MappingInstruction) GetSourceElementId() string {
@@ -6071,7 +6196,7 @@ const file_gateway_proto_rawDesc = "" +
 	"\n" +
 	"StringList\x12\x16\n" +
 	"\x06values\x18\x01 \x03(\tR\x06values\"\x15\n" +
-	"\x13CompleteJobResponse\"\xb8\x04\n" +
+	"\x13CompleteJobResponse\"\xcb\x06\n" +
 	"\x1cCreateProcessInstanceRequest\x122\n" +
 	"\x14processDefinitionKey\x18\x01 \x01(\x03R\x14processDefinitionKey\x12$\n" +
 	"\rbpmnProcessId\x18\x02 \x01(\tR\rbpmnProcessId\x12\x18\n" +
@@ -6085,9 +6210,22 @@ const file_gateway_proto_rawDesc = "" +
 	"\n" +
 	"businessId\x18\n" +
 	" \x01(\tH\x01R\n" +
-	"businessId\x88\x01\x01B\x15\n" +
+	"businessId\x88\x01\x01\x12#\n" +
+	"\n" +
+	"versionTag\x18\v \x01(\tH\x02R\n" +
+	"versionTag\x88\x01\x01\x12s\n" +
+	"\x11variablesMetadata\x18\f \x03(\v2E.gateway_protocol.CreateProcessInstanceRequest.VariablesMetadataEntryR\x11variablesMetadata\x1ah\n" +
+	"\x16VariablesMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x128\n" +
+	"\x05value\x18\x02 \x01(\v2\".gateway_protocol.VariableMetadataR\x05value:\x028\x01B\x15\n" +
 	"\x13_operationReferenceB\r\n" +
-	"\v_businessId\"G\n" +
+	"\v_businessIdB\r\n" +
+	"\v_versionTag\"\x8d\x01\n" +
+	"\x10VariableMetadata\x12[\n" +
+	"\x0fprotectionModes\x18\x01 \x03(\x0e21.gateway_protocol.VariableMetadata.ProtectionModeR\x0fprotectionModes\"\x1c\n" +
+	"\x0eProtectionMode\x12\n" +
+	"\n" +
+	"\x06REDACT\x10\x00\"G\n" +
 	"'ProcessInstanceCreationStartInstruction\x12\x1c\n" +
 	"\telementId\x18\x01 \x01(\tR\telementId\"\x91\x01\n" +
 	")ProcessInstanceCreationRuntimeInstruction\x12U\n" +
@@ -6325,12 +6463,16 @@ const file_gateway_proto_rawDesc = "" +
 	"\t_priorityB\x15\n" +
 	"\x13_operationReferenceB\x10\n" +
 	"\x0e_jobLeaseToken\"\x1b\n" +
-	"\x19UpdateJobPriorityResponse\"\xc5\x01\n" +
+	"\x19UpdateJobPriorityResponse\"\x9b\x03\n" +
 	"\x13SetVariablesRequest\x12.\n" +
 	"\x12elementInstanceKey\x18\x01 \x01(\x03R\x12elementInstanceKey\x12\x1c\n" +
 	"\tvariables\x18\x02 \x01(\tR\tvariables\x12\x14\n" +
 	"\x05local\x18\x03 \x01(\bR\x05local\x123\n" +
-	"\x12operationReference\x18\x04 \x01(\x04H\x00R\x12operationReference\x88\x01\x01B\x15\n" +
+	"\x12operationReference\x18\x04 \x01(\x04H\x00R\x12operationReference\x88\x01\x01\x12j\n" +
+	"\x11variablesMetadata\x18\x05 \x03(\v2<.gateway_protocol.SetVariablesRequest.VariablesMetadataEntryR\x11variablesMetadata\x1ah\n" +
+	"\x16VariablesMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x128\n" +
+	"\x05value\x18\x02 \x01(\v2\".gateway_protocol.VariableMetadataR\x05value:\x028\x01B\x15\n" +
 	"\x13_operationReference\"(\n" +
 	"\x14SetVariablesResponse\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\x03R\x03key\"\xa2\v\n" +
@@ -6468,188 +6610,197 @@ func file_gateway_proto_rawDescGZIP() []byte {
 	return file_gateway_proto_rawDescData
 }
 
-var file_gateway_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
-var file_gateway_proto_msgTypes = make([]protoimpl.MessageInfo, 77)
+var file_gateway_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
+var file_gateway_proto_msgTypes = make([]protoimpl.MessageInfo, 80)
 var file_gateway_proto_goTypes = []any{
 	(TenantFilter)(0),                                         // 0: gateway_protocol.TenantFilter
 	(ActivatedJob_JobKind)(0),                                 // 1: gateway_protocol.ActivatedJob.JobKind
 	(ActivatedJob_ListenerEventType)(0),                       // 2: gateway_protocol.ActivatedJob.ListenerEventType
-	(Partition_PartitionBrokerRole)(0),                        // 3: gateway_protocol.Partition.PartitionBrokerRole
-	(Partition_PartitionBrokerHealth)(0),                      // 4: gateway_protocol.Partition.PartitionBrokerHealth
-	(BatchOperationCreatedResult_BatchOperationTypeEnum)(0),   // 5: gateway_protocol.BatchOperationCreatedResult.BatchOperationTypeEnum
-	(*StreamActivatedJobsRequest)(nil),                        // 6: gateway_protocol.StreamActivatedJobsRequest
-	(*ActivateJobsRequest)(nil),                               // 7: gateway_protocol.ActivateJobsRequest
-	(*ActivateJobsResponse)(nil),                              // 8: gateway_protocol.ActivateJobsResponse
-	(*ActivatedJob)(nil),                                      // 9: gateway_protocol.ActivatedJob
-	(*UserTaskProperties)(nil),                                // 10: gateway_protocol.UserTaskProperties
-	(*CancelProcessInstanceRequest)(nil),                      // 11: gateway_protocol.CancelProcessInstanceRequest
-	(*CancelProcessInstanceResponse)(nil),                     // 12: gateway_protocol.CancelProcessInstanceResponse
-	(*CompleteJobRequest)(nil),                                // 13: gateway_protocol.CompleteJobRequest
-	(*JobResult)(nil),                                         // 14: gateway_protocol.JobResult
-	(*JobResultCorrections)(nil),                              // 15: gateway_protocol.JobResultCorrections
-	(*JobResultActivateElement)(nil),                          // 16: gateway_protocol.JobResultActivateElement
-	(*StringList)(nil),                                        // 17: gateway_protocol.StringList
-	(*CompleteJobResponse)(nil),                               // 18: gateway_protocol.CompleteJobResponse
-	(*CreateProcessInstanceRequest)(nil),                      // 19: gateway_protocol.CreateProcessInstanceRequest
-	(*ProcessInstanceCreationStartInstruction)(nil),           // 20: gateway_protocol.ProcessInstanceCreationStartInstruction
-	(*ProcessInstanceCreationRuntimeInstruction)(nil),         // 21: gateway_protocol.ProcessInstanceCreationRuntimeInstruction
-	(*TerminateProcessInstanceInstruction)(nil),               // 22: gateway_protocol.TerminateProcessInstanceInstruction
-	(*CreateProcessInstanceResponse)(nil),                     // 23: gateway_protocol.CreateProcessInstanceResponse
-	(*CreateProcessInstanceWithResultRequest)(nil),            // 24: gateway_protocol.CreateProcessInstanceWithResultRequest
-	(*CreateProcessInstanceWithResultResponse)(nil),           // 25: gateway_protocol.CreateProcessInstanceWithResultResponse
-	(*EvaluateDecisionRequest)(nil),                           // 26: gateway_protocol.EvaluateDecisionRequest
-	(*EvaluateDecisionResponse)(nil),                          // 27: gateway_protocol.EvaluateDecisionResponse
-	(*EvaluatedDecision)(nil),                                 // 28: gateway_protocol.EvaluatedDecision
-	(*EvaluatedDecisionInput)(nil),                            // 29: gateway_protocol.EvaluatedDecisionInput
-	(*EvaluatedDecisionOutput)(nil),                           // 30: gateway_protocol.EvaluatedDecisionOutput
-	(*MatchedDecisionRule)(nil),                               // 31: gateway_protocol.MatchedDecisionRule
-	(*DeployProcessRequest)(nil),                              // 32: gateway_protocol.DeployProcessRequest
-	(*ProcessRequestObject)(nil),                              // 33: gateway_protocol.ProcessRequestObject
-	(*DeployProcessResponse)(nil),                             // 34: gateway_protocol.DeployProcessResponse
-	(*DeployResourceRequest)(nil),                             // 35: gateway_protocol.DeployResourceRequest
-	(*Resource)(nil),                                          // 36: gateway_protocol.Resource
-	(*DeployResourceResponse)(nil),                            // 37: gateway_protocol.DeployResourceResponse
-	(*Deployment)(nil),                                        // 38: gateway_protocol.Deployment
-	(*ProcessMetadata)(nil),                                   // 39: gateway_protocol.ProcessMetadata
-	(*DecisionMetadata)(nil),                                  // 40: gateway_protocol.DecisionMetadata
-	(*DecisionRequirementsMetadata)(nil),                      // 41: gateway_protocol.DecisionRequirementsMetadata
-	(*FormMetadata)(nil),                                      // 42: gateway_protocol.FormMetadata
-	(*FailJobRequest)(nil),                                    // 43: gateway_protocol.FailJobRequest
-	(*FailJobResponse)(nil),                                   // 44: gateway_protocol.FailJobResponse
-	(*ThrowErrorRequest)(nil),                                 // 45: gateway_protocol.ThrowErrorRequest
-	(*ThrowErrorResponse)(nil),                                // 46: gateway_protocol.ThrowErrorResponse
-	(*PublishMessageRequest)(nil),                             // 47: gateway_protocol.PublishMessageRequest
-	(*PublishMessageResponse)(nil),                            // 48: gateway_protocol.PublishMessageResponse
-	(*ResolveIncidentRequest)(nil),                            // 49: gateway_protocol.ResolveIncidentRequest
-	(*ResolveIncidentResponse)(nil),                           // 50: gateway_protocol.ResolveIncidentResponse
-	(*TopologyRequest)(nil),                                   // 51: gateway_protocol.TopologyRequest
-	(*TopologyResponse)(nil),                                  // 52: gateway_protocol.TopologyResponse
-	(*BrokerInfo)(nil),                                        // 53: gateway_protocol.BrokerInfo
-	(*Partition)(nil),                                         // 54: gateway_protocol.Partition
-	(*UpdateJobRetriesRequest)(nil),                           // 55: gateway_protocol.UpdateJobRetriesRequest
-	(*UpdateJobRetriesResponse)(nil),                          // 56: gateway_protocol.UpdateJobRetriesResponse
-	(*UpdateJobTimeoutRequest)(nil),                           // 57: gateway_protocol.UpdateJobTimeoutRequest
-	(*UpdateJobTimeoutResponse)(nil),                          // 58: gateway_protocol.UpdateJobTimeoutResponse
-	(*UpdateJobPriorityRequest)(nil),                          // 59: gateway_protocol.UpdateJobPriorityRequest
-	(*UpdateJobPriorityResponse)(nil),                         // 60: gateway_protocol.UpdateJobPriorityResponse
-	(*SetVariablesRequest)(nil),                               // 61: gateway_protocol.SetVariablesRequest
-	(*SetVariablesResponse)(nil),                              // 62: gateway_protocol.SetVariablesResponse
-	(*ModifyProcessInstanceRequest)(nil),                      // 63: gateway_protocol.ModifyProcessInstanceRequest
-	(*ModifyProcessInstanceResponse)(nil),                     // 64: gateway_protocol.ModifyProcessInstanceResponse
-	(*MigrateProcessInstanceRequest)(nil),                     // 65: gateway_protocol.MigrateProcessInstanceRequest
-	(*MigrateProcessInstanceResponse)(nil),                    // 66: gateway_protocol.MigrateProcessInstanceResponse
-	(*AssignProcessInstanceBusinessIdRequest)(nil),            // 67: gateway_protocol.AssignProcessInstanceBusinessIdRequest
-	(*AssignProcessInstanceBusinessIdResponse)(nil),           // 68: gateway_protocol.AssignProcessInstanceBusinessIdResponse
-	(*DeleteResourceRequest)(nil),                             // 69: gateway_protocol.DeleteResourceRequest
-	(*DeleteResourceResponse)(nil),                            // 70: gateway_protocol.DeleteResourceResponse
-	(*BatchOperationCreatedResult)(nil),                       // 71: gateway_protocol.BatchOperationCreatedResult
-	(*BroadcastSignalRequest)(nil),                            // 72: gateway_protocol.BroadcastSignalRequest
-	(*BroadcastSignalResponse)(nil),                           // 73: gateway_protocol.BroadcastSignalResponse
-	(*EvaluateConditionalRequest)(nil),                        // 74: gateway_protocol.EvaluateConditionalRequest
-	(*ProcessInstanceReference)(nil),                          // 75: gateway_protocol.ProcessInstanceReference
-	(*EvaluateConditionalResponse)(nil),                       // 76: gateway_protocol.EvaluateConditionalResponse
-	(*ModifyProcessInstanceRequest_ActivateInstruction)(nil),  // 77: gateway_protocol.ModifyProcessInstanceRequest.ActivateInstruction
-	(*ModifyProcessInstanceRequest_VariableInstruction)(nil),  // 78: gateway_protocol.ModifyProcessInstanceRequest.VariableInstruction
-	(*ModifyProcessInstanceRequest_TerminateInstruction)(nil), // 79: gateway_protocol.ModifyProcessInstanceRequest.TerminateInstruction
-	(*ModifyProcessInstanceRequest_MoveInstruction)(nil),      // 80: gateway_protocol.ModifyProcessInstanceRequest.MoveInstruction
-	(*MigrateProcessInstanceRequest_MigrationPlan)(nil),       // 81: gateway_protocol.MigrateProcessInstanceRequest.MigrationPlan
-	(*MigrateProcessInstanceRequest_MappingInstruction)(nil),  // 82: gateway_protocol.MigrateProcessInstanceRequest.MappingInstruction
+	(VariableMetadata_ProtectionMode)(0),                      // 3: gateway_protocol.VariableMetadata.ProtectionMode
+	(Partition_PartitionBrokerRole)(0),                        // 4: gateway_protocol.Partition.PartitionBrokerRole
+	(Partition_PartitionBrokerHealth)(0),                      // 5: gateway_protocol.Partition.PartitionBrokerHealth
+	(BatchOperationCreatedResult_BatchOperationTypeEnum)(0),   // 6: gateway_protocol.BatchOperationCreatedResult.BatchOperationTypeEnum
+	(*StreamActivatedJobsRequest)(nil),                        // 7: gateway_protocol.StreamActivatedJobsRequest
+	(*ActivateJobsRequest)(nil),                               // 8: gateway_protocol.ActivateJobsRequest
+	(*ActivateJobsResponse)(nil),                              // 9: gateway_protocol.ActivateJobsResponse
+	(*ActivatedJob)(nil),                                      // 10: gateway_protocol.ActivatedJob
+	(*UserTaskProperties)(nil),                                // 11: gateway_protocol.UserTaskProperties
+	(*CancelProcessInstanceRequest)(nil),                      // 12: gateway_protocol.CancelProcessInstanceRequest
+	(*CancelProcessInstanceResponse)(nil),                     // 13: gateway_protocol.CancelProcessInstanceResponse
+	(*CompleteJobRequest)(nil),                                // 14: gateway_protocol.CompleteJobRequest
+	(*JobResult)(nil),                                         // 15: gateway_protocol.JobResult
+	(*JobResultCorrections)(nil),                              // 16: gateway_protocol.JobResultCorrections
+	(*JobResultActivateElement)(nil),                          // 17: gateway_protocol.JobResultActivateElement
+	(*StringList)(nil),                                        // 18: gateway_protocol.StringList
+	(*CompleteJobResponse)(nil),                               // 19: gateway_protocol.CompleteJobResponse
+	(*CreateProcessInstanceRequest)(nil),                      // 20: gateway_protocol.CreateProcessInstanceRequest
+	(*VariableMetadata)(nil),                                  // 21: gateway_protocol.VariableMetadata
+	(*ProcessInstanceCreationStartInstruction)(nil),           // 22: gateway_protocol.ProcessInstanceCreationStartInstruction
+	(*ProcessInstanceCreationRuntimeInstruction)(nil),         // 23: gateway_protocol.ProcessInstanceCreationRuntimeInstruction
+	(*TerminateProcessInstanceInstruction)(nil),               // 24: gateway_protocol.TerminateProcessInstanceInstruction
+	(*CreateProcessInstanceResponse)(nil),                     // 25: gateway_protocol.CreateProcessInstanceResponse
+	(*CreateProcessInstanceWithResultRequest)(nil),            // 26: gateway_protocol.CreateProcessInstanceWithResultRequest
+	(*CreateProcessInstanceWithResultResponse)(nil),           // 27: gateway_protocol.CreateProcessInstanceWithResultResponse
+	(*EvaluateDecisionRequest)(nil),                           // 28: gateway_protocol.EvaluateDecisionRequest
+	(*EvaluateDecisionResponse)(nil),                          // 29: gateway_protocol.EvaluateDecisionResponse
+	(*EvaluatedDecision)(nil),                                 // 30: gateway_protocol.EvaluatedDecision
+	(*EvaluatedDecisionInput)(nil),                            // 31: gateway_protocol.EvaluatedDecisionInput
+	(*EvaluatedDecisionOutput)(nil),                           // 32: gateway_protocol.EvaluatedDecisionOutput
+	(*MatchedDecisionRule)(nil),                               // 33: gateway_protocol.MatchedDecisionRule
+	(*DeployProcessRequest)(nil),                              // 34: gateway_protocol.DeployProcessRequest
+	(*ProcessRequestObject)(nil),                              // 35: gateway_protocol.ProcessRequestObject
+	(*DeployProcessResponse)(nil),                             // 36: gateway_protocol.DeployProcessResponse
+	(*DeployResourceRequest)(nil),                             // 37: gateway_protocol.DeployResourceRequest
+	(*Resource)(nil),                                          // 38: gateway_protocol.Resource
+	(*DeployResourceResponse)(nil),                            // 39: gateway_protocol.DeployResourceResponse
+	(*Deployment)(nil),                                        // 40: gateway_protocol.Deployment
+	(*ProcessMetadata)(nil),                                   // 41: gateway_protocol.ProcessMetadata
+	(*DecisionMetadata)(nil),                                  // 42: gateway_protocol.DecisionMetadata
+	(*DecisionRequirementsMetadata)(nil),                      // 43: gateway_protocol.DecisionRequirementsMetadata
+	(*FormMetadata)(nil),                                      // 44: gateway_protocol.FormMetadata
+	(*FailJobRequest)(nil),                                    // 45: gateway_protocol.FailJobRequest
+	(*FailJobResponse)(nil),                                   // 46: gateway_protocol.FailJobResponse
+	(*ThrowErrorRequest)(nil),                                 // 47: gateway_protocol.ThrowErrorRequest
+	(*ThrowErrorResponse)(nil),                                // 48: gateway_protocol.ThrowErrorResponse
+	(*PublishMessageRequest)(nil),                             // 49: gateway_protocol.PublishMessageRequest
+	(*PublishMessageResponse)(nil),                            // 50: gateway_protocol.PublishMessageResponse
+	(*ResolveIncidentRequest)(nil),                            // 51: gateway_protocol.ResolveIncidentRequest
+	(*ResolveIncidentResponse)(nil),                           // 52: gateway_protocol.ResolveIncidentResponse
+	(*TopologyRequest)(nil),                                   // 53: gateway_protocol.TopologyRequest
+	(*TopologyResponse)(nil),                                  // 54: gateway_protocol.TopologyResponse
+	(*BrokerInfo)(nil),                                        // 55: gateway_protocol.BrokerInfo
+	(*Partition)(nil),                                         // 56: gateway_protocol.Partition
+	(*UpdateJobRetriesRequest)(nil),                           // 57: gateway_protocol.UpdateJobRetriesRequest
+	(*UpdateJobRetriesResponse)(nil),                          // 58: gateway_protocol.UpdateJobRetriesResponse
+	(*UpdateJobTimeoutRequest)(nil),                           // 59: gateway_protocol.UpdateJobTimeoutRequest
+	(*UpdateJobTimeoutResponse)(nil),                          // 60: gateway_protocol.UpdateJobTimeoutResponse
+	(*UpdateJobPriorityRequest)(nil),                          // 61: gateway_protocol.UpdateJobPriorityRequest
+	(*UpdateJobPriorityResponse)(nil),                         // 62: gateway_protocol.UpdateJobPriorityResponse
+	(*SetVariablesRequest)(nil),                               // 63: gateway_protocol.SetVariablesRequest
+	(*SetVariablesResponse)(nil),                              // 64: gateway_protocol.SetVariablesResponse
+	(*ModifyProcessInstanceRequest)(nil),                      // 65: gateway_protocol.ModifyProcessInstanceRequest
+	(*ModifyProcessInstanceResponse)(nil),                     // 66: gateway_protocol.ModifyProcessInstanceResponse
+	(*MigrateProcessInstanceRequest)(nil),                     // 67: gateway_protocol.MigrateProcessInstanceRequest
+	(*MigrateProcessInstanceResponse)(nil),                    // 68: gateway_protocol.MigrateProcessInstanceResponse
+	(*AssignProcessInstanceBusinessIdRequest)(nil),            // 69: gateway_protocol.AssignProcessInstanceBusinessIdRequest
+	(*AssignProcessInstanceBusinessIdResponse)(nil),           // 70: gateway_protocol.AssignProcessInstanceBusinessIdResponse
+	(*DeleteResourceRequest)(nil),                             // 71: gateway_protocol.DeleteResourceRequest
+	(*DeleteResourceResponse)(nil),                            // 72: gateway_protocol.DeleteResourceResponse
+	(*BatchOperationCreatedResult)(nil),                       // 73: gateway_protocol.BatchOperationCreatedResult
+	(*BroadcastSignalRequest)(nil),                            // 74: gateway_protocol.BroadcastSignalRequest
+	(*BroadcastSignalResponse)(nil),                           // 75: gateway_protocol.BroadcastSignalResponse
+	(*EvaluateConditionalRequest)(nil),                        // 76: gateway_protocol.EvaluateConditionalRequest
+	(*ProcessInstanceReference)(nil),                          // 77: gateway_protocol.ProcessInstanceReference
+	(*EvaluateConditionalResponse)(nil),                       // 78: gateway_protocol.EvaluateConditionalResponse
+	nil,                                                       // 79: gateway_protocol.CreateProcessInstanceRequest.VariablesMetadataEntry
+	nil,                                                       // 80: gateway_protocol.SetVariablesRequest.VariablesMetadataEntry
+	(*ModifyProcessInstanceRequest_ActivateInstruction)(nil),  // 81: gateway_protocol.ModifyProcessInstanceRequest.ActivateInstruction
+	(*ModifyProcessInstanceRequest_VariableInstruction)(nil),  // 82: gateway_protocol.ModifyProcessInstanceRequest.VariableInstruction
+	(*ModifyProcessInstanceRequest_TerminateInstruction)(nil), // 83: gateway_protocol.ModifyProcessInstanceRequest.TerminateInstruction
+	(*ModifyProcessInstanceRequest_MoveInstruction)(nil),      // 84: gateway_protocol.ModifyProcessInstanceRequest.MoveInstruction
+	(*MigrateProcessInstanceRequest_MigrationPlan)(nil),       // 85: gateway_protocol.MigrateProcessInstanceRequest.MigrationPlan
+	(*MigrateProcessInstanceRequest_MappingInstruction)(nil),  // 86: gateway_protocol.MigrateProcessInstanceRequest.MappingInstruction
 }
 var file_gateway_proto_depIdxs = []int32{
 	0,  // 0: gateway_protocol.StreamActivatedJobsRequest.tenantFilter:type_name -> gateway_protocol.TenantFilter
 	0,  // 1: gateway_protocol.ActivateJobsRequest.tenantFilter:type_name -> gateway_protocol.TenantFilter
-	9,  // 2: gateway_protocol.ActivateJobsResponse.jobs:type_name -> gateway_protocol.ActivatedJob
-	10, // 3: gateway_protocol.ActivatedJob.userTask:type_name -> gateway_protocol.UserTaskProperties
+	10, // 2: gateway_protocol.ActivateJobsResponse.jobs:type_name -> gateway_protocol.ActivatedJob
+	11, // 3: gateway_protocol.ActivatedJob.userTask:type_name -> gateway_protocol.UserTaskProperties
 	1,  // 4: gateway_protocol.ActivatedJob.kind:type_name -> gateway_protocol.ActivatedJob.JobKind
 	2,  // 5: gateway_protocol.ActivatedJob.listenerEventType:type_name -> gateway_protocol.ActivatedJob.ListenerEventType
-	14, // 6: gateway_protocol.CompleteJobRequest.result:type_name -> gateway_protocol.JobResult
-	15, // 7: gateway_protocol.JobResult.corrections:type_name -> gateway_protocol.JobResultCorrections
-	16, // 8: gateway_protocol.JobResult.activateElements:type_name -> gateway_protocol.JobResultActivateElement
-	17, // 9: gateway_protocol.JobResultCorrections.candidateUsers:type_name -> gateway_protocol.StringList
-	17, // 10: gateway_protocol.JobResultCorrections.candidateGroups:type_name -> gateway_protocol.StringList
-	20, // 11: gateway_protocol.CreateProcessInstanceRequest.startInstructions:type_name -> gateway_protocol.ProcessInstanceCreationStartInstruction
-	21, // 12: gateway_protocol.CreateProcessInstanceRequest.runtimeInstructions:type_name -> gateway_protocol.ProcessInstanceCreationRuntimeInstruction
-	22, // 13: gateway_protocol.ProcessInstanceCreationRuntimeInstruction.terminate:type_name -> gateway_protocol.TerminateProcessInstanceInstruction
-	19, // 14: gateway_protocol.CreateProcessInstanceWithResultRequest.request:type_name -> gateway_protocol.CreateProcessInstanceRequest
-	28, // 15: gateway_protocol.EvaluateDecisionResponse.evaluatedDecisions:type_name -> gateway_protocol.EvaluatedDecision
-	31, // 16: gateway_protocol.EvaluatedDecision.matchedRules:type_name -> gateway_protocol.MatchedDecisionRule
-	29, // 17: gateway_protocol.EvaluatedDecision.evaluatedInputs:type_name -> gateway_protocol.EvaluatedDecisionInput
-	30, // 18: gateway_protocol.MatchedDecisionRule.evaluatedOutputs:type_name -> gateway_protocol.EvaluatedDecisionOutput
-	33, // 19: gateway_protocol.DeployProcessRequest.processes:type_name -> gateway_protocol.ProcessRequestObject
-	39, // 20: gateway_protocol.DeployProcessResponse.processes:type_name -> gateway_protocol.ProcessMetadata
-	36, // 21: gateway_protocol.DeployResourceRequest.resources:type_name -> gateway_protocol.Resource
-	38, // 22: gateway_protocol.DeployResourceResponse.deployments:type_name -> gateway_protocol.Deployment
-	39, // 23: gateway_protocol.Deployment.process:type_name -> gateway_protocol.ProcessMetadata
-	40, // 24: gateway_protocol.Deployment.decision:type_name -> gateway_protocol.DecisionMetadata
-	41, // 25: gateway_protocol.Deployment.decisionRequirements:type_name -> gateway_protocol.DecisionRequirementsMetadata
-	42, // 26: gateway_protocol.Deployment.form:type_name -> gateway_protocol.FormMetadata
-	53, // 27: gateway_protocol.TopologyResponse.brokers:type_name -> gateway_protocol.BrokerInfo
-	54, // 28: gateway_protocol.BrokerInfo.partitions:type_name -> gateway_protocol.Partition
-	3,  // 29: gateway_protocol.Partition.role:type_name -> gateway_protocol.Partition.PartitionBrokerRole
-	4,  // 30: gateway_protocol.Partition.health:type_name -> gateway_protocol.Partition.PartitionBrokerHealth
-	77, // 31: gateway_protocol.ModifyProcessInstanceRequest.activateInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.ActivateInstruction
-	79, // 32: gateway_protocol.ModifyProcessInstanceRequest.terminateInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.TerminateInstruction
-	80, // 33: gateway_protocol.ModifyProcessInstanceRequest.moveInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.MoveInstruction
-	81, // 34: gateway_protocol.MigrateProcessInstanceRequest.migrationPlan:type_name -> gateway_protocol.MigrateProcessInstanceRequest.MigrationPlan
-	71, // 35: gateway_protocol.DeleteResourceResponse.batchOperation:type_name -> gateway_protocol.BatchOperationCreatedResult
-	5,  // 36: gateway_protocol.BatchOperationCreatedResult.batchOperationType:type_name -> gateway_protocol.BatchOperationCreatedResult.BatchOperationTypeEnum
-	75, // 37: gateway_protocol.EvaluateConditionalResponse.processInstances:type_name -> gateway_protocol.ProcessInstanceReference
-	78, // 38: gateway_protocol.ModifyProcessInstanceRequest.ActivateInstruction.variableInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.VariableInstruction
-	78, // 39: gateway_protocol.ModifyProcessInstanceRequest.MoveInstruction.variableInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.VariableInstruction
-	82, // 40: gateway_protocol.MigrateProcessInstanceRequest.MigrationPlan.mappingInstructions:type_name -> gateway_protocol.MigrateProcessInstanceRequest.MappingInstruction
-	7,  // 41: gateway_protocol.Gateway.ActivateJobs:input_type -> gateway_protocol.ActivateJobsRequest
-	6,  // 42: gateway_protocol.Gateway.StreamActivatedJobs:input_type -> gateway_protocol.StreamActivatedJobsRequest
-	11, // 43: gateway_protocol.Gateway.CancelProcessInstance:input_type -> gateway_protocol.CancelProcessInstanceRequest
-	13, // 44: gateway_protocol.Gateway.CompleteJob:input_type -> gateway_protocol.CompleteJobRequest
-	19, // 45: gateway_protocol.Gateway.CreateProcessInstance:input_type -> gateway_protocol.CreateProcessInstanceRequest
-	24, // 46: gateway_protocol.Gateway.CreateProcessInstanceWithResult:input_type -> gateway_protocol.CreateProcessInstanceWithResultRequest
-	26, // 47: gateway_protocol.Gateway.EvaluateDecision:input_type -> gateway_protocol.EvaluateDecisionRequest
-	32, // 48: gateway_protocol.Gateway.DeployProcess:input_type -> gateway_protocol.DeployProcessRequest
-	35, // 49: gateway_protocol.Gateway.DeployResource:input_type -> gateway_protocol.DeployResourceRequest
-	43, // 50: gateway_protocol.Gateway.FailJob:input_type -> gateway_protocol.FailJobRequest
-	45, // 51: gateway_protocol.Gateway.ThrowError:input_type -> gateway_protocol.ThrowErrorRequest
-	47, // 52: gateway_protocol.Gateway.PublishMessage:input_type -> gateway_protocol.PublishMessageRequest
-	49, // 53: gateway_protocol.Gateway.ResolveIncident:input_type -> gateway_protocol.ResolveIncidentRequest
-	61, // 54: gateway_protocol.Gateway.SetVariables:input_type -> gateway_protocol.SetVariablesRequest
-	51, // 55: gateway_protocol.Gateway.Topology:input_type -> gateway_protocol.TopologyRequest
-	55, // 56: gateway_protocol.Gateway.UpdateJobRetries:input_type -> gateway_protocol.UpdateJobRetriesRequest
-	63, // 57: gateway_protocol.Gateway.ModifyProcessInstance:input_type -> gateway_protocol.ModifyProcessInstanceRequest
-	65, // 58: gateway_protocol.Gateway.MigrateProcessInstance:input_type -> gateway_protocol.MigrateProcessInstanceRequest
-	67, // 59: gateway_protocol.Gateway.AssignProcessInstanceBusinessId:input_type -> gateway_protocol.AssignProcessInstanceBusinessIdRequest
-	57, // 60: gateway_protocol.Gateway.UpdateJobTimeout:input_type -> gateway_protocol.UpdateJobTimeoutRequest
-	59, // 61: gateway_protocol.Gateway.UpdateJobPriority:input_type -> gateway_protocol.UpdateJobPriorityRequest
-	69, // 62: gateway_protocol.Gateway.DeleteResource:input_type -> gateway_protocol.DeleteResourceRequest
-	72, // 63: gateway_protocol.Gateway.BroadcastSignal:input_type -> gateway_protocol.BroadcastSignalRequest
-	74, // 64: gateway_protocol.Gateway.EvaluateConditional:input_type -> gateway_protocol.EvaluateConditionalRequest
-	8,  // 65: gateway_protocol.Gateway.ActivateJobs:output_type -> gateway_protocol.ActivateJobsResponse
-	9,  // 66: gateway_protocol.Gateway.StreamActivatedJobs:output_type -> gateway_protocol.ActivatedJob
-	12, // 67: gateway_protocol.Gateway.CancelProcessInstance:output_type -> gateway_protocol.CancelProcessInstanceResponse
-	18, // 68: gateway_protocol.Gateway.CompleteJob:output_type -> gateway_protocol.CompleteJobResponse
-	23, // 69: gateway_protocol.Gateway.CreateProcessInstance:output_type -> gateway_protocol.CreateProcessInstanceResponse
-	25, // 70: gateway_protocol.Gateway.CreateProcessInstanceWithResult:output_type -> gateway_protocol.CreateProcessInstanceWithResultResponse
-	27, // 71: gateway_protocol.Gateway.EvaluateDecision:output_type -> gateway_protocol.EvaluateDecisionResponse
-	34, // 72: gateway_protocol.Gateway.DeployProcess:output_type -> gateway_protocol.DeployProcessResponse
-	37, // 73: gateway_protocol.Gateway.DeployResource:output_type -> gateway_protocol.DeployResourceResponse
-	44, // 74: gateway_protocol.Gateway.FailJob:output_type -> gateway_protocol.FailJobResponse
-	46, // 75: gateway_protocol.Gateway.ThrowError:output_type -> gateway_protocol.ThrowErrorResponse
-	48, // 76: gateway_protocol.Gateway.PublishMessage:output_type -> gateway_protocol.PublishMessageResponse
-	50, // 77: gateway_protocol.Gateway.ResolveIncident:output_type -> gateway_protocol.ResolveIncidentResponse
-	62, // 78: gateway_protocol.Gateway.SetVariables:output_type -> gateway_protocol.SetVariablesResponse
-	52, // 79: gateway_protocol.Gateway.Topology:output_type -> gateway_protocol.TopologyResponse
-	56, // 80: gateway_protocol.Gateway.UpdateJobRetries:output_type -> gateway_protocol.UpdateJobRetriesResponse
-	64, // 81: gateway_protocol.Gateway.ModifyProcessInstance:output_type -> gateway_protocol.ModifyProcessInstanceResponse
-	66, // 82: gateway_protocol.Gateway.MigrateProcessInstance:output_type -> gateway_protocol.MigrateProcessInstanceResponse
-	68, // 83: gateway_protocol.Gateway.AssignProcessInstanceBusinessId:output_type -> gateway_protocol.AssignProcessInstanceBusinessIdResponse
-	58, // 84: gateway_protocol.Gateway.UpdateJobTimeout:output_type -> gateway_protocol.UpdateJobTimeoutResponse
-	60, // 85: gateway_protocol.Gateway.UpdateJobPriority:output_type -> gateway_protocol.UpdateJobPriorityResponse
-	70, // 86: gateway_protocol.Gateway.DeleteResource:output_type -> gateway_protocol.DeleteResourceResponse
-	73, // 87: gateway_protocol.Gateway.BroadcastSignal:output_type -> gateway_protocol.BroadcastSignalResponse
-	76, // 88: gateway_protocol.Gateway.EvaluateConditional:output_type -> gateway_protocol.EvaluateConditionalResponse
-	65, // [65:89] is the sub-list for method output_type
-	41, // [41:65] is the sub-list for method input_type
-	41, // [41:41] is the sub-list for extension type_name
-	41, // [41:41] is the sub-list for extension extendee
-	0,  // [0:41] is the sub-list for field type_name
+	15, // 6: gateway_protocol.CompleteJobRequest.result:type_name -> gateway_protocol.JobResult
+	16, // 7: gateway_protocol.JobResult.corrections:type_name -> gateway_protocol.JobResultCorrections
+	17, // 8: gateway_protocol.JobResult.activateElements:type_name -> gateway_protocol.JobResultActivateElement
+	18, // 9: gateway_protocol.JobResultCorrections.candidateUsers:type_name -> gateway_protocol.StringList
+	18, // 10: gateway_protocol.JobResultCorrections.candidateGroups:type_name -> gateway_protocol.StringList
+	22, // 11: gateway_protocol.CreateProcessInstanceRequest.startInstructions:type_name -> gateway_protocol.ProcessInstanceCreationStartInstruction
+	23, // 12: gateway_protocol.CreateProcessInstanceRequest.runtimeInstructions:type_name -> gateway_protocol.ProcessInstanceCreationRuntimeInstruction
+	79, // 13: gateway_protocol.CreateProcessInstanceRequest.variablesMetadata:type_name -> gateway_protocol.CreateProcessInstanceRequest.VariablesMetadataEntry
+	3,  // 14: gateway_protocol.VariableMetadata.protectionModes:type_name -> gateway_protocol.VariableMetadata.ProtectionMode
+	24, // 15: gateway_protocol.ProcessInstanceCreationRuntimeInstruction.terminate:type_name -> gateway_protocol.TerminateProcessInstanceInstruction
+	20, // 16: gateway_protocol.CreateProcessInstanceWithResultRequest.request:type_name -> gateway_protocol.CreateProcessInstanceRequest
+	30, // 17: gateway_protocol.EvaluateDecisionResponse.evaluatedDecisions:type_name -> gateway_protocol.EvaluatedDecision
+	33, // 18: gateway_protocol.EvaluatedDecision.matchedRules:type_name -> gateway_protocol.MatchedDecisionRule
+	31, // 19: gateway_protocol.EvaluatedDecision.evaluatedInputs:type_name -> gateway_protocol.EvaluatedDecisionInput
+	32, // 20: gateway_protocol.MatchedDecisionRule.evaluatedOutputs:type_name -> gateway_protocol.EvaluatedDecisionOutput
+	35, // 21: gateway_protocol.DeployProcessRequest.processes:type_name -> gateway_protocol.ProcessRequestObject
+	41, // 22: gateway_protocol.DeployProcessResponse.processes:type_name -> gateway_protocol.ProcessMetadata
+	38, // 23: gateway_protocol.DeployResourceRequest.resources:type_name -> gateway_protocol.Resource
+	40, // 24: gateway_protocol.DeployResourceResponse.deployments:type_name -> gateway_protocol.Deployment
+	41, // 25: gateway_protocol.Deployment.process:type_name -> gateway_protocol.ProcessMetadata
+	42, // 26: gateway_protocol.Deployment.decision:type_name -> gateway_protocol.DecisionMetadata
+	43, // 27: gateway_protocol.Deployment.decisionRequirements:type_name -> gateway_protocol.DecisionRequirementsMetadata
+	44, // 28: gateway_protocol.Deployment.form:type_name -> gateway_protocol.FormMetadata
+	55, // 29: gateway_protocol.TopologyResponse.brokers:type_name -> gateway_protocol.BrokerInfo
+	56, // 30: gateway_protocol.BrokerInfo.partitions:type_name -> gateway_protocol.Partition
+	4,  // 31: gateway_protocol.Partition.role:type_name -> gateway_protocol.Partition.PartitionBrokerRole
+	5,  // 32: gateway_protocol.Partition.health:type_name -> gateway_protocol.Partition.PartitionBrokerHealth
+	80, // 33: gateway_protocol.SetVariablesRequest.variablesMetadata:type_name -> gateway_protocol.SetVariablesRequest.VariablesMetadataEntry
+	81, // 34: gateway_protocol.ModifyProcessInstanceRequest.activateInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.ActivateInstruction
+	83, // 35: gateway_protocol.ModifyProcessInstanceRequest.terminateInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.TerminateInstruction
+	84, // 36: gateway_protocol.ModifyProcessInstanceRequest.moveInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.MoveInstruction
+	85, // 37: gateway_protocol.MigrateProcessInstanceRequest.migrationPlan:type_name -> gateway_protocol.MigrateProcessInstanceRequest.MigrationPlan
+	73, // 38: gateway_protocol.DeleteResourceResponse.batchOperation:type_name -> gateway_protocol.BatchOperationCreatedResult
+	6,  // 39: gateway_protocol.BatchOperationCreatedResult.batchOperationType:type_name -> gateway_protocol.BatchOperationCreatedResult.BatchOperationTypeEnum
+	77, // 40: gateway_protocol.EvaluateConditionalResponse.processInstances:type_name -> gateway_protocol.ProcessInstanceReference
+	21, // 41: gateway_protocol.CreateProcessInstanceRequest.VariablesMetadataEntry.value:type_name -> gateway_protocol.VariableMetadata
+	21, // 42: gateway_protocol.SetVariablesRequest.VariablesMetadataEntry.value:type_name -> gateway_protocol.VariableMetadata
+	82, // 43: gateway_protocol.ModifyProcessInstanceRequest.ActivateInstruction.variableInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.VariableInstruction
+	82, // 44: gateway_protocol.ModifyProcessInstanceRequest.MoveInstruction.variableInstructions:type_name -> gateway_protocol.ModifyProcessInstanceRequest.VariableInstruction
+	86, // 45: gateway_protocol.MigrateProcessInstanceRequest.MigrationPlan.mappingInstructions:type_name -> gateway_protocol.MigrateProcessInstanceRequest.MappingInstruction
+	8,  // 46: gateway_protocol.Gateway.ActivateJobs:input_type -> gateway_protocol.ActivateJobsRequest
+	7,  // 47: gateway_protocol.Gateway.StreamActivatedJobs:input_type -> gateway_protocol.StreamActivatedJobsRequest
+	12, // 48: gateway_protocol.Gateway.CancelProcessInstance:input_type -> gateway_protocol.CancelProcessInstanceRequest
+	14, // 49: gateway_protocol.Gateway.CompleteJob:input_type -> gateway_protocol.CompleteJobRequest
+	20, // 50: gateway_protocol.Gateway.CreateProcessInstance:input_type -> gateway_protocol.CreateProcessInstanceRequest
+	26, // 51: gateway_protocol.Gateway.CreateProcessInstanceWithResult:input_type -> gateway_protocol.CreateProcessInstanceWithResultRequest
+	28, // 52: gateway_protocol.Gateway.EvaluateDecision:input_type -> gateway_protocol.EvaluateDecisionRequest
+	34, // 53: gateway_protocol.Gateway.DeployProcess:input_type -> gateway_protocol.DeployProcessRequest
+	37, // 54: gateway_protocol.Gateway.DeployResource:input_type -> gateway_protocol.DeployResourceRequest
+	45, // 55: gateway_protocol.Gateway.FailJob:input_type -> gateway_protocol.FailJobRequest
+	47, // 56: gateway_protocol.Gateway.ThrowError:input_type -> gateway_protocol.ThrowErrorRequest
+	49, // 57: gateway_protocol.Gateway.PublishMessage:input_type -> gateway_protocol.PublishMessageRequest
+	51, // 58: gateway_protocol.Gateway.ResolveIncident:input_type -> gateway_protocol.ResolveIncidentRequest
+	63, // 59: gateway_protocol.Gateway.SetVariables:input_type -> gateway_protocol.SetVariablesRequest
+	53, // 60: gateway_protocol.Gateway.Topology:input_type -> gateway_protocol.TopologyRequest
+	57, // 61: gateway_protocol.Gateway.UpdateJobRetries:input_type -> gateway_protocol.UpdateJobRetriesRequest
+	65, // 62: gateway_protocol.Gateway.ModifyProcessInstance:input_type -> gateway_protocol.ModifyProcessInstanceRequest
+	67, // 63: gateway_protocol.Gateway.MigrateProcessInstance:input_type -> gateway_protocol.MigrateProcessInstanceRequest
+	69, // 64: gateway_protocol.Gateway.AssignProcessInstanceBusinessId:input_type -> gateway_protocol.AssignProcessInstanceBusinessIdRequest
+	59, // 65: gateway_protocol.Gateway.UpdateJobTimeout:input_type -> gateway_protocol.UpdateJobTimeoutRequest
+	61, // 66: gateway_protocol.Gateway.UpdateJobPriority:input_type -> gateway_protocol.UpdateJobPriorityRequest
+	71, // 67: gateway_protocol.Gateway.DeleteResource:input_type -> gateway_protocol.DeleteResourceRequest
+	74, // 68: gateway_protocol.Gateway.BroadcastSignal:input_type -> gateway_protocol.BroadcastSignalRequest
+	76, // 69: gateway_protocol.Gateway.EvaluateConditional:input_type -> gateway_protocol.EvaluateConditionalRequest
+	9,  // 70: gateway_protocol.Gateway.ActivateJobs:output_type -> gateway_protocol.ActivateJobsResponse
+	10, // 71: gateway_protocol.Gateway.StreamActivatedJobs:output_type -> gateway_protocol.ActivatedJob
+	13, // 72: gateway_protocol.Gateway.CancelProcessInstance:output_type -> gateway_protocol.CancelProcessInstanceResponse
+	19, // 73: gateway_protocol.Gateway.CompleteJob:output_type -> gateway_protocol.CompleteJobResponse
+	25, // 74: gateway_protocol.Gateway.CreateProcessInstance:output_type -> gateway_protocol.CreateProcessInstanceResponse
+	27, // 75: gateway_protocol.Gateway.CreateProcessInstanceWithResult:output_type -> gateway_protocol.CreateProcessInstanceWithResultResponse
+	29, // 76: gateway_protocol.Gateway.EvaluateDecision:output_type -> gateway_protocol.EvaluateDecisionResponse
+	36, // 77: gateway_protocol.Gateway.DeployProcess:output_type -> gateway_protocol.DeployProcessResponse
+	39, // 78: gateway_protocol.Gateway.DeployResource:output_type -> gateway_protocol.DeployResourceResponse
+	46, // 79: gateway_protocol.Gateway.FailJob:output_type -> gateway_protocol.FailJobResponse
+	48, // 80: gateway_protocol.Gateway.ThrowError:output_type -> gateway_protocol.ThrowErrorResponse
+	50, // 81: gateway_protocol.Gateway.PublishMessage:output_type -> gateway_protocol.PublishMessageResponse
+	52, // 82: gateway_protocol.Gateway.ResolveIncident:output_type -> gateway_protocol.ResolveIncidentResponse
+	64, // 83: gateway_protocol.Gateway.SetVariables:output_type -> gateway_protocol.SetVariablesResponse
+	54, // 84: gateway_protocol.Gateway.Topology:output_type -> gateway_protocol.TopologyResponse
+	58, // 85: gateway_protocol.Gateway.UpdateJobRetries:output_type -> gateway_protocol.UpdateJobRetriesResponse
+	66, // 86: gateway_protocol.Gateway.ModifyProcessInstance:output_type -> gateway_protocol.ModifyProcessInstanceResponse
+	68, // 87: gateway_protocol.Gateway.MigrateProcessInstance:output_type -> gateway_protocol.MigrateProcessInstanceResponse
+	70, // 88: gateway_protocol.Gateway.AssignProcessInstanceBusinessId:output_type -> gateway_protocol.AssignProcessInstanceBusinessIdResponse
+	60, // 89: gateway_protocol.Gateway.UpdateJobTimeout:output_type -> gateway_protocol.UpdateJobTimeoutResponse
+	62, // 90: gateway_protocol.Gateway.UpdateJobPriority:output_type -> gateway_protocol.UpdateJobPriorityResponse
+	72, // 91: gateway_protocol.Gateway.DeleteResource:output_type -> gateway_protocol.DeleteResourceResponse
+	75, // 92: gateway_protocol.Gateway.BroadcastSignal:output_type -> gateway_protocol.BroadcastSignalResponse
+	78, // 93: gateway_protocol.Gateway.EvaluateConditional:output_type -> gateway_protocol.EvaluateConditionalResponse
+	70, // [70:94] is the sub-list for method output_type
+	46, // [46:70] is the sub-list for method input_type
+	46, // [46:46] is the sub-list for extension type_name
+	46, // [46:46] is the sub-list for extension extendee
+	0,  // [0:46] is the sub-list for field type_name
 }
 
 func init() { file_gateway_proto_init() }
@@ -6664,36 +6815,36 @@ func file_gateway_proto_init() {
 	file_gateway_proto_msgTypes[8].OneofWrappers = []any{}
 	file_gateway_proto_msgTypes[9].OneofWrappers = []any{}
 	file_gateway_proto_msgTypes[13].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[15].OneofWrappers = []any{
+	file_gateway_proto_msgTypes[16].OneofWrappers = []any{
 		(*ProcessInstanceCreationRuntimeInstruction_Terminate)(nil),
 	}
-	file_gateway_proto_msgTypes[17].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[19].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[32].OneofWrappers = []any{
+	file_gateway_proto_msgTypes[18].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[20].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[33].OneofWrappers = []any{
 		(*Deployment_Process)(nil),
 		(*Deployment_Decision)(nil),
 		(*Deployment_DecisionRequirements)(nil),
 		(*Deployment_Form)(nil),
 	}
-	file_gateway_proto_msgTypes[37].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[39].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[41].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[43].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[49].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[51].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[53].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[55].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[57].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[59].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[63].OneofWrappers = []any{}
-	file_gateway_proto_msgTypes[68].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[38].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[40].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[42].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[44].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[50].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[52].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[54].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[56].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[58].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[60].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[64].OneofWrappers = []any{}
+	file_gateway_proto_msgTypes[69].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gateway_proto_rawDesc), len(file_gateway_proto_rawDesc)),
-			NumEnums:      6,
-			NumMessages:   77,
+			NumEnums:      7,
+			NumMessages:   80,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

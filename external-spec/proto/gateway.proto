@@ -290,7 +290,8 @@ message CreateProcessInstanceRequest {
   int64 processDefinitionKey = 1;
   // the BPMN process ID of the process definition
   string bpmnProcessId = 2;
-  // the version of the process; set to -1 to use the latest version
+  // the version of the process; set to -1 to use the latest version. When versionTag is set,
+  // 0 is treated as unset.
   int32 version = 3;
   // JSON document that will instantiate the variables for the root variable scope of the
   // process instance; it must be a JSON object, as variables will be mapped in a
@@ -323,6 +324,28 @@ message CreateProcessInstanceRequest {
   // with the same business id is already active for the same process definition.
   // Note that any active child process instances with the same business id are not taken into account.
   optional string businessId = 10;
+
+  // creates an instance of the latest deployed version of the process (identified by bpmnProcessId)
+  // that carries this version tag. Cannot be combined with version or processDefinitionKey.
+  // Requires 8.11 or later; not supported by older gateways or brokers.
+  optional string versionTag = 11;
+
+  // metadata of the variables, keyed by variable name. Use it to set how a variable is treated,
+  // for example to protect its value. A variable without an entry has no metadata.
+  // Requires 8.11 or later; not supported by older gateways or brokers.
+  map<string, VariableMetadata> variablesMetadata = 12;
+}
+
+// Describes how a variable is treated.
+message VariableMetadata {
+  // The kind of protection applied to a variable value.
+  enum ProtectionMode {
+    // irrecoverably replaces the value before it reaches secondary storage
+    REDACT = 0;
+  }
+
+  // the protections applied to the variable
+  repeated ProtectionMode protectionModes = 1;
 }
 
 message ProcessInstanceCreationStartInstruction {
@@ -872,6 +895,10 @@ message SetVariablesRequest {
   bool local = 3;
   // a reference key chosen by the user and will be part of all records resulted from this operation
   optional uint64 operationReference = 4;
+  // metadata of the variables, keyed by variable name. Use it to set how a variable is treated,
+  // for example to protect its value. A variable without an entry has no metadata.
+  // Requires 8.11 or later; not supported by older gateways or brokers.
+  map<string, VariableMetadata> variablesMetadata = 5;
 }
 
 message SetVariablesResponse {
