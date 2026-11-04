@@ -70,7 +70,7 @@ func (c *CamundaClient) withDefaultTenantConditionalEvaluation(body ConditionalE
 func (c *CamundaClient) withDefaultTenantExpressionEvaluation(body ExpressionEvaluationRequest) ExpressionEvaluationRequest {
 	if body.TenantId == nil {
 		if d := c.defaultTenant(); d != "" {
-			body.SetTenantId(d)
+			body.SetTenantId(camundaapi.MustTenantId(d))
 		}
 	}
 	return body
