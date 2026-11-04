@@ -922,6 +922,9 @@ type ApiGetUserTaskRequest = camundaapi.ApiGetUserTaskRequest
 // Fields and methods are documented on [camundaapi.ApiGetUserTaskFormRequest].
 type ApiGetUserTaskFormRequest = camundaapi.ApiGetUserTaskFormRequest
 
+// Fields and methods are documented on [camundaapi.ApiLookupUserTaskRequest].
+type ApiLookupUserTaskRequest = camundaapi.ApiLookupUserTaskRequest
+
 // Fields and methods are documented on [camundaapi.ApiSearchUserTaskAuditLogsRequest].
 type ApiSearchUserTaskAuditLogsRequest = camundaapi.ApiSearchUserTaskAuditLogsRequest
 
@@ -17892,6 +17895,94 @@ type NullableUserTaskFilterFields = camundaapi.NullableUserTaskFilterFields
 
 func NewNullableUserTaskFilterFields(val *UserTaskFilterFields) *NullableUserTaskFilterFields {
 	return camundaapi.NewNullableUserTaskFilterFields(val)
+}
+
+// UserTaskLookupRequest struct for UserTaskLookupRequest
+//
+// Fields and methods are documented on [camundaapi.UserTaskLookupRequest].
+type UserTaskLookupRequest = camundaapi.UserTaskLookupRequest
+
+// NewUserTaskLookupRequest instantiates a new UserTaskLookupRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewUserTaskLookupRequest() *UserTaskLookupRequest {
+	return camundaapi.NewUserTaskLookupRequest()
+}
+
+// NewUserTaskLookupRequestWithDefaults instantiates a new UserTaskLookupRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewUserTaskLookupRequestWithDefaults() *UserTaskLookupRequest {
+	return camundaapi.NewUserTaskLookupRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableUserTaskLookupRequest].
+type NullableUserTaskLookupRequest = camundaapi.NullableUserTaskLookupRequest
+
+func NewNullableUserTaskLookupRequest(val *UserTaskLookupRequest) *NullableUserTaskLookupRequest {
+	return camundaapi.NewNullableUserTaskLookupRequest(val)
+}
+
+// UserTaskLookupResult struct for UserTaskLookupResult
+//
+// Fields and methods are documented on [camundaapi.UserTaskLookupResult].
+type UserTaskLookupResult = camundaapi.UserTaskLookupResult
+
+// NewUserTaskLookupResult instantiates a new UserTaskLookupResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewUserTaskLookupResult(userTaskKey UserTaskKey, state UserTaskLookupStateEnum, elementId ElementId, elementInstanceKey ElementInstanceKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processDefinitionVersion int32, tenantId TenantId, assignee NullableString, candidateGroups []string, candidateUsers []string, dueDate NullableTime, followUpDate NullableTime, formKey NullableFormKey, externalFormReference NullableString, customHeaders map[string]string, priority int32, tags []Tag, businessId NullableBusinessId, creationDate time.Time, variables map[string]interface{}) *UserTaskLookupResult {
+	return camundaapi.NewUserTaskLookupResult(userTaskKey, state, elementId, elementInstanceKey, processInstanceKey, rootProcessInstanceKey, processDefinitionId, processDefinitionKey, processDefinitionVersion, tenantId, assignee, candidateGroups, candidateUsers, dueDate, followUpDate, formKey, externalFormReference, customHeaders, priority, tags, businessId, creationDate, variables)
+}
+
+// NewUserTaskLookupResultWithDefaults instantiates a new UserTaskLookupResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewUserTaskLookupResultWithDefaults() *UserTaskLookupResult {
+	return camundaapi.NewUserTaskLookupResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableUserTaskLookupResult].
+type NullableUserTaskLookupResult = camundaapi.NullableUserTaskLookupResult
+
+func NewNullableUserTaskLookupResult(val *UserTaskLookupResult) *NullableUserTaskLookupResult {
+	return camundaapi.NewNullableUserTaskLookupResult(val)
+}
+
+// UserTaskLookupStateEnum The lifecycle state of an active user task. A state ending in `-ING` means a change to the task is in progress, for example waiting for task listeners; the task fields still hold the values from before the change.
+//
+// Fields and methods are documented on [camundaapi.UserTaskLookupStateEnum].
+type UserTaskLookupStateEnum = camundaapi.UserTaskLookupStateEnum
+
+// List of UserTaskLookupStateEnum
+const (
+	USERTASKLOOKUPSTATEENUM_CREATING   UserTaskLookupStateEnum = "CREATING"
+	USERTASKLOOKUPSTATEENUM_CREATED    UserTaskLookupStateEnum = "CREATED"
+	USERTASKLOOKUPSTATEENUM_ASSIGNING  UserTaskLookupStateEnum = "ASSIGNING"
+	USERTASKLOOKUPSTATEENUM_CLAIMING   UserTaskLookupStateEnum = "CLAIMING"
+	USERTASKLOOKUPSTATEENUM_UPDATING   UserTaskLookupStateEnum = "UPDATING"
+	USERTASKLOOKUPSTATEENUM_COMPLETING UserTaskLookupStateEnum = "COMPLETING"
+	USERTASKLOOKUPSTATEENUM_CANCELING  UserTaskLookupStateEnum = "CANCELING"
+)
+
+// All allowed values of UserTaskLookupStateEnum enum
+var (
+	AllowedUserTaskLookupStateEnumEnumValues = camundaapi.AllowedUserTaskLookupStateEnumEnumValues
+)
+
+// NewUserTaskLookupStateEnumFromValue returns a pointer to a valid UserTaskLookupStateEnum
+// for the value passed as argument, or an error if the value passed is not allowed by the enum
+func NewUserTaskLookupStateEnumFromValue(v string) (*UserTaskLookupStateEnum, error) {
+	return camundaapi.NewUserTaskLookupStateEnumFromValue(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableUserTaskLookupStateEnum].
+type NullableUserTaskLookupStateEnum = camundaapi.NullableUserTaskLookupStateEnum
+
+func NewNullableUserTaskLookupStateEnum(val *UserTaskLookupStateEnum) *NullableUserTaskLookupStateEnum {
+	return camundaapi.NewNullableUserTaskLookupStateEnum(val)
 }
 
 // UserTaskProperties Contains properties of a user task.

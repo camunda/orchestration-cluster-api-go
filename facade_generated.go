@@ -4557,6 +4557,29 @@ func (c *CamundaClient) GetUserTaskForm(ctx context.Context, userTaskKey UserTas
 	return value, c.wrapError(resp, err)
 }
 
+// LookupUserTask calls the LookupUserTask operation.
+//
+// Example:
+//
+//	body := camunda.NewUserTaskLookupRequest()
+//	body.SetFetchVariables([]string{"recommendation", "applicant"})
+//	result, err := client.LookupUserTask(ctx,
+//		camunda.MustUserTaskKey("2251799813685380"),
+//		*body)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("state: %s, assignee: %s\n", result.GetState(), result.GetAssignee())
+func (c *CamundaClient) LookupUserTask(ctx context.Context, userTaskKey UserTaskKey, body UserTaskLookupRequest, opts ...func(ApiLookupUserTaskRequest) ApiLookupUserTaskRequest) (*UserTaskLookupResult, error) {
+	req := c.raw.UserTaskAPI.LookupUserTask(ctx, userTaskKey)
+	req = req.UserTaskLookupRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // SearchUserTaskAuditLogs calls the SearchUserTaskAuditLogs operation.
 //
 // Example:
