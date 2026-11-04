@@ -1455,6 +1455,13 @@
       "label": "Search user task effective variables"
     }
   ],
+  "lookupUserTask": [
+    {
+      "file": "user_task.go",
+      "region": "LookupUserTask",
+      "label": "Look up an active user task"
+    }
+  ],
   "getUserTaskForm": [
     {
       "file": "user_task.go",
