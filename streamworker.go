@@ -71,8 +71,9 @@ func (c *CamundaClient) grpcConn() (*grpc.ClientConn, error) {
 }
 
 // StreamJobWorker activates jobs over the Zeebe gRPC StreamActivatedJobs stream
-// and completes, fails, or throws BPMN errors over gRPC. Unlike the REST
-// JobWorker it does not poll: the engine pushes jobs as they become available.
+// and completes (with any job result, see CompletionHandler), fails, or throws
+// BPMN errors over gRPC. Unlike the REST JobWorker it does not poll: the engine
+// pushes jobs as they become available.
 type StreamJobWorker struct {
 	client           *CamundaClient
 	jobType          string
@@ -378,6 +379,10 @@ func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *
 	ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 	defer cancel()
 
+	var result *pb.JobResult
+	if err == nil {
+		result, err = grpcJobResult(job.result)
+	}
 	if err != nil {
 		var bpmn *BpmnError
 		if errors.As(err, &bpmn) {
@@ -387,10 +392,10 @@ func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *
 		}
 		return
 	}
-	w.completeJob(ackCtx, gw, job, vars)
+	w.completeJob(ackCtx, gw, job, vars, result)
 }
 
-func (w *StreamJobWorker) completeJob(ctx context.Context, gw pb.GatewayClient, job *Job, vars map[string]any) {
+func (w *StreamJobWorker) completeJob(ctx context.Context, gw pb.GatewayClient, job *Job, vars map[string]any, result *pb.JobResult) {
 	key, err := strconv.ParseInt(job.key, 10, 64)
 	if err != nil {
 		w.client.logger.Error("complete job failed: invalid key", "job", job.key, "error", err)
@@ -402,6 +407,7 @@ func (w *StreamJobWorker) completeJob(ctx context.Context, gw pb.GatewayClient, 
 			req.Variables = string(b)
 		}
 	}
+	req.Result = result
 	if job.leaseToken != "" {
 		req.JobLeaseToken = &job.leaseToken
 	}

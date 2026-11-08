@@ -165,7 +165,37 @@ func document(dir, importPath, include, exclude string) (*Package, error) {
 		pkg.Types = append(pkg.Types, r.typeItem(dt))
 	}
 	sort.Slice(pkg.Types, func(i, j int) bool { return pkg.Types[i].Name < pkg.Types[j].Name })
+	pkg.Funcs = append(pkg.Funcs, r.funcs(orphanFuncs(files, dpkg))...)
+	sort.Slice(pkg.Funcs, func(i, j int) bool { return pkg.Funcs[i].Name < pkg.Funcs[j].Name })
 	return pkg, nil
+}
+
+// orphanFuncs returns the exported package-level functions go/doc dropped.
+// go/doc files a function under the type it returns and discards that type's
+// functions when the type has no declaration among the parsed files, so a
+// constructor returning a type declared in an -exclude'd file (a re-exported
+// client type) would otherwise vanish from the reference.
+func orphanFuncs(files []*ast.File, dpkg *doc.Package) []*doc.Func {
+	seen := map[string]bool{}
+	for _, f := range dpkg.Funcs {
+		seen[f.Name] = true
+	}
+	for _, t := range dpkg.Types {
+		for _, f := range t.Funcs {
+			seen[f.Name] = true
+		}
+	}
+	var out []*doc.Func
+	for _, file := range files {
+		for _, decl := range file.Decls {
+			fn, ok := decl.(*ast.FuncDecl)
+			if !ok || fn.Recv != nil || !fn.Name.IsExported() || seen[fn.Name.Name] {
+				continue
+			}
+			out = append(out, &doc.Func{Name: fn.Name.Name, Doc: fn.Doc.Text(), Decl: fn})
+		}
+	}
+	return out
 }
 
 // parseDir reads dir and parses its non-test Go files. It deliberately avoids

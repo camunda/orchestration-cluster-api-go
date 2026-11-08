@@ -292,6 +292,86 @@ engine) and need an engine that supports them: rather than degrade to unfenced
 commands, a worker that asked for a lease and is handed a job without a token
 rejects the activation with `camunda.ErrLeaseNotHonored`.
 
+### Job Corrections (User Task Listeners)
+
+When a job worker handles a [user task listener](https://docs.camunda.io/docs/components/concepts/user-task-listeners/),
+it can correct task properties (assignee, due date, candidate groups, etc.) by
+completing the job with a job result. Write the handler as a
+`camunda.JobCompletionHandler`, which returns a `camunda.JobCompletion`, and adapt
+it with `camunda.CompletionHandler`:
+
+<!-- snippet-source: examples/readme.go | regions: JobCorrections -->
+```go
+// A CompletionHandler returns a JobCompletion, which can carry a job result
+// alongside the variables. Adapt it for NewJobWorker or NewStreamJobWorker.
+worker := client.NewJobWorker("io.camunda:userTaskListener",
+	camunda.CompletionHandler(func(ctx context.Context, job *camunda.Job) (camunda.JobCompletion, error) {
+		corrections := camunda.NewJobResultCorrections()
+		corrections.SetAssignee("corrected-user")
+		corrections.SetPriority(80)
+		return camunda.JobCompletion{Result: camunda.CorrectUserTask(*corrections)}, nil
+	}),
+	camunda.WithMaxConcurrentJobs(5),
+)
+```
+
+To deny a task completion (reject the work):
+
+<!-- snippet-source: examples/readme.go | regions: JobCorrectionsDenial -->
+```go
+return camunda.JobCompletion{
+	Result: camunda.DenyUserTask("Insufficient documentation"),
+}, nil
+```
+
+| Correctable attribute | Setter on `JobResultCorrections` | Clear value |
+|---|---|---|
+| `assignee` | `SetAssignee(string)` | Empty string `""` |
+| `dueDate` | `SetDueDate(time.Time)` | — |
+| `followUpDate` | `SetFollowUpDate(time.Time)` | — |
+| `candidateUsers` | `SetCandidateUsers([]string)` | Empty slice `[]string{}` |
+| `candidateGroups` | `SetCandidateGroups([]string)` | Empty slice `[]string{}` |
+| `priority` | `SetPriority(int32)` (0–100) | — |
+
+Leaving an attribute unset (or setting it to `nil` with its `Set…Nil` method)
+preserves the persisted value. The API clears `dueDate` and `followUpDate` with an
+empty string, which the `time.Time` setters cannot express.
+
+### Ad-hoc sub-process results
+
+The job of an [ad-hoc sub-process](https://docs.camunda.io/docs/components/modeler/bpmn/ad-hoc-subprocesses/)
+completes with a result that names the inner elements to activate next and
+whether the sub-process is done:
+
+<!-- snippet-source: examples/readme.go | regions: AdHocSubProcessResult -->
+```go
+// The job of an ad-hoc sub-process decides which inner elements to activate
+// next, and whether the sub-process is done.
+worker := client.NewJobWorker("plan-next-steps",
+	camunda.CompletionHandler(func(ctx context.Context, job *camunda.Job) (camunda.JobCompletion, error) {
+		result := camunda.NewJobResultAdHocSubProcess()
+		result.SetActivateElements([]camunda.JobResultActivateElement{
+			camunda.ActivateAdHocElement("review_document", map[string]any{"reviewer": "alice"}),
+			camunda.ActivateAdHocElement("notify_customer", nil),
+		})
+		result.SetIsCompletionConditionFulfilled(false)
+		result.SetIsCancelRemainingInstances(false)
+		return camunda.JobCompletion{
+			Variables: map[string]any{"planned": true},
+			Result:    camunda.AdHocSubProcessJobResult(*result),
+		}, nil
+	}),
+)
+```
+
+The worker sets the result's `type` discriminator (`userTask` or
+`adHocSubProcess`) from the variant you populate, so a result built directly from
+the generated `JobResult` union is sent correctly too. A result with no variant —
+or both — fails the job rather than completing it without the result. Job results
+work with both workers: the gRPC streaming worker sends them on `CompleteJob`, and
+the REST worker on `POST /jobs/{jobKey}/completion` (also when it receives jobs over
+the FALCON command stream, whose completion frame cannot carry a result).
+
 ## Deploying and starting processes
 
 The facade exposes request bodies as first-class parameters; the `Raw()` escape

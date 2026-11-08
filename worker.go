@@ -208,8 +208,23 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 
 // handleFalcon runs the handler and acknowledges the job over the command stream.
 // Each ack (complete/fail/throw) replenishes one delivery credit.
+//
+// The command stream's completeJob frame cannot carry a job result, so a
+// completion with one is sent over REST instead (the gateway is a superset of the
+// REST API) and the credit is replenished separately.
 func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, job *Job) {
 	vars, err := w.handler(ctx, job)
+	var result *JobResult
+	if err == nil {
+		result, err = wireJobResult(job.result)
+	}
+	if err == nil && result != nil {
+		ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+		defer cancel()
+		w.client.restCompleteJob(ackCtx, job, vars, result)
+		sw.Replenish(1)
+		return
+	}
 	if err != nil {
 		var bpmn *BpmnError
 		if errors.As(err, &bpmn) {
@@ -330,6 +345,10 @@ func (w *JobWorker) handle(ctx context.Context, job *Job) {
 // on the handler outcome. It is used by the REST JobWorker and by the gRPC stream
 // worker's REST sidecar poll (poll-activated jobs are acknowledged over REST).
 func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]any, handlerErr error) {
+	var result *JobResult
+	if handlerErr == nil {
+		result, handlerErr = wireJobResult(job.result)
+	}
 	if handlerErr != nil {
 		var bpmn *BpmnError
 		if errors.As(handlerErr, &bpmn) {
@@ -339,13 +358,18 @@ func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]a
 		}
 		return
 	}
-	c.restCompleteJob(ctx, job, vars)
+	c.restCompleteJob(ctx, job, vars, result)
 }
 
-func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any) {
+// restCompleteJob completes a job over REST. result must already have been passed
+// through wireJobResult, or be nil.
+func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any, result *JobResult) {
 	req := camundaapi.NewJobCompletionRequest()
 	if len(vars) > 0 {
 		req.SetVariables(vars)
+	}
+	if result != nil {
+		req.SetResult(*result)
 	}
 	if job.leaseToken != "" {
 		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
