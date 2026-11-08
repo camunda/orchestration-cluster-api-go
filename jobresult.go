@@ -62,8 +62,9 @@ func UserTaskJobResult(r JobResultUserTask) *JobResult {
 
 // CorrectUserTask returns a user task listener result that corrects the task's
 // attributes. Only the attributes set on c are corrected; the rest keep their
-// persisted value. Clear the assignee with an empty string and the candidate
-// users or groups with an empty, non-nil slice.
+// persisted value. Clear the assignee with an empty string, the due or follow-up
+// date with ClearDueDate or ClearFollowUpDate, and the candidate users or groups
+// with an empty, non-nil slice.
 func CorrectUserTask(c JobResultCorrections) *JobResult {
 	r := camundaapi.NewJobResultUserTask()
 	r.SetCorrections(c)
@@ -179,10 +180,15 @@ func grpcCorrections(c *JobResultCorrections) *pb.JobResultCorrections {
 	if v, ok := c.GetAssigneeOk(); ok && v != nil {
 		out.Assignee = ptrTo(*v)
 	}
-	if v, ok := c.GetDueDateOk(); ok && v != nil {
+	// An empty string clears a date, matching the REST wire form.
+	if c.IsDueDateCleared() {
+		out.DueDate = ptrTo("")
+	} else if v, ok := c.GetDueDateOk(); ok && v != nil {
 		out.DueDate = ptrTo(v.Format(time.RFC3339Nano))
 	}
-	if v, ok := c.GetFollowUpDateOk(); ok && v != nil {
+	if c.IsFollowUpDateCleared() {
+		out.FollowUpDate = ptrTo("")
+	} else if v, ok := c.GetFollowUpDateOk(); ok && v != nil {
 		out.FollowUpDate = ptrTo(v.Format(time.RFC3339Nano))
 	}
 	// A non-nil empty slice clears the list, so only nil means "not corrected".

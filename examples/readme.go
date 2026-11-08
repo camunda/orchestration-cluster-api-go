@@ -120,6 +120,7 @@ func jobCorrections(client *camunda.CamundaClient) {
 			corrections := camunda.NewJobResultCorrections()
 			corrections.SetAssignee("corrected-user")
 			corrections.SetPriority(80)
+			corrections.ClearFollowUpDate() // sent as "": removes the follow-up date
 			return camunda.JobCompletion{Result: camunda.CorrectUserTask(*corrections)}, nil
 		}),
 		camunda.WithMaxConcurrentJobs(5),

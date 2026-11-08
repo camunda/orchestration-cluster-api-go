@@ -191,6 +191,119 @@ func TestJobWorkerCompletionRequestBody(t *testing.T) {
 	}
 }
 
+// TestJobWorkerCorrectionDatesWireBody pins the three states of a correction date
+// on the REST wire: cleared is "", set is the ISO-8601 instant, unset is omitted.
+func TestJobWorkerCorrectionDatesWireBody(t *testing.T) {
+	due := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
+	tests := []struct {
+		name  string
+		build func(c *camunda.JobResultCorrections)
+		want  string
+	}{
+		{
+			name:  "cleared dueDate",
+			build: func(c *camunda.JobResultCorrections) { c.ClearDueDate() },
+			want:  `{"dueDate":""}`,
+		},
+		{
+			name:  "cleared followUpDate",
+			build: func(c *camunda.JobResultCorrections) { c.ClearFollowUpDate() },
+			want:  `{"followUpDate":""}`,
+		},
+		{
+			name: "set dates keep the ISO-8601 form",
+			build: func(c *camunda.JobResultCorrections) {
+				c.SetDueDate(due)
+				c.SetFollowUpDate(due.Add(90 * time.Minute))
+			},
+			want: `{"dueDate":"2026-01-02T03:04:05Z","followUpDate":"2026-01-02T04:34:05Z"}`,
+		},
+		{
+			name:  "unset dates are omitted",
+			build: func(c *camunda.JobResultCorrections) { c.SetAssignee("corrected-user") },
+			want:  `{"assignee":"corrected-user"}`,
+		},
+		{
+			name: "clear alongside other corrections",
+			build: func(c *camunda.JobResultCorrections) {
+				c.SetAssignee("corrected-user")
+				c.ClearDueDate()
+				c.SetFollowUpDate(due)
+				c.SetCandidateGroups([]string{"reviewers"})
+				c.SetPriority(80)
+			},
+			want: `{"assignee":"corrected-user","dueDate":"","followUpDate":"2026-01-02T03:04:05Z",
+				"candidateGroups":["reviewers"],"priority":80}`,
+		},
+		{
+			name: "set after clear wins",
+			build: func(c *camunda.JobResultCorrections) {
+				c.ClearDueDate()
+				c.SetDueDate(due)
+			},
+			want: `{"dueDate":"2026-01-02T03:04:05Z"}`,
+		},
+		{
+			name: "clear after set wins",
+			build: func(c *camunda.JobResultCorrections) {
+				c.SetDueDate(due)
+				c.ClearDueDate()
+			},
+			want: `{"dueDate":""}`,
+		},
+		{
+			name: "unset after clear omits",
+			build: func(c *camunda.JobResultCorrections) {
+				c.ClearFollowUpDate()
+				c.UnsetFollowUpDate()
+			},
+			want: `{}`,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			c := camunda.NewJobResultCorrections()
+			tc.build(c)
+			path, body := captureRESTAck(t, completeWith(camunda.JobCompletion{Result: camunda.CorrectUserTask(*c)}))
+			if !strings.HasSuffix(path, "/jobs/123/completion") {
+				t.Fatalf("ack path = %q, want .../jobs/123/completion", path)
+			}
+			want := mustJSON(t, `{"result":{"type":"userTask","corrections":`+tc.want+`}}`)
+			if !reflect.DeepEqual(body, want) {
+				got, _ := json.Marshal(body)
+				t.Errorf("completion body =\n  %s\nwant corrections %s", got, tc.want)
+			}
+		})
+	}
+}
+
+// TestJobResultCorrectionsClearMarshalsDirectly covers low-level callers who build
+// a JobCompletionRequest themselves: the clear lives on the model, not the worker.
+func TestJobResultCorrectionsClearMarshalsDirectly(t *testing.T) {
+	c := camunda.NewJobResultCorrections()
+	c.ClearDueDate()
+	c.ClearFollowUpDate()
+	ut := camunda.NewJobResultUserTask()
+	ut.SetType("userTask")
+	ut.SetCorrections(*c)
+	req := camunda.NewJobCompletionRequest()
+	req.SetResult(camunda.JobResultUserTaskAsJobResult(ut))
+
+	b, err := json.Marshal(req)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	var got map[string]any
+	_ = json.Unmarshal(b, &got)
+	want := mustJSON(t, `{"result":{"type":"userTask","corrections":{"dueDate":"","followUpDate":""}}}`)
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("JobCompletionRequest = %s, want %v", b, want)
+	}
+	if !c.IsDueDateCleared() || !c.IsFollowUpDateCleared() || c.HasDueDate() || c.HasFollowUpDate() {
+		t.Error("cleared dates must report cleared and not set")
+	}
+}
+
 // TestJobWorkerFailsJobOnInvalidResult pins the no-silent-failure contract: a
 // result the worker cannot put on the wire fails the job instead of completing
 // it without the correction or denial the handler asked for.

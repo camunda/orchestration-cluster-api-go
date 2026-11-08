@@ -24,8 +24,9 @@ func TestStreamJobWorkerSendsJobResultOverGRPC(t *testing.T) {
 			{Key: 2, Type: "correct"},
 			{Key: 3, Type: "deny"},
 			{Key: 4, Type: "adhoc"},
+			{Key: 5, Type: "clear"},
 		},
-		completes: make(chan *pb.CompleteJobRequest, 4),
+		completes: make(chan *pb.CompleteJobRequest, 5),
 		fails:     make(chan *pb.FailJobRequest, 1),
 		throws:    make(chan *pb.ThrowErrorRequest, 1),
 	}
@@ -46,6 +47,10 @@ func TestStreamJobWorkerSendsJobResultOverGRPC(t *testing.T) {
 	corrections.SetCandidateUsers([]string{})
 	corrections.SetCandidateGroups([]string{"reviewers"})
 
+	clearing := NewJobResultCorrections()
+	clearing.ClearDueDate()
+	clearing.SetFollowUpDate(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC))
+
 	adHoc := NewJobResultAdHocSubProcess()
 	adHoc.SetActivateElements([]JobResultActivateElement{
 		ActivateAdHocElement("task_a", map[string]any{"input": "x"}),
@@ -58,6 +63,8 @@ func TestStreamJobWorkerSendsJobResultOverGRPC(t *testing.T) {
 		switch job.Type() {
 		case "correct":
 			return JobCompletion{Result: CorrectUserTask(*corrections)}, nil
+		case "clear":
+			return JobCompletion{Result: CorrectUserTask(*clearing)}, nil
 		case "deny":
 			return JobCompletion{Result: DenyUserTask("Insufficient documentation")}, nil
 		case "adhoc":
@@ -67,7 +74,7 @@ func TestStreamJobWorkerSendsJobResultOverGRPC(t *testing.T) {
 		}
 	})
 
-	w := client.NewStreamJobWorker("any", handler, WithStreamPollInterval(-1), WithStreamMaxConcurrentJobs(4))
+	w := client.NewStreamJobWorker("any", handler, WithStreamPollInterval(-1), WithStreamMaxConcurrentJobs(5))
 	w.dial = bufDial(lis)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -118,6 +125,16 @@ func TestStreamJobWorkerSendsJobResultOverGRPC(t *testing.T) {
 	}
 	if !proto.Equal(got[4].Result, wantAdHoc) {
 		t.Errorf("ad-hoc Result = %v, want %v", got[4].Result, wantAdHoc)
+	}
+	wantClear := &pb.JobResult{
+		Type: ptrTo("userTask"),
+		Corrections: &pb.JobResultCorrections{
+			DueDate:      ptrTo(""),
+			FollowUpDate: ptrTo("2026-01-02T03:04:05Z"),
+		},
+	}
+	if !proto.Equal(got[5].Result, wantClear) {
+		t.Errorf("cleared-date Result = %v, want %v", got[5].Result, wantClear)
 	}
 	if got[4].Variables != `{"round":1}` {
 		t.Errorf("ad-hoc Variables = %q, want {\"round\":1}", got[4].Variables)
