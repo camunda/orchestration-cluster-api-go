@@ -21,7 +21,7 @@ var _ MappedNullable = &ProcessInstanceCreationInstructionBase{}
 type ProcessInstanceCreationInstructionBase struct {
 	// JSON object that will instantiate the variables for the root variable scope of the process instance.
 	Variables map[string]interface{} `json:"variables,omitempty"`
-	// Metadata of the variables, keyed by variable name. Use it to set how a variable is treated, for example to protect its value. A variable without an entry has no metadata.
+	// Metadata of the variables, keyed by variable name. Use it to set how a variable is treated, for example to protect its value. Each key must be the name of a variable in `variables`. A variable without an entry has no metadata.
 	VariablesMetadata *map[string]VariableMetadata `json:"variablesMetadata,omitempty"`
 	// The tenant id of the process definition. If multi-tenancy is enabled, provide the tenant id of the process definition to start a process instance of. If multi-tenancy is disabled, don't provide this parameter.
 	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`

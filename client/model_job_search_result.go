@@ -56,6 +56,8 @@ type JobSearchResult struct {
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The business ID of the owning process instance, inherited when the job was created. This is `null` for jobs created before version 8.10 and for jobs whose owning process instance has no business ID.
 	BusinessId NullableBusinessId `json:"businessId"`
+	// The storage ordinal this job's data belongs to. This is `null` for data exported before storage ordinals were introduced in version 8.11.
+	StorageOrdinal NullableInt32 `json:"storageOrdinal"`
 	// The amount of retries left to this job.
 	Retries int32        `json:"retries"`
 	State   JobStateEnum `json:"state"`
@@ -79,7 +81,7 @@ type _JobSearchResult JobSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId NullableProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
+func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId NullableProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, storageOrdinal NullableInt32, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
 	this := JobSearchResult{}
 	this.CustomHeaders = customHeaders
 	this.Deadline = deadline
@@ -99,6 +101,7 @@ func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, 
 	this.ProcessInstanceKey = processInstanceKey
 	this.RootProcessInstanceKey = rootProcessInstanceKey
 	this.BusinessId = businessId
+	this.StorageOrdinal = storageOrdinal
 	this.Retries = retries
 	this.State = state
 	this.TenantId = tenantId
@@ -572,6 +575,32 @@ func (o *JobSearchResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
 }
 
+// GetStorageOrdinal returns the StorageOrdinal field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *JobSearchResult) GetStorageOrdinal() int32 {
+	if o == nil || o.StorageOrdinal.Get() == nil {
+		var ret int32
+		return ret
+	}
+
+	return *o.StorageOrdinal.Get()
+}
+
+// GetStorageOrdinalOk returns a tuple with the StorageOrdinal field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *JobSearchResult) GetStorageOrdinalOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.StorageOrdinal.Get(), o.StorageOrdinal.IsSet()
+}
+
+// SetStorageOrdinal sets field value
+func (o *JobSearchResult) SetStorageOrdinal(v int32) {
+	o.StorageOrdinal.Set(&v)
+}
+
 // GetRetries returns the Retries field value
 func (o *JobSearchResult) GetRetries() int32 {
 	if o == nil {
@@ -796,6 +825,7 @@ func (o JobSearchResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["processInstanceKey"] = o.ProcessInstanceKey
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
 	toSerialize["businessId"] = o.BusinessId.Get()
+	toSerialize["storageOrdinal"] = o.StorageOrdinal.Get()
 	toSerialize["retries"] = o.Retries
 	toSerialize["state"] = o.State
 	toSerialize["tenantId"] = o.TenantId

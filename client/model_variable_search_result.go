@@ -35,7 +35,7 @@ type VariableSearchResult struct {
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// Metadata of this variable.
 	Metadata VariableMetadata `json:"metadata"`
-	// Value of this variable. Can be truncated.
+	// The value of this variable. Can be truncated or redacted.  If the value is truncated, `isTruncated` is `true` and the value contains only the beginning of the full value.  If the variable is redacted, the value is set to `\"\"` instead of the real value. Check `metadata.protectionModes` before you use the value: it contains `REDACT` for a redacted variable.
 	Value string `json:"value"`
 	// Whether the value is truncated or not.
 	IsTruncated bool `json:"isTruncated"`
