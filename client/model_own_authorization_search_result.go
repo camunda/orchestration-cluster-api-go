@@ -24,7 +24,7 @@ type OwnAuthorizationSearchResult struct {
 	Page SearchQueryPageResponse `json:"page"`
 	// The matching authorizations.
 	Items []AuthorizationResult `json:"items"`
-	// Indicates whether authorization checks are enabled for the cluster.
+	// Indicates whether authorization checks are enabled for the physical tenant of the request.
 	AuthorizationsEnabled bool `json:"authorizationsEnabled"`
 }
 

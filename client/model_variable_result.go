@@ -35,7 +35,7 @@ type VariableResult struct {
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// Metadata of this variable.
 	Metadata VariableMetadata `json:"metadata"`
-	// Full value of this variable.
+	// The full value of this variable, or `\"\"` if the variable is redacted.  Check `metadata.protectionModes` before you use the value: it contains `REDACT` for a redacted variable.
 	Value string `json:"value"`
 }
 
