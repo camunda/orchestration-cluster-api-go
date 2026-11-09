@@ -396,9 +396,10 @@ func (o *JobResultCorrections) IsFollowUpDateCleared() bool {
 	return o != nil && o.followUpDateCleared && !o.FollowUpDate.IsSet()
 }
 
-// UnmarshalJSON decodes a JobResultCorrections, taking an empty string for a clearable date
-// (DueDate, FollowUpDate) as a clear: the inverse of ToMap. Everything else, including
-// timestamps, null and absent properties, decodes as with the default decoder.
+// UnmarshalJSON decodes into a JobResultCorrections like encoding/json, taking
+// an empty string for a clearable date (DueDate, FollowUpDate) as a clear: the inverse
+// of ToMap. As with the default decoder, properties absent from data are left
+// untouched; a timestamp or null for a date replaces a clear, as its setters do.
 func (o *JobResultCorrections) UnmarshalJSON(data []byte) error {
 	type plain JobResultCorrections
 	var raw map[string]json.RawMessage
@@ -413,24 +414,36 @@ func (o *JobResultCorrections) UnmarshalJSON(data []byte) error {
 		var s string
 		return len(v) > 0 && v[0] == '"' && json.Unmarshal(v, &s) == nil && s == ""
 	}
-	dueDateCleared := isEmpty(raw["dueDate"])
-	if dueDateCleared {
+	dueDateValue, dueDatePresent := raw["dueDate"]
+	dueDateClear := dueDatePresent && isEmpty(dueDateValue)
+	if dueDateClear {
 		delete(raw, "dueDate")
 	}
-	followUpDateCleared := isEmpty(raw["followUpDate"])
-	if followUpDateCleared {
+	followUpDateValue, followUpDatePresent := raw["followUpDate"]
+	followUpDateClear := followUpDatePresent && isEmpty(followUpDateValue)
+	if followUpDateClear {
 		delete(raw, "followUpDate")
 	}
 	rest, err := json.Marshal(raw)
 	if err != nil {
 		return err
 	}
-	var p plain
+	p := plain(*o)
 	if err := json.Unmarshal(rest, &p); err != nil {
 		return err
 	}
 	*o = JobResultCorrections(p)
-	o.dueDateCleared = dueDateCleared
-	o.followUpDateCleared = followUpDateCleared
+	if dueDateClear {
+		o.DueDate.Unset()
+		o.dueDateCleared = true
+	} else if dueDatePresent {
+		o.dueDateCleared = false
+	}
+	if followUpDateClear {
+		o.FollowUpDate.Unset()
+		o.followUpDateCleared = true
+	} else if followUpDatePresent {
+		o.followUpDateCleared = false
+	}
 	return nil
 }
