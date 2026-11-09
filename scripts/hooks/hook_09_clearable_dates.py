@@ -17,6 +17,13 @@ every caller, so this hook keeps the field and adds a clear marker beside it::
 ``MarshalJSON``) then emits ``"dueDate": ""``. ``SetDueDate``, ``SetDueDateNil``
 and ``UnsetDueDate`` drop the marker, so the last call wins.
 
+Decoding needs the reverse: ``NullableTime`` rejects ``""``, so a model with a
+clearable date gets an ``UnmarshalJSON`` that takes an empty string for each such
+property as a clear (setting the marker) and decodes everything else exactly as
+the default decoder would — timestamps, ``null`` and absent properties included.
+A generated model that already has its own ``UnmarshalJSON`` fails the run, as
+the two cannot be merged safely.
+
 The affected properties are read from the spec — a schema description bullet
 "* `<prop>` - clear by providing an empty String" on a ``date-time`` property —
 so a property the spec stops declaring as a date (and that the generator then
@@ -52,7 +59,7 @@ def _replace_once(text: str, old: str, new: str, where: str) -> str:
     return text.replace(old, new, 1)
 
 
-def _patch(text: str, model: str, prop: str, path: Path) -> str:
+def _patch(text: str, model: str, prop: str, path: Path) -> tuple[str, str, str]:
     field_re = re.compile(rf"^\t(?P<field>\w+) NullableTime `json:\"{re.escape(prop)},omitempty\"`$", re.MULTILINE)
     m = field_re.search(text)
     if m is None:
@@ -100,7 +107,61 @@ def _patch(text: str, model: str, prop: str, path: Path) -> str:
             f"func (o *{model}) Is{field}Cleared() bool {{\n"
             f"\treturn o != nil && o.{flag} && !o.{field}.IsSet()\n}}\n"
         )
-    return text
+    return text, field, flag
+
+
+_UNMARSHAL_MARKER = "an empty string for a clearable date"
+
+
+def _unmarshal(text: str, model: str, cleared: list[tuple[str, str, str]], path: Path) -> str:
+    """Emit UnmarshalJSON restoring the clear markers; cleared is (prop, field, flag)."""
+    signature = f"func (o *{model}) UnmarshalJSON(data []byte) error {{"
+    if signature in text:
+        if _UNMARSHAL_MARKER not in text:
+            raise SystemExit(f"hook_09: {model} in {path.name} already has a generated UnmarshalJSON")
+        return text
+    names = ", ".join(field for _, field, _ in cleared)
+    lines = [
+        f"// UnmarshalJSON decodes a {model}, taking {_UNMARSHAL_MARKER}",
+        f"// ({names}) as a clear: the inverse of ToMap. Everything else, including",
+        "// timestamps, null and absent properties, decodes as with the default decoder.",
+        signature,
+        f"\ttype plain {model}",
+        "\tvar raw map[string]json.RawMessage",
+        "\tif err := json.Unmarshal(data, &raw); err != nil {",
+        "\t\treturn err",
+        "\t}",
+        "\tif raw == nil { // a JSON null leaves the value untouched",
+        "\t\treturn nil",
+        "\t}",
+        "\t// Only a string literal can be a clear; null decodes to \"\" too but preserves.",
+        "\tisEmpty := func(v json.RawMessage) bool {",
+        "\t\tvar s string",
+        "\t\treturn len(v) > 0 && v[0] == '\"' && json.Unmarshal(v, &s) == nil && s == \"\"",
+        "\t}",
+    ]
+    for prop, _, flag in cleared:
+        lines += [
+            f"\t{flag} := isEmpty(raw[\"{prop}\"])",
+            f"\tif {flag} {{",
+            f"\t\tdelete(raw, \"{prop}\")",
+            "\t}",
+        ]
+    lines += [
+        "\trest, err := json.Marshal(raw)",
+        "\tif err != nil {",
+        "\t\treturn err",
+        "\t}",
+        "\tvar p plain",
+        "\tif err := json.Unmarshal(rest, &p); err != nil {",
+        "\t\treturn err",
+        "\t}",
+        f"\t*o = {model}(p)",
+    ]
+    for _, _, flag in cleared:
+        lines.append(f"\to.{flag} = {flag}")
+    lines += ["\treturn nil", "}"]
+    return text.rstrip("\n") + "\n\n" + "\n".join(lines) + "\n"
 
 
 def run(ctx) -> None:
@@ -116,8 +177,11 @@ def run(ctx) -> None:
         if path is None:
             raise SystemExit(f"hook_09: no generated model for schema {model}")
         text = path.read_text(encoding="utf-8")
+        cleared = []
         for prop in props:
-            text = _patch(text, model, prop, path)
+            text, field, flag = _patch(text, model, prop, path)
+            cleared.append((prop, field, flag))
             patched += 1
+        text = _unmarshal(text, model, cleared, path)
         path.write_text(text, encoding="utf-8")
     print(f"    made {patched} date-time field(s) clearable")
