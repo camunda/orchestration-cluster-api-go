@@ -622,6 +622,8 @@ WORKER_TYPES = [
     "StreamWorkerOption",
     "Job",
     "JobHandler",
+    "JobCompletion",
+    "JobCompletionHandler",
 ]
 RUNTIME_TYPES = [
     "APIError",
@@ -653,6 +655,16 @@ VAR_BUCKETS = {
     "ConfigSchema": "configuration",
     "ErrConfig": "runtime",
     "SeedEnvVar": "runtime",
+}
+
+# Package-level functions not filed under a type are published on the Runtime
+# page unless routed elsewhere here.
+FUNC_BUCKETS = {
+    "UserTaskJobResult": "job-workers",
+    "CorrectUserTask": "job-workers",
+    "DenyUserTask": "job-workers",
+    "AdHocSubProcessJobResult": "job-workers",
+    "ActivateAdHocElement": "job-workers",
 }
 
 BUCKETS: dict[str, list[str]] = {
@@ -1142,6 +1154,9 @@ def generate_api_reference() -> None:
     sdk = load_doc_json(SDK_JSON_PATH)
     buckets = classify_types(sdk.types)
     var_buckets = classify_vars(sdk.consts + sdk.vars)
+    func_buckets: dict[str, list[Func]] = {slug: [] for slug in BUCKETS}
+    for f in sdk.funcs:
+        func_buckets[FUNC_BUCKETS.get(f.name, "runtime")].append(f)
     examples = load_examples()
     generated = load_generated_types()
 
@@ -1188,7 +1203,7 @@ def generate_api_reference() -> None:
                 "outcome back to the cluster.",
                 buckets["job-workers"],
                 var_buckets["job-workers"],
-                [],
+                func_buckets["job-workers"],
                 examples,
                 generated,
             ),
@@ -1201,7 +1216,7 @@ def generate_api_reference() -> None:
                 "and the polling helper that absorbs eventual consistency.",
                 buckets["runtime"],
                 var_buckets["runtime"],
-                sdk.funcs,
+                func_buckets["runtime"],
                 examples,
                 generated,
             ),

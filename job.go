@@ -22,6 +22,8 @@ type Job struct {
 	variables          map[string]any
 	leaseToken         string
 	clock              Clock
+	// result is the job result a CompletionHandler returned, sent on completion.
+	result *JobResult
 }
 
 // Key returns the job key.
@@ -126,4 +128,8 @@ func (e *BpmnError) Error() string {
 //   - returning (variables, nil) completes the job with those variables;
 //   - returning a *BpmnError throws a BPMN error;
 //   - returning any other error fails the job (decrementing its retries).
+//
+// To also complete the job with a job result (user task listener corrections or
+// denial, or an ad-hoc sub-process result), write a JobCompletionHandler and adapt
+// it with CompletionHandler.
 type JobHandler func(ctx context.Context, job *Job) (map[string]any, error)

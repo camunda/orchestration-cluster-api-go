@@ -45,7 +45,7 @@ them here:
 | `cmd/facadegen/` | The AST-based facade and re-export generator. Primary edit surface for facade and re-export output. |
 | `scripts/generate.sh` | Pipeline orchestrator: bundle → fetch-proto → openapi-generator → buf → post-process → gofmt → build. |
 | `scripts/bundle-spec.sh`, `scripts/fetch-proto.sh` | Fetch the OpenAPI spec and `gateway.proto` (pinned to `$SPEC_REF`). |
-| `scripts/postprocess.py`, `scripts/hooks/` | Numbered post-processing hooks: Domain Type System, semantic field types, generator-quirk fixes, version-skew tolerance, then the facade (delegates to `cmd/facadegen`). Primary edit surface for fixing generated output. |
+| `scripts/postprocess.py`, `scripts/hooks/` | Numbered post-processing hooks: Domain Type System, semantic field types, generator-quirk fixes, version-skew tolerance, clearable date fields, then the facade (delegates to `cmd/facadegen`). Primary edit surface for fixing generated output. |
 | `external-spec/bundled/` | Bundled spec (`rest-api.bundle.json`) + `spec-metadata.json`. Generator inputs. |
 | `external-spec/proto/` | Fetched `gateway.proto`. Generator input. |
 | `external-spec/upstream/` | Transient sparse clone. **Never commit** (gitignored). |

@@ -7,7 +7,9 @@
 //	go test -tags integration ./test/integration/...
 //
 // The cluster address is taken from CAMUNDA_REST_ADDRESS / CAMUNDA_GRPC_ADDRESS
-// (defaulting to a local stack). Authentication is disabled, matching the
+// (defaulting to a local stack). Tests that wait for a gRPC job stream to register
+// read the gateway's actuator at CAMUNDA_MONITORING_ADDRESS (default
+// http://localhost:9600). Authentication is disabled, matching the
 // sdk-infra docker compose stack used in CI.
 package integration
 
