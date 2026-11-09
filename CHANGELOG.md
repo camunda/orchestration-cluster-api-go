@@ -1,3 +1,10 @@
+# [11.0.0-alpha.5](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.4...v11.0.0-alpha.5) (2026-11-09)
+
+
+### Features
+
+* send job results from job workers ([#122](https://github.com/camunda/orchestration-cluster-api-go/issues/122)) ([93d8025](https://github.com/camunda/orchestration-cluster-api-go/commit/93d802517be5bb5af5892523c5a066efb54a98f7))
+
 # [11.0.0-alpha.4](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.3...v11.0.0-alpha.4) (2026-11-04)
 
 
