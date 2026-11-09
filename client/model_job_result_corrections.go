@@ -395,3 +395,42 @@ func (o *JobResultCorrections) ClearFollowUpDate() {
 func (o *JobResultCorrections) IsFollowUpDateCleared() bool {
 	return o != nil && o.followUpDateCleared && !o.FollowUpDate.IsSet()
 }
+
+// UnmarshalJSON decodes a JobResultCorrections, taking an empty string for a clearable date
+// (DueDate, FollowUpDate) as a clear: the inverse of ToMap. Everything else, including
+// timestamps, null and absent properties, decodes as with the default decoder.
+func (o *JobResultCorrections) UnmarshalJSON(data []byte) error {
+	type plain JobResultCorrections
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	if raw == nil { // a JSON null leaves the value untouched
+		return nil
+	}
+	// Only a string literal can be a clear; null decodes to "" too but preserves.
+	isEmpty := func(v json.RawMessage) bool {
+		var s string
+		return len(v) > 0 && v[0] == '"' && json.Unmarshal(v, &s) == nil && s == ""
+	}
+	dueDateCleared := isEmpty(raw["dueDate"])
+	if dueDateCleared {
+		delete(raw, "dueDate")
+	}
+	followUpDateCleared := isEmpty(raw["followUpDate"])
+	if followUpDateCleared {
+		delete(raw, "followUpDate")
+	}
+	rest, err := json.Marshal(raw)
+	if err != nil {
+		return err
+	}
+	var p plain
+	if err := json.Unmarshal(rest, &p); err != nil {
+		return err
+	}
+	*o = JobResultCorrections(p)
+	o.dueDateCleared = dueDateCleared
+	o.followUpDateCleared = followUpDateCleared
+	return nil
+}
