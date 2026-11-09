@@ -191,8 +191,11 @@ type SupervisedLink struct {
 	writer    *conn // current live socket; nil while disconnected
 	endpoints []string
 	current   string
-	connects  atomic.Uint64
-	cancel    context.CancelFunc
+	// live is closed while a socket is live and replaced with a fresh channel on
+	// each disconnect, so awaitEndpoint can wait for the next connection.
+	live     chan struct{}
+	connects atomic.Uint64
+	cancel   context.CancelFunc
 }
 
 // startLink launches the supervisor and blocks until the first connection
@@ -200,7 +203,7 @@ type SupervisedLink struct {
 // address fails fast into REST fallback).
 func startLink(endpoints []string, d *Dialer, hooks linkHooks) (*SupervisedLink, error) {
 	supCtx, cancel := context.WithCancel(context.Background())
-	l := &SupervisedLink{endpoints: endpoints, cancel: cancel}
+	l := &SupervisedLink{endpoints: endpoints, cancel: cancel, live: make(chan struct{})}
 	ready := make(chan error, 1)
 	go l.supervise(supCtx, d, hooks, ready)
 	if err := <-ready; err != nil {
@@ -210,14 +213,32 @@ func startLink(endpoints []string, d *Dialer, hooks linkHooks) (*SupervisedLink,
 	return l, nil
 }
 
-// currentEndpoint returns the endpoint of the live socket, or "" while
-// disconnected.
-func (l *SupervisedLink) currentEndpoint() string {
+// awaitEndpoint returns the endpoint of the live socket, waiting for the
+// supervisor to reconnect if there is none. It returns ("", false) if ctx ends
+// first.
+func (l *SupervisedLink) awaitEndpoint(ctx context.Context) (string, bool) {
+	for {
+		l.mu.Lock()
+		if l.writer != nil {
+			ep := l.current
+			l.mu.Unlock()
+			return ep, true
+		}
+		live := l.live
+		l.mu.Unlock()
+		select {
+		case <-live:
+		case <-ctx.Done():
+			return "", false
+		}
+	}
+}
+
+// lastEndpoint returns the endpoint of the live socket or, while reconnecting,
+// of the most recent one; "" before the first connection.
+func (l *SupervisedLink) lastEndpoint() string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	if l.writer == nil {
-		return ""
-	}
 	return l.current
 }
 
@@ -242,6 +263,11 @@ func (l *SupervisedLink) close() {
 	l.cancel()
 	l.mu.Lock()
 	c := l.writer
+	if c != nil {
+		// live was closed by the connect; reopen it so awaitEndpoint waits (until
+		// its context ends) instead of spinning on a closed channel.
+		l.live = make(chan struct{})
+	}
 	l.writer = nil
 	l.mu.Unlock()
 	if c != nil {
@@ -281,6 +307,7 @@ func (l *SupervisedLink) supervise(supCtx context.Context, d *Dialer, hooks link
 		l.mu.Lock()
 		l.writer = c
 		l.current = url
+		close(l.live)
 		l.mu.Unlock()
 		l.connects.Add(1)
 		if !sentReady {
@@ -296,6 +323,7 @@ func (l *SupervisedLink) supervise(supCtx context.Context, d *Dialer, hooks link
 		c.close()
 		l.mu.Lock()
 		l.writer = nil
+		l.live = make(chan struct{})
 		l.mu.Unlock()
 		if hooks.onDisconnect != nil {
 			hooks.onDisconnect()
