@@ -7,7 +7,9 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -497,5 +499,104 @@ func TestFalconWorkerFailsJobOnUnencodableResult(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// TestFalconWorkerSendsResultToConnectedGateway covers command-stream failover:
+// the configured gateway drops the stream, the worker fails over to a peer from
+// the topology, and the REST fallback for a result-bearing completion must go to
+// that peer — keeping the REST base path and credentials — not to the
+// configured gateway the stream just left.
+func TestFalconWorkerSendsResultToConnectedGateway(t *testing.T) {
+	type completion struct {
+		path, auth string
+		body       map[string]any
+	}
+	peerCompletions := make(chan completion, 1)
+	configuredCompletions := make(chan string, 1)
+	recordCompletion := func(ch chan completion) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			var body map[string]any
+			_ = json.NewDecoder(r.Body).Decode(&body)
+			select {
+			case ch <- completion{r.URL.Path, r.Header.Get("Authorization"), body}:
+			default:
+			}
+			w.WriteHeader(http.StatusNoContent)
+		}
+	}
+
+	peerMux := http.NewServeMux()
+	peerMux.HandleFunc("/ctx/v2/jobs/2251799813685424/completion", recordCompletion(peerCompletions))
+	peerMux.HandleFunc("/falcon", func(w http.ResponseWriter, r *http.Request) {
+		c, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer func() { _ = c.CloseNow() }()
+		ctx := r.Context()
+		if sub, err := wsReadJSON(ctx, c); err != nil || sub["type"] != "subscribe" {
+			return
+		}
+		wsWriteJSON(ctx, c, map[string]any{"type": "welcome", "heartbeatMs": 15000})
+		_ = c.Write(ctx, websocket.MessageText, []byte(pushedJobFrame))
+		for {
+			if _, err := wsReadJSON(ctx, c); err != nil {
+				return
+			}
+		}
+	})
+	peer := httptest.NewServer(peerMux)
+	defer peer.Close()
+	peerURL, _ := url.Parse(peer.URL)
+	peerPort, _ := strconv.Atoi(peerURL.Port())
+
+	configuredMux := http.NewServeMux()
+	configuredMux.HandleFunc("/ctx/v2/topology", func(w http.ResponseWriter, _ *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"nano":    map[string]any{"falconPath": "/falcon"},
+			"brokers": []map[string]any{{"host": peerURL.Hostname(), "port": peerPort}},
+		})
+	})
+	configuredMux.HandleFunc("/ctx/v2/jobs/2251799813685424/completion", func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case configuredCompletions <- r.URL.Path:
+		default:
+		}
+		w.WriteHeader(http.StatusServiceUnavailable)
+	})
+	// The configured gateway's command stream is failing: it accepts the socket
+	// and drops it at once, so the link fails over to the peer.
+	configuredMux.HandleFunc("/falcon", func(w http.ResponseWriter, r *http.Request) {
+		if c, err := websocket.Accept(w, r, nil); err == nil {
+			_ = c.CloseNow()
+		}
+	})
+	configured := httptest.NewServer(configuredMux)
+	defer configured.Close()
+
+	client, err := camunda.New(camunda.WithRestAddress(configured.URL+"/ctx"), camunda.WithFalcon(true),
+		camunda.WithBasicAuth("demo", "secret"), camunda.WithLogLevel(camunda.LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	worker := client.NewJobWorker("email", completeWith(camunda.JobCompletion{Result: camunda.DenyUserTask("nope")}))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = worker.Run(ctx) }()
+
+	select {
+	case got := <-peerCompletions:
+		if got.auth != "Basic ZGVtbzpzZWNyZXQ=" {
+			t.Errorf("Authorization = %q, want the configured basic credentials", got.auth)
+		}
+		want := mustJSON(t, `{"result":{"type":"userTask","denied":true,"deniedReason":"nope"}}`)
+		if !reflect.DeepEqual(got.body, want) {
+			t.Errorf("completion body = %v, want %v", got.body, want)
+		}
+	case path := <-configuredCompletions:
+		t.Fatalf("completion went to the configured gateway (%s), not the one the stream is connected to", path)
+	case <-time.After(5 * time.Second):
+		t.Fatal("result-carrying completion was not sent to the connected gateway")
 	}
 }

@@ -210,6 +210,17 @@ func startLink(endpoints []string, d *Dialer, hooks linkHooks) (*SupervisedLink,
 	return l, nil
 }
 
+// currentEndpoint returns the endpoint of the live socket, or "" while
+// disconnected.
+func (l *SupervisedLink) currentEndpoint() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if l.writer == nil {
+		return ""
+	}
+	return l.current
+}
+
 // send writes a frame on the current socket, or errors while disconnected.
 func (l *SupervisedLink) send(data []byte) error {
 	l.mu.Lock()

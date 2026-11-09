@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"reflect"
 	"time"
 
@@ -396,4 +397,40 @@ func (c *CamundaClient) resolveTenant(provided *string) string {
 		return c.cfg.DefaultTenantID
 	}
 	return "<default>"
+}
+
+// restClientForEndpoint returns a REST client for the gateway serving the
+// command-stream endpoint (ws[s]://host:port/path): the configured REST base URL
+// with its scheme and host replaced, so the base path, the transport chain (auth,
+// TLS, retry, backpressure) and default headers are kept. It returns the
+// client's own REST client when endpoint is empty, unparseable, or already the
+// configured host.
+func (c *CamundaClient) restClientForEndpoint(endpoint string) *camundaapi.APIClient {
+	if endpoint == "" {
+		return c.raw
+	}
+	ep, err := url.Parse(endpoint)
+	if err != nil || ep.Host == "" {
+		return c.raw
+	}
+	base, err := url.Parse(v2BaseURL(c.cfg.RestAddress, c.cfg.ExactRestAddress))
+	if err != nil {
+		return c.raw
+	}
+	scheme := "http"
+	if ep.Scheme == "wss" || ep.Scheme == "https" {
+		scheme = "https"
+	}
+	if base.Scheme == scheme && base.Host == ep.Host {
+		return c.raw
+	}
+	base.Scheme, base.Host = scheme, ep.Host
+	key := base.String()
+	if raw, ok := c.falconRESTClients.Load(key); ok {
+		return raw.(*camundaapi.APIClient)
+	}
+	oc := *c.raw.GetConfig()
+	oc.Servers = camundaapi.ServerConfigurations{{URL: key}}
+	raw, _ := c.falconRESTClients.LoadOrStore(key, camundaapi.NewAPIClient(&oc))
+	return raw.(*camundaapi.APIClient)
 }

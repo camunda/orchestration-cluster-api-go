@@ -149,6 +149,16 @@ func (w *StreamWorker) ThrowError(jobKey, errorCode, errorMessage string, variab
 	w.Replenish(1)
 }
 
+// Endpoint returns the command-stream endpoint the worker is connected to, or ""
+// while it is reconnecting. The link fails over across the directory, so this
+// can differ from the configured gateway.
+func (w *StreamWorker) Endpoint() string {
+	if w.link == nil {
+		return ""
+	}
+	return w.link.currentEndpoint()
+}
+
 // Close tears down the worker's link.
 func (w *StreamWorker) Close() {
 	if w.link != nil {

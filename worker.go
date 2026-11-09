@@ -211,7 +211,9 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 //
 // The command stream's completeJob frame cannot carry a job result, so a
 // completion with one is sent over REST instead (the gateway is a superset of the
-// REST API) and the credit is replenished separately.
+// REST API) and the credit is replenished separately. The REST call goes to the
+// gateway the stream is connected to: the stream may have failed over away from
+// the configured address precisely because that gateway is down.
 func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, job *Job) {
 	vars, err := w.handler(ctx, job)
 	var result *JobResult
@@ -221,7 +223,8 @@ func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, j
 	if err == nil && result != nil {
 		ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 		defer cancel()
-		w.client.restCompleteJob(ackCtx, job, vars, result)
+		raw := w.client.restClientForEndpoint(sw.Endpoint())
+		w.client.restCompleteJobVia(ackCtx, raw, job, vars, result)
 		sw.Replenish(1)
 		return
 	}
@@ -364,6 +367,11 @@ func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]a
 // restCompleteJob completes a job over REST. result must already have been passed
 // through completionResult, or be nil.
 func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any, result *JobResult) {
+	c.restCompleteJobVia(ctx, c.raw, job, vars, result)
+}
+
+// restCompleteJobVia is restCompleteJob through a specific REST client.
+func (c *CamundaClient) restCompleteJobVia(ctx context.Context, raw *camundaapi.APIClient, job *Job, vars map[string]any, result *JobResult) {
 	req := camundaapi.NewJobCompletionRequest()
 	if len(vars) > 0 {
 		req.SetVariables(vars)
@@ -374,7 +382,7 @@ func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[
 	if job.leaseToken != "" {
 		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
 	}
-	_, err := c.raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
+	_, err := raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
 		JobCompletionRequest(*req).Execute()
 	if err != nil {
 		c.logger.Error("complete job failed", "job", job.Key(), "error", err)
