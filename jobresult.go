@@ -42,6 +42,10 @@ type JobCompletionHandler func(ctx context.Context, job *Job) (JobCompletion, er
 // populated, so it is always correct on the wire. A result with no variant set,
 // or with both, is a handler bug: the job is failed with a descriptive error
 // rather than completed without the result the handler asked for.
+//
+// The FALCON command stream cannot carry a job result, so a JobWorker receiving
+// jobs over it fails a result-bearing completion; use WithForceREST to send job
+// results to a gateway that advertises FALCON.
 func CompletionHandler(h JobCompletionHandler) JobHandler {
 	return func(ctx context.Context, job *Job) (map[string]any, error) {
 		c, err := h(ctx, job)

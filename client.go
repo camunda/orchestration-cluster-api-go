@@ -46,9 +46,6 @@ type CamundaClient struct {
 	falconProdOnce  sync.Once
 	falconProd      *falcon.Producer
 	falconProdErr   error
-	// falconRESTClients caches, per REST base URL, the REST client used to reach
-	// the gateway behind a command-stream endpoint; see restClientForEndpoint.
-	falconRESTClients sync.Map
 }
 
 // New resolves configuration from environment variables and options, then builds

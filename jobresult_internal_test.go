@@ -177,9 +177,9 @@ func TestStreamJobWorkerFailsJobOnInvalidResult(t *testing.T) {
 	}
 }
 
-// TestStreamJobWorkerFailsJobOnUnencodableResult mirrors the REST and FALCON
-// workers: a result-bearing completion that cannot be JSON-encoded fails the job
-// instead of completing it with its variables silently dropped.
+// TestStreamJobWorkerFailsJobOnUnencodableResult mirrors the REST worker: a
+// result-bearing completion that cannot be JSON-encoded fails the job instead of
+// completing it with its variables silently dropped.
 func TestStreamJobWorkerFailsJobOnUnencodableResult(t *testing.T) {
 	adHoc := NewJobResultAdHocSubProcess()
 	adHoc.SetActivateElements([]JobResultActivateElement{
@@ -246,30 +246,5 @@ func TestWireJobResultRejectsAmbiguousUnion(t *testing.T) {
 	})
 	if !errors.Is(err, errInvalidJobResult) {
 		t.Errorf("err = %v, want errInvalidJobResult", err)
-	}
-}
-
-func TestRestClientForEndpoint(t *testing.T) {
-	c, err := New(WithRestAddress("https://gw-a.example:8443/ctx"), WithNoAuth())
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-	for _, ep := range []string{"", "::bad", "wss://gw-a.example:8443/falcon"} {
-		if got := c.restClientForEndpoint(ep); got != c.raw {
-			t.Errorf("restClientForEndpoint(%q) is not the configured client", ep)
-		}
-	}
-	peer := c.restClientForEndpoint("wss://gw-b.example:9443/falcon")
-	if peer == c.raw {
-		t.Fatal("a peer endpoint reused the configured client")
-	}
-	if got := peer.GetConfig().Servers[0].URL; got != "https://gw-b.example:9443/ctx/v2" {
-		t.Errorf("peer base URL = %q, want https://gw-b.example:9443/ctx/v2", got)
-	}
-	if peer.GetConfig().HTTPClient != c.raw.GetConfig().HTTPClient {
-		t.Error("peer client does not share the configured transport chain")
-	}
-	if again := c.restClientForEndpoint("wss://gw-b.example:9443/other"); again != peer {
-		t.Error("peer client was not cached per base URL")
 	}
 }

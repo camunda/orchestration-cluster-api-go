@@ -149,26 +149,6 @@ func (w *StreamWorker) ThrowError(jobKey, errorCode, errorMessage string, variab
 	w.Replenish(1)
 }
 
-// AwaitEndpoint returns the command-stream endpoint the worker is connected to,
-// waiting while the link reconnects; ("", false) if ctx ends first. The link
-// fails over across the directory, so this can differ from the configured
-// gateway.
-func (w *StreamWorker) AwaitEndpoint(ctx context.Context) (string, bool) {
-	if w.link == nil {
-		return "", false
-	}
-	return w.link.awaitEndpoint(ctx)
-}
-
-// LastEndpoint returns the endpoint the worker is, or was most recently,
-// connected to; "" if it never connected.
-func (w *StreamWorker) LastEndpoint() string {
-	if w.link == nil {
-		return ""
-	}
-	return w.link.lastEndpoint()
-}
-
 // Close tears down the worker's link.
 func (w *StreamWorker) Close() {
 	if w.link != nil {

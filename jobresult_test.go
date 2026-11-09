@@ -2,15 +2,12 @@ package camunda_test
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"io"
 	"math"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"reflect"
-	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -391,6 +388,80 @@ func falconJobGateway(t *testing.T) (srv *httptest.Server, restBodies, frames ch
 	return srv, restBodies, frames
 }
 
+// TestFalconWorkerFailsJobWithResult: the command stream's completeJob frame
+// cannot carry a job result, so over FALCON a result-bearing completion fails the
+// job with an actionable message. It is never completed, with or without the
+// result (completing a denied task without its denial would approve it), and
+// nothing is sent over REST.
+func TestFalconWorkerFailsJobWithResult(t *testing.T) {
+	corrections := camunda.NewJobResultCorrections()
+	corrections.SetAssignee("someone")
+	completions := map[string]camunda.JobCompletion{
+		"denial":      {Result: camunda.DenyUserTask("nope")},
+		"corrections": {Variables: map[string]any{"ok": true}, Result: camunda.CorrectUserTask(*corrections)},
+		"ad-hoc":      {Result: camunda.AdHocSubProcessJobResult(*camunda.NewJobResultAdHocSubProcess())},
+	}
+	for name, c := range unencodableCompletions() {
+		completions["unencodable "+name] = c
+	}
+	for name, completion := range completions {
+		t.Run(name, func(t *testing.T) {
+			srv, restBodies, frames := falconJobGateway(t)
+			runFalconWorker(t, srv, completeWith(completion))
+
+			deadline := time.After(5 * time.Second)
+			for {
+				select {
+				case body := <-restBodies:
+					t.Fatalf("job was completed over REST: %v", body)
+				case f := <-frames:
+					switch f["type"] {
+					case "completeJob":
+						t.Fatalf("job was completed over the command stream: %v", f)
+					case "failJob":
+						msg, _ := f["errorMessage"].(string)
+						if !strings.Contains(msg, "cannot be sent over the FALCON command stream") ||
+							!strings.Contains(msg, "CAMUNDA_FORCE_REST=true") {
+							t.Errorf("failJob errorMessage = %q, want the FALCON limitation and its workaround", msg)
+						}
+						if f["retries"] != float64(2) {
+							t.Errorf("failJob retries = %v, want 2 (decremented from 3)", f["retries"])
+						}
+						return
+					}
+				case <-deadline:
+					t.Fatal("job was not failed over the command stream")
+				}
+			}
+		})
+	}
+}
+
+// TestFalconWorkerCompletesWithoutResult: a CompletionHandler that returns no
+// result completes over the command stream exactly like a plain JobHandler.
+func TestFalconWorkerCompletesWithoutResult(t *testing.T) {
+	srv, restBodies, frames := falconJobGateway(t)
+	runFalconWorker(t, srv, completeWith(camunda.JobCompletion{Variables: map[string]any{"ok": true}}))
+
+	deadline := time.After(5 * time.Second)
+	for {
+		select {
+		case body := <-restBodies:
+			t.Fatalf("job was completed over REST: %v", body)
+		case f := <-frames:
+			if f["type"] == "completeJob" {
+				want := map[string]any{"ok": true}
+				if !reflect.DeepEqual(f["variables"], want) {
+					t.Errorf("completeJob variables = %v, want %v", f["variables"], want)
+				}
+				return
+			}
+		case <-deadline:
+			t.Fatal("job was not completed over the command stream")
+		}
+	}
+}
+
 // runFalconWorker runs a JobWorker over the FALCON gateway at srv until the test ends.
 func runFalconWorker(t *testing.T, srv *httptest.Server, handler camunda.JobHandler) {
 	t.Helper()
@@ -405,44 +476,11 @@ func runFalconWorker(t *testing.T, srv *httptest.Server, handler camunda.JobHand
 	go func() { _ = worker.Run(ctx) }()
 }
 
-// TestFalconWorkerSendsResultOverREST covers the FALCON transport: its
-// completeJob frame has no result field, so a completion carrying a result must go
-// over REST (and still replenish the delivery credit) rather than drop the result.
-func TestFalconWorkerSendsResultOverREST(t *testing.T) {
-	srv, restBodies, frames := falconJobGateway(t)
-	runFalconWorker(t, srv, completeWith(camunda.JobCompletion{
-		Result: camunda.DenyUserTask("Insufficient documentation"),
-	}))
-
-	select {
-	case body := <-restBodies:
-		want := mustJSON(t, `{"result":{"type":"userTask","denied":true,"deniedReason":"Insufficient documentation"}}`)
-		if !reflect.DeepEqual(body, want) {
-			t.Errorf("REST completion body = %v, want %v", body, want)
-		}
-	case <-time.After(5 * time.Second):
-		t.Fatal("result-carrying completion was not sent over REST")
-	}
-
-	deadline := time.After(5 * time.Second)
-	for {
-		select {
-		case f := <-frames:
-			switch f["type"] {
-			case "completeJob":
-				t.Fatalf("job was also completed over the command stream: %v", f)
-			case "jobCredits":
-				return
-			}
-		case <-deadline:
-			t.Fatal("delivery credit was not replenished after the REST completion")
-		}
-	}
-}
-
 // unencodableCompletions are result-bearing completions that cannot be put on the
 // wire as JSON. Each must fail the job on every transport, rather than being
 // logged and left to time out (REST) or sent without its variables (gRPC).
+// FALCON fails every result-bearing completion; see
+// TestFalconWorkerFailsJobWithResult.
 func unencodableCompletions() map[string]camunda.JobCompletion {
 	adHoc := camunda.NewJobResultAdHocSubProcess()
 	adHoc.SetActivateElements([]camunda.JobResultActivateElement{
@@ -471,134 +509,6 @@ func TestJobWorkerFailsJobOnUnencodableResult(t *testing.T) {
 				t.Errorf("errorMessage = %q, want it to mention the invalid job result", msg)
 			}
 		})
-	}
-}
-
-func TestFalconWorkerFailsJobOnUnencodableResult(t *testing.T) {
-	for name, completion := range unencodableCompletions() {
-		t.Run(name, func(t *testing.T) {
-			srv, restBodies, frames := falconJobGateway(t)
-			runFalconWorker(t, srv, completeWith(completion))
-
-			deadline := time.After(5 * time.Second)
-			for {
-				select {
-				case body := <-restBodies:
-					t.Fatalf("job was completed over REST: %v", body)
-				case f := <-frames:
-					switch f["type"] {
-					case "completeJob":
-						t.Fatalf("job was completed over the command stream: %v", f)
-					case "failJob":
-						if msg, _ := f["errorMessage"].(string); !strings.Contains(msg, "invalid job result") {
-							t.Errorf("failJob errorMessage = %q, want it to mention the invalid job result", msg)
-						}
-						return
-					}
-				case <-deadline:
-					t.Fatal("job was not failed over the command stream")
-				}
-			}
-		})
-	}
-}
-
-// TestFalconWorkerSendsResultToConnectedGateway covers command-stream failover:
-// the configured gateway drops the stream, the worker fails over to a peer from
-// the topology, and the REST fallback for a result-bearing completion must go to
-// that peer — keeping the REST base path and credentials — not to the
-// configured gateway the stream just left.
-func TestFalconWorkerSendsResultToConnectedGateway(t *testing.T) {
-	type completion struct {
-		path, auth string
-		body       map[string]any
-	}
-	peerCompletions := make(chan completion, 1)
-	configuredCompletions := make(chan string, 1)
-	recordCompletion := func(ch chan completion) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			var body map[string]any
-			_ = json.NewDecoder(r.Body).Decode(&body)
-			select {
-			case ch <- completion{r.URL.Path, r.Header.Get("Authorization"), body}:
-			default:
-			}
-			w.WriteHeader(http.StatusNoContent)
-		}
-	}
-
-	peerMux := http.NewServeMux()
-	peerMux.HandleFunc("/ctx/v2/jobs/2251799813685424/completion", recordCompletion(peerCompletions))
-	peerMux.HandleFunc("/falcon", func(w http.ResponseWriter, r *http.Request) {
-		c, err := websocket.Accept(w, r, nil)
-		if err != nil {
-			return
-		}
-		defer func() { _ = c.CloseNow() }()
-		ctx := r.Context()
-		if sub, err := wsReadJSON(ctx, c); err != nil || sub["type"] != "subscribe" {
-			return
-		}
-		wsWriteJSON(ctx, c, map[string]any{"type": "welcome", "heartbeatMs": 15000})
-		_ = c.Write(ctx, websocket.MessageText, []byte(pushedJobFrame))
-		for {
-			if _, err := wsReadJSON(ctx, c); err != nil {
-				return
-			}
-		}
-	})
-	peer := httptest.NewServer(peerMux)
-	defer peer.Close()
-	peerURL, _ := url.Parse(peer.URL)
-	peerPort, _ := strconv.Atoi(peerURL.Port())
-
-	configuredMux := http.NewServeMux()
-	configuredMux.HandleFunc("/ctx/v2/topology", func(w http.ResponseWriter, _ *http.Request) {
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"nano":    map[string]any{"falconPath": "/falcon"},
-			"brokers": []map[string]any{{"host": peerURL.Hostname(), "port": peerPort}},
-		})
-	})
-	configuredMux.HandleFunc("/ctx/v2/jobs/2251799813685424/completion", func(w http.ResponseWriter, r *http.Request) {
-		select {
-		case configuredCompletions <- r.URL.Path:
-		default:
-		}
-		w.WriteHeader(http.StatusServiceUnavailable)
-	})
-	// The configured gateway's command stream is failing: it accepts the socket
-	// and drops it at once, so the link fails over to the peer.
-	configuredMux.HandleFunc("/falcon", func(w http.ResponseWriter, r *http.Request) {
-		if c, err := websocket.Accept(w, r, nil); err == nil {
-			_ = c.CloseNow()
-		}
-	})
-	configured := httptest.NewServer(configuredMux)
-	defer configured.Close()
-
-	client, err := camunda.New(camunda.WithRestAddress(configured.URL+"/ctx"), camunda.WithFalcon(true),
-		camunda.WithBasicAuth("demo", "secret"), camunda.WithLogLevel(camunda.LogOff))
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-	worker := client.NewJobWorker("email", completeWith(camunda.JobCompletion{Result: camunda.DenyUserTask("nope")}))
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	go func() { _ = worker.Run(ctx) }()
-
-	select {
-	case got := <-peerCompletions:
-		if want := "Basic " + base64.StdEncoding.EncodeToString([]byte("demo:secret")); got.auth != want {
-			t.Errorf("Authorization = %q, want the configured basic credentials", got.auth)
-		}
-		want := mustJSON(t, `{"result":{"type":"userTask","denied":true,"deniedReason":"nope"}}`)
-		if !reflect.DeepEqual(got.body, want) {
-			t.Errorf("completion body = %v, want %v", got.body, want)
-		}
-	case path := <-configuredCompletions:
-		t.Fatalf("completion went to the configured gateway (%s), not the one the stream is connected to", path)
-	case <-time.After(5 * time.Second):
-		t.Fatal("result-carrying completion was not sent to the connected gateway")
 	}
 }
 

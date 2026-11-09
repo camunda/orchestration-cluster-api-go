@@ -29,9 +29,6 @@ type JobWorker struct {
 	withLease      bool
 	// startupDelay is drawn once, when the worker is built; see startupJitter.
 	startupDelay time.Duration
-	// falconAckTimeout bounds a FALCON job's REST acknowledgement; zero means 30s.
-	// A test seam.
-	falconAckTimeout time.Duration
 }
 
 // WorkerOption customizes a JobWorker.
@@ -209,30 +206,22 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 	return nil
 }
 
+// falconJobResultUnsupported is the failure message for a job completed with a
+// job result over the FALCON command stream.
+const falconJobResultUnsupported = "Job results (user task corrections/denial, ad-hoc sub-process results) " +
+	"cannot be sent over the FALCON command stream; set CAMUNDA_FORCE_REST=true to use the REST transport"
+
 // handleFalcon runs the handler and acknowledges the job over the command stream.
 // Each ack (complete/fail/throw) replenishes one delivery credit.
 //
-// The command stream's completeJob frame cannot carry a job result, so a
-// completion with one is sent over REST instead (the gateway is a superset of the
-// REST API) and the credit is replenished separately. The REST call goes to the
-// gateway the stream is connected to (see falconAckClients): the stream may have
-// failed over away from the configured address precisely because that gateway is
-// down.
+// The command stream's completeJob frame has no result field, so a completion
+// carrying a job result fails the job instead. Completing it without the result
+// would be wrong, not just lossy: it would approve a task the handler denied.
 func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, job *Job) {
 	vars, err := w.handler(ctx, job)
-	var result *JobResult
-	if err == nil {
-		result, err = completionResult(job, vars)
-	}
-	if err == nil && result != nil {
-		ackTimeout := w.falconAckTimeout
-		if ackTimeout <= 0 {
-			ackTimeout = 30 * time.Second
-		}
-		ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), ackTimeout)
-		defer cancel()
-		w.client.restCompleteJobVia(ackCtx, job, vars, result, w.falconAckClients(ackCtx, ackTimeout, sw)...)
-		sw.Replenish(1)
+	if err == nil && job.result != nil {
+		w.client.logger.Error("job result not sent: "+falconJobResultUnsupported, "job", job.Key())
+		sw.Fail(job.Key(), max(job.Retries()-1, 0), falconJobResultUnsupported)
 		return
 	}
 	if err != nil {
@@ -249,28 +238,6 @@ func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, j
 		return
 	}
 	sw.Complete(job.Key(), vars)
-}
-
-// falconAckClients returns the REST clients to try, in order, for a FALCON job's
-// REST acknowledgement.
-//
-// The gateway behind the live command stream comes first. While the link is
-// reconnecting there is none, so it waits for one for up to half the ack budget,
-// keeping the rest for the REST call itself: the peer the stream was on may be
-// the one that died, so a freshly connected gateway is preferred to it. If no
-// connection comes up in time, it falls back to the last connected peer and then
-// the configured address.
-func (w *JobWorker) falconAckClients(ackCtx context.Context, ackTimeout time.Duration, sw *falcon.StreamWorker) []*camundaapi.APIClient {
-	waitCtx, cancel := context.WithTimeout(ackCtx, ackTimeout/2)
-	defer cancel()
-	if ep, ok := sw.AwaitEndpoint(waitCtx); ok {
-		return []*camundaapi.APIClient{w.client.restClientForEndpoint(ep)}
-	}
-	last := w.client.restClientForEndpoint(sw.LastEndpoint())
-	if last == w.client.raw {
-		return []*camundaapi.APIClient{last}
-	}
-	return []*camundaapi.APIClient{last, w.client.raw}
 }
 
 // runRESTPoll is the REST long-polling worker loop (also the FALCON fallback).
@@ -396,14 +363,6 @@ func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]a
 // restCompleteJob completes a job over REST. result must already have been passed
 // through completionResult, or be nil.
 func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any, result *JobResult) {
-	c.restCompleteJobVia(ctx, job, vars, result, c.raw)
-}
-
-// restCompleteJobVia is restCompleteJob through the first of raws that reaches a
-// gateway. It moves on to the next client only when a request got no HTTP
-// response at all (the gateway is unreachable): any response, success or not,
-// means that gateway decided the command.
-func (c *CamundaClient) restCompleteJobVia(ctx context.Context, job *Job, vars map[string]any, result *JobResult, raws ...*camundaapi.APIClient) {
 	req := camundaapi.NewJobCompletionRequest()
 	if len(vars) > 0 {
 		req.SetVariables(vars)
@@ -414,17 +373,10 @@ func (c *CamundaClient) restCompleteJobVia(ctx context.Context, job *Job, vars m
 	if job.leaseToken != "" {
 		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
 	}
-	for i, raw := range raws {
-		resp, err := raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
-			JobCompletionRequest(*req).Execute()
-		if err == nil {
-			return
-		}
-		if resp != nil || ctx.Err() != nil || i == len(raws)-1 {
-			c.logger.Error("complete job failed", "job", job.Key(), "error", err)
-			return
-		}
-		c.logger.Warn("complete job: gateway unreachable; trying the next one", "job", job.Key(), "error", err)
+	_, err := c.raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
+		JobCompletionRequest(*req).Execute()
+	if err != nil {
+		c.logger.Error("complete job failed", "job", job.Key(), "error", err)
 	}
 }
 

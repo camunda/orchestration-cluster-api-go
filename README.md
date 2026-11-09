@@ -372,8 +372,15 @@ The worker sets the result's `type` discriminator (`userTask` or
 the generated `JobResult` union is sent correctly too. A result with no variant —
 or both — fails the job rather than completing it without the result. Job results
 work with both workers: the gRPC streaming worker sends them on `CompleteJob`, and
-the REST worker on `POST /jobs/{jobKey}/completion` (also when it receives jobs over
-the FALCON command stream, whose completion frame cannot carry a result).
+the REST worker on `POST /jobs/{jobKey}/completion`.
+
+The FALCON command stream (used by `NewJobWorker` when a nanobpmn gateway
+advertises it) cannot carry a job result: its completion frame has no result
+field. On FALCON, a handler that returns a result fails the job with a message
+saying so, rather than completing it without the result — which would, for
+example, approve a task the listener denied. To use job results against such a
+gateway, set `CAMUNDA_FORCE_REST=true` (or `camunda.WithForceREST(true)`) so the
+worker polls over REST.
 
 ## Deploying and starting processes
 
