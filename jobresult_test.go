@@ -2,6 +2,7 @@ package camunda_test
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"math"
@@ -587,7 +588,7 @@ func TestFalconWorkerSendsResultToConnectedGateway(t *testing.T) {
 
 	select {
 	case got := <-peerCompletions:
-		if got.auth != "Basic ZGVtbzpzZWNyZXQ=" {
+		if want := "Basic " + base64.StdEncoding.EncodeToString([]byte("demo:secret")); got.auth != want {
 			t.Errorf("Authorization = %q, want the configured basic credentials", got.auth)
 		}
 		want := mustJSON(t, `{"result":{"type":"userTask","denied":true,"deniedReason":"nope"}}`)
