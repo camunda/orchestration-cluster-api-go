@@ -644,3 +644,111 @@ func TestJobResultCorrectionsDecodesPaddedClear(t *testing.T) {
 			c.IsDueDateCleared(), c.IsFollowUpDateCleared(), c.HasFollowUpDate())
 	}
 }
+
+// plainCorrections has JobResultCorrections' fields but none of its methods, so
+// it decodes with encoding/json's default semantics: the oracle for the generated
+// decoder on inputs that do not clear a date.
+type plainCorrections camunda.JobResultCorrections
+
+func populatedCorrections() *camunda.JobResultCorrections {
+	c := camunda.NewJobResultCorrections()
+	c.SetAssignee("someone")
+	c.SetDueDate(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC))
+	c.ClearFollowUpDate()
+	c.SetCandidateGroups([]string{"reviewers"})
+	c.SetCandidateUsers([]string{"alice"})
+	c.SetPriority(40)
+	return c
+}
+
+// TestJobResultCorrectionsDecodeMergesLikeEncodingJSON: decoding into a populated
+// receiver leaves absent properties (clear markers included) untouched and
+// otherwise behaves exactly like encoding/json's default decoding of the model.
+func TestJobResultCorrectionsDecodeMergesLikeEncodingJSON(t *testing.T) {
+	for _, in := range []string{
+		`{}`,
+		`null`,
+		`{"priority":80}`,
+		`{"assignee":"other"}`,
+		`{"assignee":null}`,
+		`{"candidateGroups":["x"]}`,
+		`{"candidateUsers":[]}`,
+		`{"priority":null,"candidateGroups":null}`,
+		`{"dueDate":"2027-05-06T07:08:09Z"}`,
+		`{"dueDate":null}`,
+		`{"unknown":1,"priority":80}`,
+	} {
+		t.Run(in, func(t *testing.T) {
+			got := populatedCorrections()
+			if err := json.Unmarshal([]byte(in), got); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			oracle := plainCorrections(*populatedCorrections())
+			if err := json.Unmarshal([]byte(in), &oracle); err != nil {
+				t.Fatalf("oracle Unmarshal: %v", err)
+			}
+			if want := camunda.JobResultCorrections(oracle); !reflect.DeepEqual(*got, want) {
+				gotJSON, _ := json.Marshal(got)
+				wantJSON, _ := json.Marshal(&want)
+				t.Errorf("decoded into a populated receiver:\n got %s\nwant %s", gotJSON, wantJSON)
+			}
+			if !got.IsFollowUpDateCleared() {
+				t.Error("the follow-up date clear, absent from the input, was lost")
+			}
+		})
+	}
+}
+
+// TestJobResultCorrectionsDecodeClearTransitions: on decode, "" clears a date
+// (unsetting its value) and a timestamp or null replaces a clear, matching the
+// last-call-wins rule of Set/SetNil/Clear; other properties do not touch it.
+func TestJobResultCorrectionsDecodeClearTransitions(t *testing.T) {
+	ts := time.Date(2027, 5, 6, 7, 8, 9, 0, time.UTC)
+	type date struct {
+		prop    string
+		set     func(*camunda.JobResultCorrections, time.Time)
+		clear   func(*camunda.JobResultCorrections)
+		cleared func(*camunda.JobResultCorrections) bool
+		get     func(*camunda.JobResultCorrections) (*time.Time, bool)
+	}
+	for _, d := range []date{
+		{"dueDate", (*camunda.JobResultCorrections).SetDueDate, (*camunda.JobResultCorrections).ClearDueDate,
+			(*camunda.JobResultCorrections).IsDueDateCleared, (*camunda.JobResultCorrections).GetDueDateOk},
+		{"followUpDate", (*camunda.JobResultCorrections).SetFollowUpDate, (*camunda.JobResultCorrections).ClearFollowUpDate,
+			(*camunda.JobResultCorrections).IsFollowUpDateCleared, (*camunda.JobResultCorrections).GetFollowUpDateOk},
+	} {
+		cases := []struct {
+			name        string
+			start       func(*camunda.JobResultCorrections)
+			in          string
+			wantCleared bool
+			wantSet     bool
+			wantValue   *time.Time
+		}{
+			{"set then decoded clear", func(c *camunda.JobResultCorrections) { d.set(c, ts) }, `{"` + d.prop + `":""}`, true, false, nil},
+			{"clear kept when absent", d.clear, `{"priority":80}`, true, false, nil},
+			{"clear replaced by timestamp", d.clear, `{"` + d.prop + `":"2027-05-06T07:08:09Z"}`, false, true, &ts},
+			{"clear replaced by null", d.clear, `{"` + d.prop + `":null}`, false, true, nil},
+			{"set kept when absent", func(c *camunda.JobResultCorrections) { d.set(c, ts) }, `{"priority":80}`, false, true, &ts},
+		}
+		for _, tc := range cases {
+			t.Run(d.prop+"/"+tc.name, func(t *testing.T) {
+				c := camunda.NewJobResultCorrections()
+				c.SetAssignee("someone")
+				tc.start(c)
+				if err := json.Unmarshal([]byte(tc.in), c); err != nil {
+					t.Fatalf("Unmarshal: %v", err)
+				}
+				v, set := d.get(c)
+				if d.cleared(c) != tc.wantCleared || set != tc.wantSet ||
+					(v == nil) != (tc.wantValue == nil) || (v != nil && !v.Equal(*tc.wantValue)) {
+					t.Errorf("cleared=%v set=%v value=%v; want cleared=%v set=%v value=%v",
+						d.cleared(c), set, v, tc.wantCleared, tc.wantSet, tc.wantValue)
+				}
+				if c.GetAssignee() != "someone" {
+					t.Errorf("assignee = %q, want it left untouched", c.GetAssignee())
+				}
+			})
+		}
+	}
+}
