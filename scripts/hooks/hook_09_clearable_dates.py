@@ -19,8 +19,10 @@ and ``UnsetDueDate`` drop the marker, so the last call wins.
 
 Decoding needs the reverse: ``NullableTime`` rejects ``""``, so a model with a
 clearable date gets an ``UnmarshalJSON`` that takes an empty string for each such
-property as a clear (setting the marker) and decodes everything else exactly as
-the default decoder would — timestamps, ``null`` and absent properties included.
+property as a clear (unsetting the date and setting the marker) and otherwise
+keeps encoding/json's semantics: it decodes into a copy of the receiver, so absent
+properties — clear markers included — are left untouched, and a timestamp or
+``null`` for a date replaces its clear, as the setters do.
 A generated model that already has its own ``UnmarshalJSON`` fails the run, as
 the two cannot be merged safely.
 
@@ -114,7 +116,12 @@ _UNMARSHAL_MARKER = "an empty string for a clearable date"
 
 
 def _unmarshal(text: str, model: str, cleared: list[tuple[str, str, str]], path: Path) -> str:
-    """Emit UnmarshalJSON restoring the clear markers; cleared is (prop, field, flag)."""
+    """Emit UnmarshalJSON restoring the clear markers; cleared is (prop, field, flag).
+
+    It keeps encoding/json's merge semantics for the model, which has no decoder
+    of its own otherwise: it decodes into a copy of the receiver, so a property
+    absent from the input (a date's clear marker included) is left untouched.
+    """
     signature = f"func (o *{model}) UnmarshalJSON(data []byte) error {{"
     if signature in text:
         if _UNMARSHAL_MARKER not in text:
@@ -122,9 +129,10 @@ def _unmarshal(text: str, model: str, cleared: list[tuple[str, str, str]], path:
         return text
     names = ", ".join(field for _, field, _ in cleared)
     lines = [
-        f"// UnmarshalJSON decodes a {model}, taking {_UNMARSHAL_MARKER}",
-        f"// ({names}) as a clear: the inverse of ToMap. Everything else, including",
-        "// timestamps, null and absent properties, decodes as with the default decoder.",
+        f"// UnmarshalJSON decodes into a {model} like encoding/json, taking",
+        f"// {_UNMARSHAL_MARKER} ({names}) as a clear: the inverse",
+        "// of ToMap. As with the default decoder, properties absent from data are left",
+        "// untouched; a timestamp or null for a date replaces a clear, as its setters do.",
         signature,
         f"\ttype plain {model}",
         "\tvar raw map[string]json.RawMessage",
@@ -141,9 +149,11 @@ def _unmarshal(text: str, model: str, cleared: list[tuple[str, str, str]], path:
         "\t}",
     ]
     for prop, _, flag in cleared:
+        base = flag[: -len("Cleared")]
         lines += [
-            f"\t{flag} := isEmpty(raw[\"{prop}\"])",
-            f"\tif {flag} {{",
+            f"\t{base}Value, {base}Present := raw[\"{prop}\"]",
+            f"\t{base}Clear := {base}Present && isEmpty({base}Value)",
+            f"\tif {base}Clear {{",
             f"\t\tdelete(raw, \"{prop}\")",
             "\t}",
         ]
@@ -152,14 +162,22 @@ def _unmarshal(text: str, model: str, cleared: list[tuple[str, str, str]], path:
         "\tif err != nil {",
         "\t\treturn err",
         "\t}",
-        "\tvar p plain",
+        "\tp := plain(*o)",
         "\tif err := json.Unmarshal(rest, &p); err != nil {",
         "\t\treturn err",
         "\t}",
         f"\t*o = {model}(p)",
     ]
-    for _, _, flag in cleared:
-        lines.append(f"\to.{flag} = {flag}")
+    for _, field, flag in cleared:
+        base = flag[: -len("Cleared")]
+        lines += [
+            f"\tif {base}Clear {{",
+            f"\t\to.{field}.Unset()",
+            f"\t\to.{flag} = true",
+            f"\t}} else if {base}Present {{",
+            f"\t\to.{flag} = false",
+            "\t}",
+        ]
     lines += ["\treturn nil", "}"]
     return text.rstrip("\n") + "\n\n" + "\n".join(lines) + "\n"
 
