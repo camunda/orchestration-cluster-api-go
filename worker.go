@@ -216,7 +216,7 @@ func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, j
 	vars, err := w.handler(ctx, job)
 	var result *JobResult
 	if err == nil {
-		result, err = wireJobResult(job.result)
+		result, err = completionResult(job, vars)
 	}
 	if err == nil && result != nil {
 		ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
@@ -347,7 +347,7 @@ func (w *JobWorker) handle(ctx context.Context, job *Job) {
 func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]any, handlerErr error) {
 	var result *JobResult
 	if handlerErr == nil {
-		result, handlerErr = wireJobResult(job.result)
+		result, handlerErr = completionResult(job, vars)
 	}
 	if handlerErr != nil {
 		var bpmn *BpmnError
@@ -362,7 +362,7 @@ func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]a
 }
 
 // restCompleteJob completes a job over REST. result must already have been passed
-// through wireJobResult, or be nil.
+// through completionResult, or be nil.
 func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any, result *JobResult) {
 	req := camundaapi.NewJobCompletionRequest()
 	if len(vars) > 0 {

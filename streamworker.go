@@ -381,7 +381,10 @@ func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *
 
 	var result *pb.JobResult
 	if err == nil {
-		result, err = grpcJobResult(job.result)
+		var r *JobResult
+		if r, err = completionResult(job, vars); err == nil {
+			result, err = grpcJobResult(r)
+		}
 	}
 	if err != nil {
 		var bpmn *BpmnError

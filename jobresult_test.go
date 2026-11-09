@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -342,12 +343,13 @@ func TestCompletionHandlerKeepsErrorSemantics(t *testing.T) {
 	}
 }
 
-// TestFalconWorkerSendsResultOverREST covers the FALCON transport: its
-// completeJob frame has no result field, so a completion carrying a result must go
-// over REST (and still replenish the delivery credit) rather than drop the result.
-func TestFalconWorkerSendsResultOverREST(t *testing.T) {
-	restBodies := make(chan map[string]any, 1)
-	frames := make(chan map[string]any, 8)
+// falconJobGateway is a single nanobpmn gateway that pushes pushedJobFrame to
+// the first subscriber. It records REST completions of that job and every frame
+// the worker sends after subscribing.
+func falconJobGateway(t *testing.T) (srv *httptest.Server, restBodies, frames chan map[string]any) {
+	t.Helper()
+	restBodies = make(chan map[string]any, 1)
+	frames = make(chan map[string]any, 8)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v2/topology", func(w http.ResponseWriter, _ *http.Request) {
 		_ = json.NewEncoder(w).Encode(map[string]any{"nano": map[string]any{"falconPath": "/falcon"}})
@@ -381,20 +383,33 @@ func TestFalconWorkerSendsResultOverREST(t *testing.T) {
 			}
 		}
 	})
-	srv := httptest.NewServer(mux)
-	defer srv.Close()
+	srv = httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+	return srv, restBodies, frames
+}
 
+// runFalconWorker runs a JobWorker over the FALCON gateway at srv until the test ends.
+func runFalconWorker(t *testing.T, srv *httptest.Server, handler camunda.JobHandler) {
+	t.Helper()
 	client, err := camunda.New(camunda.WithRestAddress(srv.URL+"/v2"), camunda.WithFalcon(true),
 		camunda.WithLogLevel(camunda.LogOff))
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
-	worker := client.NewJobWorker("email", completeWith(camunda.JobCompletion{
+	worker := client.NewJobWorker("email", handler)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	go func() { _ = worker.Run(ctx) }()
+}
+
+// TestFalconWorkerSendsResultOverREST covers the FALCON transport: its
+// completeJob frame has no result field, so a completion carrying a result must go
+// over REST (and still replenish the delivery credit) rather than drop the result.
+func TestFalconWorkerSendsResultOverREST(t *testing.T) {
+	srv, restBodies, frames := falconJobGateway(t)
+	runFalconWorker(t, srv, completeWith(camunda.JobCompletion{
 		Result: camunda.DenyUserTask("Insufficient documentation"),
 	}))
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	go func() { _ = worker.Run(ctx) }()
 
 	select {
 	case body := <-restBodies:
@@ -419,5 +434,68 @@ func TestFalconWorkerSendsResultOverREST(t *testing.T) {
 		case <-deadline:
 			t.Fatal("delivery credit was not replenished after the REST completion")
 		}
+	}
+}
+
+// unencodableCompletions are result-bearing completions that cannot be put on the
+// wire as JSON. Each must fail the job on every transport, rather than being
+// logged and left to time out (REST) or sent without its variables (gRPC).
+func unencodableCompletions() map[string]camunda.JobCompletion {
+	adHoc := camunda.NewJobResultAdHocSubProcess()
+	adHoc.SetActivateElements([]camunda.JobResultActivateElement{
+		camunda.ActivateAdHocElement("task_a", map[string]any{"score": math.NaN()}),
+	})
+	corrections := camunda.NewJobResultCorrections()
+	corrections.SetDueDate(time.Date(10000, 1, 1, 0, 0, 0, 0, time.UTC)) // outside RFC 3339
+	return map[string]camunda.JobCompletion{
+		"ad-hoc element variables": {Result: camunda.AdHocSubProcessJobResult(*adHoc)},
+		"user task corrections":    {Result: camunda.CorrectUserTask(*corrections)},
+		"variables alongside a result": {
+			Variables: map[string]any{"score": math.Inf(1)},
+			Result:    camunda.DenyUserTask("nope"),
+		},
+	}
+}
+
+func TestJobWorkerFailsJobOnUnencodableResult(t *testing.T) {
+	for name, completion := range unencodableCompletions() {
+		t.Run(name, func(t *testing.T) {
+			path, body := captureRESTAck(t, completeWith(completion))
+			if !strings.HasSuffix(path, "/jobs/123/failure") {
+				t.Fatalf("ack path = %q, want .../jobs/123/failure", path)
+			}
+			if msg, _ := body["errorMessage"].(string); !strings.Contains(msg, "invalid job result") {
+				t.Errorf("errorMessage = %q, want it to mention the invalid job result", msg)
+			}
+		})
+	}
+}
+
+func TestFalconWorkerFailsJobOnUnencodableResult(t *testing.T) {
+	for name, completion := range unencodableCompletions() {
+		t.Run(name, func(t *testing.T) {
+			srv, restBodies, frames := falconJobGateway(t)
+			runFalconWorker(t, srv, completeWith(completion))
+
+			deadline := time.After(5 * time.Second)
+			for {
+				select {
+				case body := <-restBodies:
+					t.Fatalf("job was completed over REST: %v", body)
+				case f := <-frames:
+					switch f["type"] {
+					case "completeJob":
+						t.Fatalf("job was completed over the command stream: %v", f)
+					case "failJob":
+						if msg, _ := f["errorMessage"].(string); !strings.Contains(msg, "invalid job result") {
+							t.Errorf("failJob errorMessage = %q, want it to mention the invalid job result", msg)
+						}
+						return
+					}
+				case <-deadline:
+					t.Fatal("job was not failed over the command stream")
+				}
+			}
+		})
 	}
 }

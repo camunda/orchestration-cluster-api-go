@@ -132,6 +132,29 @@ func wireJobResult(r *JobResult) (*JobResult, error) {
 	}
 }
 
+// completionResult prepares the job result a CompletionHandler attached to job for
+// sending alongside vars, or returns nil when there is none.
+//
+// A result-bearing completion is checked for JSON encodability up front: the
+// result itself (a map holding math.NaN, a date outside years 0-9999) and the
+// variables sent with it. Otherwise each transport would fail differently: the
+// REST client errors before sending and the job is only logged, never failed, so
+// it is redelivered after its timeout, while gRPC would fail it. An error wraps
+// errInvalidJobResult and takes the job-failure path on every transport.
+func completionResult(job *Job, vars map[string]any) (*JobResult, error) {
+	r, err := wireJobResult(job.result)
+	if r == nil || err != nil {
+		return r, err
+	}
+	if _, err := json.Marshal(r); err != nil {
+		return nil, fmt.Errorf("%w: %v", errInvalidJobResult, err)
+	}
+	if _, err := json.Marshal(vars); err != nil {
+		return nil, fmt.Errorf("%w: completion variables: %v", errInvalidJobResult, err)
+	}
+	return r, nil
+}
+
 // grpcJobResult converts a JobResult to its gateway.proto form. Explicit nulls in
 // the REST model mean "preserve the persisted value", as does omission, so both
 // map to an unset proto field.

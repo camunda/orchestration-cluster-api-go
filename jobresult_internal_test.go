@@ -3,6 +3,7 @@ package camunda
 import (
 	"context"
 	"errors"
+	"math"
 	"strings"
 	"testing"
 	"time"
@@ -173,6 +174,68 @@ func TestStreamJobWorkerFailsJobOnInvalidResult(t *testing.T) {
 	fl := waitFor(t, fake.fails)
 	if fl.JobKey != 7 || !strings.Contains(fl.ErrorMessage, "invalid job result") {
 		t.Errorf("fail = {JobKey:%d ErrorMessage:%q}, want job 7 failed for an invalid job result", fl.JobKey, fl.ErrorMessage)
+	}
+}
+
+// TestStreamJobWorkerFailsJobOnUnencodableResult mirrors the REST and FALCON
+// workers: a result-bearing completion that cannot be JSON-encoded fails the job
+// instead of completing it with its variables silently dropped.
+func TestStreamJobWorkerFailsJobOnUnencodableResult(t *testing.T) {
+	adHoc := NewJobResultAdHocSubProcess()
+	adHoc.SetActivateElements([]JobResultActivateElement{
+		ActivateAdHocElement("task_a", map[string]any{"score": math.NaN()}),
+	})
+	corrections := NewJobResultCorrections()
+	corrections.SetDueDate(time.Date(10000, 1, 1, 0, 0, 0, 0, time.UTC))
+	completions := map[string]JobCompletion{
+		"adhoc":     {Result: AdHocSubProcessJobResult(*adHoc)},
+		"corrected": {Result: CorrectUserTask(*corrections)},
+		"variables": {Variables: map[string]any{"score": math.Inf(1)}, Result: DenyUserTask("nope")},
+	}
+
+	lis := bufconn.Listen(1024 * 1024)
+	fake := &fakeGateway{
+		jobs: []*pb.ActivatedJob{
+			{Key: 1, Type: "adhoc", Retries: 3},
+			{Key: 2, Type: "corrected", Retries: 3},
+			{Key: 3, Type: "variables", Retries: 3},
+		},
+		completes: make(chan *pb.CompleteJobRequest, 3),
+		fails:     make(chan *pb.FailJobRequest, 3),
+		throws:    make(chan *pb.ThrowErrorRequest, 1),
+	}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, fake)
+	go func() { _ = srv.Serve(lis) }()
+	defer srv.Stop()
+
+	client, err := New(WithNoAuth())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	w := client.NewStreamJobWorker("any", CompletionHandler(
+		func(_ context.Context, job *Job) (JobCompletion, error) {
+			return completions[job.Type()], nil
+		}), WithStreamPollInterval(-1), WithStreamMaxConcurrentJobs(3))
+	w.dial = bufDial(lis)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = w.Run(ctx) }()
+
+	failed := map[int64]bool{}
+	for range fake.jobs {
+		select {
+		case fl := <-fake.fails:
+			if !strings.Contains(fl.ErrorMessage, "invalid job result") {
+				t.Errorf("job %d failed with %q, want an invalid job result", fl.JobKey, fl.ErrorMessage)
+			}
+			failed[fl.JobKey] = true
+		case comp := <-fake.completes:
+			t.Errorf("job %d was completed: %v", comp.JobKey, comp)
+		case <-time.After(5 * time.Second):
+			t.Fatalf("timed out; failed so far: %v", failed)
+		}
 	}
 }
 
