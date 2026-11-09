@@ -146,6 +146,7 @@ func document(dir, importPath, include, exclude string) (*Package, error) {
 
 	// doc.NewFromFiles with the default mode keeps only exported declarations,
 	// which is exactly the surface the published reference documents.
+	funcDocs := topLevelFuncDocs(files)
 	dpkg, err := doc.NewFromFiles(fset, files, importPath)
 	if err != nil {
 		return nil, fmt.Errorf("build package documentation: %w", err)
@@ -165,7 +166,7 @@ func document(dir, importPath, include, exclude string) (*Package, error) {
 		pkg.Types = append(pkg.Types, r.typeItem(dt))
 	}
 	sort.Slice(pkg.Types, func(i, j int) bool { return pkg.Types[i].Name < pkg.Types[j].Name })
-	pkg.Funcs = append(pkg.Funcs, r.funcs(orphanFuncs(files, dpkg))...)
+	pkg.Funcs = append(pkg.Funcs, r.funcs(orphanFuncs(files, dpkg, funcDocs))...)
 	sort.Slice(pkg.Funcs, func(i, j int) bool { return pkg.Funcs[i].Name < pkg.Funcs[j].Name })
 	return pkg, nil
 }
@@ -175,7 +176,11 @@ func document(dir, importPath, include, exclude string) (*Package, error) {
 // functions when the type has no declaration among the parsed files, so a
 // constructor returning a type declared in an -exclude'd file (a re-exported
 // client type) would otherwise vanish from the reference.
-func orphanFuncs(files []*ast.File, dpkg *doc.Package) []*doc.Func {
+//
+// docs holds the doc comments captured by topLevelFuncDocs, because
+// doc.NewFromFiles clears fn.Doc on the AST it reads, including on the functions
+// it then drops.
+func orphanFuncs(files []*ast.File, dpkg *doc.Package, docs map[*ast.FuncDecl]string) []*doc.Func {
 	seen := map[string]bool{}
 	for _, f := range dpkg.Funcs {
 		seen[f.Name] = true
@@ -192,10 +197,24 @@ func orphanFuncs(files []*ast.File, dpkg *doc.Package) []*doc.Func {
 			if !ok || fn.Recv != nil || !fn.Name.IsExported() || seen[fn.Name.Name] {
 				continue
 			}
-			out = append(out, &doc.Func{Name: fn.Name.Name, Doc: fn.Doc.Text(), Decl: fn})
+			out = append(out, &doc.Func{Name: fn.Name.Name, Doc: docs[fn], Decl: fn})
 		}
 	}
 	return out
+}
+
+// topLevelFuncDocs captures the doc comment of every package-level function
+// before go/doc consumes them.
+func topLevelFuncDocs(files []*ast.File) map[*ast.FuncDecl]string {
+	docs := map[*ast.FuncDecl]string{}
+	for _, file := range files {
+		for _, decl := range file.Decls {
+			if fn, ok := decl.(*ast.FuncDecl); ok && fn.Recv == nil {
+				docs[fn] = fn.Doc.Text()
+			}
+		}
+	}
+	return docs
 }
 
 // parseDir reads dir and parses its non-test Go files. It deliberately avoids
