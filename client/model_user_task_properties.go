@@ -381,7 +381,6 @@ func (o *UserTaskProperties) UnmarshalJSON(data []byte) (err error) {
 	varUserTaskProperties := _UserTaskProperties{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varUserTaskProperties)
 
 	if err != nil {

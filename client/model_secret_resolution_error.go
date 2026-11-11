@@ -165,7 +165,6 @@ func (o *SecretResolutionError) UnmarshalJSON(data []byte) (err error) {
 	varSecretResolutionError := _SecretResolutionError{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varSecretResolutionError)
 
 	if err != nil {

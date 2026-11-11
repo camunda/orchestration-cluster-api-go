@@ -109,7 +109,6 @@ func (o *ClockResult) UnmarshalJSON(data []byte) (err error) {
 	varClockResult := _ClockResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClockResult)
 
 	if err != nil {

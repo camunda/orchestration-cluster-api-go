@@ -344,7 +344,6 @@ func (o *ProcessDefinitionResult) UnmarshalJSON(data []byte) (err error) {
 	varProcessDefinitionResult := _ProcessDefinitionResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessDefinitionResult)
 
 	if err != nil {

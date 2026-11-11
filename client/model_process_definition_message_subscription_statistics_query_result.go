@@ -136,7 +136,6 @@ func (o *ProcessDefinitionMessageSubscriptionStatisticsQueryResult) UnmarshalJSO
 	varProcessDefinitionMessageSubscriptionStatisticsQueryResult := _ProcessDefinitionMessageSubscriptionStatisticsQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessDefinitionMessageSubscriptionStatisticsQueryResult)
 
 	if err != nil {

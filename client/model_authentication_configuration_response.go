@@ -166,7 +166,6 @@ func (o *AuthenticationConfigurationResponse) UnmarshalJSON(data []byte) (err er
 	varAuthenticationConfigurationResponse := _AuthenticationConfigurationResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAuthenticationConfigurationResponse)
 
 	if err != nil {

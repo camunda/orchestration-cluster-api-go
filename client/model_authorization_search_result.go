@@ -136,7 +136,6 @@ func (o *AuthorizationSearchResult) UnmarshalJSON(data []byte) (err error) {
 	varAuthorizationSearchResult := _AuthorizationSearchResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAuthorizationSearchResult)
 
 	if err != nil {

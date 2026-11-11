@@ -312,7 +312,6 @@ func (o *VariableResult) UnmarshalJSON(data []byte) (err error) {
 	varVariableResult := _VariableResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varVariableResult)
 
 	if err != nil {

@@ -166,7 +166,6 @@ func (o *ClusterRestoreAwaitModeChangeOperation) UnmarshalJSON(data []byte) (err
 	varClusterRestoreAwaitModeChangeOperation := _ClusterRestoreAwaitModeChangeOperation{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterRestoreAwaitModeChangeOperation)
 
 	if err != nil {

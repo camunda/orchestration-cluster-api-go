@@ -641,7 +641,6 @@ func (o *DecisionInstanceResult) UnmarshalJSON(data []byte) (err error) {
 	varDecisionInstanceResult := _DecisionInstanceResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDecisionInstanceResult)
 
 	if err != nil {

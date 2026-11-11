@@ -136,7 +136,6 @@ func (o *MappingRuleSearchQueryResult) UnmarshalJSON(data []byte) (err error) {
 	varMappingRuleSearchQueryResult := _MappingRuleSearchQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varMappingRuleSearchQueryResult)
 
 	if err != nil {

@@ -108,7 +108,6 @@ func (o *ExportingStatusResponse) UnmarshalJSON(data []byte) (err error) {
 	varExportingStatusResponse := _ExportingStatusResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varExportingStatusResponse)
 
 	if err != nil {

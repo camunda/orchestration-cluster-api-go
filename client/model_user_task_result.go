@@ -854,7 +854,6 @@ func (o *UserTaskResult) UnmarshalJSON(data []byte) (err error) {
 	varUserTaskResult := _UserTaskResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varUserTaskResult)
 
 	if err != nil {

@@ -496,7 +496,6 @@ func (o *ElementInstanceResult) UnmarshalJSON(data []byte) (err error) {
 	varElementInstanceResult := _ElementInstanceResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varElementInstanceResult)
 
 	if err != nil {

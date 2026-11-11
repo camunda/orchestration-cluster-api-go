@@ -136,7 +136,6 @@ func (o *AgentInstanceHistorySearchQueryResult) UnmarshalJSON(data []byte) (err 
 	varAgentInstanceHistorySearchQueryResult := _AgentInstanceHistorySearchQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAgentInstanceHistorySearchQueryResult)
 
 	if err != nil {

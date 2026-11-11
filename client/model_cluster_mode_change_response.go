@@ -137,7 +137,6 @@ func (o *ClusterModeChangeResponse) UnmarshalJSON(data []byte) (err error) {
 	varClusterModeChangeResponse := _ClusterModeChangeResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterModeChangeResponse)
 
 	if err != nil {

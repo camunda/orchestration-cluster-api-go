@@ -108,7 +108,6 @@ func (o *VariableMetadata) UnmarshalJSON(data []byte) (err error) {
 	varVariableMetadata := _VariableMetadata{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varVariableMetadata)
 
 	if err != nil {

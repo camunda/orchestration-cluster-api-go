@@ -137,7 +137,6 @@ func (o *ClusterRestoreBrokerOperation) UnmarshalJSON(data []byte) (err error) {
 	varClusterRestoreBrokerOperation := _ClusterRestoreBrokerOperation{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterRestoreBrokerOperation)
 
 	if err != nil {

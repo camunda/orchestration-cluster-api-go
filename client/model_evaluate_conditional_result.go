@@ -166,7 +166,6 @@ func (o *EvaluateConditionalResult) UnmarshalJSON(data []byte) (err error) {
 	varEvaluateConditionalResult := _EvaluateConditionalResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varEvaluateConditionalResult)
 
 	if err != nil {

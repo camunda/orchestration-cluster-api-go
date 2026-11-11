@@ -166,7 +166,6 @@ func (o *RuntimeBackupState) UnmarshalJSON(data []byte) (err error) {
 	varRuntimeBackupState := _RuntimeBackupState{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varRuntimeBackupState)
 
 	if err != nil {
