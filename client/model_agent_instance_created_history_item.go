@@ -166,7 +166,6 @@ func (o *AgentInstanceCreatedHistoryItem) UnmarshalJSON(data []byte) (err error)
 	varAgentInstanceCreatedHistoryItem := _AgentInstanceCreatedHistoryItem{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAgentInstanceCreatedHistoryItem)
 
 	if err != nil {

@@ -168,7 +168,6 @@ func (o *RoleUpdateResult) UnmarshalJSON(data []byte) (err error) {
 	varRoleUpdateResult := _RoleUpdateResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varRoleUpdateResult)
 
 	if err != nil {

@@ -137,7 +137,6 @@ func (o *ExpressionSecretReferenceItem) UnmarshalJSON(data []byte) (err error) {
 	varExpressionSecretReferenceItem := _ExpressionSecretReferenceItem{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varExpressionSecretReferenceItem)
 
 	if err != nil {

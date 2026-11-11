@@ -319,7 +319,6 @@ func (o *BatchOperationItemResponse) UnmarshalJSON(data []byte) (err error) {
 	varBatchOperationItemResponse := _BatchOperationItemResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varBatchOperationItemResponse)
 
 	if err != nil {

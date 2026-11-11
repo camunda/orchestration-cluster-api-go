@@ -136,7 +136,6 @@ func (o *ClusterVariableSearchQueryResult) UnmarshalJSON(data []byte) (err error
 	varClusterVariableSearchQueryResult := _ClusterVariableSearchQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterVariableSearchQueryResult)
 
 	if err != nil {

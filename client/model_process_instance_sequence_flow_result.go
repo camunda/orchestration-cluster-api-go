@@ -288,7 +288,6 @@ func (o *ProcessInstanceSequenceFlowResult) UnmarshalJSON(data []byte) (err erro
 	varProcessInstanceSequenceFlowResult := _ProcessInstanceSequenceFlowResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessInstanceSequenceFlowResult)
 
 	if err != nil {

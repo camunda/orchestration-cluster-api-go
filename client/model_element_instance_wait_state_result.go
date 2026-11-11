@@ -313,7 +313,6 @@ func (o *ElementInstanceWaitStateResult) UnmarshalJSON(data []byte) (err error) 
 	varElementInstanceWaitStateResult := _ElementInstanceWaitStateResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varElementInstanceWaitStateResult)
 
 	if err != nil {

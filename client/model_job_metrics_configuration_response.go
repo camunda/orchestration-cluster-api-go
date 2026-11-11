@@ -253,7 +253,6 @@ func (o *JobMetricsConfigurationResponse) UnmarshalJSON(data []byte) (err error)
 	varJobMetricsConfigurationResponse := _JobMetricsConfigurationResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varJobMetricsConfigurationResponse)
 
 	if err != nil {

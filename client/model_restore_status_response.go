@@ -198,7 +198,6 @@ func (o *RestoreStatusResponse) UnmarshalJSON(data []byte) (err error) {
 	varRestoreStatusResponse := _RestoreStatusResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varRestoreStatusResponse)
 
 	if err != nil {

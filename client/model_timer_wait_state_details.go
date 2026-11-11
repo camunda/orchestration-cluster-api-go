@@ -170,7 +170,6 @@ func (o *TimerWaitStateDetails) UnmarshalJSON(data []byte) (err error) {
 	varTimerWaitStateDetails := _TimerWaitStateDetails{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varTimerWaitStateDetails)
 
 	if err != nil {

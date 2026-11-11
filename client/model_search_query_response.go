@@ -107,7 +107,6 @@ func (o *SearchQueryResponse) UnmarshalJSON(data []byte) (err error) {
 	varSearchQueryResponse := _SearchQueryResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varSearchQueryResponse)
 
 	if err != nil {

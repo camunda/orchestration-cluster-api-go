@@ -110,7 +110,6 @@ func (o *CloudConfigurationResponse) UnmarshalJSON(data []byte) (err error) {
 	varCloudConfigurationResponse := _CloudConfigurationResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varCloudConfigurationResponse)
 
 	if err != nil {
