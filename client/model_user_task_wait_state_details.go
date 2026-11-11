@@ -169,7 +169,6 @@ func (o *UserTaskWaitStateDetails) UnmarshalJSON(data []byte) (err error) {
 	varUserTaskWaitStateDetails := _UserTaskWaitStateDetails{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varUserTaskWaitStateDetails)
 
 	if err != nil {

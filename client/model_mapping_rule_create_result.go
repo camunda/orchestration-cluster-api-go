@@ -195,7 +195,6 @@ func (o *MappingRuleCreateResult) UnmarshalJSON(data []byte) (err error) {
 	varMappingRuleCreateResult := _MappingRuleCreateResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varMappingRuleCreateResult)
 
 	if err != nil {

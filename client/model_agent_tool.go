@@ -170,7 +170,6 @@ func (o *AgentTool) UnmarshalJSON(data []byte) (err error) {
 	varAgentTool := _AgentTool{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAgentTool)
 
 	if err != nil {

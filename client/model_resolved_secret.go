@@ -137,7 +137,6 @@ func (o *ResolvedSecret) UnmarshalJSON(data []byte) (err error) {
 	varResolvedSecret := _ResolvedSecret{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varResolvedSecret)
 
 	if err != nil {

@@ -108,7 +108,6 @@ func (o *ComponentsConfigurationResponse) UnmarshalJSON(data []byte) (err error)
 	varComponentsConfigurationResponse := _ComponentsConfigurationResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varComponentsConfigurationResponse)
 
 	if err != nil {

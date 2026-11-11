@@ -136,7 +136,6 @@ func (o *GroupClientSearchResult) UnmarshalJSON(data []byte) (err error) {
 	varGroupClientSearchResult := _GroupClientSearchResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varGroupClientSearchResult)
 
 	if err != nil {

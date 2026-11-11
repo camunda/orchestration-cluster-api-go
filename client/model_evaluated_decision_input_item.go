@@ -166,7 +166,6 @@ func (o *EvaluatedDecisionInputItem) UnmarshalJSON(data []byte) (err error) {
 	varEvaluatedDecisionInputItem := _EvaluatedDecisionInputItem{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varEvaluatedDecisionInputItem)
 
 	if err != nil {

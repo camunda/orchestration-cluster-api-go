@@ -138,7 +138,6 @@ func (o *DocumentLink) UnmarshalJSON(data []byte) (err error) {
 	varDocumentLink := _DocumentLink{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDocumentLink)
 
 	if err != nil {

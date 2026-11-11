@@ -224,7 +224,6 @@ func (o *DeploymentFormResult) UnmarshalJSON(data []byte) (err error) {
 	varDeploymentFormResult := _DeploymentFormResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDeploymentFormResult)
 
 	if err != nil {

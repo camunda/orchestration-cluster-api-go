@@ -108,7 +108,6 @@ func (o *ProcessDefinitionElementStatisticsQueryResult) UnmarshalJSON(data []byt
 	varProcessDefinitionElementStatisticsQueryResult := _ProcessDefinitionElementStatisticsQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessDefinitionElementStatisticsQueryResult)
 
 	if err != nil {

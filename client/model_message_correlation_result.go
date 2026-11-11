@@ -166,7 +166,6 @@ func (o *MessageCorrelationResult) UnmarshalJSON(data []byte) (err error) {
 	varMessageCorrelationResult := _MessageCorrelationResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varMessageCorrelationResult)
 
 	if err != nil {

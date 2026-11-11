@@ -195,7 +195,6 @@ func (o *ClusterBrokerInfo) UnmarshalJSON(data []byte) (err error) {
 	varClusterBrokerInfo := _ClusterBrokerInfo{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterBrokerInfo)
 
 	if err != nil {

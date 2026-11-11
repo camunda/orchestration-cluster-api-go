@@ -136,7 +136,6 @@ func (o *IncidentProcessInstanceStatisticsByErrorQueryResult) UnmarshalJSON(data
 	varIncidentProcessInstanceStatisticsByErrorQueryResult := _IncidentProcessInstanceStatisticsByErrorQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varIncidentProcessInstanceStatisticsByErrorQueryResult)
 
 	if err != nil {

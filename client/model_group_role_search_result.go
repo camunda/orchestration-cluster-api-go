@@ -136,7 +136,6 @@ func (o *GroupRoleSearchResult) UnmarshalJSON(data []byte) (err error) {
 	varGroupRoleSearchResult := _GroupRoleSearchResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varGroupRoleSearchResult)
 
 	if err != nil {

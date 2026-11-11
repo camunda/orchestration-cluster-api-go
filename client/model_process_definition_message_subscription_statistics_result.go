@@ -224,7 +224,6 @@ func (o *ProcessDefinitionMessageSubscriptionStatisticsResult) UnmarshalJSON(dat
 	varProcessDefinitionMessageSubscriptionStatisticsResult := _ProcessDefinitionMessageSubscriptionStatisticsResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessDefinitionMessageSubscriptionStatisticsResult)
 
 	if err != nil {
