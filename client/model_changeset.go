@@ -31,6 +31,10 @@ type Changeset struct {
 	// The priority of the task.
 	Priority             NullableInt32 `json:"priority,omitempty"`
 	AdditionalProperties map[string]interface{}
+	// dueDateCleared is set by ClearDueDate: DueDate is then sent as "", which clears it.
+	dueDateCleared bool
+	// followUpDateCleared is set by ClearFollowUpDate: FollowUpDate is then sent as "", which clears it.
+	followUpDateCleared bool
 }
 
 type _Changeset Changeset
@@ -87,16 +91,19 @@ func (o *Changeset) HasDueDate() bool {
 // SetDueDate gets a reference to the given NullableTime and assigns it to the DueDate field.
 func (o *Changeset) SetDueDate(v time.Time) {
 	o.DueDate.Set(&v)
+	o.dueDateCleared = false
 }
 
 // SetDueDateNil sets the value for DueDate to be an explicit nil
 func (o *Changeset) SetDueDateNil() {
 	o.DueDate.Set(nil)
+	o.dueDateCleared = false
 }
 
 // UnsetDueDate ensures that no value is present for DueDate, not even an explicit nil
 func (o *Changeset) UnsetDueDate() {
 	o.DueDate.Unset()
+	o.dueDateCleared = false
 }
 
 // GetFollowUpDate returns the FollowUpDate field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -130,16 +137,19 @@ func (o *Changeset) HasFollowUpDate() bool {
 // SetFollowUpDate gets a reference to the given NullableTime and assigns it to the FollowUpDate field.
 func (o *Changeset) SetFollowUpDate(v time.Time) {
 	o.FollowUpDate.Set(&v)
+	o.followUpDateCleared = false
 }
 
 // SetFollowUpDateNil sets the value for FollowUpDate to be an explicit nil
 func (o *Changeset) SetFollowUpDateNil() {
 	o.FollowUpDate.Set(nil)
+	o.followUpDateCleared = false
 }
 
 // UnsetFollowUpDate ensures that no value is present for FollowUpDate, not even an explicit nil
 func (o *Changeset) UnsetFollowUpDate() {
 	o.FollowUpDate.Unset()
+	o.followUpDateCleared = false
 }
 
 // GetCandidateUsers returns the CandidateUsers field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -261,10 +271,14 @@ func (o Changeset) MarshalJSON() ([]byte, error) {
 
 func (o Changeset) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.DueDate.IsSet() {
+	if o.dueDateCleared && !o.DueDate.IsSet() {
+		toSerialize["dueDate"] = ""
+	} else if o.DueDate.IsSet() {
 		toSerialize["dueDate"] = o.DueDate.Get()
 	}
-	if o.FollowUpDate.IsSet() {
+	if o.followUpDateCleared && !o.FollowUpDate.IsSet() {
+		toSerialize["followUpDate"] = ""
+	} else if o.FollowUpDate.IsSet() {
 		toSerialize["followUpDate"] = o.FollowUpDate.Get()
 	}
 	if o.CandidateUsers != nil {
@@ -284,7 +298,8 @@ func (o Changeset) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *Changeset) UnmarshalJSON(data []byte) (err error) {
+// unmarshalGeneratedJSON is the generator's decoder; UnmarshalJSON wraps it.
+func (o *Changeset) unmarshalGeneratedJSON(data []byte) (err error) {
 	varChangeset := _Changeset{}
 
 	err = json.Unmarshal(data, &varChangeset)
@@ -343,4 +358,73 @@ func (v NullableChangeset) MarshalJSON() ([]byte, error) {
 func (v *NullableChangeset) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
+}
+
+// ClearDueDate clears DueDate: it is sent as an empty string, which the API
+// treats as "remove the value" (null or omission instead preserves it).
+// SetDueDate, SetDueDateNil or UnsetDueDate afterwards replaces the clear.
+func (o *Changeset) ClearDueDate() {
+	o.DueDate.Unset()
+	o.dueDateCleared = true
+}
+
+// IsDueDateCleared reports whether DueDate is to be cleared (see ClearDueDate).
+func (o *Changeset) IsDueDateCleared() bool {
+	return o != nil && o.dueDateCleared && !o.DueDate.IsSet()
+}
+
+// ClearFollowUpDate clears FollowUpDate: it is sent as an empty string, which the API
+// treats as "remove the value" (null or omission instead preserves it).
+// SetFollowUpDate, SetFollowUpDateNil or UnsetFollowUpDate afterwards replaces the clear.
+func (o *Changeset) ClearFollowUpDate() {
+	o.FollowUpDate.Unset()
+	o.followUpDateCleared = true
+}
+
+// IsFollowUpDateCleared reports whether FollowUpDate is to be cleared (see ClearFollowUpDate).
+func (o *Changeset) IsFollowUpDateCleared() bool {
+	return o != nil && o.followUpDateCleared && !o.FollowUpDate.IsSet()
+}
+
+// UnmarshalJSON decodes a Changeset with the generated decoder, taking
+// an empty string for a clearable date (DueDate, FollowUpDate) as a clear: the inverse
+// of ToMap. Like the generated decoder, it replaces the whole value, so a clear
+// absent from data is reset; a timestamp or null for a date is decoded as usual.
+func (o *Changeset) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	// Only a string literal can be a clear; null decodes to "" too but preserves.
+	isEmpty := func(v json.RawMessage) bool {
+		var s string
+		return len(v) > 0 && v[0] == '"' && json.Unmarshal(v, &s) == nil && s == ""
+	}
+	dueDateClear := isEmpty(raw["dueDate"])
+	if dueDateClear {
+		delete(raw, "dueDate")
+	}
+	followUpDateClear := isEmpty(raw["followUpDate"])
+	if followUpDateClear {
+		delete(raw, "followUpDate")
+	}
+	if dueDateClear || followUpDateClear {
+		rest, err := json.Marshal(raw)
+		if err != nil {
+			return err
+		}
+		data = rest
+	}
+	if err := o.unmarshalGeneratedJSON(data); err != nil {
+		return err
+	}
+	if dueDateClear {
+		o.DueDate.Unset()
+		o.dueDateCleared = true
+	}
+	if followUpDateClear {
+		o.FollowUpDate.Unset()
+		o.followUpDateCleared = true
+	}
+	return nil
 }
