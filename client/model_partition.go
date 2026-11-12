@@ -195,7 +195,6 @@ func (o *Partition) UnmarshalJSON(data []byte) (err error) {
 	varPartition := _Partition{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varPartition)
 
 	if err != nil {

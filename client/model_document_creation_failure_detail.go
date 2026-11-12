@@ -195,7 +195,6 @@ func (o *DocumentCreationFailureDetail) UnmarshalJSON(data []byte) (err error) {
 	varDocumentCreationFailureDetail := _DocumentCreationFailureDetail{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDocumentCreationFailureDetail)
 
 	if err != nil {

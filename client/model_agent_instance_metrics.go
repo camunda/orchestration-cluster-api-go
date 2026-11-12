@@ -282,7 +282,6 @@ func (o *AgentInstanceMetrics) UnmarshalJSON(data []byte) (err error) {
 	varAgentInstanceMetrics := _AgentInstanceMetrics{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAgentInstanceMetrics)
 
 	if err != nil {

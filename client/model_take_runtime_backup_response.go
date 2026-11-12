@@ -108,7 +108,6 @@ func (o *TakeRuntimeBackupResponse) UnmarshalJSON(data []byte) (err error) {
 	varTakeRuntimeBackupResponse := _TakeRuntimeBackupResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varTakeRuntimeBackupResponse)
 
 	if err != nil {

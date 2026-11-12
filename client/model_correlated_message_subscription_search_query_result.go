@@ -136,7 +136,6 @@ func (o *CorrelatedMessageSubscriptionSearchQueryResult) UnmarshalJSON(data []by
 	varCorrelatedMessageSubscriptionSearchQueryResult := _CorrelatedMessageSubscriptionSearchQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varCorrelatedMessageSubscriptionSearchQueryResult)
 
 	if err != nil {

@@ -289,7 +289,6 @@ func (o *DocumentMetadataResponse) UnmarshalJSON(data []byte) (err error) {
 	varDocumentMetadataResponse := _DocumentMetadataResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDocumentMetadataResponse)
 
 	if err != nil {

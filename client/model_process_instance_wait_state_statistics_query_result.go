@@ -108,7 +108,6 @@ func (o *ProcessInstanceWaitStateStatisticsQueryResult) UnmarshalJSON(data []byt
 	varProcessInstanceWaitStateStatisticsQueryResult := _ProcessInstanceWaitStateStatisticsQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessInstanceWaitStateStatisticsQueryResult)
 
 	if err != nil {

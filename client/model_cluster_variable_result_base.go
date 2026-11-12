@@ -224,7 +224,6 @@ func (o *ClusterVariableResultBase) UnmarshalJSON(data []byte) (err error) {
 	varClusterVariableResultBase := _ClusterVariableResultBase{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterVariableResultBase)
 
 	if err != nil {

@@ -170,7 +170,6 @@ func (o *UserResult) UnmarshalJSON(data []byte) (err error) {
 	varUserResult := _UserResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varUserResult)
 
 	if err != nil {

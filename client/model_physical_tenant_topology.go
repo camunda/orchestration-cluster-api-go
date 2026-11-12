@@ -224,7 +224,6 @@ func (o *PhysicalTenantTopology) UnmarshalJSON(data []byte) (err error) {
 	varPhysicalTenantTopology := _PhysicalTenantTopology{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varPhysicalTenantTopology)
 
 	if err != nil {

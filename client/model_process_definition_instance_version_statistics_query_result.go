@@ -136,7 +136,6 @@ func (o *ProcessDefinitionInstanceVersionStatisticsQueryResult) UnmarshalJSON(da
 	varProcessDefinitionInstanceVersionStatisticsQueryResult := _ProcessDefinitionInstanceVersionStatisticsQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessDefinitionInstanceVersionStatisticsQueryResult)
 
 	if err != nil {

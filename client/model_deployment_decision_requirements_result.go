@@ -253,7 +253,6 @@ func (o *DeploymentDecisionRequirementsResult) UnmarshalJSON(data []byte) (err e
 	varDeploymentDecisionRequirementsResult := _DeploymentDecisionRequirementsResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDeploymentDecisionRequirementsResult)
 
 	if err != nil {

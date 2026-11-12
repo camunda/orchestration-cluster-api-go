@@ -139,7 +139,6 @@ func (o *DeleteResourceResponse) UnmarshalJSON(data []byte) (err error) {
 	varDeleteResourceResponse := _DeleteResourceResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDeleteResourceResponse)
 
 	if err != nil {
