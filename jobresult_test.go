@@ -3,6 +3,7 @@ package camunda_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math"
 	"net/http"
@@ -750,5 +751,68 @@ func TestJobResultCorrectionsDecodeClearTransitions(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+// TestJobResultCorrectionsClearKeepsMemberOrder: apart from the clear, decoding must
+// match encoding/json's default decoding of the model (with null for the date).
+// encoding/json matches names case-insensitively and the last member wins, so
+// filtering the clear out through a map (which reorders) changes the result.
+func TestJobResultCorrectionsClearKeepsMemberOrder(t *testing.T) {
+	for _, others := range []string{
+		`"priority":80,"Priority":10`,
+		`"Priority":10,"priority":80`,
+		`"assignee":"a","Assignee":"b"`,
+		`"Assignee":"b","assignee":"a"`,
+		`"followUpDate":"2026-01-02T03:04:05Z","FollowUpDate":null`,
+	} {
+		for _, in := range []string{`{` + others + `,"dueDate":%s}`, `{"dueDate":%s,` + others + `}`} {
+			t.Run(in, func(t *testing.T) {
+				var cleared camunda.JobResultCorrections
+				var oracle plainCorrections
+				if err := json.Unmarshal([]byte(fmt.Sprintf(in, `""`)), &cleared); err != nil {
+					t.Fatalf("Unmarshal clear: %v", err)
+				}
+				if err := json.Unmarshal([]byte(fmt.Sprintf(in, `null`)), &oracle); err != nil {
+					t.Fatalf("Unmarshal null: %v", err)
+				}
+				if !cleared.IsDueDateCleared() {
+					t.Error("dueDate \"\" did not decode as a clear")
+				}
+				nulled := camunda.JobResultCorrections(oracle)
+				cleared.UnsetDueDate()
+				nulled.UnsetDueDate()
+				if !reflect.DeepEqual(cleared, nulled) {
+					a, _ := json.Marshal(&cleared)
+					b, _ := json.Marshal(&nulled)
+					t.Errorf("other members decode differently with a clear:\n clear %s\n  null %s", a, b)
+				}
+			})
+		}
+	}
+}
+
+// TestJobResultCorrectionsRepeatedDateLastWins: as with any member, the last of
+// several members naming a date (in any letter case) decides whether it is cleared.
+func TestJobResultCorrectionsRepeatedDateLastWins(t *testing.T) {
+	ts := time.Date(2027, 5, 6, 7, 8, 9, 0, time.UTC)
+	for _, tc := range []struct {
+		in      string
+		cleared bool
+	}{
+		{`{"dueDate":"","DueDate":"2027-05-06T07:08:09Z"}`, false},
+		{`{"dueDate":"2027-05-06T07:08:09Z","DueDate":""}`, true},
+		{`{"DUEDATE":""}`, true},
+	} {
+		t.Run(tc.in, func(t *testing.T) {
+			var c camunda.JobResultCorrections
+			if err := json.Unmarshal([]byte(tc.in), &c); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			v, ok := c.GetDueDateOk()
+			if c.IsDueDateCleared() != tc.cleared || ok == tc.cleared || (!tc.cleared && !v.Equal(ts)) {
+				t.Errorf("cleared=%v set=%v value=%v; want cleared=%v", c.IsDueDateCleared(), ok, v, tc.cleared)
+			}
+		})
 	}
 }

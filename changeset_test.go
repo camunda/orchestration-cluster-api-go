@@ -3,6 +3,7 @@ package camunda_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -171,5 +172,40 @@ func TestChangesetDecodeReplacesLikeGeneratedDecoder(t *testing.T) {
 	if !c.IsDueDateCleared() || c.IsFollowUpDateCleared() || !c.HasFollowUpDate() {
 		t.Errorf("dueCleared=%v followUpCleared=%v followUpSet=%v; want a due-date clear and a follow-up null",
 			c.IsDueDateCleared(), c.IsFollowUpDateCleared(), c.HasFollowUpDate())
+	}
+}
+
+// TestChangesetClearKeepsMemberOrder: decoding a clear must not change how the other
+// members decode. encoding/json matches names case-insensitively and the last member
+// wins, so filtering the clear out through a map (which reorders) changes the result.
+func TestChangesetClearKeepsMemberOrder(t *testing.T) {
+	for _, others := range []string{
+		`"priority":80,"Priority":10`,
+		`"Priority":10,"priority":80`,
+		`"candidateUsers":["a"],"CandidateUsers":["b"]`,
+		`"CandidateUsers":["b"],"candidateUsers":["a"]`,
+		`"followUpDate":"2026-01-02T03:04:05Z","FollowUpDate":null`,
+	} {
+		for _, in := range []string{`{` + others + `,"dueDate":%s}`, `{"dueDate":%s,` + others + `}`} {
+			t.Run(in, func(t *testing.T) {
+				var cleared, nulled camunda.Changeset
+				if err := json.Unmarshal([]byte(fmt.Sprintf(in, `""`)), &cleared); err != nil {
+					t.Fatalf("Unmarshal clear: %v", err)
+				}
+				if err := json.Unmarshal([]byte(fmt.Sprintf(in, `null`)), &nulled); err != nil {
+					t.Fatalf("Unmarshal null: %v", err)
+				}
+				if !cleared.IsDueDateCleared() {
+					t.Error("dueDate \"\" did not decode as a clear")
+				}
+				cleared.UnsetDueDate()
+				nulled.UnsetDueDate()
+				if !reflect.DeepEqual(cleared, nulled) {
+					a, _ := json.Marshal(&cleared)
+					b, _ := json.Marshal(&nulled)
+					t.Errorf("other members decode differently with a clear:\n clear %s\n  null %s", a, b)
+				}
+			})
+		}
 	}
 }
