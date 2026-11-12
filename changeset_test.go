@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -204,6 +205,53 @@ func TestChangesetClearKeepsMemberOrder(t *testing.T) {
 					a, _ := json.Marshal(&cleared)
 					b, _ := json.Marshal(&nulled)
 					t.Errorf("other members decode differently with a clear:\n clear %s\n  null %s", a, b)
+				}
+			})
+		}
+	}
+}
+
+// TestChangesetCaseVariantClearRoundTrips: encoding/json matches a date's name in any
+// letter case, so `{"duedate":""}` is a clear. The generated decoder also keeps every
+// non-canonical name as an additional property, and that copy must hold the original
+// "" (not the null the clear is decoded through): re-encoded, a null would follow the
+// clear and cancel it on the next decode.
+func TestChangesetCaseVariantClearRoundTrips(t *testing.T) {
+	type date struct {
+		prop    string
+		cleared func(*camunda.Changeset) bool
+	}
+	for _, d := range []date{
+		{"dueDate", (*camunda.Changeset).IsDueDateCleared},
+		{"followUpDate", (*camunda.Changeset).IsFollowUpDateCleared},
+	} {
+		for _, key := range []string{strings.ToLower(d.prop), strings.ToUpper(d.prop), d.prop, `\u00` + fmt.Sprintf("%x", d.prop[0]) + d.prop[1:]} {
+			in := `{"` + key + `":"","custom":1}`
+			t.Run(in, func(t *testing.T) {
+				// What the generated decoder collects: every member but the canonical names.
+				var want map[string]any
+				if err := json.Unmarshal([]byte(in), &want); err != nil {
+					t.Fatalf("oracle: %v", err)
+				}
+				for _, canonical := range []string{"dueDate", "followUpDate", "candidateUsers", "candidateGroups", "priority"} {
+					delete(want, canonical)
+				}
+				var c camunda.Changeset
+				for round := 0; round < 3; round++ {
+					if err := json.Unmarshal([]byte(in), &c); err != nil {
+						t.Fatalf("round %d: Unmarshal %s: %v", round, in, err)
+					}
+					if !d.cleared(&c) {
+						t.Errorf("round %d: %s did not decode as a clear of %s", round, in, d.prop)
+					}
+					if !reflect.DeepEqual(c.AdditionalProperties, want) {
+						t.Errorf("round %d: additional properties = %v, want %v", round, c.AdditionalProperties, want)
+					}
+					b, err := json.Marshal(&c)
+					if err != nil {
+						t.Fatalf("round %d: Marshal: %v", round, err)
+					}
+					in = string(b)
 				}
 			})
 		}

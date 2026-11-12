@@ -31,7 +31,9 @@ other members decode exactly as they would without the clear.
 A model whose generator-emitted ``UnmarshalJSON`` must stay (``Changeset``,
 which collects ``additionalProperties``) keeps it, renamed to
 ``unmarshalGeneratedJSON``; the hook's ``UnmarshalJSON`` delegates to it and then
-sets the markers. That decoder
+sets the markers. Only its typed decoding sees the clears rewritten to ``null``:
+``additionalProperties``, which keeps case variants of a date's name, collects
+the original ``""`` so that re-encoding does not cancel the clear. That decoder
 replaces the whole receiver, so it also resets clears absent from the input. Any
 other generated ``UnmarshalJSON`` fails the run, as the two cannot be merged safely.
 
@@ -261,14 +263,33 @@ def _clear_markers(cleared: list[tuple[str, str, str]], merge: bool) -> list[str
 
 def _wrap_generated_unmarshal(text: str, model: str, cleared: list[tuple[str, str, str]],
                               names: str, generated: str, path: Path) -> str:
-    """Keep the generator's UnmarshalJSON (renamed) and decode the clears around it."""
-    inner = f"func (o *{model}) unmarshalGeneratedJSON(data []byte) (err error) {{"
-    text = _replace_once(
-        text,
+    """Keep the generator's UnmarshalJSON (renamed) and decode the clears around it.
+
+    The generated decoder reads data twice: into the typed fields, and into a map
+    for additionalProperties, which keeps every name that is not canonical, case
+    variants of a date included. Only the typed decoding may see the clears
+    rewritten to null; additionalProperties must collect the original "", or
+    re-encoding would put a null after the clear and cancel it on the next decode.
+    """
+    where = f"{path.name} ({model}.UnmarshalJSON)"
+    start = text.find(f"\n{generated}")
+    if start < 0:
+        raise SystemExit(f"hook_09: expected exactly one anchor in {where}:\n{generated}")
+    end = text.find("\n}\n", start) + len("\n}\n")
+    body = text[start:end]
+    inner = f"func (o *{model}) unmarshalGeneratedJSON(data, original []byte) (err error) {{"
+    body = body.replace(
         f"\n{generated}",
-        f"\n// unmarshalGeneratedJSON is the generator's decoder; UnmarshalJSON wraps it.\n{inner}",
-        f"{path.name} ({model}.UnmarshalJSON)",
+        f"\n// unmarshalGeneratedJSON is the generator's decoder; UnmarshalJSON wraps it.\n"
+        f"// data feeds the typed fields, original the additional properties.\n{inner}",
+        1,
     )
+    if "additionalProperties" in body:
+        collect = "json.Unmarshal(data, &additionalProperties)"
+        if body.count(collect) != 1:
+            raise SystemExit(f"hook_09: expected exactly one anchor in {where}:\n{collect}")
+        body = body.replace(collect, "json.Unmarshal(original, &additionalProperties)")
+    text = text[:start] + body + text[end:]
     props = ", ".join(f'"{prop}"' for prop, _, _ in cleared)
     lines = [
         f"// UnmarshalJSON decodes a {model} with the generated decoder, taking",
@@ -276,8 +297,8 @@ def _wrap_generated_unmarshal(text: str, model: str, cleared: list[tuple[str, st
         "// of ToMap. Like the generated decoder, it replaces the whole value, so a clear",
         "// absent from data is reset; a timestamp or null for a date is decoded as usual.",
         f"func (o *{model}) UnmarshalJSON(data []byte) error {{",
-        f"\tdata, cleared, _ := nullEmptyDates(data, {props})",
-        "\tif err := o.unmarshalGeneratedJSON(data); err != nil {",
+        f"\ttyped, cleared, _ := nullEmptyDates(data, {props})",
+        "\tif err := o.unmarshalGeneratedJSON(typed, data); err != nil {",
         "\t\treturn err",
         "\t}",
         *_clear_markers(cleared, merge=False),

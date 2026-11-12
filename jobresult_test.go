@@ -816,3 +816,37 @@ func TestJobResultCorrectionsRepeatedDateLastWins(t *testing.T) {
 		})
 	}
 }
+
+// TestJobResultCorrectionsCaseVariantClearRoundTrips: encoding/json matches a date's
+// name in any letter case, so `{"duedate":""}` is a clear, and it must survive
+// re-encoding and decoding again.
+func TestJobResultCorrectionsCaseVariantClearRoundTrips(t *testing.T) {
+	type date struct {
+		prop    string
+		cleared func(*camunda.JobResultCorrections) bool
+	}
+	for _, d := range []date{
+		{"dueDate", (*camunda.JobResultCorrections).IsDueDateCleared},
+		{"followUpDate", (*camunda.JobResultCorrections).IsFollowUpDateCleared},
+	} {
+		for _, key := range []string{strings.ToLower(d.prop), strings.ToUpper(d.prop), d.prop, `\u00` + fmt.Sprintf("%x", d.prop[0]) + d.prop[1:]} {
+			in := `{"` + key + `":"","priority":5}`
+			t.Run(in, func(t *testing.T) {
+				var c camunda.JobResultCorrections
+				for round := 0; round < 3; round++ {
+					if err := json.Unmarshal([]byte(in), &c); err != nil {
+						t.Fatalf("round %d: Unmarshal %s: %v", round, in, err)
+					}
+					if !d.cleared(&c) || c.GetPriority() != 5 {
+						t.Errorf("round %d: %s: cleared=%v priority=%d", round, in, d.cleared(&c), c.GetPriority())
+					}
+					b, err := json.Marshal(&c)
+					if err != nil {
+						t.Fatalf("round %d: Marshal: %v", round, err)
+					}
+					in = string(b)
+				}
+			})
+		}
+	}
+}
