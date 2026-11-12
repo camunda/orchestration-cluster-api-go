@@ -1,3 +1,10 @@
+## [10.0.3](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.2...v10.0.3) (2026-11-12)
+
+
+### Bug Fixes
+
+* ignore unknown fields when decoding response models (backport to stable/10) ([#128](https://github.com/camunda/orchestration-cluster-api-go/issues/128)) ([e7b47bb](https://github.com/camunda/orchestration-cluster-api-go/commit/e7b47bb92117f61c041972e50d59d8331d385549)), closes [#126](https://github.com/camunda/orchestration-cluster-api-go/issues/126) [#124](https://github.com/camunda/orchestration-cluster-api-go/issues/124)
+
 ## [10.0.2](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.1...v10.0.2) (2026-11-02)
 
 
