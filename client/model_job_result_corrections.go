@@ -402,47 +402,22 @@ func (o *JobResultCorrections) IsFollowUpDateCleared() bool {
 // untouched; a timestamp or null for a date replaces a clear, as its setters do.
 func (o *JobResultCorrections) UnmarshalJSON(data []byte) error {
 	type plain JobResultCorrections
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	if raw == nil { // a JSON null leaves the value untouched
-		return nil
-	}
-	// Only a string literal can be a clear; null decodes to "" too but preserves.
-	isEmpty := func(v json.RawMessage) bool {
-		var s string
-		return len(v) > 0 && v[0] == '"' && json.Unmarshal(v, &s) == nil && s == ""
-	}
-	dueDateValue, dueDatePresent := raw["dueDate"]
-	dueDateClear := dueDatePresent && isEmpty(dueDateValue)
-	if dueDateClear {
-		delete(raw, "dueDate")
-	}
-	followUpDateValue, followUpDatePresent := raw["followUpDate"]
-	followUpDateClear := followUpDatePresent && isEmpty(followUpDateValue)
-	if followUpDateClear {
-		delete(raw, "followUpDate")
-	}
-	rest, err := json.Marshal(raw)
-	if err != nil {
-		return err
-	}
+	data, cleared, present := nullEmptyDates(data, "dueDate", "followUpDate")
 	p := plain(*o)
-	if err := json.Unmarshal(rest, &p); err != nil {
+	if err := json.Unmarshal(data, &p); err != nil {
 		return err
 	}
 	*o = JobResultCorrections(p)
-	if dueDateClear {
+	if cleared[0] {
 		o.DueDate.Unset()
 		o.dueDateCleared = true
-	} else if dueDatePresent {
+	} else if present[0] {
 		o.dueDateCleared = false
 	}
-	if followUpDateClear {
+	if cleared[1] {
 		o.FollowUpDate.Unset()
 		o.followUpDateCleared = true
-	} else if followUpDatePresent {
+	} else if present[1] {
 		o.followUpDateCleared = false
 	}
 	return nil

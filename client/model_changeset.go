@@ -391,38 +391,15 @@ func (o *Changeset) IsFollowUpDateCleared() bool {
 // of ToMap. Like the generated decoder, it replaces the whole value, so a clear
 // absent from data is reset; a timestamp or null for a date is decoded as usual.
 func (o *Changeset) UnmarshalJSON(data []byte) error {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	// Only a string literal can be a clear; null decodes to "" too but preserves.
-	isEmpty := func(v json.RawMessage) bool {
-		var s string
-		return len(v) > 0 && v[0] == '"' && json.Unmarshal(v, &s) == nil && s == ""
-	}
-	dueDateClear := isEmpty(raw["dueDate"])
-	if dueDateClear {
-		delete(raw, "dueDate")
-	}
-	followUpDateClear := isEmpty(raw["followUpDate"])
-	if followUpDateClear {
-		delete(raw, "followUpDate")
-	}
-	if dueDateClear || followUpDateClear {
-		rest, err := json.Marshal(raw)
-		if err != nil {
-			return err
-		}
-		data = rest
-	}
+	data, cleared, _ := nullEmptyDates(data, "dueDate", "followUpDate")
 	if err := o.unmarshalGeneratedJSON(data); err != nil {
 		return err
 	}
-	if dueDateClear {
+	if cleared[0] {
 		o.DueDate.Unset()
 		o.dueDateCleared = true
 	}
-	if followUpDateClear {
+	if cleared[1] {
 		o.FollowUpDate.Unset()
 		o.followUpDateCleared = true
 	}
