@@ -299,7 +299,8 @@ func (o Changeset) ToMap() (map[string]interface{}, error) {
 }
 
 // unmarshalGeneratedJSON is the generator's decoder; UnmarshalJSON wraps it.
-func (o *Changeset) unmarshalGeneratedJSON(data []byte) (err error) {
+// data feeds the typed fields, original the additional properties.
+func (o *Changeset) unmarshalGeneratedJSON(data, original []byte) (err error) {
 	varChangeset := _Changeset{}
 
 	err = json.Unmarshal(data, &varChangeset)
@@ -312,7 +313,7 @@ func (o *Changeset) unmarshalGeneratedJSON(data []byte) (err error) {
 
 	additionalProperties := make(map[string]interface{})
 
-	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+	if err = json.Unmarshal(original, &additionalProperties); err == nil {
 		delete(additionalProperties, "dueDate")
 		delete(additionalProperties, "followUpDate")
 		delete(additionalProperties, "candidateUsers")
@@ -391,8 +392,8 @@ func (o *Changeset) IsFollowUpDateCleared() bool {
 // of ToMap. Like the generated decoder, it replaces the whole value, so a clear
 // absent from data is reset; a timestamp or null for a date is decoded as usual.
 func (o *Changeset) UnmarshalJSON(data []byte) error {
-	data, cleared, _ := nullEmptyDates(data, "dueDate", "followUpDate")
-	if err := o.unmarshalGeneratedJSON(data); err != nil {
+	typed, cleared, _ := nullEmptyDates(data, "dueDate", "followUpDate")
+	if err := o.unmarshalGeneratedJSON(typed, data); err != nil {
 		return err
 	}
 	if cleared[0] {
