@@ -158,14 +158,16 @@ func EnvironmentSnapshot(environ []string) map[string]string {
 // for support diagnostics, redacting secret values. environ should be the output
 // of os.Environ(); if nil, os.Environ() is used.
 //
-// isSecret is the authoritative declaration of which variables carry credential
-// material (the root package builds it from ConfigSchema, which this leaf package
-// cannot import). A variable it reports as secret is always redacted, whatever its
-// name looks like. For a variable it does not report as secret, a name heuristic
-// is the fallback, so a credential the declaration does not know about (a user's
-// own ZEEBE_* leftovers) is still not written out in full. isSecret may be nil, in
+// classify is the authoritative declaration of the caller's known variables (the
+// root package builds it from ConfigSchema, which this leaf package cannot
+// import). It reports whether a variable is secret and whether it is known at all.
+// A known variable is redacted exactly when it is declared secret, whatever its
+// name looks like, so CAMUNDA_MTLS_CERT is hidden and a known non-secret such as
+// CAMUNDA_TOKEN_AUDIENCE stays visible. Only an unknown variable falls back to the
+// name heuristic, so a credential the declaration has never heard of (a user's own
+// ZEEBE_* leftovers) is still not written out in full. classify may be nil, in
 // which case only the heuristic applies.
-func EnvironmentSnapshotWithSecrets(environ []string, isSecret func(key string) bool) map[string]string {
+func EnvironmentSnapshotWithSecrets(environ []string, classify func(key string) (secret, known bool)) map[string]string {
 	if environ == nil {
 		environ = os.Environ()
 	}
@@ -180,7 +182,14 @@ func EnvironmentSnapshotWithSecrets(environ []string, isSecret func(key string) 
 		if !strings.HasPrefix(up, "CAMUNDA_") && !strings.HasPrefix(up, "ZEEBE_") {
 			continue
 		}
-		secret := (isSecret != nil && isSecret(key)) || isSecretKey(key)
+		secret := false
+		known := false
+		if classify != nil {
+			secret, known = classify(key)
+		}
+		if !known {
+			secret = isSecretKey(key)
+		}
 		if secret && val != "" {
 			out[key] = RedactedValue
 		} else {
