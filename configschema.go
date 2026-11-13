@@ -99,5 +99,5 @@ func isSecretEnvKey(key string) bool { return secretEnvKeys[strings.ToUpper(key)
 // diagnostics. Redaction is driven by the ConfigSchema Secret declarations; the
 // diag package's name heuristic only covers variables the schema does not know.
 func environmentSnapshot(environ []string) map[string]string {
-	return diag.EnvironmentSnapshot(environ, isSecretEnvKey)
+	return diag.EnvironmentSnapshotWithSecrets(environ, isSecretEnvKey)
 }
