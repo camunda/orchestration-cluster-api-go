@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/camunda/orchestration-cluster-api-go/v11/internal/diag"
@@ -211,5 +212,52 @@ func TestRedactedPlaceholderMatchesDiag(t *testing.T) {
 	if got != redactedPlaceholder {
 		t.Errorf("redactedPlaceholder = %q but internal/diag uses %q; a support bundle would "+
 			"use two different words for the same thing", redactedPlaceholder, got)
+	}
+}
+
+// TestConfigFormattingDoesNotRaceWithInjectedDependencies guards the injected
+// Clock and Random fields. A Config can be formatted while the SDK is running,
+// and the injected SeededRandom mutates its state on every draw. Dumping that
+// struct field by field reads the state while Float64 writes it, so the
+// dependencies are rendered by type identity only. The race detector is what
+// fails this test, so it is meaningful under `go test -race`.
+func TestConfigFormattingDoesNotRaceWithInjectedDependencies(t *testing.T) {
+	const rounds = 2000
+	rnd := NewSeededRandom(42)
+	cfg := sentinelConfig()
+	cfg.Random = rnd
+	cfg.Clock = LiveClock{}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for range rounds {
+			rnd.Float64()
+		}
+	}()
+	for range rounds {
+		_ = fmt.Sprintf("%v %+v %#v %s", cfg, cfg, cfg, cfg)
+		_ = fmt.Sprintf("%v %+v %#v %s", *cfg, *cfg, *cfg, *cfg)
+	}
+	wg.Wait()
+}
+
+// TestConfigFormattingNamesInjectedDependencies pins what replaces the dump: the
+// dynamic type of an injected dependency is still visible, without its state.
+func TestConfigFormattingNamesInjectedDependencies(t *testing.T) {
+	cfg := sentinelConfig()
+	cfg.Random = NewSeededRandom(42)
+	cfg.Clock = LiveClock{}
+	for _, verb := range []string{"%v", "%+v", "%#v"} {
+		out := fmt.Sprintf(verb, cfg)
+		for _, want := range []string{"*camunda.SeededRandom", "camunda.LiveClock"} {
+			if !strings.Contains(out, want) {
+				t.Errorf("%s output does not name %s: %s", verb, want, out)
+			}
+		}
+		if strings.Contains(out, "state:") {
+			t.Errorf("%s output dumps the injected dependency's state: %s", verb, out)
+		}
 	}
 }
