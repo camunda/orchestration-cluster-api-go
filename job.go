@@ -47,10 +47,15 @@ func (j *Job) CustomHeaders() map[string]any { return j.customHeaders }
 
 // RawVariables returns the job variables as a decoded map.
 //
-// The map is never nil: a job with no variables (absent, null, empty or
-// undecodable) yields an empty, writable map, identically on the REST and gRPC
-// transports. Each job owns its map, so a handler may add to it freely without
-// affecting other jobs.
+// The map is never nil: a job with no variables (absent, null or empty) yields an
+// empty, writable map, identically on the REST and gRPC transports. Each job owns
+// its map, so a handler may add to it freely without affecting other jobs.
+//
+// Malformed payloads are handled differently per transport. The gRPC stream
+// carries variables as a JSON string, and one that cannot be decoded as an object
+// also yields an empty map. On REST the response is decoded before any Job is
+// built, so a malformed variables value fails the activation with an error and no
+// job reaches the handler.
 func (j *Job) RawVariables() map[string]any { return j.variables }
 
 // LeaseToken returns the activation lease token, or "" if the job was not leased.
