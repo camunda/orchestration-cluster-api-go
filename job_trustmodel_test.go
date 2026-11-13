@@ -39,19 +39,15 @@ func TestDeeplyNestedVariablesAreRejectedNotFatal(t *testing.T) {
 // payload that is not a JSON object: decoding fails softly and the handler sees
 // no variables, rather than the worker goroutine dying on the frame.
 //
-// It asserts emptiness, not non-nilness. RawVariables may legitimately be nil
-// today — a REST job activated with no variables, and a gRPC payload of "null",
-// both produce a nil map, while an empty gRPC payload produces an empty one.
-// That inconsistency is a separate defect (a handler that writes to the returned
-// map panics on nil), filed as #147; this test documents the current contract
-// rather than asserting one that does not hold.
+// It asserts emptiness, not non-nilness: whether RawVariables may be nil is a
+// separate contract, tracked in #147, and this test does not depend on it.
 func TestMalformedVariablesDecodeToNoVariables(t *testing.T) {
 	for _, payload := range []string{"", "not json", "[1,2,3]", `"a string"`, "null", "{"} {
 		job := newGRPCJob(&pb.ActivatedJob{Variables: payload}, LiveClock{})
 		if got := len(job.RawVariables()); got != 0 {
 			t.Errorf("payload %q produced %d key(s), want none", payload, got)
 		}
-		// Reading from a nil map is safe, which is what the documentation tells
+		// Reading a missing key is safe, which is what the documentation tells
 		// handler authors to rely on.
 		if v, ok := job.RawVariables()["anything"]; ok {
 			t.Errorf("payload %q yielded unexpected key with value %v", payload, v)

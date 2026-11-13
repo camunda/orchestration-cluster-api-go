@@ -51,6 +51,11 @@ import (
 //     query fragment or shell string is just a string here — if a handler
 //     passes one to a filesystem, database, template or subprocess, enforcing
 //     that trust boundary is the handler's job.
+//
+// [Job.RawVariables] is subject to all of the above: its content is untrusted
+// input, and the SDK neither validates nor size-limits it. It returns the job's
+// own decoded map, not a copy, so reading from it is safe, but copy it before
+// handing it to code that may retain or mutate it.
 type Job struct {
 	key                string
 	jobType            string
@@ -84,13 +89,6 @@ func (j *Job) ElementID() string { return j.elementID }
 func (j *Job) CustomHeaders() map[string]any { return j.customHeaders }
 
 // RawVariables returns the job variables as a decoded map.
-//
-// The content is untrusted input — it is set by whoever started the process
-// instance, not by the cluster. The SDK neither validates nor size-limits it;
-// see [Job] for what is and is not guaranteed.
-//
-// Reading from the returned map is always safe; copy it before writing rather
-// than mutating what is returned.
 func (j *Job) RawVariables() map[string]any { return j.variables }
 
 // LeaseToken returns the activation lease token, or "" if the job was not leased.
