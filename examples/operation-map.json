@@ -1,11 +1,4 @@
 {
-  "getAgentDefinition": [
-    {
-      "file": "agent_definition.go",
-      "region": "GetAgentDefinition",
-      "label": "Get agent definition"
-    }
-  ],
   "searchAgentDefinitions": [
     {
       "file": "agent_definition.go",

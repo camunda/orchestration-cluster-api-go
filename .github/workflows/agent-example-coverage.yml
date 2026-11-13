@@ -31,7 +31,7 @@ jobs:
       id-token: write          # mint GitHub OIDC token for Vault JWT auth
       copilot-requests: write  # Copilot CLI auth via GITHUB_TOKEN (billed to the org)
       issues: write            # report the outcome back on the issue
-    uses: camunda/sdk-infra/.github/workflows/sdk-agent-example-coverage.yml@v1
+    uses: camunda/sdk-infra/.github/workflows/sdk-agent-example-coverage.yml@fix/agent-job-isolation
     # Explicit rather than `inherit`: the shared workflow needs only Vault auth,
     # and this job hands the repo to an LLM agent.
     secrets:
@@ -41,6 +41,7 @@ jobs:
       VAULT_JWT_AUDIENCE: ${{ secrets.VAULT_JWT_AUDIENCE }}
     with:
       language: go
+      sdk-infra-ref: fix/agent-job-isolation
       issue-number: ${{ github.event.issue.number || inputs.issue-number }}
       # Bundle first: `make coverage` reads spec-metadata.json committed in this repo,
       # so without a refresh it reports full coverage for operations that only exist
