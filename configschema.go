@@ -1,5 +1,11 @@
 package camunda
 
+import (
+	"strings"
+
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/diag"
+)
+
 // ConfigField documents a single environment variable the SDK reads while
 // resolving configuration. It carries the variable's alias precedence, default,
 // and whether it holds credential material.
@@ -68,4 +74,30 @@ var ConfigSchema = []ConfigField{
 	{Keys: []string{"CAMUNDA_WORKER_REQUEST_TIMEOUT"}, Description: "Default activate-jobs request timeout, in milliseconds."},
 	{Keys: []string{"CAMUNDA_WORKER_NAME"}, Default: defaultWorkerName, Description: "Default worker name."},
 	{Keys: []string{"CAMUNDA_WORKER_STARTUP_JITTER_MAX_SECONDS"}, Description: "Max random startup delay for workers, in seconds."},
+}
+
+// secretEnvKeys is the set of every environment variable name, aliases included,
+// that ConfigSchema declares Secret. Names are upper-cased, matching how the
+// diagnostics snapshot compares them.
+var secretEnvKeys = func() map[string]bool {
+	m := make(map[string]bool)
+	for _, f := range ConfigSchema {
+		if !f.Secret {
+			continue
+		}
+		for _, k := range f.Keys {
+			m[strings.ToUpper(k)] = true
+		}
+	}
+	return m
+}()
+
+// isSecretEnvKey reports whether ConfigSchema declares key as credential material.
+func isSecretEnvKey(key string) bool { return secretEnvKeys[strings.ToUpper(key)] }
+
+// environmentSnapshot collects the CAMUNDA_*/ZEEBE_* environment for support
+// diagnostics. Redaction is driven by the ConfigSchema Secret declarations; the
+// diag package's name heuristic only covers variables the schema does not know.
+func environmentSnapshot(environ []string) map[string]string {
+	return diag.EnvironmentSnapshot(environ, isSecretEnvKey)
 }

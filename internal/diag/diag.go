@@ -125,7 +125,11 @@ func (l *Logger) Debug(msg string, kv ...any) { l.log(LevelDebug, msg, kv...) }
 // Trace logs at trace level.
 func (l *Logger) Trace(msg string, kv ...any) { l.log(LevelTrace, msg, kv...) }
 
-// secretKeySubstrings identify env vars whose values must be redacted in a snapshot.
+// RedactedValue replaces the value of a secret variable in an environment snapshot.
+const RedactedValue = "***redacted***"
+
+// secretKeySubstrings identify env vars whose values must be redacted in a snapshot
+// when the caller's declaration does not know the variable (see EnvironmentSnapshot).
 var secretKeySubstrings = []string{"SECRET", "PASSWORD", "PASSPHRASE", "TOKEN", "KEY"}
 
 func isSecretKey(key string) bool {
@@ -143,9 +147,17 @@ func isSecretKey(key string) bool {
 }
 
 // EnvironmentSnapshot collects CAMUNDA_*/ZEEBE_* environment variables for
-// support diagnostics, redacting secret-like values. environ should be the
-// output of os.Environ(); if nil, os.Environ() is used.
-func EnvironmentSnapshot(environ []string) map[string]string {
+// support diagnostics, redacting secret values. environ should be the output of
+// os.Environ(); if nil, os.Environ() is used.
+//
+// isSecret is the authoritative declaration of which variables carry credential
+// material (the root package builds it from ConfigSchema, which this leaf package
+// cannot import). A variable it reports as secret is always redacted, whatever its
+// name looks like. For a variable it does not report as secret, a name heuristic
+// is the fallback, so a credential the declaration does not know about (a user's
+// own ZEEBE_* leftovers) is still not written out in full. isSecret may be nil, in
+// which case only the heuristic applies.
+func EnvironmentSnapshot(environ []string, isSecret func(key string) bool) map[string]string {
 	if environ == nil {
 		environ = os.Environ()
 	}
@@ -160,8 +172,9 @@ func EnvironmentSnapshot(environ []string) map[string]string {
 		if !strings.HasPrefix(up, "CAMUNDA_") && !strings.HasPrefix(up, "ZEEBE_") {
 			continue
 		}
-		if isSecretKey(key) && val != "" {
-			out[key] = "***redacted***"
+		secret := (isSecret != nil && isSecret(key)) || isSecretKey(key)
+		if secret && val != "" {
+			out[key] = RedactedValue
 		} else {
 			out[key] = val
 		}

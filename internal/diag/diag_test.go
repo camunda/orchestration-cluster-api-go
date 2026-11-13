@@ -72,7 +72,7 @@ func TestEnvironmentSnapshotRedactsSecrets(t *testing.T) {
 		"CAMUNDA_MTLS_KEY_PATH=/etc/key.pem",
 		"UNRELATED_VAR=ignored",
 	}
-	snap := EnvironmentSnapshot(environ)
+	snap := EnvironmentSnapshot(environ, nil)
 	if _, ok := snap["UNRELATED_VAR"]; ok {
 		t.Error("non-CAMUNDA/ZEEBE var should be excluded")
 	}
@@ -93,6 +93,27 @@ func TestEnvironmentSnapshotRedactsSecrets(t *testing.T) {
 	}
 	if snap["CAMUNDA_MTLS_KEY_PATH"] != "/etc/key.pem" {
 		t.Errorf("key path is a location not a secret, got %q", snap["CAMUNDA_MTLS_KEY_PATH"])
+	}
+}
+
+// An explicit declaration wins over the name heuristic, and the heuristic still
+// covers variables the declaration does not know about.
+func TestEnvironmentSnapshotExplicitSecretWinsHeuristicIsFallback(t *testing.T) {
+	declared := func(key string) bool { return key == "CAMUNDA_MTLS_CERT" }
+	snap := EnvironmentSnapshot([]string{
+		"CAMUNDA_MTLS_CERT=-----BEGIN CERTIFICATE-----",
+		"CAMUNDA_MTLS_CERT_PATH=/etc/cert.pem",
+		"CAMUNDA_UNKNOWN_TOKEN=tok",
+		"CAMUNDA_CLIENT_ID=my-client",
+	}, declared)
+	if snap["CAMUNDA_MTLS_CERT"] != RedactedValue {
+		t.Errorf("declared secret must be redacted, got %q", snap["CAMUNDA_MTLS_CERT"])
+	}
+	if snap["CAMUNDA_UNKNOWN_TOKEN"] != RedactedValue {
+		t.Errorf("heuristic fallback must redact unknown token-like var, got %q", snap["CAMUNDA_UNKNOWN_TOKEN"])
+	}
+	if snap["CAMUNDA_MTLS_CERT_PATH"] != "/etc/cert.pem" || snap["CAMUNDA_CLIENT_ID"] != "my-client" {
+		t.Errorf("non-secrets must be kept, got %v", snap)
 	}
 }
 
