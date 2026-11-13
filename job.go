@@ -27,17 +27,25 @@ import (
 //   - [Job.Variables] fills only the type the handler author supplied; the
 //     payload selects values, never a type.
 //   - Nesting is bounded by encoding/json's limit of 10000, so a deeply nested
-//     payload returns an error rather than exhausting the stack.
-//   - Variable contents are kept out of the SDK's logs.
+//     payload cannot exhaust the stack. On a gRPC-streamed job the decode error
+//     is swallowed and the handler sees no variables at all, so check for the
+//     keys you need rather than expecting a decode failure to surface.
+//   - Variable values are kept out of the SDK's own log records: the worker logs
+//     job keys and types, never the variable map or a raw frame. A decoding
+//     error is logged, though, and a Go JSON error can quote the offending
+//     literal, so a malformed value can reach the log by that route.
 //   - Each job owns its maps, so concurrent handlers never share or mutate the
 //     same values.
 //
 // What the SDK does not do:
 //
-//   - It enforces no size limit on a variable payload. Whatever the gateway
-//     hands over is decoded, so in-flight payload memory is bounded only by
-//     WithMaxConcurrentJobs. Whether the SDK should impose its own limit is an
-//     open question; none is applied today.
+//   - It enforces no variable-specific size limit: whatever arrives is decoded.
+//     Two nearby limits are not that limit — the FALCON command stream caps a
+//     single frame at 16 MiB (a transport limit that does not apply to REST or
+//     gRPC), and WithMaxConcurrentJobs / WithStreamMaxConcurrentJobs cap how
+//     many handlers run at once, bounding neither the bytes in one payload nor
+//     the jobs buffered before dispatch. Whether the SDK should impose a limit
+//     of its own is an open question; none is applied today.
 //   - It does not validate or sanitise values beyond what JSON decoding
 //     requires, and it does not interpret them. A variable holding a path, URL,
 //     query fragment or shell string is just a string here — if a handler

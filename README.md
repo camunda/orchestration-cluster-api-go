@@ -310,10 +310,16 @@ What the SDK does:
   map and unmarshals it into the type *you* supplied. The payload selects values,
   never a type.
 - **Bounds nesting.** `encoding/json` rejects input nested deeper than 10000, so a
-  deeply nested payload returns an error instead of exhausting the stack.
-- **Keeps variable content out of SDK logs.** The worker logs job keys and types;
-  it does not log variable contents, and an undecodable frame is reported without
-  its payload.
+  deeply nested payload cannot exhaust the stack. Note what that means per
+  transport: on a gRPC-streamed job the decode error is swallowed and the handler
+  simply sees **no variables** (an empty map), so `job.Variables(&v)` succeeds
+  against nothing — check for the keys you need rather than assuming a decode
+  failure will surface as an error.
+- **Keeps variable *values* out of its own log records.** The worker logs job keys
+  and types, never the variable map, and an undecodable frame is reported without
+  its payload. One caveat: a decoding error is logged, and a Go JSON error can
+  quote the offending literal — `json: cannot unmarshal number 1e100000 into Go
+  value of type float64` — so a malformed value can reach the log by that route.
 - **Does not share variables between jobs.** Each job gets its own `*Job` with its
   own maps before its handler goroutine starts, so concurrent handlers never
   share or mutate the same values. The map `RawVariables()` returns may be nil
@@ -322,12 +328,16 @@ What the SDK does:
 
 What the SDK does **not** do:
 
-- **No size limit.** The SDK enforces no maximum on a variable payload: whatever
-  the gateway hands over is decoded. The engine has its own limits, but the SDK
-  adds none, so a handler that holds many large payloads in flight at once is
-  bounded only by `WithMaxConcurrentJobs` and available memory. Whether the SDK
-  should impose its own limit — and what it should be — is an open question
-  tracked in [#140](https://github.com/camunda/orchestration-cluster-api-go/issues/140);
+- **No variable-specific size limit.** Nothing inspects how large a variable
+  payload is: whatever arrives is decoded. Two unrelated limits sit nearby and
+  should not be mistaken for one — the FALCON command stream caps a single
+  *frame* at 16 MiB (a transport limit, and it does not apply to REST or gRPC),
+  and `WithMaxConcurrentJobs` / `WithStreamMaxConcurrentJobs` cap how many
+  *handlers* run at once, which bounds neither the bytes in one payload nor the
+  jobs buffered before dispatch. The engine applies its own limits; the SDK adds
+  none of its own. Whether it should — and what the limit would be — is an open
+  question tracked in
+  [#140](https://github.com/camunda/orchestration-cluster-api-go/issues/140);
   no limit is being introduced quietly.
 - **No validation or sanitisation.** The SDK does not check types, ranges,
   lengths or encodings beyond what JSON decoding requires. Validate in your
