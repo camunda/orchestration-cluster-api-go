@@ -392,7 +392,11 @@ FALCON command stream, the gRPC stream, and the gRPC worker's REST sidecar poll)
 - The job is failed exactly as it would be for a returned error, so its retries
   decrement and the engine schedules a retry instead of leaving the job to sit
   until its activation timeout expires.
-- The resulting error matches `errors.Is(err, camunda.ErrHandlerPanic)`.
+- The recovered panic is observable through the SDK log and through the failed
+  job (and its incident) on the cluster. It is **not** returned to your code:
+  the worker consumes the resulting `camunda.ErrHandlerPanic` internally and
+  `Run` does not return per-job handler errors, so `errors.Is` cannot be used
+  to detect it from application code.
 - The panic value and a stack trace are written to the SDK log at **error**
   level — the same detail the runtime would have printed to stderr as the process
   died.

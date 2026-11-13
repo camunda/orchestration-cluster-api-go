@@ -32,8 +32,14 @@ var (
 	// whole program down, and a job handler runs on its own goroutine.
 	//
 	// The job is failed exactly as it would be for a returned error, so its
-	// retries decrement and the engine schedules a retry. Match it with
-	// errors.Is to tell a panicking handler apart from one that failed cleanly.
+	// retries decrement and the engine schedules a retry.
+	//
+	// The sentinel is consumed inside the worker: it is not returned from
+	// JobWorker.Run or handed to any caller, so application code cannot match it
+	// with errors.Is. A recovered panic is observable through the SDK log (the
+	// panic value and stack, at error level) and through the failed job and its
+	// incident on the cluster. The sentinel is what the worker's own failure
+	// path matches on to tell a panic from an ordinary handler error.
 	//
 	// The panic value and its stack are written to the SDK log at error level;
 	// they are deliberately kept out of the error message sent to the cluster,
