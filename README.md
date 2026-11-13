@@ -144,6 +144,22 @@ The OAuth token cache is two-tier: an in-memory cache backed by an on-disk cache
 valid token instead of re-authenticating on every start. Concurrent refreshes are
 collapsed into a single in-flight request.
 
+The on-disk tier is opt-in and holds a bearer token, so it is treated as
+credential storage. The directory is created mode `0700` and each entry is
+written mode `0600` through a temp file renamed into place — so the mode is
+reapplied on every rewrite and a concurrent reader never sees a partially written
+entry. An entry found expired is deleted rather than left behind. If the cache
+directory is writable by group or other, the cache is disabled rather than
+trusted: the entry path is derived from the token URL, client id and audience, so
+write access to that directory would be enough to substitute the token the SDK
+presents to the cluster.
+
+> **Windows:** none of the above is enforced by the operating system. Go's
+> permission bits are largely ignored on Windows — a file inherits the ACL of its
+> parent directory, and `0700` on the directory does not restrict that ACL — so
+> the group/other-writable check is skipped and the cache has no OS-enforced
+> protection. Leave the on-disk cache disabled on a shared Windows host.
+
 ## Configuration reference
 
 `CAMUNDA_*` variables are canonical; the `ZEEBE_*` names are accepted as

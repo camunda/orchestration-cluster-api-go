@@ -46,6 +46,13 @@ func WithOAuthScope(scope string) Option {
 }
 
 // WithOAuthCacheDir enables the on-disk OAuth token cache at dir.
+//
+// The cache holds a bearer token. dir is created mode 0700, entries are written
+// mode 0600 via an atomic rename, an expired entry is removed, and the cache is
+// disabled entirely when dir is writable by group or other. On Windows none of
+// that is enforced by the operating system — permission bits are largely ignored
+// there and a file inherits its directory's ACL — so do not enable the cache on
+// a shared Windows host. See the internal/auth package documentation for detail.
 func WithOAuthCacheDir(dir string) Option {
 	return func(c *Config) { c.OAuthCacheDir = dir }
 }
