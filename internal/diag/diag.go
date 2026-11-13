@@ -147,8 +147,16 @@ func isSecretKey(key string) bool {
 }
 
 // EnvironmentSnapshot collects CAMUNDA_*/ZEEBE_* environment variables for
-// support diagnostics, redacting secret values. environ should be the output of
-// os.Environ(); if nil, os.Environ() is used.
+// support diagnostics using only the name heuristic to decide what to redact.
+// Prefer EnvironmentSnapshotWithSecrets, which lets the caller declare credential
+// variables explicitly; the heuristic alone misses names such as CAMUNDA_MTLS_CERT.
+func EnvironmentSnapshot(environ []string) map[string]string {
+	return EnvironmentSnapshotWithSecrets(environ, nil)
+}
+
+// EnvironmentSnapshotWithSecrets collects CAMUNDA_*/ZEEBE_* environment variables
+// for support diagnostics, redacting secret values. environ should be the output
+// of os.Environ(); if nil, os.Environ() is used.
 //
 // isSecret is the authoritative declaration of which variables carry credential
 // material (the root package builds it from ConfigSchema, which this leaf package
@@ -157,7 +165,7 @@ func isSecretKey(key string) bool {
 // is the fallback, so a credential the declaration does not know about (a user's
 // own ZEEBE_* leftovers) is still not written out in full. isSecret may be nil, in
 // which case only the heuristic applies.
-func EnvironmentSnapshot(environ []string, isSecret func(key string) bool) map[string]string {
+func EnvironmentSnapshotWithSecrets(environ []string, isSecret func(key string) bool) map[string]string {
 	if environ == nil {
 		environ = os.Environ()
 	}

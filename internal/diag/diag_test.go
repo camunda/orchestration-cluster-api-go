@@ -72,7 +72,7 @@ func TestEnvironmentSnapshotRedactsSecrets(t *testing.T) {
 		"CAMUNDA_MTLS_KEY_PATH=/etc/key.pem",
 		"UNRELATED_VAR=ignored",
 	}
-	snap := EnvironmentSnapshot(environ, nil)
+	snap := EnvironmentSnapshot(environ)
 	if _, ok := snap["UNRELATED_VAR"]; ok {
 		t.Error("non-CAMUNDA/ZEEBE var should be excluded")
 	}
@@ -100,7 +100,7 @@ func TestEnvironmentSnapshotRedactsSecrets(t *testing.T) {
 // covers variables the declaration does not know about.
 func TestEnvironmentSnapshotExplicitSecretWinsHeuristicIsFallback(t *testing.T) {
 	declared := func(key string) bool { return key == "CAMUNDA_MTLS_CERT" }
-	snap := EnvironmentSnapshot([]string{
+	snap := EnvironmentSnapshotWithSecrets([]string{
 		"CAMUNDA_MTLS_CERT=-----BEGIN CERTIFICATE-----",
 		"CAMUNDA_MTLS_CERT_PATH=/etc/cert.pem",
 		"CAMUNDA_UNKNOWN_TOKEN=tok",
