@@ -134,13 +134,27 @@ func TestTokenSourceFailures(t *testing.T) {
 			dir := t.TempDir()
 			cfg := OAuthConfig{ClientID: "id", ClientSecret: "sec", CacheDir: dir}
 
+			// attempts counts how many times the token endpoint is actually
+			// reached, so the test can tell a genuine retry from a replayed
+			// cached error.
+			var attempts atomic.Int32
+			erroring := &erroringRoundTripper{}
 			if tc.handler != nil {
-				srv := httptest.NewServer(tc.handler)
+				srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					attempts.Add(1)
+					tc.handler(w, r)
+				}))
 				defer srv.Close()
 				cfg.TokenURL = srv.URL
 			} else {
 				cfg.TokenURL = "http://token.invalid/oauth/token"
-				cfg.HTTPClient = &http.Client{Transport: &erroringRoundTripper{}}
+				cfg.HTTPClient = &http.Client{Transport: erroring}
+			}
+			fetchCount := func() int32 {
+				if tc.handler != nil {
+					return attempts.Load()
+				}
+				return erroring.calls.Load()
 			}
 
 			ts := NewTokenSource(cfg, &settableClock{t: time.Unix(1_000_000, 0)})
@@ -169,9 +183,19 @@ func TestTokenSourceFailures(t *testing.T) {
 				t.Errorf("a failed fetch wrote %d file(s) to the token cache dir", len(entries))
 			}
 
-			// And a second call must retry rather than hand out a zero value.
+			if got := fetchCount(); got != 1 {
+				t.Errorf("first Token() made %d fetch attempts, want 1", got)
+			}
+
+			// And a second call must really go back to the endpoint, not replay
+			// a cached failure: an implementation that memoised the first error
+			// would never recover from a transient outage.
 			if _, err := ts.Token(context.Background()); err == nil {
 				t.Error("second Token() succeeded after a failed fetch")
+			}
+			if got := fetchCount(); got != 2 {
+				t.Errorf("after two Token() calls the endpoint saw %d attempts, want 2; "+
+					"a failure must not be cached", got)
 			}
 		})
 	}
