@@ -14,7 +14,8 @@ func getAgentDefinitionExample(ctx context.Context, client *camunda.CamundaClien
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%v\n", definition)
+	fmt.Printf("agent %q (%s) is defined by element %q\n",
+		definition.GetName(), definition.GetAgentType(), definition.GetElementId())
 	// endregion GetAgentDefinition
 	return nil
 }
