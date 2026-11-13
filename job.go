@@ -89,9 +89,8 @@ func (j *Job) CustomHeaders() map[string]any { return j.customHeaders }
 // instance, not by the cluster. The SDK neither validates nor size-limits it;
 // see [Job] for what is and is not guaranteed.
 //
-// The returned map may be nil when the job carries no variables. Reading from it
-// is safe either way; copy it before writing rather than mutating what is
-// returned.
+// Reading from the returned map is always safe; copy it before writing rather
+// than mutating what is returned.
 func (j *Job) RawVariables() map[string]any { return j.variables }
 
 // LeaseToken returns the activation lease token, or "" if the job was not leased.

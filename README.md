@@ -322,9 +322,8 @@ What the SDK does:
   value of type float64` — so a malformed value can reach the log by that route.
 - **Does not share variables between jobs.** Each job gets its own `*Job` with its
   own maps before its handler goroutine starts, so concurrent handlers never
-  share or mutate the same values. The map `RawVariables()` returns may be nil
-  when the job carries no variables; reading from it is safe either way, but copy
-  it before writing rather than mutating what is returned.
+  share or mutate the same values. Reading from the map `RawVariables()` returns
+  is always safe; copy it before writing rather than mutating what is returned.
 
 What the SDK does **not** do:
 
