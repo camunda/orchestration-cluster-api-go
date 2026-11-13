@@ -468,3 +468,36 @@ func TestDiskCacheExpiryCleanupKeepsAFreshlyPublishedEntry(t *testing.T) {
 		t.Errorf("expired entry survived cleanup; stat err = %v", err)
 	}
 }
+
+// TestDiskCacheRenameFailureLeavesNoTemporaryFile forces the rename step of the
+// write to fail by occupying the destination path with a directory. The cache is
+// best-effort, so the token must still be returned, and the token-bearing temp
+// file written just before the rename must not be left in the cache directory.
+func TestDiskCacheRenameFailureLeavesNoTemporaryFile(t *testing.T) {
+	dir := t.TempDir()
+	ts := newCachingEndpoint(t).source(dir, &settableClock{t: time.Unix(1_000_000, 0)})
+
+	// A non-empty directory cannot be replaced by rename on any platform.
+	blocker := ts.cachePath()
+	if err := os.MkdirAll(filepath.Join(blocker, "keep"), 0o700); err != nil {
+		t.Fatalf("occupy cache path: %v", err)
+	}
+
+	tok, err := ts.Token(context.Background())
+	if err != nil {
+		t.Fatalf("Token must succeed when persisting to disk fails: %v", err)
+	}
+	if tok == "" {
+		t.Fatal("Token returned an empty token")
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("read cache dir: %v", err)
+	}
+	for _, e := range entries {
+		if e.Name() != filepath.Base(blocker) {
+			t.Errorf("unexpected leftover %q in the cache directory after a failed rename", e.Name())
+		}
+	}
+}
