@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/diag"
 )
 
 // cfgSentinel values are distinctive so a leak into formatted output is
@@ -196,8 +198,18 @@ func TestRedactedFieldsMatchConfigSchema(t *testing.T) {
 // same, so a support bundle containing both an environment snapshot and a config
 // dump does not use two different words for the same thing.
 func TestRedactedPlaceholderMatchesDiag(t *testing.T) {
-	snapshot := fmt.Sprintf("%v", map[string]string{"CAMUNDA_CLIENT_SECRET": "***redacted***"})
-	if !strings.Contains(snapshot, redactedPlaceholder) {
-		t.Errorf("redactedPlaceholder %q does not match the marker used by internal/diag", redactedPlaceholder)
+	// Ask internal/diag for its marker rather than restating it here: comparing
+	// two copies of the same literal would pass even if diag changed.
+	snapshot := diag.EnvironmentSnapshot([]string{"CAMUNDA_CLIENT_SECRET=" + cfgSentinelClientSecret})
+	got, ok := snapshot["CAMUNDA_CLIENT_SECRET"]
+	if !ok {
+		t.Fatal("diag.EnvironmentSnapshot did not report CAMUNDA_CLIENT_SECRET at all")
+	}
+	if got == cfgSentinelClientSecret {
+		t.Fatalf("diag.EnvironmentSnapshot did not redact the secret: %q", got)
+	}
+	if got != redactedPlaceholder {
+		t.Errorf("redactedPlaceholder = %q but internal/diag uses %q; a support bundle would "+
+			"use two different words for the same thing", redactedPlaceholder, got)
 	}
 }
