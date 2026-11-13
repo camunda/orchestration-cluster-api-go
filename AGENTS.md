@@ -43,10 +43,11 @@ them here:
 | `client/` | **Generated.** REST client from `openapi-generator`. Never hand-edit. |
 | `pb/` | **Generated.** gRPC stubs from `buf`. Never hand-edit. |
 | `cmd/facadegen/` | The AST-based facade and re-export generator. Primary edit surface for facade and re-export output. |
-| `scripts/generate.sh` | Pipeline orchestrator: bundle → fetch-proto → openapi-generator → buf → post-process → gofmt → build. |
+| `scripts/generate.sh` | Pipeline orchestrator: bundle → fetch-proto → normalize-spec → openapi-generator → buf → post-process → gofmt → build. |
 | `scripts/bundle-spec.sh`, `scripts/fetch-proto.sh` | Fetch the OpenAPI spec and `gateway.proto` (pinned to `$SPEC_REF`). |
-| `scripts/postprocess.py`, `scripts/hooks/` | Numbered post-processing hooks: Domain Type System, semantic field types, generator-quirk fixes, version-skew tolerance, clearable date fields, then the facade (delegates to `cmd/facadegen`). Primary edit surface for fixing generated output. |
+| `scripts/postprocess.py`, `scripts/hooks/` | Numbered post-processing hooks: Domain Type System, semantic field types, generator-quirk fixes, version-skew tolerance, clearable date fields (`x-clearable`, see `scripts/normalize-spec.py`), then the facade (delegates to `cmd/facadegen`). Primary edit surface for fixing generated output. |
 | `external-spec/bundled/` | Bundled spec (`rest-api.bundle.json`) + `spec-metadata.json`. Generator inputs. |
+| `scripts/normalize-spec.py` | Rewrites properties typed by an `x-clearable` schema (`ClearableDateTime`) to a nullable `date-time` marked `x-clearable`, so they generate as `time.Time`; hook 09 then adds `Clear<Field>`. Writes the generator input `external-spec/generator/rest-api.json` (gitignored). |
 | `external-spec/proto/` | Fetched `gateway.proto`. Generator input. |
 | `external-spec/upstream/` | Transient sparse clone. **Never commit** (gitignored). |
 | `examples/` | Runnable examples; `readme.go` hosts region-tagged snippets injected into `README.md`. |
@@ -77,7 +78,7 @@ make fetch-proto  # fetch gateway.proto (ref: $SPEC_REF)
 make generate     # regenerate REST client + gRPC stubs + post-process from the fetched inputs
 ```
 
-`scripts/generate.sh` runs: openapi-generator → `client/`; `buf generate` → `pb/`;
+`scripts/generate.sh` runs: `scripts/normalize-spec.py` → generator input; openapi-generator → `client/`; `buf generate` → `pb/`;
 `scripts/postprocess.py` (numbered hooks incl. `cmd/facadegen`); `gofmt -w`; `go build`.
 
 ## Build / test / lint
