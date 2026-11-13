@@ -148,11 +148,17 @@ The on-disk tier is opt-in and holds a bearer token, so it is treated as
 credential storage. The directory is created mode `0700` and each entry is
 written mode `0600` through a temp file renamed into place — so the mode is
 reapplied on every rewrite and a concurrent reader never sees a partially written
-entry. An entry found expired is deleted rather than left behind. If the cache
-directory is writable by group or other, the cache is disabled rather than
-trusted: the entry path is derived from the token URL, client id and audience, so
-write access to that directory would be enough to substitute the token the SDK
-presents to the cluster.
+entry. An entry found expired is deleted rather than left behind, after a
+re-read confirms another process has not just published a fresh one.
+
+Entries are also checked before they are trusted. If the cache directory is
+writable by group or other, the cache is disabled rather than used: the entry
+path is derived from the token URL, client id and audience, so write access to
+that directory would be enough to substitute the token the SDK presents to the
+cluster. An individual entry whose own mode is wider than `0600` is ignored for
+the same reason — a restrictive directory does not stop someone rewriting a file
+their own permissions already allow — and the refetch that follows republishes it
+at `0600`.
 
 > **Windows:** none of the above is enforced by the operating system. Go's
 > permission bits are largely ignored on Windows — a file inherits the ACL of its

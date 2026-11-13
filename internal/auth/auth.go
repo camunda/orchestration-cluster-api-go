@@ -22,7 +22,12 @@
 //     writable by group or other, because the entry path is derived from values
 //     an attacker may know and a writable directory lets them both widen the
 //     file's mode and substitute the token the SDK presents to the cluster.
-//   - An entry found expired is removed rather than left on disk.
+//   - An entry whose own mode is wider than 0600 is ignored on read. A
+//     restrictive directory is not sufficient: an existing file can be rewritten
+//     by anyone its own permissions allow, with no write access to the
+//     directory. Anything wider than 0600 was not written by this SDK.
+//   - An entry found expired is removed rather than left on disk, after a
+//     re-read confirms another process has not just published a fresh one.
 //
 // On Windows these guarantees do not hold. Go's permission bits are largely
 // ignored there: a file inherits the ACL of its parent directory, MkdirAll's
@@ -137,7 +142,7 @@ func (ts *TokenSource) Token(ctx context.Context) (string, error) {
 			// readable on disk indefinitely — surviving the process and any
 			// credential rotation. Drop it now rather than waiting for a
 			// successful refresh, which may never come.
-			ts.removeDisk()
+			ts.removeExpiredDisk(now)
 		}
 	}
 
@@ -222,11 +227,37 @@ func cacheDirUsable(dir string) bool {
 	return fi.Mode().Perm()&0o022 == 0
 }
 
+// readDisk returns the cached entry, if there is one worth trusting.
+//
+// The entry's own mode is checked, not just the directory's. A restrictive
+// directory is not sufficient: an entry that already exists can be opened and
+// rewritten by anyone the file's own permissions allow, without any write access
+// to the directory. Since writeDisk only ever publishes mode 0600, anything
+// wider was not written by this SDK, and a token from it could have been
+// substituted by another local user. The entry is ignored rather than trusted;
+// the refetch that follows republishes it at 0600 through the atomic rename,
+// which repairs the mode as a side effect.
+//
+// The file is stat'ed through the open descriptor so the mode that is checked is
+// the mode of the file that is read, with no window in between.
 func (ts *TokenSource) readDisk() (string, time.Time, bool) {
 	if !cacheDirUsable(ts.cfg.CacheDir) {
 		return "", time.Time{}, false
 	}
-	data, err := os.ReadFile(ts.cachePath())
+	f, err := os.Open(ts.cachePath())
+	if err != nil {
+		return "", time.Time{}, false
+	}
+	defer func() { _ = f.Close() }()
+
+	if runtime.GOOS != "windows" {
+		fi, err := f.Stat()
+		if err != nil || !fi.Mode().IsRegular() || fi.Mode().Perm()&0o077 != 0 {
+			return "", time.Time{}, false
+		}
+	}
+
+	data, err := io.ReadAll(io.LimitReader(f, 1<<20))
 	if err != nil {
 		return "", time.Time{}, false
 	}
@@ -237,9 +268,25 @@ func (ts *TokenSource) readDisk() (string, time.Time, bool) {
 	return dt.AccessToken, time.UnixMilli(dt.RefreshAfterUnixMs), true
 }
 
-// removeDisk drops the cached entry. Best-effort, like the rest of the cache.
-func (ts *TokenSource) removeDisk() {
+// removeExpiredDisk drops the cached entry if it is still expired.
+//
+// The re-read matters because the cache is shared between processes: between
+// this process reading an expired entry and deciding to delete it, another may
+// have published a fresh one, and removing that by pathname would discard a good
+// token. Re-reading immediately before the unlink narrows the window to the gap
+// between these two syscalls.
+//
+// It does not close the window completely — doing that needs file locking, which
+// is a larger design decision than this fix. The residual consequence is bounded
+// and harmless: at worst a freshly published entry is removed and the next
+// caller fetches a token again. A wrong or stale token is never served.
+//
+// Best-effort, like the rest of the cache.
+func (ts *TokenSource) removeExpiredDisk(now time.Time) {
 	if !cacheDirUsable(ts.cfg.CacheDir) {
+		return
+	}
+	if _, refreshAfter, ok := ts.readDisk(); ok && now.Before(refreshAfter) {
 		return
 	}
 	_ = os.Remove(ts.cachePath())

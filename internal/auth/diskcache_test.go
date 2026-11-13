@@ -381,3 +381,90 @@ func TestDiskCacheKeepsValidEntry(t *testing.T) {
 		t.Errorf("valid cache entry was removed: %v", err)
 	}
 }
+
+// TestDiskCacheIgnoresWideModeEntry covers the gap a directory check alone
+// leaves: an entry that already exists can be opened and rewritten by anyone the
+// *file's* own permissions allow, with no write access to the directory. Since
+// writeDisk only ever publishes 0600, anything wider was not written by this SDK
+// and the token in it may have been substituted.
+func TestDiskCacheIgnoresWideModeEntry(t *testing.T) {
+	skipIfNoUnixPerms(t)
+
+	for _, mode := range []os.FileMode{0o666, 0o644, 0o660, 0o606, 0o640} {
+		t.Run(fmt.Sprintf("mode_%04o", mode), func(t *testing.T) {
+			dir := t.TempDir() // 0700: the directory check passes
+			endpoint := newCachingEndpoint(t)
+			start := time.Unix(1_000_000, 0)
+			ts := endpoint.source(dir, &settableClock{t: start})
+
+			planted, err := json.Marshal(diskToken{
+				AccessToken:        "attacker-supplied-token",
+				RefreshAfterUnixMs: start.Add(time.Hour).UnixMilli(),
+			})
+			if err != nil {
+				t.Fatalf("marshal planted entry: %v", err)
+			}
+			if err := os.WriteFile(ts.cachePath(), planted, 0o600); err != nil {
+				t.Fatalf("plant entry: %v", err)
+			}
+			if err := os.Chmod(ts.cachePath(), mode); err != nil {
+				t.Fatalf("chmod entry: %v", err)
+			}
+
+			tok, err := ts.Token(context.Background())
+			if err != nil {
+				t.Fatalf("Token: %v", err)
+			}
+			if tok == "attacker-supplied-token" {
+				t.Errorf("used a token from a %04o cache entry", mode)
+			}
+			if *endpoint.calls != 1 {
+				t.Errorf("made %d token fetches, want 1 (the wide-mode entry must be ignored)", *endpoint.calls)
+			}
+			// The refetch republishes through the atomic rename, which repairs
+			// the mode as a side effect.
+			fi, err := os.Stat(ts.cachePath())
+			if err != nil {
+				t.Fatalf("stat cache file: %v", err)
+			}
+			if got := fi.Mode().Perm(); got != 0o600 {
+				t.Errorf("cache file mode = %04o after refetch, want 0600", got)
+			}
+		})
+	}
+}
+
+// TestDiskCacheExpiryCleanupKeepsAFreshlyPublishedEntry covers the race in the
+// other direction: this process decides an entry is expired, another publishes a
+// fresh one, and the removal must not throw that away. The concurrent publish is
+// simulated deterministically by writing the fresh entry before the cleanup runs.
+func TestDiskCacheExpiryCleanupKeepsAFreshlyPublishedEntry(t *testing.T) {
+	dir := t.TempDir()
+	start := time.Unix(1_000_000, 0)
+	endpoint := newCachingEndpoint(t)
+	ts := endpoint.source(dir, &settableClock{t: start})
+
+	// What another process would have published a moment ago.
+	ts.writeDisk("freshly-published-token", start.Add(time.Hour))
+
+	// Now run the cleanup as it would run after reading an entry believed
+	// expired. It must notice the entry is no longer expired and leave it.
+	ts.removeExpiredDisk(start)
+
+	tok, refreshAfter, ok := ts.readDisk()
+	if !ok {
+		t.Fatal("expiry cleanup deleted a freshly published entry")
+	}
+	if tok != "freshly-published-token" {
+		t.Errorf("cached token = %q, want the freshly published one", tok)
+	}
+	if !start.Before(refreshAfter) {
+		t.Errorf("refreshAfter %v is not after %v", refreshAfter, start)
+	}
+
+	// And an entry that really is expired is still removed.
+	ts.removeExpiredDisk(start.Add(48 * time.Hour))
+	if _, err := os.Stat(ts.cachePath()); !os.IsNotExist(err) {
+		t.Errorf("expired entry survived cleanup; stat err = %v", err)
+	}
+}
