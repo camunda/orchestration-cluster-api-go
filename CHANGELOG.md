@@ -1,3 +1,10 @@
+# [11.0.0-alpha.7](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.6...v11.0.0-alpha.7) (2026-11-13)
+
+
+### Bug Fixes
+
+* **deps:** update grpc to v1.83.2 and clear dev tooling alerts ([#131](https://github.com/camunda/orchestration-cluster-api-go/issues/131)) ([c6c8552](https://github.com/camunda/orchestration-cluster-api-go/commit/c6c85524e4e8688a9973e16e168baa64ef543ba9))
+
 # [11.0.0-alpha.6](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.5...v11.0.0-alpha.6) (2026-11-11)
 
 
