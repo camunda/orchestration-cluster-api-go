@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"runtime/debug"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -352,9 +351,16 @@ func (c *CamundaClient) invokeHandler(ctx context.Context, h JobHandler, job *Jo
 		if r == nil {
 			return
 		}
+		// Every attacker-influenceable field is quoted, not just the stack. The
+		// logger writes field values verbatim and one record per line, so a
+		// newline in a panic value — which may be job-variable content — would
+		// otherwise let a handler forge log records. %q escapes newlines and
+		// other control characters while keeping the detail readable.
 		c.logger.Error("job handler panicked; failing the job",
-			"job", job.Key(), "type", job.Type(), "panic", fmt.Sprintf("%v", r),
-			"stack", strings.ReplaceAll(string(debug.Stack()), "\n", "\\n"))
+			"job", fmt.Sprintf("%q", job.Key()),
+			"type", fmt.Sprintf("%q", job.Type()),
+			"panic", fmt.Sprintf("%q", fmt.Sprintf("%v", r)),
+			"stack", fmt.Sprintf("%q", debug.Stack()))
 		// Discard anything the handler returned before panicking.
 		vars, err = nil, ErrHandlerPanic
 	}()

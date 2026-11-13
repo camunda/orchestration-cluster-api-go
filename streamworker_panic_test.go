@@ -135,8 +135,45 @@ func TestInvokeHandlerLogsThePanicValueAndStack(t *testing.T) {
 	if !strings.Contains(out, "invokeHandler") && !strings.Contains(out, "goroutine") {
 		t.Errorf("no stack was logged with the panic: %s", out)
 	}
-	if !strings.Contains(out, "job=123") {
+	if !strings.Contains(out, `job="123"`) {
 		t.Errorf("the log record does not identify the job: %s", out)
+	}
+}
+
+// TestInvokeHandlerLoggingResistsRecordInjection pins the escaping. The logger
+// writes field values verbatim, one record per line, so a panic value carrying
+// newlines — and a panic value can be job-variable content, which is untrusted
+// input — would otherwise let a handler forge log records.
+func TestInvokeHandlerLoggingResistsRecordInjection(t *testing.T) {
+	const forged = "\n2026-01-01T00:00:00Z [ERROR] camunda cluster credentials rotated"
+
+	client, err := New(WithNoAuth())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	logs := &syncBuffer{}
+	client.logger = diag.New(diag.LevelError, logs, client.clock)
+
+	_, err = client.invokeHandler(context.Background(),
+		func(context.Context, *Job) (map[string]any, error) {
+			panic("legitimate detail" + forged)
+		},
+		&Job{key: "123\nalso-forged", jobType: "demo\ntask"})
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+
+	out := logs.String()
+	// Exactly one record: the panic must not have produced extra lines.
+	if got := strings.Count(strings.TrimRight(out, "\n"), "\n"); got != 0 {
+		t.Errorf("the panic injected %d extra log line(s):\n%s", got, out)
+	}
+	if strings.Contains(out, forged) {
+		t.Errorf("an unescaped newline from the panic value reached the log:\n%s", out)
+	}
+	// The detail is still there, escaped rather than dropped.
+	if !strings.Contains(out, "legitimate detail") {
+		t.Errorf("escaping dropped the panic detail:\n%s", out)
 	}
 }
 
