@@ -292,6 +292,51 @@ engine) and need an engine that supports them: rather than degrade to unfenced
 commands, a worker that asked for a lease and is handed a job without a token
 rejects the activation with `camunda.ErrLeaseNotHonored`.
 
+### Job variables are untrusted input
+
+Job variables reach your handler through the cluster, but their **content** is
+set by whoever started the process instance — a REST caller, a message
+publisher, an upstream service, or an earlier task. Treat them the way you would
+treat the body of an HTTP request from the internet.
+
+What the SDK does:
+
+- **Decodes into JSON-shaped values only.** REST-activated jobs carry the
+  variables as a `map[string]any`; gRPC-streamed jobs arrive as JSON strings and
+  are decoded with `encoding/json` into a `map[string]any`. No mechanism here can
+  instantiate a type chosen by the payload — there is no equivalent of
+  unpickling or polymorphic deserialization.
+- **Fills only the type you named.** `job.Variables(&v)` re-marshals the decoded
+  map and unmarshals it into the type *you* supplied. The payload selects values,
+  never a type.
+- **Bounds nesting.** `encoding/json` rejects input nested deeper than 10000, so a
+  deeply nested payload returns an error instead of exhausting the stack.
+- **Keeps variable content out of SDK logs.** The worker logs job keys and types;
+  it does not log variable contents, and an undecodable frame is reported without
+  its payload.
+- **Does not share variables between jobs.** Each job gets its own `*Job` with its
+  own maps before its handler goroutine starts, so concurrent handlers never
+  share or mutate the same values. The map `RawVariables()` returns may be nil
+  when the job carries no variables; reading from it is safe either way, but copy
+  it before writing rather than mutating what is returned.
+
+What the SDK does **not** do:
+
+- **No size limit.** The SDK enforces no maximum on a variable payload: whatever
+  the gateway hands over is decoded. The engine has its own limits, but the SDK
+  adds none, so a handler that holds many large payloads in flight at once is
+  bounded only by `WithMaxConcurrentJobs` and available memory. Whether the SDK
+  should impose its own limit — and what it should be — is an open question
+  tracked in [#140](https://github.com/camunda/orchestration-cluster-api-go/issues/140);
+  no limit is being introduced quietly.
+- **No validation or sanitisation.** The SDK does not check types, ranges,
+  lengths or encodings beyond what JSON decoding requires. Validate in your
+  handler.
+- **No interpretation.** A variable that happens to contain a path, a URL, a SQL
+  fragment or a shell string is just a string to the SDK. If your handler passes
+  one to a filesystem, a query, a template or a subprocess, that is your trust
+  boundary to enforce.
+
 ### Job Corrections (User Task Listeners)
 
 When a job worker handles a [user task listener](https://docs.camunda.io/docs/components/concepts/user-task-listeners/),

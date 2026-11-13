@@ -12,6 +12,37 @@ import (
 
 // Job is an activated job passed to a JobHandler. It is transport-agnostic: the
 // same type is produced by the REST job worker and the gRPC streaming worker.
+//
+// # Variables are untrusted input
+//
+// A job's variables reach the handler through the cluster, but their content is
+// set by whoever started the process instance. Treat them as you would the body
+// of an HTTP request from an untrusted caller.
+//
+// What the SDK guarantees:
+//
+//   - Variables are decoded into JSON-shaped values only — a map[string]any,
+//     via the generated model for REST jobs and encoding/json for gRPC jobs.
+//     Nothing here can instantiate a type chosen by the payload.
+//   - [Job.Variables] fills only the type the handler author supplied; the
+//     payload selects values, never a type.
+//   - Nesting is bounded by encoding/json's limit of 10000, so a deeply nested
+//     payload returns an error rather than exhausting the stack.
+//   - Variable contents are kept out of the SDK's logs.
+//   - Each job owns its maps, so concurrent handlers never share or mutate the
+//     same values.
+//
+// What the SDK does not do:
+//
+//   - It enforces no size limit on a variable payload. Whatever the gateway
+//     hands over is decoded, so in-flight payload memory is bounded only by
+//     WithMaxConcurrentJobs. Whether the SDK should impose its own limit is an
+//     open question; none is applied today.
+//   - It does not validate or sanitise values beyond what JSON decoding
+//     requires, and it does not interpret them. A variable holding a path, URL,
+//     query fragment or shell string is just a string here — if a handler
+//     passes one to a filesystem, database, template or subprocess, enforcing
+//     that trust boundary is the handler's job.
 type Job struct {
 	key                string
 	jobType            string
@@ -45,6 +76,14 @@ func (j *Job) ElementID() string { return j.elementID }
 func (j *Job) CustomHeaders() map[string]any { return j.customHeaders }
 
 // RawVariables returns the job variables as a decoded map.
+//
+// The content is untrusted input — it is set by whoever started the process
+// instance, not by the cluster. The SDK neither validates nor size-limits it;
+// see [Job] for what is and is not guaranteed.
+//
+// The returned map may be nil when the job carries no variables. Reading from it
+// is safe either way; copy it before writing rather than mutating what is
+// returned.
 func (j *Job) RawVariables() map[string]any { return j.variables }
 
 // LeaseToken returns the activation lease token, or "" if the job was not leased.
@@ -61,6 +100,12 @@ func (j *Job) LeaseToken() string { return j.leaseToken }
 func (j *Job) Clock() Clock { return j.clock }
 
 // Variables unmarshals the job variables into v (a pointer to a struct or map).
+//
+// v selects the target type, never the payload: the decoded variables are
+// re-marshalled and unmarshalled into the type the handler author named, so a
+// payload cannot cause an arbitrary type to be instantiated. The values are
+// still untrusted input and are not validated or size-limited by the SDK; see
+// [Job] for the full trust model.
 func (j *Job) Variables(v any) error {
 	b, err := json.Marshal(j.variables)
 	if err != nil {
