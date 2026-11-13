@@ -382,6 +382,33 @@ example, approve a task the listener denied. To use job results against such a
 gateway, set `CAMUNDA_FORCE_REST=true` (or `camunda.WithForceREST(true)`) so the
 worker polls over REST.
 
+### Panicking handlers
+
+A handler runs on its own goroutine, and in Go an unrecovered panic on *any*
+goroutine terminates the whole process. The workers therefore recover a panicking
+handler and **fail the job** with it, on every transport (REST polling, the
+FALCON command stream, the gRPC stream, and the gRPC worker's REST sidecar poll):
+
+- The job is failed exactly as it would be for a returned error, so its retries
+  decrement and the engine schedules a retry instead of leaving the job to sit
+  until its activation timeout expires.
+- The resulting error matches `errors.Is(err, camunda.ErrHandlerPanic)`.
+- The panic value and a stack trace are written to the SDK log at **error**
+  level — the same detail the runtime would have printed to stderr as the process
+  died.
+- The panic value is **not** sent to the cluster. The failure message the engine
+  stores on the incident says only that the handler panicked, because that
+  message is durable and widely visible, and a panic value can carry job-variable
+  content.
+
+This is a deliberate choice rather than a silent one: a panic is a bug in the
+handler, but losing the host application (and every other job it was running) is
+a disproportionate consequence. If your handler must not be recovered — if a
+panic indicates corrupted process state that should stop the program — detect
+that in the handler and terminate the process explicitly rather than relying on
+the panic to propagate. There is deliberately no option to turn recovery off;
+adding one would be a design decision for the SDK team.
+
 ## Deploying and starting processes
 
 The facade exposes request bodies as first-class parameters; the `Raw()` escape

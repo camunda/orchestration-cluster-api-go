@@ -26,6 +26,20 @@ var (
 	// ErrEventualConsistencyTimeout indicates an eventual-consistency polling
 	// helper timed out before its predicate was met.
 	ErrEventualConsistencyTimeout = errors.New("camunda: eventual consistency timeout")
+	// ErrHandlerPanic indicates a JobHandler panicked. The worker recovers the
+	// panic and fails the job with it, rather than letting the panic terminate
+	// the host process — in Go an unrecovered panic on any goroutine takes the
+	// whole program down, and a job handler runs on its own goroutine.
+	//
+	// The job is failed exactly as it would be for a returned error, so its
+	// retries decrement and the engine schedules a retry. Match it with
+	// errors.Is to tell a panicking handler apart from one that failed cleanly.
+	//
+	// The panic value and its stack are written to the SDK log at error level;
+	// they are deliberately kept out of the error message sent to the cluster,
+	// which is stored on the incident and visible far more widely. See the
+	// "Panicking handlers" section of the README.
+	ErrHandlerPanic = errors.New("camunda: job handler panicked")
 	// ErrLeaseNotHonored indicates a worker activated jobs with a lease but the
 	// server returned a job carrying no lease token.
 	//
