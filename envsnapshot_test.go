@@ -56,3 +56,31 @@ func TestEnvironmentSnapshotKeepsHeuristicForUnknownVariables(t *testing.T) {
 		t.Errorf("unknown benign variable should be kept, got %q", snap["ZEEBE_SOMETHING_ELSE"])
 	}
 }
+
+// TestEnvironmentSnapshotKeepsKnownNonSecrets: a variable the schema knows is not
+// secret stays visible even when its name looks like a credential to the
+// heuristic (CAMUNDA_TOKEN_AUDIENCE, CAMUNDA_TOKEN_SCOPE), so diagnostics keep
+// the configuration a support engineer needs.
+func TestEnvironmentSnapshotKeepsKnownNonSecrets(t *testing.T) {
+	var environ, plain []string
+	for _, f := range ConfigSchema {
+		if f.Secret {
+			continue
+		}
+		for _, k := range f.Keys {
+			environ = append(environ, k+"=visible-value")
+			plain = append(plain, k)
+		}
+	}
+	snap := environmentSnapshot(environ)
+	for _, k := range plain {
+		if snap[k] != "visible-value" {
+			t.Errorf("%s is not Secret in ConfigSchema but was redacted: %q", k, snap[k])
+		}
+	}
+	for _, k := range []string{"CAMUNDA_TOKEN_AUDIENCE", "CAMUNDA_TOKEN_SCOPE"} {
+		if _, ok := snap[k]; !ok {
+			t.Errorf("%s no longer in ConfigSchema; update this test's pinned examples", k)
+		}
+	}
+}
