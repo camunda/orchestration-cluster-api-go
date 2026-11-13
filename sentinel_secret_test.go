@@ -57,12 +57,41 @@ type sentinelScenario struct {
 	run func(t *testing.T) (logs string, errs []error)
 }
 
-// idp builds a token endpoint. handler decides the response.
+// sentinelIDP builds a token endpoint. handler decides the response.
 func sentinelIDP(t *testing.T, handler http.HandlerFunc) *httptest.Server {
 	t.Helper()
 	srv := httptest.NewServer(handler)
 	t.Cleanup(srv.Close)
 	return srv
+}
+
+// validTopologyJSON satisfies every required field of TopologyResponse, so a
+// success scenario really decodes successfully.
+const validTopologyJSON = `{"brokers":[],"clusterId":null,"clusterSize":1,"partitionsCount":1,"replicationFactor":1,"gatewayVersion":"8.11.0","lastCompletedChangeId":"0"}`
+
+// recordingIDP is a token endpoint that issues sentinelAccessToken and records the
+// client_secret it received, so a success scenario can prove the credential was
+// actually submitted.
+type recordingIDP struct {
+	srv    *httptest.Server
+	secret atomic.Value // last client_secret form value
+}
+
+func newRecordingIDP(t *testing.T) *recordingIDP {
+	t.Helper()
+	i := &recordingIDP{}
+	i.srv = sentinelIDP(t, func(w http.ResponseWriter, r *http.Request) {
+		_ = r.ParseForm()
+		i.secret.Store(r.Form.Get("client_secret"))
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprintf(w, `{"access_token":%q,"expires_in":3600}`, sentinelAccessToken)
+	})
+	return i
+}
+
+func (i *recordingIDP) lastSecret() string {
+	s, _ := i.secret.Load().(string)
+	return s
 }
 
 // sentinelAPI is a cluster stub that records the Authorization header it saw and
@@ -91,7 +120,7 @@ func newSentinelAPI(t *testing.T, status int) *sentinelAPI {
 		}
 		w.WriteHeader(status)
 		if status == http.StatusOK {
-			_, _ = io.WriteString(w, `{}`)
+			_, _ = io.WriteString(w, validTopologyJSON)
 		}
 	}))
 	t.Cleanup(a.srv.Close)
@@ -171,19 +200,20 @@ func callAndPoll(t *testing.T, client *CamundaClient, logs *syncBuffer, api *sen
 }
 
 func sentinelScenarios() []sentinelScenario {
-	tokenJSON := func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = fmt.Fprintf(w, `{"access_token":%q,"expires_in":3600}`, sentinelAccessToken)
-	}
 	return []sentinelScenario{
 		{
 			name: "oauth success",
 			run: func(t *testing.T) (string, []error) {
 				api := newSentinelAPI(t, http.StatusOK)
-				idp := sentinelIDP(t, tokenJSON)
-				client, logs := newSentinelClient(t, oauthSentinelConfig(t, api, idp.URL))
+				idp := newRecordingIDP(t)
+				client, logs := newSentinelClient(t, oauthSentinelConfig(t, api, idp.srv.URL))
 				out, errs := callAndPoll(t, client, logs, api, false)
-				// Guard against a vacuous pass: the credential really flowed.
+				// Guard against a vacuous pass: the credential really flowed, and
+				// the call really succeeded.
+				requireNoErrors(t, errs)
+				if got := idp.lastSecret(); got != sentinelOAuthSecret {
+					t.Fatalf("token endpoint received client_secret %q, want the configured secret", got)
+				}
 				if got := api.lastAuth(); got != "Bearer "+sentinelAccessToken {
 					t.Fatalf("success path did not authenticate with the issued token; Authorization = %q", got)
 				}
@@ -249,9 +279,9 @@ func sentinelScenarios() []sentinelScenario {
 			name: "oauth token endpoint unreachable",
 			run: func(t *testing.T) (string, []error) {
 				api := newSentinelAPI(t, http.StatusOK)
-				idp := sentinelIDP(t, tokenJSON)
-				url := idp.URL
-				idp.Close() // connection refused
+				idp := newRecordingIDP(t)
+				url := idp.srv.URL
+				idp.srv.Close() // connection refused
 				client, logs := newSentinelClient(t, oauthSentinelConfig(t, api, url))
 				out, errs := callAndPoll(t, client, logs, api, true)
 				requireFailure(t, errs)
@@ -269,6 +299,7 @@ func sentinelScenarios() []sentinelScenario {
 				}
 				client, logs := newSentinelClient(t, cfg)
 				out, errs := callAndPoll(t, client, logs, api, false)
+				requireNoErrors(t, errs)
 				want := "Basic " + base64.StdEncoding.EncodeToString([]byte("sentinel-user:"+sentinelBasicPw))
 				if got := api.lastAuth(); got != want {
 					t.Fatalf("success path did not send basic credentials; Authorization = %q", got)
@@ -277,6 +308,11 @@ func sentinelScenarios() []sentinelScenario {
 			},
 		},
 		{
+			// The 401 body is empty on purpose. A cluster API error body is surfaced to
+			// callers in APIError by design (it carries the problem detail), and the SDK
+			// cannot know whether a hostile or misconfigured intermediary echoed request
+			// headers into it; that position is recorded in a decision issue. What the
+			// SDK itself must never do is add the credential to the error or the log.
 			name: "basic auth rejected",
 			run: func(t *testing.T) (string, []error) {
 				api := newSentinelAPI(t, http.StatusUnauthorized)
@@ -317,6 +353,15 @@ func sentinelScenarios() []sentinelScenario {
 				return "", []error{err}
 			},
 		},
+	}
+}
+
+func requireNoErrors(t *testing.T, errs []error) {
+	t.Helper()
+	for _, err := range errs {
+		if err != nil {
+			t.Fatalf("success scenario returned an error: %v", err)
+		}
 	}
 }
 
