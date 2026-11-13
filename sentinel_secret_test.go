@@ -174,15 +174,24 @@ func callAndPoll(t *testing.T, client *CamundaClient, logs *syncBuffer, api *sen
 	done := make(chan struct{})
 	go func() { defer close(done); _ = worker.Run(ctx) }()
 
+	// In the failure scenarios the worker has finished a poll once it has logged
+	// the failure. In the success scenarios the first activation signal arrives
+	// before the response is decoded, and cancelling then could stop the worker
+	// before it logs a decode error, so a successful poll would be assumed rather
+	// than observed. The worker polls sequentially, so the second activation
+	// request proves the first poll completed.
+	activationsSeen := 0
 	reached := func() bool {
 		if expectPollFailure {
 			return strings.Contains(logs.String(), "activate jobs failed")
 		}
-		select {
-		case <-api.activations:
-			return true
-		default:
-			return false
+		for {
+			select {
+			case <-api.activations:
+				activationsSeen++
+			default:
+				return activationsSeen >= 2
+			}
 		}
 	}
 	deadline := time.Now().Add(10 * time.Second)
@@ -196,6 +205,9 @@ func callAndPoll(t *testing.T, client *CamundaClient, logs *syncBuffer, api *sen
 	}
 	cancel()
 	<-done
+	if !expectPollFailure && strings.Contains(logs.String(), "activate jobs failed") {
+		t.Fatalf("a worker poll that should have succeeded logged a failure:\n%s", logs.String())
+	}
 	return logs.String(), errs
 }
 
