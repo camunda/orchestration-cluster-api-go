@@ -1,3 +1,10 @@
+# [11.0.0-alpha.8](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.7...v11.0.0-alpha.8) (2026-11-14)
+
+
+### Bug Fixes
+
+* size the HTTP connection pool for job workers and allow user-supplied transports ([#163](https://github.com/camunda/orchestration-cluster-api-go/issues/163)) ([281a6cb](https://github.com/camunda/orchestration-cluster-api-go/commit/281a6cb394319cdb41a31274eb3f25976b5a93f7)), closes [#162](https://github.com/camunda/orchestration-cluster-api-go/issues/162)
+
 # [11.0.0-alpha.7](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.6...v11.0.0-alpha.7) (2026-11-13)
 
 
