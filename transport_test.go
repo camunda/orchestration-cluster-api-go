@@ -115,7 +115,7 @@ func TestBuildBaseTransportUserTransportWins(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RoundTrip: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 	if !called {
 		t.Error("expected the base transport to be the user-supplied RoundTripper")
 	}
@@ -165,7 +165,7 @@ func TestWithTransportStaysUnderSDKChain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Do: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 	if sawAuth == "" {
 		t.Error("expected the SDK auth layer to set an Authorization header above the user transport")
 	}
@@ -245,7 +245,7 @@ func TestFalconDialerUsesCustomPlumbing(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Do: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 	if !called {
 		t.Fatal("falcon dialer bypassed the WithTransport round tripper")
 	}
