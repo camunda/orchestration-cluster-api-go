@@ -481,6 +481,19 @@ func TestJobWorkerAppliesDefaultTenant(t *testing.T) {
 // defaultJobWorkerTenantIds fallback — so a zero-config worker is accepted on
 // multi-tenant clusters.
 func TestJobWorkerDefaultsToDefaultTenantIdentifier(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		opts []camunda.WorkerOption
+	}{
+		{name: "no tenant option"},
+		{name: "empty WithWorkerTenantIDs()", opts: []camunda.WorkerOption{camunda.WithWorkerTenantIDs()}},
+		{name: "empty slice", opts: []camunda.WorkerOption{camunda.WithWorkerTenantIDs([]string{}...)}},
+	} {
+		t.Run(tc.name, func(t *testing.T) { testJobWorkerDefaultTenant(t, tc.opts) })
+	}
+}
+
+func testJobWorkerDefaultTenant(t *testing.T, extra []camunda.WorkerOption) {
 	tenants := make(chan []string, 1)
 	var activateCount atomic.Int32
 
@@ -511,8 +524,10 @@ func TestJobWorkerDefaultsToDefaultTenantIdentifier(t *testing.T) {
 
 	worker := client.NewJobWorker("demo-task",
 		func(context.Context, *camunda.Job) (map[string]any, error) { return nil, nil },
-		camunda.WithRequestTimeout(50*time.Millisecond),
-		camunda.WithPollInterval(10*time.Millisecond),
+		append([]camunda.WorkerOption{
+			camunda.WithRequestTimeout(50 * time.Millisecond),
+			camunda.WithPollInterval(10 * time.Millisecond),
+		}, extra...)...,
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())

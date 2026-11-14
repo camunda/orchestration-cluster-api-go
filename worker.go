@@ -72,7 +72,7 @@ func WithFetchVariables(vars ...string) WorkerOption {
 }
 
 // WithWorkerTenantIDs restricts job activation to the given tenant ids,
-// overriding the client's default tenant.
+// overriding the client's default tenant. An empty list keeps the default.
 func WithWorkerTenantIDs(ids ...string) WorkerOption {
 	return func(w *JobWorker) { w.tenantIDs = ids }
 }
@@ -115,6 +115,10 @@ func (c *CamundaClient) NewJobWorker(jobType string, handler JobHandler, opts ..
 		o(w)
 	}
 	c.registerWorkerCapacity(w.maxConcurrent)
+	if len(w.tenantIDs) == 0 {
+		// An empty tenant option must not erase the default-tenant rule.
+		w.tenantIDs = defaultTenantIDs(c.cfg.DefaultTenantID)
+	}
 	w.startupDelay = startupJitter(c.random, wd.StartupJitterMaxSeconds)
 	return w
 }

@@ -498,6 +498,19 @@ func TestStreamJobWorkerAcksAfterContextCancel(t *testing.T) {
 // TestStreamJobWorkerAppliesDefaultTenant verifies that the client's default
 // tenant is sent as the stream's tenant filter.
 func TestStreamJobWorkerAppliesDefaultTenant(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		opts []StreamWorkerOption
+	}{
+		{name: "no tenant option"},
+		{name: "empty WithStreamTenantIDs()", opts: []StreamWorkerOption{WithStreamTenantIDs()}},
+		{name: "empty slice", opts: []StreamWorkerOption{WithStreamTenantIDs([]string{}...)}},
+	} {
+		t.Run(tc.name, func(t *testing.T) { testStreamWorkerDefaultTenant(t, tc.opts) })
+	}
+}
+
+func testStreamWorkerDefaultTenant(t *testing.T, extra []StreamWorkerOption) {
 	lis := bufconn.Listen(1024 * 1024)
 	fake := &fakeGateway{
 		streamReqs: make(chan *pb.StreamActivatedJobsRequest, 1),
@@ -517,7 +530,7 @@ func TestStreamJobWorkerAppliesDefaultTenant(t *testing.T) {
 
 	w := client.NewStreamJobWorker("greet",
 		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
-		WithStreamPollInterval(-1))
+		append([]StreamWorkerOption{WithStreamPollInterval(-1)}, extra...)...)
 	w.dial = bufDial(lis)
 
 	ctx, cancel := context.WithCancel(context.Background())

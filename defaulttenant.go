@@ -23,17 +23,16 @@ func (c *CamundaClient) effectiveDefaultTenant() string {
 }
 
 // tenantIDOrDefault converts an optional branded TenantId into the plain *string
-// the falcon producer and resolveTenant operate on, applying the configured
-// default tenant when the instruction did not specify one.
+// the falcon producer and resolveTenant operate on, applying the effective
+// default tenant (configured, else DefaultTenantIdentifier) when the
+// instruction did not specify one, so FALCON and REST send the same tenant.
 func (c *CamundaClient) tenantIDOrDefault(t *camundaapi.TenantId) *string {
 	if t != nil {
 		s := string(*t)
 		return &s
 	}
-	if d := c.cfg.DefaultTenantID; d != "" {
-		return &d
-	}
-	return nil
+	d := c.effectiveDefaultTenant()
+	return &d
 }
 
 // The withDefaultTenant* helpers implement the default-tenant rule for

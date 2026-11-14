@@ -195,16 +195,15 @@ func captureCreateFrame(t *testing.T, clientOpts []camunda.Option, instr camunda
 	}
 }
 
-// TestCreateProcessInstanceFalconOmitsTenantWhenUnset: with neither an
-// instruction tenant nor a configured default, the create frame must leave
-// tenantId absent so the gateway applies its own default — sending the
-// "<default>" marker would pin a literal tenant.
-func TestCreateProcessInstanceFalconOmitsTenantWhenUnset(t *testing.T) {
+// TestCreateProcessInstanceFalconSendsDefaultTenantWhenUnset: with neither an
+// instruction tenant nor a configured default, the create frame carries
+// "<default>", matching the REST path.
+func TestCreateProcessInstanceFalconSendsDefaultTenantWhenUnset(t *testing.T) {
 	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
 		camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process")))
 	frame := captureCreateFrame(t, nil, instr)
-	if _, present := frame["tenantId"]; present {
-		t.Errorf("tenantId present in create frame (%v), want absent so the gateway defaults it", frame["tenantId"])
+	if got := frame["tenantId"]; got != camunda.DefaultTenantIdentifier {
+		t.Errorf("tenantId = %v, want %q", got, camunda.DefaultTenantIdentifier)
 	}
 }
 
