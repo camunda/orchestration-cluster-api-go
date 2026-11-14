@@ -63,6 +63,9 @@ var ConfigSchema = []ConfigField{
 	{Keys: []string{"CAMUNDA_SDK_HTTP_RETRY_BASE_DELAY_MS"}, Description: "Base backoff delay for retries, in milliseconds."},
 	{Keys: []string{"CAMUNDA_SDK_HTTP_RETRY_MAX_DELAY_MS"}, Description: "Max backoff delay for retries, in milliseconds."},
 
+	{Keys: []string{"CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS"}, Default: "256", Description: "Max idle (keep-alive) HTTP connections across all hosts."},
+	{Keys: []string{"CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST"}, Default: "256", Description: "Max idle (keep-alive) HTTP connections per host. Size to at least the sum of the workers' max concurrent jobs plus pollers."},
+
 	{Keys: []string{"CAMUNDA_WORKER_TIMEOUT"}, Description: "Default job activation timeout, in milliseconds."},
 	{Keys: []string{"CAMUNDA_WORKER_MAX_CONCURRENT_JOBS", "CAMUNDA_WORKER_MAX_JOBS_ACTIVE"}, Description: "Default max concurrently-activated jobs per worker."},
 	{Keys: []string{"CAMUNDA_WORKER_REQUEST_TIMEOUT"}, Description: "Default activate-jobs request timeout, in milliseconds."},

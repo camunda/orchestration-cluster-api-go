@@ -1,5 +1,7 @@
 package camunda
 
+import "net/http"
+
 // Option configures a Config. Options are applied after environment resolution
 // and therefore take precedence over environment variables.
 type Option func(*Config)
@@ -122,4 +124,48 @@ func WithRandom(r Random) Option {
 // support (useful where WebSockets are blocked by a proxy).
 func WithForceREST(force bool) Option {
 	return func(c *Config) { c.ForceREST = force }
+}
+
+// WithMaxIdleConns sets the maximum number of idle (keep-alive) connections the
+// SDK's HTTP transport keeps open across all hosts. It maps to the
+// CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS environment variable and applies only when the
+// SDK builds the base transport itself (not with [WithHTTPClient] or
+// [WithTransport]).
+//
+// The SDK default (256) deliberately replaces Go's http.DefaultTransport pool,
+// whose 2 idle connections per host force a job worker with many jobs in flight
+// to open and close a TCP connection per call — churning sockets into TIME_WAIT
+// and exhausting ephemeral ports (camunda/orchestration-cluster-api-go#162).
+func WithMaxIdleConns(n int) Option {
+	return func(c *Config) { c.MaxIdleConns = n }
+}
+
+// WithMaxIdleConnsPerHost sets the maximum number of idle (keep-alive)
+// connections the SDK's HTTP transport keeps open per host. It maps to the
+// CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST environment variable and applies only
+// when the SDK builds the base transport itself (not with [WithHTTPClient] or
+// [WithTransport]). Size it to at least the sum of your workers'
+// WithMaxConcurrentJobs plus their pollers when running many workers against one
+// gateway.
+func WithMaxIdleConnsPerHost(n int) Option {
+	return func(c *Config) { c.MaxIdleConnsPerHost = n }
+}
+
+// WithHTTPClient supplies the *http.Client used for all REST calls. The client
+// is used as-is: the SDK's retry, backpressure, auth, and TLS layers are
+// bypassed, so the supplied client must carry everything the deployment needs.
+// Mutually exclusive with [WithTransport]; setting both fails [New] with a
+// configuration error.
+func WithHTTPClient(client *http.Client) Option {
+	return func(c *Config) { c.HTTPClient = client }
+}
+
+// WithTransport replaces the base http.RoundTripper at the bottom of the SDK's
+// transport chain (backpressure -> retry -> auth -> Transport), so the SDK's
+// resilience layers still apply on top of it. TLS material is not applied to a
+// user-supplied transport — configure it on the transport itself. Mutually
+// exclusive with [WithHTTPClient]; setting both fails [New] with a
+// configuration error.
+func WithTransport(rt http.RoundTripper) Option {
+	return func(c *Config) { c.Transport = rt }
 }
