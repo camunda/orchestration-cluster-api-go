@@ -654,6 +654,7 @@ NON_KEY_TYPES = {"ModelString", "JobLeaseToken"}
 # Package-level var and const groups, keyed by their first declared name.
 VAR_BUCKETS = {
     "ConfigSchema": "configuration",
+    "DefaultTenantIdentifier": "configuration",
     "ErrConfig": "runtime",
     "SeedEnvVar": "runtime",
     "DefaultStreamPollBackoff": "job-workers",

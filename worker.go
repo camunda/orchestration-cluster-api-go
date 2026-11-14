@@ -458,11 +458,13 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 	}
 }
 
-// defaultTenantIDs returns a single-element tenant slice for a non-empty default
-// tenant id, or nil.
+// defaultTenantIDs returns the single-element tenant slice a job worker
+// activates for: the configured default tenant id, or DefaultTenantIdentifier
+// when none is configured — matching the Camunda Java client, whose
+// defaultJobWorkerTenantIds defaults to ["<default>"].
 func defaultTenantIDs(id string) []string {
 	if id == "" {
-		return nil
+		return []string{DefaultTenantIdentifier}
 	}
 	return []string{id}
 }
