@@ -181,6 +181,7 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 		FetchVariables: w.fetchVariables,
 		TimeoutMs:      w.timeout.Milliseconds(),
 		Worker:         w.name,
+		TenantIDs:      w.tenantIDs,
 	})
 	if err != nil {
 		return err
