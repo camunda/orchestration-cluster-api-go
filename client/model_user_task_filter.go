@@ -22,7 +22,7 @@ type UserTaskFilter struct {
 	// The user task state.
 	State *UserTaskStateFilterProperty `json:"state,omitempty"`
 	// Whether the user task is suspended because its owning process instance is suspended.
-	IsSuspended NullableBool `json:"isSuspended,omitempty"`
+	IsSuspended *bool `json:"isSuspended,omitempty"`
 	// The assignee of the user task.
 	Assignee *StringFilterProperty `json:"assignee,omitempty"`
 	// The business ID of the owning process instance the user task belongs to. This only works for user tasks created with 8.10 and onwards. Tasks from prior versions don't contain this data and cannot be found.
@@ -116,47 +116,36 @@ func (o *UserTaskFilter) SetState(v UserTaskStateFilterProperty) {
 	o.State = &v
 }
 
-// GetIsSuspended returns the IsSuspended field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetIsSuspended returns the IsSuspended field value if set, zero value otherwise.
 func (o *UserTaskFilter) GetIsSuspended() bool {
-	if o == nil || IsNil(o.IsSuspended.Get()) {
+	if o == nil || IsNil(o.IsSuspended) {
 		var ret bool
 		return ret
 	}
-	return *o.IsSuspended.Get()
+	return *o.IsSuspended
 }
 
 // GetIsSuspendedOk returns a tuple with the IsSuspended field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UserTaskFilter) GetIsSuspendedOk() (*bool, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.IsSuspended) {
 		return nil, false
 	}
-	return o.IsSuspended.Get(), o.IsSuspended.IsSet()
+	return o.IsSuspended, true
 }
 
 // HasIsSuspended returns a boolean if a field has been set.
 func (o *UserTaskFilter) HasIsSuspended() bool {
-	if o != nil && o.IsSuspended.IsSet() {
+	if o != nil && !IsNil(o.IsSuspended) {
 		return true
 	}
 
 	return false
 }
 
-// SetIsSuspended gets a reference to the given NullableBool and assigns it to the IsSuspended field.
+// SetIsSuspended gets a reference to the given bool and assigns it to the IsSuspended field.
 func (o *UserTaskFilter) SetIsSuspended(v bool) {
-	o.IsSuspended.Set(&v)
-}
-
-// SetIsSuspendedNil sets the value for IsSuspended to be an explicit nil
-func (o *UserTaskFilter) SetIsSuspendedNil() {
-	o.IsSuspended.Set(nil)
-}
-
-// UnsetIsSuspended ensures that no value is present for IsSuspended, not even an explicit nil
-func (o *UserTaskFilter) UnsetIsSuspended() {
-	o.IsSuspended.Unset()
+	o.IsSuspended = &v
 }
 
 // GetAssignee returns the Assignee field value if set, zero value otherwise.
@@ -844,8 +833,8 @@ func (o UserTaskFilter) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
 	}
-	if o.IsSuspended.IsSet() {
-		toSerialize["isSuspended"] = o.IsSuspended.Get()
+	if !IsNil(o.IsSuspended) {
+		toSerialize["isSuspended"] = o.IsSuspended
 	}
 	if !IsNil(o.Assignee) {
 		toSerialize["assignee"] = o.Assignee

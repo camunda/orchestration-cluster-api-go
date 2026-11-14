@@ -12,7 +12,6 @@ package camundaapi
 
 import (
 	"encoding/json"
-	"time"
 )
 
 // checks if the Changeset type satisfies the MappedNullable interface at compile time
@@ -21,9 +20,9 @@ var _ MappedNullable = &Changeset{}
 // Changeset JSON object with changed task attribute values.  The following attributes can be adjusted with this endpoint, additional attributes will be ignored:  * `candidateGroups` - reset by providing an empty list * `candidateUsers` - reset by providing an empty list * `dueDate` - reset by providing an empty String * `followUpDate` - reset by providing an empty String * `priority` - minimum 0, maximum 100, default 50  Providing any of those attributes with a `null` value or omitting it preserves the persisted attribute's value.  The assignee cannot be adjusted with this endpoint, use the Assign task endpoint. This ensures correct event emission for assignee changes.
 type Changeset struct {
 	// The due date of the task. Reset by providing an empty String.
-	DueDate NullableTime `json:"dueDate,omitempty"`
+	DueDate NullableClearableDateTime `json:"dueDate,omitempty"`
 	// The follow-up date of the task. Reset by providing an empty String.
-	FollowUpDate NullableTime `json:"followUpDate,omitempty"`
+	FollowUpDate NullableClearableDateTime `json:"followUpDate,omitempty"`
 	// The list of candidate users of the task. Reset by providing an empty list.
 	CandidateUsers []string `json:"candidateUsers,omitempty"`
 	// The list of candidate groups of the task. Reset by providing an empty list.
@@ -57,9 +56,9 @@ func NewChangesetWithDefaults() *Changeset {
 }
 
 // GetDueDate returns the DueDate field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *Changeset) GetDueDate() time.Time {
+func (o *Changeset) GetDueDate() ClearableDateTime {
 	if o == nil || IsNil(o.DueDate.Get()) {
-		var ret time.Time
+		var ret ClearableDateTime
 		return ret
 	}
 	return *o.DueDate.Get()
@@ -68,7 +67,7 @@ func (o *Changeset) GetDueDate() time.Time {
 // GetDueDateOk returns a tuple with the DueDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Changeset) GetDueDateOk() (*time.Time, bool) {
+func (o *Changeset) GetDueDateOk() (*ClearableDateTime, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -84,8 +83,8 @@ func (o *Changeset) HasDueDate() bool {
 	return false
 }
 
-// SetDueDate gets a reference to the given NullableTime and assigns it to the DueDate field.
-func (o *Changeset) SetDueDate(v time.Time) {
+// SetDueDate gets a reference to the given NullableClearableDateTime and assigns it to the DueDate field.
+func (o *Changeset) SetDueDate(v ClearableDateTime) {
 	o.DueDate.Set(&v)
 }
 
@@ -100,9 +99,9 @@ func (o *Changeset) UnsetDueDate() {
 }
 
 // GetFollowUpDate returns the FollowUpDate field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *Changeset) GetFollowUpDate() time.Time {
+func (o *Changeset) GetFollowUpDate() ClearableDateTime {
 	if o == nil || IsNil(o.FollowUpDate.Get()) {
-		var ret time.Time
+		var ret ClearableDateTime
 		return ret
 	}
 	return *o.FollowUpDate.Get()
@@ -111,7 +110,7 @@ func (o *Changeset) GetFollowUpDate() time.Time {
 // GetFollowUpDateOk returns a tuple with the FollowUpDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Changeset) GetFollowUpDateOk() (*time.Time, bool) {
+func (o *Changeset) GetFollowUpDateOk() (*ClearableDateTime, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -127,8 +126,8 @@ func (o *Changeset) HasFollowUpDate() bool {
 	return false
 }
 
-// SetFollowUpDate gets a reference to the given NullableTime and assigns it to the FollowUpDate field.
-func (o *Changeset) SetFollowUpDate(v time.Time) {
+// SetFollowUpDate gets a reference to the given NullableClearableDateTime and assigns it to the FollowUpDate field.
+func (o *Changeset) SetFollowUpDate(v ClearableDateTime) {
 	o.FollowUpDate.Set(&v)
 }
 
