@@ -13,6 +13,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -262,6 +263,32 @@ func transientRetry() error {
 		}),
 	)
 	// endregion TransientRetry
+	_, _ = client, err
+	return nil
+}
+
+func customTransport() error {
+	// region CustomTransport
+	// WithTransport replaces the base RoundTripper; the SDK's retry, backpressure
+	// and auth layers still apply on top of it.
+	client, err := camunda.New(camunda.WithTransport(&http.Transport{
+		MaxIdleConns:        1024,
+		MaxIdleConnsPerHost: 1024,
+	}))
+	// endregion CustomTransport
+	_, _ = client, err
+	return nil
+}
+
+func customHTTPClient() error {
+	// region CustomHTTPClient
+	// WithHTTPClient replaces the whole HTTP client; it is used as-is, so the
+	// SDK's retry, backpressure, auth and TLS layers are bypassed.
+	client, err := camunda.New(camunda.WithHTTPClient(&http.Client{
+		Transport: &http.Transport{MaxIdleConnsPerHost: 1024},
+		Timeout:   30 * time.Second,
+	}))
+	// endregion CustomHTTPClient
 	_, _ = client, err
 	return nil
 }
