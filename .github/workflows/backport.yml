@@ -16,10 +16,6 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: backport-${{ github.event.pull_request.number || github.event.issue.number }}
-  cancel-in-progress: false
-
 jobs:
   backport:
     name: Create backport PRs
@@ -27,6 +23,14 @@ jobs:
     permissions:
       contents: read
       id-token: write # Vault JWT auth
+    # Job-level, not workflow-level: every comment and label event starts this
+    # workflow, and a skipped run would otherwise replace (cancel) a queued
+    # backport run in the same group. Only runs that pass `if` join the group.
+    # If two real backport runs still collide, the survivor reads the PR's
+    # current labels, so no target is lost.
+    concurrency:
+      group: backport-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: false
     # pull_request_target runs this workflow from the default branch and never
     # checks out PR code, so it is safe for fork PRs.
     # Never react to the automation app's own comments
@@ -191,8 +195,9 @@ jobs:
           }
 
           # Branch names follow the action's default: backport-<PR>-to-<target>.
+          # gh pr list returns 30 PRs by default; the app can have more open.
           existing=$(gh pr list --state open --author app/camunda-sdk-automation \
-            --json number,headRefName \
+            --limit 1000 --json number,headRefName \
             -q ".[] | select(.headRefName | startswith(\"backport-$SOURCE_PR-to-\")) | .number") || {
             echo "::error::Could not list existing backport PRs for #$SOURCE_PR."
             exit 1
