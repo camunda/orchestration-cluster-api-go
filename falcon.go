@@ -89,7 +89,23 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 // buildFalconDialer constructs a WebSocket dialer whose HTTP client carries the
 // SDK's TLS material (for wss://) and injects the configured authentication on
 // both the topology probe and the WebSocket upgrade handshake.
+//
+// Caller-supplied plumbing is honoured so a required proxy, dialer, CA or
+// custom auth is never bypassed: WithHTTPClient is used as-is (the caller owns
+// auth and TLS, exactly as for REST), and WithTransport replaces the SDK-built
+// base transport underneath the SDK auth layer.
 func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
+	if c.cfg.HTTPClient != nil {
+		return &falcon.Dialer{HTTPClient: c.cfg.HTTPClient, Random: c.random}, nil
+	}
+	if c.cfg.Transport != nil {
+		header, err := c.falconAuthHeader()
+		if err != nil {
+			return nil, err
+		}
+		httpClient := &http.Client{Transport: &falconAuthTransport{base: c.cfg.Transport, header: header}}
+		return &falcon.Dialer{HTTPClient: httpClient, Random: c.random}, nil
+	}
 	tlsConf, err := buildTLSConfig(c.cfg.TLS)
 	if err != nil {
 		return nil, err

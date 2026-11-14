@@ -1,6 +1,7 @@
 package camunda
 
 import (
+	"net/http"
 	"net/url"
 	"os"
 	"reflect"
@@ -23,6 +24,20 @@ const (
 	defaultWorkerRequestMs     = 10_000
 	defaultWorkerMaxConcurrent = 10
 	defaultWorkerName          = "go-sdk-worker"
+
+	// defaultMaxIdleConns and defaultMaxIdleConnsPerHost size the SDK's own HTTP
+	// connection pool. Go's http.DefaultTransport keeps only 2 idle connections
+	// per host, so a job worker with many jobs in flight opens a fresh TCP
+	// connection for nearly every complete/fail/activate call and closes it
+	// again — churning sockets into TIME_WAIT, exhausting ephemeral ports, and
+	// roughly halving throughput at moderate concurrency (see
+	// camunda/orchestration-cluster-api-go#162). The SDK therefore never uses
+	// http.DefaultTransport directly: it clones it and sizes the pool to a
+	// workload-appropriate default. Override with
+	// CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS(_PER_HOST), WithMaxIdleConns(PerHost), or
+	// supply your own transport with WithTransport / WithHTTPClient.
+	defaultMaxIdleConns        = 256
+	defaultMaxIdleConnsPerHost = 256
 )
 
 // AuthStrategy selects the authentication mechanism.
@@ -211,6 +226,26 @@ type Config struct {
 	TLS            TLSConfig
 	WorkerDefaults WorkerDefaults
 
+	// MaxIdleConns and MaxIdleConnsPerHost size the SDK's own HTTP connection
+	// pool (CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS / CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST,
+	// or WithMaxIdleConns / WithMaxIdleConnsPerHost). They apply only when the SDK
+	// builds the base transport itself — a user-supplied HTTPClient or Transport
+	// is used as-is.
+	MaxIdleConns        int
+	MaxIdleConnsPerHost int
+
+	// HTTPClient, when set (WithHTTPClient), is used for all REST calls as-is:
+	// the SDK's retry, backpressure, auth, and TLS layers are bypassed, and the
+	// MaxIdleConns(PerHost) settings do not apply. Mutually exclusive with
+	// Transport.
+	HTTPClient *http.Client
+
+	// Transport, when set (WithTransport), replaces the base RoundTripper at the
+	// bottom of the SDK's chain (backpressure -> retry -> auth -> Transport).
+	// TLS material is not applied to it, and the MaxIdleConns(PerHost) settings
+	// do not apply. Mutually exclusive with HTTPClient.
+	Transport http.RoundTripper
+
 	// Clock resolves runtime cadence. Nil selects [LiveClock].
 	Clock Clock
 
@@ -322,11 +357,41 @@ func resolveFromEnv(getenv func(string) string, overrides map[string]string) (*C
 	if err != nil {
 		return nil, err
 	}
+	cfg.MaxIdleConns, cfg.MaxIdleConnsPerHost, err = resolveHTTPPool(get)
+	if err != nil {
+		return nil, err
+	}
 	cfg.WorkerDefaults, err = resolveWorkerDefaults(get)
 	if err != nil {
 		return nil, err
 	}
 	return cfg, nil
+}
+
+// resolveHTTPPool resolves the SDK HTTP connection-pool sizing. The defaults
+// (defaultMaxIdleConns / defaultMaxIdleConnsPerHost) replace Go's
+// http.DefaultTransport behaviour of 2 idle connections per host, which stalls
+// job workers under concurrency (camunda/orchestration-cluster-api-go#162).
+func resolveHTTPPool(get func(...string) string) (maxIdle, maxIdlePerHost int, err error) {
+	maxIdle, maxIdlePerHost = defaultMaxIdleConns, defaultMaxIdleConnsPerHost
+	// An explicitly supplied value (including 0 and negatives) is preserved so
+	// it behaves like the equivalent option and Validate can reject negatives;
+	// the default applies only when the variable is absent.
+	if raw := get("CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS"); strings.TrimSpace(raw) != "" {
+		v, err := parseInt(raw, "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS")
+		if err != nil {
+			return 0, 0, err
+		}
+		maxIdle = v
+	}
+	if raw := get("CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST"); strings.TrimSpace(raw) != "" {
+		v, err := parseInt(raw, "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST")
+		if err != nil {
+			return 0, 0, err
+		}
+		maxIdlePerHost = v
+	}
+	return maxIdle, maxIdlePerHost, nil
 }
 
 func resolveRetry(get func(...string) string) (RetryConfig, error) {
@@ -438,6 +503,18 @@ func (c *Config) Validate() error {
 	}
 	if c.Retry.MaxAttempts < 1 {
 		return configErrorf("retry max attempts must be >= 1, got %d", c.Retry.MaxAttempts)
+	}
+	if c.Transport != nil && isNilUnderlyingValue(c.Transport) {
+		return configErrorf("HTTP transport must not be a typed-nil value")
+	}
+	if c.HTTPClient != nil && c.Transport != nil {
+		return configErrorf("WithHTTPClient and WithTransport are mutually exclusive; set only one")
+	}
+	if c.MaxIdleConns < 0 {
+		return configErrorf("max idle conns must be >= 0, got %d", c.MaxIdleConns)
+	}
+	if c.MaxIdleConnsPerHost < 0 {
+		return configErrorf("max idle conns per host must be >= 0, got %d", c.MaxIdleConnsPerHost)
 	}
 	if c.EventualPollDefault <= 0 {
 		return configErrorf("eventual poll default must be > 0")
