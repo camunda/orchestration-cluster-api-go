@@ -200,6 +200,42 @@ precedence over both.
 | --- | --- | --- |
 | `CAMUNDA_FALCON` | `true` | Enable the FALCON command-stream transport upgrade when the gateway advertises it. |
 | `CAMUNDA_FORCE_REST` | — | Force the pure-REST path even when the gateway advertises FALCON. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` | `256` | Max idle (keep-alive) HTTP connections across all hosts. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` | `256` | Max idle (keep-alive) HTTP connections per host. |
+
+The SDK never uses `http.DefaultTransport` directly: it clones it and sizes the
+idle-connection pool for job-worker workloads. Go's default pool keeps only 2
+idle connections per host, so a worker with many jobs in flight otherwise opens
+and closes a TCP connection per call — churning sockets into `TIME_WAIT`,
+exhausting ephemeral ports, and roughly halving throughput at moderate
+concurrency. Size `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` to at least the sum
+of your workers' `WithMaxConcurrentJobs` plus their pollers when running many
+workers against one gateway.
+
+For full control, supply your own HTTP plumbing:
+
+<!-- snippet-source: examples/readme.go | regions: CustomTransport -->
+```go
+// WithTransport replaces the base RoundTripper; the SDK's retry, backpressure
+// and auth layers still apply on top of it.
+client, err := camunda.New(camunda.WithTransport(&http.Transport{
+	MaxIdleConns:        1024,
+	MaxIdleConnsPerHost: 1024,
+}))
+```
+
+<!-- snippet-source: examples/readme.go | regions: CustomHTTPClient -->
+```go
+// WithHTTPClient replaces the whole HTTP client; it is used as-is, so the
+// SDK's retry, backpressure, auth and TLS layers are bypassed.
+client, err := camunda.New(camunda.WithHTTPClient(&http.Client{
+	Transport: &http.Transport{MaxIdleConnsPerHost: 1024},
+	Timeout:   30 * time.Second,
+}))
+```
+
+The two options are mutually exclusive — setting both fails `New` with a
+configuration error.
 
 Invalid values are rejected at construction with a configuration error rather
 than being silently coerced, so a typo in a deployment manifest fails the process
