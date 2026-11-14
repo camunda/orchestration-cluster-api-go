@@ -1,3 +1,10 @@
+## [10.0.4](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.3...v10.0.4) (2026-11-14)
+
+
+### Bug Fixes
+
+* size the HTTP connection pool for job workers and allow user-supplied transports (backport to stable/10) ([#164](https://github.com/camunda/orchestration-cluster-api-go/issues/164)) ([6ced2ba](https://github.com/camunda/orchestration-cluster-api-go/commit/6ced2ba7a94074be4bbe48c7b7e523b7d190916f)), closes [#162](https://github.com/camunda/orchestration-cluster-api-go/issues/162)
+
 ## [10.0.3](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.2...v10.0.3) (2026-11-12)
 
 
