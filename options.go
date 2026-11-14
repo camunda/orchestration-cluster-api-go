@@ -146,7 +146,8 @@ func WithMaxIdleConns(n int) Option {
 // when the SDK builds the base transport itself (not with [WithHTTPClient] or
 // [WithTransport]). Size it to at least the sum of your workers'
 // WithMaxConcurrentJobs plus their pollers when running many workers against one
-// gateway.
+// gateway. The global [WithMaxIdleConns] limit still caps the whole idle pool, so
+// raise it as well (to at least this value, or 0 for no global limit).
 func WithMaxIdleConnsPerHost(n int) Option {
 	return func(c *Config) { c.MaxIdleConnsPerHost = n }
 }

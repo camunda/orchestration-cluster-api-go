@@ -210,7 +210,9 @@ and closes a TCP connection per call — churning sockets into `TIME_WAIT`,
 exhausting ephemeral ports, and roughly halving throughput at moderate
 concurrency. Size `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` to at least the sum
 of your workers' `WithMaxConcurrentJobs` plus their pollers when running many
-workers against one gateway.
+workers against one gateway. `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` caps the idle pool
+across all hosts, so raise it too (to at least the per-host value, or `0` for no
+global limit) — otherwise the 256 global cap still evicts connections.
 
 For full control, supply your own HTTP plumbing:
 
