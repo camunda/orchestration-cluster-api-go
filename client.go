@@ -218,7 +218,14 @@ func buildTLSConfig(t TLSConfig) (*tls.Config, error) {
 // replacing Go's 2-per-host behaviour that stalls job workers under
 // concurrency; camunda/orchestration-cluster-api-go#162). Configured TLS
 // material is applied on top.
+//
+// When Config.HTTPClient (WithHTTPClient) is set the SDK chain is never used,
+// so no base transport is built: SDK TLS material is not loaded and
+// http.DefaultTransport's concrete type is irrelevant (nil, nil is returned).
 func buildBaseTransport(cfg *Config) (http.RoundTripper, error) {
+	if cfg.HTTPClient != nil {
+		return nil, nil
+	}
 	if cfg.Transport != nil {
 		return cfg.Transport, nil
 	}

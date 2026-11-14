@@ -170,3 +170,83 @@ func TestWithTransportStaysUnderSDKChain(t *testing.T) {
 		t.Error("expected the SDK auth layer to set an Authorization header above the user transport")
 	}
 }
+
+// Explicit env pool values are preserved (not replaced by the default) so that
+// negatives are rejected and zero matches the equivalent option.
+func TestHTTPPoolEnvExplicitValuesPreserved(t *testing.T) {
+	for _, key := range []string{"CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS", "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST"} {
+		t.Run(key+"=-1", func(t *testing.T) {
+			_, err := loadConfig(envFrom(map[string]string{key: "-1"}), nil)
+			if !errors.Is(err, ErrConfig) {
+				t.Fatalf("expected ErrConfig for negative %s, got %v", key, err)
+			}
+		})
+		t.Run(key+"=0", func(t *testing.T) {
+			cfg, err := loadConfig(envFrom(map[string]string{key: "0"}), nil)
+			if err != nil {
+				t.Fatalf("loadConfig: %v", err)
+			}
+			got := cfg.MaxIdleConns
+			if key == "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST" {
+				got = cfg.MaxIdleConnsPerHost
+			}
+			if got != 0 {
+				t.Fatalf("%s=0 resolved to %d, want 0", key, got)
+			}
+		})
+	}
+}
+
+func TestWithTransportTypedNilRejected(t *testing.T) {
+	_, err := New(WithTransport((*http.Transport)(nil)))
+	if !errors.Is(err, ErrConfig) {
+		t.Fatalf("expected ErrConfig for typed-nil transport, got %v", err)
+	}
+}
+
+// WithHTTPClient bypasses SDK TLS: an unreadable SDK CA path must not fail New.
+func TestWithHTTPClientSkipsSDKTransportSetup(t *testing.T) {
+	t.Setenv("CAMUNDA_MTLS_CA_PATH", "/nonexistent/ca.pem")
+	if _, err := New(WithHTTPClient(&http.Client{})); err != nil {
+		t.Fatalf("New with custom HTTP client: %v", err)
+	}
+}
+
+// FALCON probes/upgrades must go through caller-supplied plumbing.
+func TestFalconDialerUsesCustomPlumbing(t *testing.T) {
+	mine := &http.Client{}
+	c, err := New(WithHTTPClient(mine))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	d, err := c.buildFalconDialer()
+	if err != nil {
+		t.Fatalf("buildFalconDialer: %v", err)
+	}
+	if d.HTTPClient != mine {
+		t.Fatal("falcon dialer did not use the WithHTTPClient client")
+	}
+
+	called := false
+	rt := roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		called = true
+		return okResponse(r), nil
+	})
+	c2, err := New(WithTransport(rt))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	d2, err := c2.buildFalconDialer()
+	if err != nil {
+		t.Fatalf("buildFalconDialer: %v", err)
+	}
+	req, _ := http.NewRequest(http.MethodGet, "http://example.invalid/", nil)
+	resp, err := d2.HTTPClient.Do(req)
+	if err != nil {
+		t.Fatalf("Do: %v", err)
+	}
+	resp.Body.Close()
+	if !called {
+		t.Fatal("falcon dialer bypassed the WithTransport round tripper")
+	}
+}

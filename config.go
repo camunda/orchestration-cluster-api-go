@@ -374,14 +374,21 @@ func resolveFromEnv(getenv func(string) string, overrides map[string]string) (*C
 // job workers under concurrency (camunda/orchestration-cluster-api-go#162).
 func resolveHTTPPool(get func(...string) string) (maxIdle, maxIdlePerHost int, err error) {
 	maxIdle, maxIdlePerHost = defaultMaxIdleConns, defaultMaxIdleConnsPerHost
-	if v, err := parseInt(get("CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS"), "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS"); err != nil {
-		return 0, 0, err
-	} else if v > 0 {
+	// An explicitly supplied value (including 0 and negatives) is preserved so
+	// it behaves like the equivalent option and Validate can reject negatives;
+	// the default applies only when the variable is absent.
+	if raw := get("CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS"); strings.TrimSpace(raw) != "" {
+		v, err := parseInt(raw, "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS")
+		if err != nil {
+			return 0, 0, err
+		}
 		maxIdle = v
 	}
-	if v, err := parseInt(get("CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST"), "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST"); err != nil {
-		return 0, 0, err
-	} else if v > 0 {
+	if raw := get("CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST"); strings.TrimSpace(raw) != "" {
+		v, err := parseInt(raw, "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST")
+		if err != nil {
+			return 0, 0, err
+		}
 		maxIdlePerHost = v
 	}
 	return maxIdle, maxIdlePerHost, nil
@@ -496,6 +503,9 @@ func (c *Config) Validate() error {
 	}
 	if c.Retry.MaxAttempts < 1 {
 		return configErrorf("retry max attempts must be >= 1, got %d", c.Retry.MaxAttempts)
+	}
+	if c.Transport != nil && isNilUnderlyingValue(c.Transport) {
+		return configErrorf("HTTP transport must not be a typed-nil value")
 	}
 	if c.HTTPClient != nil && c.Transport != nil {
 		return configErrorf("WithHTTPClient and WithTransport are mutually exclusive; set only one")
