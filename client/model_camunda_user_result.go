@@ -376,7 +376,6 @@ func (o *CamundaUserResult) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"isAnonymous",
 		"username",
 		"displayName",
 		"email",

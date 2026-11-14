@@ -11,6 +11,7 @@ API version: 0.1
 package camundaapi
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -24,52 +25,40 @@ type ClearableDateTime struct {
 
 // Unmarshal JSON data into any of the pointers in the struct
 func (dst *ClearableDateTime) UnmarshalJSON(data []byte) error {
-	var err error
-	// this object is nullable so check if the payload is null or empty string
-	if string(data) == "" || string(data) == "{}" {
+	// Reset both branches so a decode never leaves a stale value behind.
+	dst.String = nil
+	dst.TimeTime = nil
+	if string(bytes.TrimSpace(data)) == "null" {
+		return nil // null preserves the persisted value
+	}
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return fmt.Errorf("ClearableDateTime: expected a string or null: %w", err)
+	}
+	if s == "" {
+		dst.String = &s
 		return nil
 	}
-
-	// try to unmarshal JSON data into String
-	err = json.Unmarshal(data, &dst.String)
-	if err == nil {
-		jsonString, _ := json.Marshal(dst.String)
-		if string(jsonString) == "{}" { // empty struct
-			dst.String = nil
-		} else {
-			return nil // data stored in dst.String, return on the first match
-		}
-	} else {
-		dst.String = nil
+	t, err := time.Parse(time.RFC3339Nano, s)
+	if err != nil {
+		return fmt.Errorf("ClearableDateTime: %q is neither an empty string nor an RFC 3339 date-time: %w", s, err)
 	}
-
-	// try to unmarshal JSON data into TimeTime
-	err = json.Unmarshal(data, &dst.TimeTime)
-	if err == nil {
-		jsonTimeTime, _ := json.Marshal(dst.TimeTime)
-		if string(jsonTimeTime) == "{}" { // empty struct
-			dst.TimeTime = nil
-		} else {
-			return nil // data stored in dst.TimeTime, return on the first match
-		}
-	} else {
-		dst.TimeTime = nil
-	}
-
-	return fmt.Errorf("data failed to match schemas in anyOf(ClearableDateTime)")
+	dst.TimeTime = &t
+	return nil
 }
 
 // Marshal data from the first non-nil pointers in the struct to JSON
 func (src ClearableDateTime) MarshalJSON() ([]byte, error) {
 	if src.String != nil {
-		return json.Marshal(&src.String)
+		if *src.String != "" {
+			return nil, fmt.Errorf("ClearableDateTime: String branch must be empty (clear), got %q", *src.String)
+		}
+		return json.Marshal(*src.String)
 	}
-
 	if src.TimeTime != nil {
-		return json.Marshal(&src.TimeTime)
+		return json.Marshal(src.TimeTime)
 	}
-
-	return nil, nil // no data in anyOf schemas
+	return []byte("null"), nil // unset: preserve the persisted value
 }
 
 type NullableClearableDateTime struct {
