@@ -1,0 +1,94 @@
+name: Backport labeled merged pull requests
+
+# Ports a merged PR to a maintenance branch. Two ways to trigger it:
+#   - add a `backport stable/N` label to the PR (before or after merging)
+#   - comment `/backport stable/N` on a merged PR
+# Uses korthout/backport-action, as camunda-8-js-sdk does.
+#
+# Runs as camunda-sdk-automation (token from Vault, as in release.yml), not
+# GITHUB_TOKEN: PRs opened with GITHUB_TOKEN do not trigger workflows, so the
+# required checks on stable/** would never run on the backport PR.
+
+on:
+  pull_request_target:
+    types: [closed, labeled]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backport-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  backport:
+    name: Create backport PRs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # mint GitHub OIDC token for Vault JWT auth
+    # Run on a merged PR (closed, or labeled after merge), or on a `/backport`
+    # comment on a PR from a repo collaborator. Skip comments from the app's own
+    # bot (user id 290741040), which posts results as comments.
+    if: >
+      (
+        github.event_name == 'pull_request_target' &&
+        github.event.pull_request.merged &&
+        (github.event.action == 'closed' || startsWith(github.event.label.name, 'backport '))
+      ) || (
+        github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        github.event.comment.user.id != 290741040 &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+        startsWith(github.event.comment.body, '/backport')
+      )
+    steps:
+      - name: Import secrets
+        id: secrets
+        uses: hashicorp/vault-action@v4.0.0
+        with:
+          url: ${{ secrets.VAULT_ADDR }}
+          method: jwt
+          path: ${{ secrets.VAULT_JWT_PATH }}
+          role: ${{ secrets.VAULT_JWT_ROLE }}
+          jwtGithubAudience: ${{ secrets.VAULT_JWT_AUDIENCE }}
+          exportEnv: false
+          secrets: |
+            secret/data/products/agentic-experience/github.com/apps/camunda/camunda-sdk-automation GITHUB_APP_ID | APP_ID ;
+            secret/data/products/agentic-experience/github.com/apps/camunda/camunda-sdk-automation GITHUB_APP_PRIVATE_KEY | APP_PRIVATE_KEY ;
+
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ steps.secrets.outputs.APP_ID }}
+          private-key: ${{ steps.secrets.outputs.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      # Checks out the base branch (never PR head code), so pull_request_target is safe.
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+
+      - name: Create backport PRs
+        uses: korthout/backport-action@v4
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          # Keep the Conventional Commit title so commitlint passes and the
+          # squash-merge triggers the right release on stable/N (matches #128, #164).
+          pull_title: "${pull_title} (backport to ${target_branch})"
+          pull_description: |-
+            Backport of #${pull_number} to `${target_branch}`.
+
+            relates to ${issue_refs}
+          add_author_as_assignee: true
+          add_author_as_reviewer: true
+          experimental: >
+            {
+              "conflict_resolution": "draft_commit_conflicts"
+            }

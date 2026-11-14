@@ -123,6 +123,14 @@ Conventional Commits (enforced by commitlint via the shared `@camunda8/sdk-infra
 config). Use `fix` only for user-facing bug fixes (triggers a release); use `chore` for
 review-comment fix-ups and regeneration commits.
 
+## Backports
+
+To port a merged fix to a maintenance line, add the label `backport stable/N` to the PR
+(before or after merge), or comment `/backport stable/N` on the merged PR.
+`.github/workflows/backport.yml` (korthout/backport-action, running as
+`camunda-sdk-automation`) opens `<original title> (backport to stable/N)`; on cherry-pick
+conflicts it opens a draft PR with the conflicts committed for manual resolution.
+
 ## Versioning
 
 Releases are automatic. On every push to `main` or `stable/**`, `release.yml` runs the
