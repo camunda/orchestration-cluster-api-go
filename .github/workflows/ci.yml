@@ -88,6 +88,8 @@ jobs:
         run: python scripts/sync-readme-snippets.py --check
       - name: Check example coverage
         run: python scripts/check-example-coverage.py
+      - name: Test the backport derived-path allowlist
+        run: ./scripts/check-derived-paths.test.sh
       # The generator fails on an exported type that is not assigned to a reference
       # page. Nothing ran it, so five merged PRs left it broken unnoticed.
       - name: Check every exported type is documented
