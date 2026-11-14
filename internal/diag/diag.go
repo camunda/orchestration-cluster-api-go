@@ -125,7 +125,11 @@ func (l *Logger) Debug(msg string, kv ...any) { l.log(LevelDebug, msg, kv...) }
 // Trace logs at trace level.
 func (l *Logger) Trace(msg string, kv ...any) { l.log(LevelTrace, msg, kv...) }
 
-// secretKeySubstrings identify env vars whose values must be redacted in a snapshot.
+// RedactedValue replaces the value of a secret variable in an environment snapshot.
+const RedactedValue = "***redacted***"
+
+// secretKeySubstrings identify env vars whose values must be redacted in a snapshot
+// when the caller's declaration does not know the variable (see EnvironmentSnapshot).
 var secretKeySubstrings = []string{"SECRET", "PASSWORD", "PASSPHRASE", "TOKEN", "KEY"}
 
 func isSecretKey(key string) bool {
@@ -143,9 +147,27 @@ func isSecretKey(key string) bool {
 }
 
 // EnvironmentSnapshot collects CAMUNDA_*/ZEEBE_* environment variables for
-// support diagnostics, redacting secret-like values. environ should be the
-// output of os.Environ(); if nil, os.Environ() is used.
+// support diagnostics using only the name heuristic to decide what to redact.
+// Prefer EnvironmentSnapshotWithSecrets, which lets the caller declare credential
+// variables explicitly; the heuristic alone misses names such as CAMUNDA_MTLS_CERT.
 func EnvironmentSnapshot(environ []string) map[string]string {
+	return EnvironmentSnapshotWithSecrets(environ, nil)
+}
+
+// EnvironmentSnapshotWithSecrets collects CAMUNDA_*/ZEEBE_* environment variables
+// for support diagnostics, redacting secret values. environ should be the output
+// of os.Environ(); if nil, os.Environ() is used.
+//
+// classify is the authoritative declaration of the caller's known variables (the
+// root package builds it from ConfigSchema, which this leaf package cannot
+// import). It reports whether a variable is secret and whether it is known at all.
+// A known variable is redacted exactly when it is declared secret, whatever its
+// name looks like, so CAMUNDA_MTLS_CERT is hidden and a known non-secret such as
+// CAMUNDA_TOKEN_AUDIENCE stays visible. Only an unknown variable falls back to the
+// name heuristic, so a credential the declaration has never heard of (a user's own
+// ZEEBE_* leftovers) is still not written out in full. classify may be nil, in
+// which case only the heuristic applies.
+func EnvironmentSnapshotWithSecrets(environ []string, classify func(key string) (secret, known bool)) map[string]string {
 	if environ == nil {
 		environ = os.Environ()
 	}
@@ -160,8 +182,16 @@ func EnvironmentSnapshot(environ []string) map[string]string {
 		if !strings.HasPrefix(up, "CAMUNDA_") && !strings.HasPrefix(up, "ZEEBE_") {
 			continue
 		}
-		if isSecretKey(key) && val != "" {
-			out[key] = "***redacted***"
+		secret := false
+		known := false
+		if classify != nil {
+			secret, known = classify(key)
+		}
+		if !known {
+			secret = isSecretKey(key)
+		}
+		if secret && val != "" {
+			out[key] = RedactedValue
 		} else {
 			out[key] = val
 		}
