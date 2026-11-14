@@ -341,7 +341,11 @@ func TestActivateJobsDefaultTenant(t *testing.T) {
 	t.Run("NoConfiguredDefaultSendsDefaultIdentifier", func(t *testing.T) {
 		bc := newBodyCapture(t)
 		client := bc.client(t)
-		_, _ = client.ActivateJobs(context.Background(), *newActivation())
+		req := newActivation()
+		// NewJobActivationRequest pre-sets PROVIDED; clear it to cover the
+		// nil-filter branch (PROVIDED is covered by ProvidedFilterInjectsDefault).
+		req.TenantFilter = nil
+		_, _ = client.ActivateJobs(context.Background(), *req)
 		got := bc.tenantIDsOf()
 		if len(got) != 1 || got[0] != camunda.DefaultTenantIdentifier {
 			t.Errorf("tenantIds = %v, want [%q]", got, camunda.DefaultTenantIdentifier)
