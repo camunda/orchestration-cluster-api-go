@@ -8,6 +8,33 @@
 //   - None: no authentication (e.g. local development).
 //
 // Authentication is applied to outgoing requests via an http.RoundTripper.
+//
+// # On-disk token cache
+//
+// The on-disk cache is opt-in (OAuthConfig.CacheDir, set from
+// CAMUNDA_OAUTH_CACHE_DIR or WithOAuthCacheDir) and holds a bearer token, so it
+// is treated as credential storage:
+//
+//   - The directory is created mode 0700 and each entry is written mode 0600.
+//   - Entries are written to a temp file and renamed into place, so the mode is
+//     reapplied on every rewrite and a concurrent reader never sees a torn file.
+//   - The cache is disabled — neither read nor written — when the directory is
+//     writable by group or other, because the entry path is derived from values
+//     an attacker may know and a writable directory lets them both widen the
+//     file's mode and substitute the token the SDK presents to the cluster.
+//   - An entry whose own mode is wider than 0600 is ignored on read. A
+//     restrictive directory is not sufficient: an existing file can be rewritten
+//     by anyone its own permissions allow, with no write access to the
+//     directory. Anything wider than 0600 was not written by this SDK.
+//   - An entry found expired is removed rather than left on disk, after a
+//     re-read confirms another process has not just published a fresh one.
+//
+// On Windows these guarantees do not hold. Go's permission bits are largely
+// ignored there: a file inherits the ACL of its parent directory, MkdirAll's
+// 0700 does not restrict that ACL, and the permission bits os.Stat reports do
+// not describe the effective access, so the group/other-writable check is
+// skipped. The cache therefore has no operating-system-enforced protection on
+// Windows and should not be enabled on a shared Windows host.
 package auth
 
 import (
@@ -21,6 +48,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -105,9 +133,16 @@ func (ts *TokenSource) Token(ctx context.Context) (string, error) {
 
 	// Try the on-disk cache (shared across processes) before hitting the network.
 	if ts.cfg.CacheDir != "" {
-		if tok, refreshAfter, ok := ts.readDisk(); ok && now.Before(refreshAfter) {
-			ts.token, ts.refreshAfter = tok, refreshAfter
-			return tok, nil
+		if tok, refreshAfter, ok := ts.readDisk(); ok {
+			if now.Before(refreshAfter) {
+				ts.token, ts.refreshAfter = tok, refreshAfter
+				return tok, nil
+			}
+			// Expired. Nothing used to remove it, so a stale bearer token stayed
+			// readable on disk indefinitely — surviving the process and any
+			// credential rotation. Drop it now rather than waiting for a
+			// successful refresh, which may never come.
+			ts.removeExpiredDisk(now)
 		}
 	}
 
@@ -168,8 +203,61 @@ func (ts *TokenSource) fetch(ctx context.Context, now time.Time) (string, time.T
 	return tr.AccessToken, refreshAfter, nil
 }
 
+// cacheDirUsable reports whether the cache directory is safe to hold a bearer
+// token: it must exist, be a directory, and not be writable by group or other.
+//
+// MkdirAll's 0700 only applies to a directory it creates; on a directory that
+// already exists it is a no-op, so a pre-existing world-writable CacheDir kept
+// its mode. The cache path is a hash of the token URL, client id and audience,
+// all of which an attacker may know, so write access to the directory is enough
+// both to pre-create the file at a wide mode and to substitute the token the SDK
+// then presents to the cluster. Neither reading nor writing is worth doing there.
+//
+// On Windows the permission bits Go reports do not describe the ACL that
+// actually governs access, so the check would be meaningless; see the package
+// documentation for what the cache does and does not guarantee there.
+func cacheDirUsable(dir string) bool {
+	if runtime.GOOS == "windows" {
+		return true
+	}
+	fi, err := os.Stat(dir)
+	if err != nil || !fi.IsDir() {
+		return false
+	}
+	return fi.Mode().Perm()&0o022 == 0
+}
+
+// readDisk returns the cached entry, if there is one worth trusting.
+//
+// The entry's own mode is checked, not just the directory's. A restrictive
+// directory is not sufficient: an entry that already exists can be opened and
+// rewritten by anyone the file's own permissions allow, without any write access
+// to the directory. Since writeDisk only ever publishes mode 0600, anything
+// wider was not written by this SDK, and a token from it could have been
+// substituted by another local user. The entry is ignored rather than trusted;
+// the refetch that follows republishes it at 0600 through the atomic rename,
+// which repairs the mode as a side effect.
+//
+// The file is stat'ed through the open descriptor so the mode that is checked is
+// the mode of the file that is read, with no window in between.
 func (ts *TokenSource) readDisk() (string, time.Time, bool) {
-	data, err := os.ReadFile(ts.cachePath())
+	if !cacheDirUsable(ts.cfg.CacheDir) {
+		return "", time.Time{}, false
+	}
+	f, err := os.Open(ts.cachePath())
+	if err != nil {
+		return "", time.Time{}, false
+	}
+	defer func() { _ = f.Close() }()
+
+	if runtime.GOOS != "windows" {
+		fi, err := f.Stat()
+		if err != nil || !fi.Mode().IsRegular() || fi.Mode().Perm()&0o077 != 0 {
+			return "", time.Time{}, false
+		}
+	}
+
+	data, err := io.ReadAll(io.LimitReader(f, 1<<20))
 	if err != nil {
 		return "", time.Time{}, false
 	}
@@ -180,16 +268,75 @@ func (ts *TokenSource) readDisk() (string, time.Time, bool) {
 	return dt.AccessToken, time.UnixMilli(dt.RefreshAfterUnixMs), true
 }
 
+// removeExpiredDisk drops the cached entry if it is still expired.
+//
+// The re-read matters because the cache is shared between processes: between
+// this process reading an expired entry and deciding to delete it, another may
+// have published a fresh one, and removing that by pathname would discard a good
+// token. Re-reading immediately before the unlink narrows the window to the gap
+// between these two syscalls.
+//
+// It does not close the window completely — doing that needs file locking, which
+// is a larger design decision than this fix. The residual consequence is bounded
+// and harmless: at worst a freshly published entry is removed and the next
+// caller fetches a token again. A wrong or stale token is never served.
+//
+// Best-effort, like the rest of the cache.
+func (ts *TokenSource) removeExpiredDisk(now time.Time) {
+	if !cacheDirUsable(ts.cfg.CacheDir) {
+		return
+	}
+	if _, refreshAfter, ok := ts.readDisk(); ok && now.Before(refreshAfter) {
+		return
+	}
+	_ = os.Remove(ts.cachePath())
+}
+
+// writeDisk persists the token for other processes sharing CacheDir.
+//
+// The write goes to a temp file in the same directory which is then renamed into
+// place. The rename is atomic, so a concurrent reader sees either the old entry
+// or the new one and never a truncated file, and it installs the temp file's own
+// 0600 mode — where os.WriteFile applied its perm only when creating the file,
+// leaving an existing cache file at whatever mode it already had.
 func (ts *TokenSource) writeDisk(token string, refreshAfter time.Time) {
 	if err := os.MkdirAll(ts.cfg.CacheDir, 0o700); err != nil {
+		return
+	}
+	if !cacheDirUsable(ts.cfg.CacheDir) {
 		return
 	}
 	data, err := json.Marshal(diskToken{AccessToken: token, RefreshAfterUnixMs: refreshAfter.UnixMilli()})
 	if err != nil {
 		return
 	}
-	// Best-effort: token caching is an optimization, not a correctness requirement.
-	_ = os.WriteFile(ts.cachePath(), data, 0o600)
+
+	// Best-effort: token caching is an optimization, not a correctness
+	// requirement, so every failure below simply leaves the cache as it was.
+	tmp, err := os.CreateTemp(ts.cfg.CacheDir, ".camunda-oauth-*.tmp")
+	if err != nil {
+		return
+	}
+	tmpName := tmp.Name()
+	// CreateTemp already uses 0600; set it explicitly so the guarantee rests on
+	// this code rather than on a standard-library default.
+	if err := tmp.Chmod(0o600); err != nil {
+		_ = tmp.Close()
+		_ = os.Remove(tmpName)
+		return
+	}
+	if _, err := tmp.Write(data); err != nil {
+		_ = tmp.Close()
+		_ = os.Remove(tmpName)
+		return
+	}
+	if err := tmp.Close(); err != nil {
+		_ = os.Remove(tmpName)
+		return
+	}
+	if err := os.Rename(tmpName, ts.cachePath()); err != nil {
+		_ = os.Remove(tmpName)
+	}
 }
 
 // Transport applies authentication to outgoing requests.
