@@ -3,7 +3,7 @@ package camunda
 import (
 	"strings"
 
-	"github.com/camunda/orchestration-cluster-api-go/v11/internal/diag"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/diag"
 )
 
 // ConfigField documents a single environment variable the SDK reads while

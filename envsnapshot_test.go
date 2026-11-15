@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/camunda/orchestration-cluster-api-go/v11/internal/diag"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/diag"
 )
 
 // TestEnvironmentSnapshotRedactsEverySchemaSecret ties the support-snapshot
