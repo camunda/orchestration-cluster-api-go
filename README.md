@@ -144,6 +144,28 @@ The OAuth token cache is two-tier: an in-memory cache backed by an on-disk cache
 valid token instead of re-authenticating on every start. Concurrent refreshes are
 collapsed into a single in-flight request.
 
+The on-disk tier is opt-in and holds a bearer token, so it is treated as
+credential storage. The directory is created mode `0700` and each entry is
+written mode `0600` through a temp file renamed into place — so the mode is
+reapplied on every rewrite and a concurrent reader never sees a partially written
+entry. An entry found expired is deleted rather than left behind, after a
+re-read confirms another process has not just published a fresh one.
+
+Entries are also checked before they are trusted. If the cache directory is
+writable by group or other, the cache is disabled rather than used: the entry
+path is derived from the token URL, client id and audience, so write access to
+that directory would be enough to substitute the token the SDK presents to the
+cluster. An individual entry whose own mode is wider than `0600` is ignored for
+the same reason — a restrictive directory does not stop someone rewriting a file
+their own permissions already allow — and the refetch that follows republishes it
+at `0600`.
+
+> **Windows:** none of the above is enforced by the operating system. Go's
+> permission bits are largely ignored on Windows — a file inherits the ACL of its
+> parent directory, and `0700` on the directory does not restrict that ACL — so
+> the group/other-writable check is skipped and the cache has no OS-enforced
+> protection. Leave the on-disk cache disabled on a shared Windows host.
+
 ## Configuration reference
 
 `CAMUNDA_*` variables are canonical; the `ZEEBE_*` names are accepted as
@@ -200,6 +222,44 @@ precedence over both.
 | --- | --- | --- |
 | `CAMUNDA_FALCON` | `true` | Enable the FALCON command-stream transport upgrade when the gateway advertises it. |
 | `CAMUNDA_FORCE_REST` | — | Force the pure-REST path even when the gateway advertises FALCON. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` | `256` | Max idle (keep-alive) HTTP connections across all hosts. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` | `256` | Max idle (keep-alive) HTTP connections per host. |
+
+The SDK never uses `http.DefaultTransport` directly: it clones it and sizes the
+idle-connection pool for job-worker workloads. Go's default pool keeps only 2
+idle connections per host, so a worker with many jobs in flight otherwise opens
+and closes a TCP connection per call — churning sockets into `TIME_WAIT`,
+exhausting ephemeral ports, and roughly halving throughput at moderate
+concurrency. Size `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` to at least the sum
+of your workers' `WithMaxConcurrentJobs` plus their pollers when running many
+workers against one gateway. `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` caps the idle pool
+across all hosts, so raise it too (to at least the per-host value, or `0` for no
+global limit) — otherwise the 256 global cap still evicts connections.
+
+For full control, supply your own HTTP plumbing:
+
+<!-- snippet-source: examples/readme.go | regions: CustomTransport -->
+```go
+// WithTransport replaces the base RoundTripper; the SDK's retry, backpressure
+// and auth layers still apply on top of it.
+client, err := camunda.New(camunda.WithTransport(&http.Transport{
+	MaxIdleConns:        1024,
+	MaxIdleConnsPerHost: 1024,
+}))
+```
+
+<!-- snippet-source: examples/readme.go | regions: CustomHTTPClient -->
+```go
+// WithHTTPClient replaces the whole HTTP client; it is used as-is, so the
+// SDK's retry, backpressure, auth and TLS layers are bypassed.
+client, err := camunda.New(camunda.WithHTTPClient(&http.Client{
+	Transport: &http.Transport{MaxIdleConnsPerHost: 1024},
+	Timeout:   30 * time.Second,
+}))
+```
+
+The two options are mutually exclusive — setting both fails `New` with a
+configuration error.
 
 Invalid values are rejected at construction with a configuration error rather
 than being silently coerced, so a typo in a deployment manifest fails the process
@@ -381,6 +441,37 @@ saying so, rather than completing it without the result — which would, for
 example, approve a task the listener denied. To use job results against such a
 gateway, set `CAMUNDA_FORCE_REST=true` (or `camunda.WithForceREST(true)`) so the
 worker polls over REST.
+
+### Panicking handlers
+
+A handler runs on its own goroutine, and in Go an unrecovered panic on *any*
+goroutine terminates the whole process. The workers therefore recover a panicking
+handler and **fail the job** with it, on every transport (REST polling, the
+FALCON command stream, the gRPC stream, and the gRPC worker's REST sidecar poll):
+
+- The job is failed exactly as it would be for a returned error, so its retries
+  decrement and the engine schedules a retry instead of leaving the job to sit
+  until its activation timeout expires.
+- The recovered panic is observable through the SDK log and through the failed
+  job (and its incident) on the cluster. It is **not** returned to your code:
+  the worker consumes the resulting `camunda.ErrHandlerPanic` internally and
+  `Run` does not return per-job handler errors, so `errors.Is` cannot be used
+  to detect it from application code.
+- The panic value and a stack trace are written to the SDK log at **error**
+  level — the same detail the runtime would have printed to stderr as the process
+  died.
+- The panic value is **not** sent to the cluster. The failure message the engine
+  stores on the incident says only that the handler panicked, because that
+  message is durable and widely visible, and a panic value can carry job-variable
+  content.
+
+This is a deliberate choice rather than a silent one: a panic is a bug in the
+handler, but losing the host application (and every other job it was running) is
+a disproportionate consequence. If your handler must not be recovered — if a
+panic indicates corrupted process state that should stop the program — detect
+that in the handler and terminate the process explicitly rather than relying on
+the panic to propagate. There is deliberately no option to turn recovery off;
+adding one would be a design decision for the SDK team.
 
 ## Deploying and starting processes
 
