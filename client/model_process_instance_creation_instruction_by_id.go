@@ -23,8 +23,6 @@ var _ MappedNullable = &ProcessInstanceCreationInstructionById{}
 type ProcessInstanceCreationInstructionById struct {
 	// JSON object that will instantiate the variables for the root variable scope of the process instance.
 	Variables map[string]interface{} `json:"variables,omitempty"`
-	// Metadata of the variables, keyed by variable name. Use it to set how a variable is treated, for example to protect its value. Each key must be the name of a variable in `variables`. A variable without an entry has no metadata.
-	VariablesMetadata *map[string]VariableMetadata `json:"variablesMetadata,omitempty"`
 	// The tenant id of the process definition. If multi-tenancy is enabled, provide the tenant id of the process definition to start a process instance of. If multi-tenancy is disabled, don't provide this parameter.
 	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// A reference key chosen by the user that will be part of all records resulting from this operation. Must be > 0 if provided.
@@ -111,38 +109,6 @@ func (o *ProcessInstanceCreationInstructionById) HasVariables() bool {
 // SetVariables gets a reference to the given map[string]interface{} and assigns it to the Variables field.
 func (o *ProcessInstanceCreationInstructionById) SetVariables(v map[string]interface{}) {
 	o.Variables = v
-}
-
-// GetVariablesMetadata returns the VariablesMetadata field value if set, zero value otherwise.
-func (o *ProcessInstanceCreationInstructionById) GetVariablesMetadata() map[string]VariableMetadata {
-	if o == nil || IsNil(o.VariablesMetadata) {
-		var ret map[string]VariableMetadata
-		return ret
-	}
-	return *o.VariablesMetadata
-}
-
-// GetVariablesMetadataOk returns a tuple with the VariablesMetadata field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ProcessInstanceCreationInstructionById) GetVariablesMetadataOk() (*map[string]VariableMetadata, bool) {
-	if o == nil || IsNil(o.VariablesMetadata) {
-		return nil, false
-	}
-	return o.VariablesMetadata, true
-}
-
-// HasVariablesMetadata returns a boolean if a field has been set.
-func (o *ProcessInstanceCreationInstructionById) HasVariablesMetadata() bool {
-	if o != nil && !IsNil(o.VariablesMetadata) {
-		return true
-	}
-
-	return false
-}
-
-// SetVariablesMetadata gets a reference to the given map[string]VariableMetadata and assigns it to the VariablesMetadata field.
-func (o *ProcessInstanceCreationInstructionById) SetVariablesMetadata(v map[string]VariableMetadata) {
-	o.VariablesMetadata = &v
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
@@ -501,9 +467,6 @@ func (o ProcessInstanceCreationInstructionById) ToMap() (map[string]interface{},
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Variables) {
 		toSerialize["variables"] = o.Variables
-	}
-	if !IsNil(o.VariablesMetadata) {
-		toSerialize["variablesMetadata"] = o.VariablesMetadata
 	}
 	if !IsNil(o.TenantId) {
 		toSerialize["tenantId"] = o.TenantId

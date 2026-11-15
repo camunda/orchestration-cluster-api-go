@@ -35,6 +35,7 @@ const (
 	RESOURCETYPEENUM_GROUP                            ResourceTypeEnum = "GROUP"
 	RESOURCETYPEENUM_MAPPING_RULE                     ResourceTypeEnum = "MAPPING_RULE"
 	RESOURCETYPEENUM_MESSAGE                          ResourceTypeEnum = "MESSAGE"
+	RESOURCETYPEENUM_PROBE                            ResourceTypeEnum = "PROBE"
 	RESOURCETYPEENUM_PROCESS_DEFINITION               ResourceTypeEnum = "PROCESS_DEFINITION"
 	RESOURCETYPEENUM_RESOURCE                         ResourceTypeEnum = "RESOURCE"
 	RESOURCETYPEENUM_ROLE                             ResourceTypeEnum = "ROLE"
@@ -62,6 +63,7 @@ var AllowedResourceTypeEnumEnumValues = []ResourceTypeEnum{
 	"GROUP",
 	"MAPPING_RULE",
 	"MESSAGE",
+	"PROBE",
 	"PROCESS_DEFINITION",
 	"RESOURCE",
 	"ROLE",

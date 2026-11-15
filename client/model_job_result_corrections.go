@@ -12,7 +12,6 @@ package camundaapi
 
 import (
 	"encoding/json"
-	"time"
 )
 
 // checks if the JobResultCorrections type satisfies the MappedNullable interface at compile time
@@ -22,20 +21,16 @@ var _ MappedNullable = &JobResultCorrections{}
 type JobResultCorrections struct {
 	// Assignee of the task.
 	Assignee NullableString `json:"assignee,omitempty"`
-	// The due date of the task.
-	DueDate NullableTime `json:"dueDate,omitempty"`
-	// The follow-up date of the task.
-	FollowUpDate NullableTime `json:"followUpDate,omitempty"`
+	// The due date of the task. Clear by providing an empty String.
+	DueDate NullableClearableDateTime `json:"dueDate,omitempty"`
+	// The follow-up date of the task. Clear by providing an empty String.
+	FollowUpDate NullableClearableDateTime `json:"followUpDate,omitempty"`
 	// The list of candidate users of the task.
 	CandidateUsers []string `json:"candidateUsers,omitempty"`
 	// The list of candidate groups of the task.
 	CandidateGroups []string `json:"candidateGroups,omitempty"`
 	// The priority of the task.
 	Priority NullableInt32 `json:"priority,omitempty"`
-	// dueDateCleared is set by ClearDueDate: DueDate is then sent as "", which clears it.
-	dueDateCleared bool
-	// followUpDateCleared is set by ClearFollowUpDate: FollowUpDate is then sent as "", which clears it.
-	followUpDateCleared bool
 }
 
 // NewJobResultCorrections instantiates a new JobResultCorrections object
@@ -99,9 +94,9 @@ func (o *JobResultCorrections) UnsetAssignee() {
 }
 
 // GetDueDate returns the DueDate field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobResultCorrections) GetDueDate() time.Time {
+func (o *JobResultCorrections) GetDueDate() ClearableDateTime {
 	if o == nil || IsNil(o.DueDate.Get()) {
-		var ret time.Time
+		var ret ClearableDateTime
 		return ret
 	}
 	return *o.DueDate.Get()
@@ -110,7 +105,7 @@ func (o *JobResultCorrections) GetDueDate() time.Time {
 // GetDueDateOk returns a tuple with the DueDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobResultCorrections) GetDueDateOk() (*time.Time, bool) {
+func (o *JobResultCorrections) GetDueDateOk() (*ClearableDateTime, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -126,28 +121,25 @@ func (o *JobResultCorrections) HasDueDate() bool {
 	return false
 }
 
-// SetDueDate gets a reference to the given NullableTime and assigns it to the DueDate field.
-func (o *JobResultCorrections) SetDueDate(v time.Time) {
+// SetDueDate gets a reference to the given NullableClearableDateTime and assigns it to the DueDate field.
+func (o *JobResultCorrections) SetDueDate(v ClearableDateTime) {
 	o.DueDate.Set(&v)
-	o.dueDateCleared = false
 }
 
 // SetDueDateNil sets the value for DueDate to be an explicit nil
 func (o *JobResultCorrections) SetDueDateNil() {
 	o.DueDate.Set(nil)
-	o.dueDateCleared = false
 }
 
 // UnsetDueDate ensures that no value is present for DueDate, not even an explicit nil
 func (o *JobResultCorrections) UnsetDueDate() {
 	o.DueDate.Unset()
-	o.dueDateCleared = false
 }
 
 // GetFollowUpDate returns the FollowUpDate field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *JobResultCorrections) GetFollowUpDate() time.Time {
+func (o *JobResultCorrections) GetFollowUpDate() ClearableDateTime {
 	if o == nil || IsNil(o.FollowUpDate.Get()) {
-		var ret time.Time
+		var ret ClearableDateTime
 		return ret
 	}
 	return *o.FollowUpDate.Get()
@@ -156,7 +148,7 @@ func (o *JobResultCorrections) GetFollowUpDate() time.Time {
 // GetFollowUpDateOk returns a tuple with the FollowUpDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *JobResultCorrections) GetFollowUpDateOk() (*time.Time, bool) {
+func (o *JobResultCorrections) GetFollowUpDateOk() (*ClearableDateTime, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -172,22 +164,19 @@ func (o *JobResultCorrections) HasFollowUpDate() bool {
 	return false
 }
 
-// SetFollowUpDate gets a reference to the given NullableTime and assigns it to the FollowUpDate field.
-func (o *JobResultCorrections) SetFollowUpDate(v time.Time) {
+// SetFollowUpDate gets a reference to the given NullableClearableDateTime and assigns it to the FollowUpDate field.
+func (o *JobResultCorrections) SetFollowUpDate(v ClearableDateTime) {
 	o.FollowUpDate.Set(&v)
-	o.followUpDateCleared = false
 }
 
 // SetFollowUpDateNil sets the value for FollowUpDate to be an explicit nil
 func (o *JobResultCorrections) SetFollowUpDateNil() {
 	o.FollowUpDate.Set(nil)
-	o.followUpDateCleared = false
 }
 
 // UnsetFollowUpDate ensures that no value is present for FollowUpDate, not even an explicit nil
 func (o *JobResultCorrections) UnsetFollowUpDate() {
 	o.FollowUpDate.Unset()
-	o.followUpDateCleared = false
 }
 
 // GetCandidateUsers returns the CandidateUsers field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -312,14 +301,10 @@ func (o JobResultCorrections) ToMap() (map[string]interface{}, error) {
 	if o.Assignee.IsSet() {
 		toSerialize["assignee"] = o.Assignee.Get()
 	}
-	if o.dueDateCleared && !o.DueDate.IsSet() {
-		toSerialize["dueDate"] = ""
-	} else if o.DueDate.IsSet() {
+	if o.DueDate.IsSet() {
 		toSerialize["dueDate"] = o.DueDate.Get()
 	}
-	if o.followUpDateCleared && !o.FollowUpDate.IsSet() {
-		toSerialize["followUpDate"] = ""
-	} else if o.FollowUpDate.IsSet() {
+	if o.FollowUpDate.IsSet() {
 		toSerialize["followUpDate"] = o.FollowUpDate.Get()
 	}
 	if o.CandidateUsers != nil {
@@ -368,82 +353,4 @@ func (v NullableJobResultCorrections) MarshalJSON() ([]byte, error) {
 func (v *NullableJobResultCorrections) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
-}
-
-// ClearDueDate clears DueDate: it is sent as an empty string, which the API
-// treats as "remove the value" (null or omission instead preserves it).
-// SetDueDate, SetDueDateNil or UnsetDueDate afterwards replaces the clear.
-func (o *JobResultCorrections) ClearDueDate() {
-	o.DueDate.Unset()
-	o.dueDateCleared = true
-}
-
-// IsDueDateCleared reports whether DueDate is to be cleared (see ClearDueDate).
-func (o *JobResultCorrections) IsDueDateCleared() bool {
-	return o != nil && o.dueDateCleared && !o.DueDate.IsSet()
-}
-
-// ClearFollowUpDate clears FollowUpDate: it is sent as an empty string, which the API
-// treats as "remove the value" (null or omission instead preserves it).
-// SetFollowUpDate, SetFollowUpDateNil or UnsetFollowUpDate afterwards replaces the clear.
-func (o *JobResultCorrections) ClearFollowUpDate() {
-	o.FollowUpDate.Unset()
-	o.followUpDateCleared = true
-}
-
-// IsFollowUpDateCleared reports whether FollowUpDate is to be cleared (see ClearFollowUpDate).
-func (o *JobResultCorrections) IsFollowUpDateCleared() bool {
-	return o != nil && o.followUpDateCleared && !o.FollowUpDate.IsSet()
-}
-
-// UnmarshalJSON decodes into a JobResultCorrections like encoding/json, taking
-// an empty string for a clearable date (DueDate, FollowUpDate) as a clear: the inverse
-// of ToMap. As with the default decoder, properties absent from data are left
-// untouched; a timestamp or null for a date replaces a clear, as its setters do.
-func (o *JobResultCorrections) UnmarshalJSON(data []byte) error {
-	type plain JobResultCorrections
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	if raw == nil { // a JSON null leaves the value untouched
-		return nil
-	}
-	// Only a string literal can be a clear; null decodes to "" too but preserves.
-	isEmpty := func(v json.RawMessage) bool {
-		var s string
-		return len(v) > 0 && v[0] == '"' && json.Unmarshal(v, &s) == nil && s == ""
-	}
-	dueDateValue, dueDatePresent := raw["dueDate"]
-	dueDateClear := dueDatePresent && isEmpty(dueDateValue)
-	if dueDateClear {
-		delete(raw, "dueDate")
-	}
-	followUpDateValue, followUpDatePresent := raw["followUpDate"]
-	followUpDateClear := followUpDatePresent && isEmpty(followUpDateValue)
-	if followUpDateClear {
-		delete(raw, "followUpDate")
-	}
-	rest, err := json.Marshal(raw)
-	if err != nil {
-		return err
-	}
-	p := plain(*o)
-	if err := json.Unmarshal(rest, &p); err != nil {
-		return err
-	}
-	*o = JobResultCorrections(p)
-	if dueDateClear {
-		o.DueDate.Unset()
-		o.dueDateCleared = true
-	} else if dueDatePresent {
-		o.dueDateCleared = false
-	}
-	if followUpDateClear {
-		o.FollowUpDate.Unset()
-		o.followUpDateCleared = true
-	} else if followUpDatePresent {
-		o.followUpDateCleared = false
-	}
-	return nil
 }

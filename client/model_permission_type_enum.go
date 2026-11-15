@@ -21,6 +21,7 @@ type PermissionTypeEnum string
 // List of PermissionTypeEnum
 const (
 	PERMISSIONTYPEENUM_ACCESS                                            PermissionTypeEnum = "ACCESS"
+	PERMISSIONTYPEENUM_ANSWER                                            PermissionTypeEnum = "ANSWER"
 	PERMISSIONTYPEENUM_CANCEL_PROCESS_INSTANCE                           PermissionTypeEnum = "CANCEL_PROCESS_INSTANCE"
 	PERMISSIONTYPEENUM_CLAIM                                             PermissionTypeEnum = "CLAIM"
 	PERMISSIONTYPEENUM_CLAIM_USER_TASK                                   PermissionTypeEnum = "CLAIM_USER_TASK"
@@ -72,6 +73,7 @@ const (
 // All allowed values of PermissionTypeEnum enum
 var AllowedPermissionTypeEnumEnumValues = []PermissionTypeEnum{
 	"ACCESS",
+	"ANSWER",
 	"CANCEL_PROCESS_INSTANCE",
 	"CLAIM",
 	"CLAIM_USER_TASK",

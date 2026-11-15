@@ -59,6 +59,35 @@ def response_schemas(spec: dict) -> set[str]:
             nxt: set[str] = set()
             _refs(node, nxt)
             todo.extend(nxt)
+    # Refinements: a schema that ``allOf``-extends a response schema (e.g.
+    # AuthenticatedCamundaUserResult narrowing CamundaUserResult) is decoded from
+    # the same server output, so it must be lenient too, even when no operation
+    # references it directly. Iterate to a fixpoint to catch refinement chains.
+    # Request-side models keep strict decoding even if they extend a response base.
+    request: set[str] = set()
+    for item in spec.get("paths", {}).values():
+        for op in item.values():
+            if isinstance(op, dict) and "requestBody" in op:
+                _refs(op["requestBody"], request)
+    grew = True
+    while grew:
+        grew = False
+        for name, node in schemas.items():
+            if name in seen or name in request or not isinstance(node, dict):
+                continue
+            bases: set[str] = set()
+            _refs(node.get("allOf", []), bases)
+            if bases & seen:
+                todo = [name]
+                while todo:
+                    n = todo.pop()
+                    if n in seen:
+                        continue
+                    seen.add(n)
+                    nxt: set[str] = set()
+                    _refs(schemas.get(n, {}), nxt)
+                    todo.extend(nxt)
+                grew = True
     for name in seen:
         node = schemas.get(name)
         if isinstance(node, dict) and "oneOf" in node and "discriminator" not in node:

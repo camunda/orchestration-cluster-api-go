@@ -1959,3 +1959,26 @@ func (v *NullableUserTaskKey) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+// NullableUsername is the generator's Nullable wrapper for Username (referenced by
+// generated models such as AuditLogResult).
+type NullableUsername struct {
+	value *Username
+	isSet bool
+}
+
+func (v NullableUsername) Get() *Username     { return v.value }
+func (v *NullableUsername) Set(val *Username) { v.value = val; v.isSet = true }
+func (v NullableUsername) IsSet() bool        { return v.isSet }
+func (v *NullableUsername) Unset()            { v.value = nil; v.isSet = false }
+
+// NewNullableUsername returns a set NullableUsername wrapping val.
+func NewNullableUsername(val *Username) *NullableUsername {
+	return &NullableUsername{value: val, isSet: true}
+}
+
+func (v NullableUsername) MarshalJSON() ([]byte, error) { return json.Marshal(v.value) }
+func (v *NullableUsername) UnmarshalJSON(src []byte) error {
+	v.isSet = true
+	return json.Unmarshal(src, &v.value)
+}
