@@ -2,6 +2,7 @@ package camunda
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
 	"strings"
 	"sync"
@@ -259,5 +260,34 @@ func TestConfigFormattingNamesInjectedDependencies(t *testing.T) {
 		if strings.Contains(out, "state:") {
 			t.Errorf("%s output dumps the injected dependency's state: %s", verb, out)
 		}
+	}
+}
+
+// sentinelTransport is a value-type RoundTripper holding a credential, the shape
+// of a hand-rolled auth transport a user might put in a custom *http.Client.
+type sentinelTransport struct{ Token string }
+
+func (sentinelTransport) RoundTrip(*http.Request) (*http.Response, error) { return nil, nil }
+
+// TestConfigFormattingDoesNotDumpCallerSuppliedObjects covers the defect class:
+// a field that holds a caller-supplied object by reference (HTTPClient,
+// Transport, Clock, Random) must render as its type, never its contents, because
+// the SDK cannot know what credentials that object carries.
+func TestConfigFormattingDoesNotDumpCallerSuppliedObjects(t *testing.T) {
+	const token = "CAMUNDA-SENTINEL-TRANSPORT-TOKEN-71ad"
+	withClient := sentinelConfig()
+	withClient.HTTPClient = &http.Client{Transport: sentinelTransport{Token: token}}
+	withTransport := sentinelConfig()
+	withTransport.Transport = sentinelTransport{Token: token}
+	for name, cfg := range map[string]Config{"HTTPClient": *withClient, "Transport": *withTransport} {
+		for _, verb := range []string{"%v", "%+v", "%#v", "%s"} {
+			out := fmt.Sprintf(verb, cfg)
+			if strings.Contains(out, token) {
+				t.Errorf("%s: %s output leaks the custom transport's token: %s", name, verb, out)
+			}
+		}
+	}
+	if out := fmt.Sprintf("%+v", *withClient); !strings.Contains(out, "HTTPClient:*http.Client") {
+		t.Errorf("%%+v output does not name the HTTPClient type: %s", out)
 	}
 }
