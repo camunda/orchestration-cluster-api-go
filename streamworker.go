@@ -331,7 +331,7 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 			go func() {
 				defer wg.Done()
 				defer func() { <-sem }()
-				vars, herr := w.handler(ctx, job)
+				vars, herr := w.client.invokeHandler(ctx, w.handler, job)
 				ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 				defer cancel()
 				w.client.restAck(ackCtx, job, vars, herr)
@@ -372,7 +372,7 @@ func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]camundaapi.ActivatedJ
 }
 
 func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *Job) {
-	vars, err := w.handler(ctx, job)
+	vars, err := w.client.invokeHandler(ctx, w.handler, job)
 
 	// Acknowledge even while shutting down so a completed handler's result is not
 	// dropped because Run's ctx was canceled. Bound the ack with its own timeout.
