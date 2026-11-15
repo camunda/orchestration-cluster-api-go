@@ -58,8 +58,9 @@ var (
 // field added later is rendered automatically; an omission would quietly turn a
 // redacting String into a lossy one, which the anti-drift test guards against.
 //
-// Fields of interface type, the injected Clock and Random, render as their
-// dynamic type name (`<nil>` when unset) and never as their contents.
+// Fields that hold a caller-supplied object by reference (interface, pointer,
+// func, chan or map: HTTPClient, Transport, Clock, Random) render as their
+// dynamic type name (`<nil>` for an unset interface) and never as their contents.
 //
 // An unset secret renders as its zero value rather than as the placeholder: an
 // operator reads a config dump to find out which credentials are in play, so
@@ -90,11 +91,13 @@ func formatRedacted(v reflect.Value, typeName string, secrets map[string]bool, g
 		b.WriteByte(':')
 
 		fv := v.Field(i)
-		if f.Type.Kind() == reflect.Interface {
-			// Injected dependencies (Clock, Random) are rendered by type identity
-			// only. Dumping the value would read their mutable internals, which a
-			// running SDK updates concurrently (SeededRandom advances its state on
-			// every draw), so formatting a live Config would be a data race.
+		if opaqueKind(f.Type.Kind()) {
+			// Caller-supplied objects (HTTPClient, Transport, Clock, Random) are
+			// rendered by type identity only. Their contents are not the SDK's to
+			// show: a custom transport can hold a bearer token the SDK knows
+			// nothing about. Dumping them would also read mutable internals that
+			// a running SDK updates concurrently (SeededRandom advances its state
+			// on every draw), so formatting a live Config would be a data race.
 			fmt.Fprintf(&b, "%T", fv.Interface())
 			continue
 		}
@@ -145,4 +148,14 @@ func (t TLSConfig) String() string {
 // credential redaction String applies.
 func (t TLSConfig) GoString() string {
 	return formatRedacted(reflect.ValueOf(t), "TLSConfig", tlsSecretFields, true)
+}
+
+// opaqueKind reports whether a field of kind k refers to an object the SDK did
+// not build and therefore must not dump.
+func opaqueKind(k reflect.Kind) bool {
+	switch k {
+	case reflect.Interface, reflect.Pointer, reflect.Func, reflect.Chan, reflect.Map, reflect.UnsafePointer:
+		return true
+	}
+	return false
 }
