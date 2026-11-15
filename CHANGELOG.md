@@ -1,3 +1,10 @@
+# [11.0.0-alpha.11](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.10...v11.0.0-alpha.11) (2026-11-15)
+
+
+### Bug Fixes
+
+* **config:** render HTTPClient by type in Config formatting ([#177](https://github.com/camunda/orchestration-cluster-api-go/issues/177)) ([bfdb790](https://github.com/camunda/orchestration-cluster-api-go/commit/bfdb790eb9ab5fcfc23e94c1cde34f60272c602a)), closes [#171](https://github.com/camunda/orchestration-cluster-api-go/issues/171)
+
 # [11.0.0-alpha.10](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.9...v11.0.0-alpha.10) (2026-11-15)
 
 
