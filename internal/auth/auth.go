@@ -148,7 +148,15 @@ func (ts *TokenSource) fetch(ctx context.Context, now time.Time) (string, time.T
 	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return "", time.Time{}, fmt.Errorf("token endpoint returned HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
+		// The response body is deliberately not interpolated. Identity providers
+		// vary in what they put in an error body — some echo the submitted
+		// parameters (including client_secret), some include token material in a
+		// partially-successful response — so the SDK cannot assume it is
+		// secret-free. This error is returned unwrapped from Transport.RoundTrip
+		// and is logged by the job worker on every poll, so the body would land in
+		// the SDK log. The status code is the diagnostic that distinguishes
+		// rejected credentials from an unhealthy endpoint.
+		return "", time.Time{}, fmt.Errorf("token endpoint returned HTTP %d", resp.StatusCode)
 	}
 
 	var tr tokenResponse
