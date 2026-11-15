@@ -13,6 +13,9 @@ coverage.txt
 external-spec/upstream/
 external-spec/upstream/**/.tmp*
 
+# Generator input written by scripts/normalize-spec.py on every generate
+external-spec/generator/
+
 # Side-effect report written by check-example-coverage.py on every run
 external-spec/missing-examples.json
 
