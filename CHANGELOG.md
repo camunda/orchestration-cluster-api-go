@@ -1,3 +1,10 @@
+# [11.0.0-alpha.9](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.8...v11.0.0-alpha.9) (2026-11-15)
+
+
+### Bug Fixes
+
+* **config:** redact credentials in Config and TLSConfig formatting ([#144](https://github.com/camunda/orchestration-cluster-api-go/issues/144)) ([39a6a35](https://github.com/camunda/orchestration-cluster-api-go/commit/39a6a35b1ffad796b496664f2201bc2b36423fb6)), closes [camunda/sdk-infra#88](https://github.com/camunda/sdk-infra/issues/88) [#v](https://github.com/camunda/orchestration-cluster-api-go/issues/v)
+
 # [11.0.0-alpha.8](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.7...v11.0.0-alpha.8) (2026-11-14)
 
 
