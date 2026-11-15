@@ -1,3 +1,10 @@
+# [11.0.0-alpha.13](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.12...v11.0.0-alpha.13) (2026-11-15)
+
+
+### Bug Fixes
+
+* adapt job result corrections to the ClearableDateTime shape ([#166](https://github.com/camunda/orchestration-cluster-api-go/issues/166)) ([6738313](https://github.com/camunda/orchestration-cluster-api-go/commit/6738313842ef8143154ecc317cf0ca329fce2920)), closes [#165](https://github.com/camunda/orchestration-cluster-api-go/issues/165)
+
 # [11.0.0-alpha.12](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.11...v11.0.0-alpha.12) (2026-11-15)
 
 
