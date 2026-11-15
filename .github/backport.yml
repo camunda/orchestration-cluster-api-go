@@ -28,5 +28,5 @@ post-cherry-pick: |
   [ "$src" = "$dst" ] && exit 0
   while IFS= read -r -d '' f; do
     [ -f "$f" ] || continue   # deleted, or a rename's old path
-    case "$f" in *.go|*.md) SRC="$src" DST="$dst" perl -pi -e 's{\Q$ENV{SRC}\E(?=["/`\s])}{$ENV{DST}}g' -- "$f" || exit 1 ;; esac
+    case "$f" in *.go|*.md) SRC="$src" DST="$dst" perl -pi -e 's{\Q$ENV{SRC}\E(?![A-Za-z0-9_-])}{$ENV{DST}}g' -- "$f" || exit 1 ;; esac
   done < "$BACKPORT_CHANGED_FILES"

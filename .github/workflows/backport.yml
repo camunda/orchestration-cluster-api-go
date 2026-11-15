@@ -16,15 +16,29 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: backport-${{ github.event.pull_request.number || github.event.issue.number }}
-  cancel-in-progress: false
-
 jobs:
   backport:
+    # The same gate as sdk-backport.yml's own, here so that concurrency (below) only
+    # admits backport events: at workflow level, an unrelated comment or label would
+    # replace a pending backport run in the group, and the requested target be lost.
+    if: >-
+      (
+        github.event_name != 'issue_comment' &&
+        github.event.pull_request.merged &&
+        (github.event.action == 'closed' || startsWith(github.event.label.name, 'backport '))
+      ) || (
+        github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        github.event.comment.user.id != 290741040 &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association) &&
+        startsWith(github.event.comment.body, '/backport')
+      )
+    concurrency:
+      group: backport-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: false
     permissions:
       contents: read
-      id-token: write       # Vault JWT for the App key
+      id-token: write        # Vault JWT for the App key
       pull-requests: write  # failure comments when the App token is unavailable
     uses: camunda/sdk-infra/.github/workflows/sdk-backport.yml@v1
     secrets:
