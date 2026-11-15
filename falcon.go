@@ -7,11 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
-	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/auth"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/falcon"
 )
 
 // falconDetectTimeout bounds a single topology probe.
@@ -88,7 +89,23 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 // buildFalconDialer constructs a WebSocket dialer whose HTTP client carries the
 // SDK's TLS material (for wss://) and injects the configured authentication on
 // both the topology probe and the WebSocket upgrade handshake.
+//
+// Caller-supplied plumbing is honoured so a required proxy, dialer, CA or
+// custom auth is never bypassed: WithHTTPClient is used as-is (the caller owns
+// auth and TLS, exactly as for REST), and WithTransport replaces the SDK-built
+// base transport underneath the SDK auth layer.
 func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
+	if c.cfg.HTTPClient != nil {
+		return &falcon.Dialer{HTTPClient: c.cfg.HTTPClient, Random: c.random}, nil
+	}
+	if c.cfg.Transport != nil {
+		header, err := c.falconAuthHeader()
+		if err != nil {
+			return nil, err
+		}
+		httpClient := &http.Client{Transport: &falconAuthTransport{base: c.cfg.Transport, header: header}}
+		return &falcon.Dialer{HTTPClient: httpClient, Random: c.random}, nil
+	}
 	tlsConf, err := buildTLSConfig(c.cfg.TLS)
 	if err != nil {
 		return nil, err
@@ -205,8 +222,44 @@ func (c *CamundaClient) CreateProcessInstance(ctx context.Context, body ProcessI
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	// Default the tenant on the FINAL body, after the opts, so a body-replacing
+	// opt (r.ProcessInstanceCreationInstruction(replacement)) cannot discard the
+	// injected tenant. An explicit tenant on that final body still wins.
+	if b := req.GetProcessInstanceCreationInstruction(); b != nil {
+		req = req.ProcessInstanceCreationInstruction(c.withDefaultTenantProcessInstanceCreation(*b))
+	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
+}
+
+// falconCreateFields are the creation-instruction fields the command stream carries.
+var falconCreateFields = map[string]bool{
+	"ProcessDefinitionId":  true,
+	"ProcessDefinitionKey": true,
+	"TenantId":             true,
+	"Variables":            true,
+	"AwaitCompletion":      true,
+	"FetchVariables":       true,
+	"RequestTimeout":       true,
+}
+
+// falconUnsupportedField names the first set field of a creation-instruction variant
+// that the command stream cannot carry, or "" if there is none. Fields a future spec
+// adds are unsupported by default, so they route to REST instead of being dropped.
+func falconUnsupportedField(variant any) string {
+	v := reflect.ValueOf(variant).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Type().Field(i)
+		if !f.IsExported() || falconCreateFields[f.Name] || v.Field(i).IsZero() {
+			continue
+		}
+		// The stream always resolves the latest version, which is what -1 asks for.
+		if f.Name == "ProcessDefinitionVersion" && v.Field(i).Elem().Int() == -1 {
+			continue
+		}
+		return f.Name
+	}
+	return ""
 }
 
 // createProcessInstanceFalcon routes a create over the command stream. It returns
@@ -224,9 +277,13 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	switch {
 	case body.ProcessInstanceCreationInstructionById != nil:
 		b := body.ProcessInstanceCreationInstructionById
+		if f := falconUnsupportedField(b); f != "" {
+			c.logger.Debug("create sets a field the command stream cannot carry; using REST", "field", f)
+			return nil, false, nil
+		}
 		id = b.ProcessDefinitionId.String()
 		version = b.ProcessDefinitionVersion
-		tenant = tenantIDPtr(b.TenantId)
+		tenant = c.tenantIDOrDefault(b.TenantId)
 		args = falcon.CreateArgs{
 			ProcessDefinitionID: b.ProcessDefinitionId.String(),
 			Variables:           b.Variables,
@@ -238,9 +295,13 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 		}
 	case body.ProcessInstanceCreationInstructionByKey != nil:
 		b := body.ProcessInstanceCreationInstructionByKey
+		if f := falconUnsupportedField(b); f != "" {
+			c.logger.Debug("create sets a field the command stream cannot carry; using REST", "field", f)
+			return nil, false, nil
+		}
 		key = string(b.ProcessDefinitionKey)
 		version = b.ProcessDefinitionVersion
-		tenant = tenantIDPtr(b.TenantId)
+		tenant = c.tenantIDOrDefault(b.TenantId)
 		args = falcon.CreateArgs{
 			ProcessDefinitionKey: key,
 			Variables:            b.Variables,
@@ -253,6 +314,13 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	default:
 		// Unknown union shape: let REST handle (and report) it.
 		return nil, false, nil
+	}
+	// The effective tenant must reach the gateway, not just the result: an
+	// explicit tenant always wins; with none set, the configured default applies.
+	// When neither is present the tenantId is left absent so the gateway applies
+	// its own default — sending the "<default>" marker would pin a literal tenant.
+	if tenant != nil && *tenant != "" {
+		args.TenantID = *tenant
 	}
 
 	caps := c.falconCapsV
@@ -331,18 +399,11 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 	return result, true, nil
 }
 
-// tenantIDPtr converts an optional branded TenantId into the plain *string the
-// falcon producer and resolveTenant operate on.
-func tenantIDPtr(t *camundaapi.TenantId) *string {
-	if t == nil {
-		return nil
-	}
-	s := string(*t)
-	return &s
-}
-
-// resolveTenant applies the configured default tenant when the instruction did not
-// specify one, matching the REST path's server-side default.
+// resolveTenant resolves the tenant shown on a synthesized create result: the
+// tenant the instruction carried (already defaulted by tenantIDOrDefault), then
+// the configured default, then the server-side default marker. It is only a
+// display fallback for the result — the create frame itself omits tenantId when
+// no tenant is set so the gateway applies its own default.
 func (c *CamundaClient) resolveTenant(provided *string) string {
 	if provided != nil && *provided != "" {
 		return *provided

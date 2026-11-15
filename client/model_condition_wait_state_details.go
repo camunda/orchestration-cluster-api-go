@@ -166,7 +166,6 @@ func (o *ConditionWaitStateDetails) UnmarshalJSON(data []byte) (err error) {
 	varConditionWaitStateDetails := _ConditionWaitStateDetails{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varConditionWaitStateDetails)
 
 	if err != nil {

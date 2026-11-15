@@ -21,7 +21,7 @@ var _ MappedNullable = &TenantCreateRequest{}
 
 // TenantCreateRequest struct for TenantCreateRequest
 type TenantCreateRequest struct {
-	// The unique ID for the tenant. Must be 31 characters or less and match `^[\\w.-]{1,31}$` (word characters, `.`, `-`). The literal `<default>` is also accepted as the default-tenant alias.
+	// The unique ID for the tenant. Must be 31 characters or less and match `` ^[\\w.-]{1,31}$ `` (word characters, `.`, `-`). The literal `<default>` is also accepted as the default-tenant alias.
 	TenantId TenantId `json:"tenantId" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// The name of the tenant.
 	Name string `json:"name"`

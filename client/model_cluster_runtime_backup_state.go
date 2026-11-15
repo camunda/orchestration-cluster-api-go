@@ -108,7 +108,6 @@ func (o *ClusterRuntimeBackupState) UnmarshalJSON(data []byte) (err error) {
 	varClusterRuntimeBackupState := _ClusterRuntimeBackupState{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterRuntimeBackupState)
 
 	if err != nil {

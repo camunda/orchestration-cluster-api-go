@@ -35,10 +35,47 @@ import (
 	"strings"
 )
 
-const (
-	clientImportPath = "github.com/camunda/orchestration-cluster-api-go/client"
-	clientAlias      = "camundaapi"
-)
+const clientAlias = "camundaapi"
+
+// clientImportPath follows go.mod so a /vN major-version path change needs no edit here.
+var clientImportPath = mustModulePath() + "/client"
+
+func mustModulePath() string {
+	path, err := modulePath()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "facadegen: %v\n", err)
+		os.Exit(1)
+	}
+	return path
+}
+
+// modulePath reads go.mod rather than running `go list -m`, which reports every
+// module under a go.work and "command-line-arguments" outside a module.
+func modulePath() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	for {
+		data, err := os.ReadFile(filepath.Join(dir, "go.mod"))
+		if err == nil {
+			for _, line := range strings.Split(string(data), "\n") {
+				if f := strings.Fields(line); len(f) >= 2 && f[0] == "module" {
+					return strings.Trim(f[1], `"`), nil
+				}
+			}
+			return "", fmt.Errorf("%s has no module directive", filepath.Join(dir, "go.mod"))
+		}
+		if !os.IsNotExist(err) {
+			return "", err
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("no go.mod found above the working directory")
+		}
+		dir = parent
+	}
+}
 
 // handwrittenOps are operations excluded from generation because the SDK ships a
 // hand-written ergonomic method with the same signature. CreateProcessInstance is
@@ -46,6 +83,28 @@ const (
 // stream (with a REST fallback) — see falcon.go.
 var handwrittenOps = map[string]bool{
 	"CreateProcessInstance": true,
+}
+
+// defaultTenantBodyOps are operations whose JSON body carries an optional
+// tenantId field. The facade injects the configured default tenant
+// (WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID) when the caller left the
+// field unset, matching the other Camunda SDKs; the withDefaultTenant* helpers
+// are hand-written in defaulttenant.go.
+var defaultTenantBodyOps = map[string]string{
+	"CorrelateMessage":     "withDefaultTenantMessageCorrelation",
+	"PublishMessage":       "withDefaultTenantMessagePublication",
+	"BroadcastSignal":      "withDefaultTenantSignalBroadcast",
+	"EvaluateConditionals": "withDefaultTenantConditionalEvaluation",
+	"EvaluateExpression":   "withDefaultTenantExpressionEvaluation",
+	"EvaluateDecision":     "withDefaultTenantDecisionEvaluation",
+}
+
+// defaultTenantReqOps are operations whose tenant id is an optional request
+// parameter rather than a JSON body field (CreateDeployment sends it as a
+// multipart form field). The facade injects the configured default tenant when
+// neither the caller nor an opt set one.
+var defaultTenantReqOps = map[string]string{
+	"CreateDeployment": "withDefaultTenantCreateDeployment",
 }
 
 type param struct {
@@ -546,6 +605,19 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 		}
 		if hasOpts {
 			b.WriteString("\tfor _, opt := range opts {\n\t\treq = opt(req)\n\t}\n")
+		}
+		if helper, ok := defaultTenantBodyOps[op.name]; ok && op.bodyBuilder != "" {
+			// Runs after the opts so a body-replacing opt (e.g. r.Body(replacement))
+			// cannot discard the injected tenant: default the final body, then
+			// re-attach it. An explicit tenant on that final body still wins.
+			// Guarded on a nonempty body builder: without the optional metadata
+			// argument loadBodyInfo yields no builder, and emitting req.Get()/req.()
+			// here would overwrite the facade with invalid Go.
+			fmt.Fprintf(&b, "\tif b := req.Get%s(); b != nil {\n\t\treq = req.%s(c.%s(*b))\n\t}\n", op.bodyBuilder, op.bodyBuilder, helper)
+		}
+		if helper, ok := defaultTenantReqOps[op.name]; ok {
+			// Runs after the opts so an explicit tenant (direct or via an opt) wins.
+			fmt.Fprintf(&b, "\treq = c.%s(req)\n", helper)
 		}
 		if op.retType != "" {
 			b.WriteString("\tvalue, resp, err := req.Execute()\n")

@@ -228,7 +228,6 @@ func (o *ClusterTopologyResponse) UnmarshalJSON(data []byte) (err error) {
 	varClusterTopologyResponse := _ClusterTopologyResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterTopologyResponse)
 
 	if err != nil {

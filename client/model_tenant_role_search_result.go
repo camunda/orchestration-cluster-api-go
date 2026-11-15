@@ -136,7 +136,6 @@ func (o *TenantRoleSearchResult) UnmarshalJSON(data []byte) (err error) {
 	varTenantRoleSearchResult := _TenantRoleSearchResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varTenantRoleSearchResult)
 
 	if err != nil {

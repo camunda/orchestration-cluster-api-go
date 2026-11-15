@@ -166,7 +166,6 @@ func (o *AgentInstanceLimits) UnmarshalJSON(data []byte) (err error) {
 	varAgentInstanceLimits := _AgentInstanceLimits{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAgentInstanceLimits)
 
 	if err != nil {

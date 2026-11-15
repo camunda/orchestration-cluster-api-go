@@ -198,7 +198,6 @@ func (o *RestorePartitionStatus) UnmarshalJSON(data []byte) (err error) {
 	varRestorePartitionStatus := _RestorePartitionStatus{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varRestorePartitionStatus)
 
 	if err != nil {

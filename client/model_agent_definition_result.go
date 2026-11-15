@@ -341,7 +341,6 @@ func (o *AgentDefinitionResult) UnmarshalJSON(data []byte) (err error) {
 	varAgentDefinitionResult := _AgentDefinitionResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAgentDefinitionResult)
 
 	if err != nil {

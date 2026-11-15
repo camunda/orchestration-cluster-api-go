@@ -140,7 +140,6 @@ func (o *StatusMetric) UnmarshalJSON(data []byte) (err error) {
 	varStatusMetric := _StatusMetric{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varStatusMetric)
 
 	if err != nil {

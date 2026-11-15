@@ -10,7 +10,21 @@ import (
 	"testing"
 )
 
-const modulePath = "github.com/camunda/orchestration-cluster-api-go"
+// modulePath is read from go.mod so the import rules follow a /vN major-version path change.
+var modulePath = readModulePath()
+
+func readModulePath() string {
+	data, err := os.ReadFile("go.mod")
+	if err != nil {
+		panic(err)
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		if f := strings.Fields(line); len(f) >= 2 && f[0] == "module" {
+			return strings.Trim(f[1], `"`)
+		}
+	}
+	panic("go.mod has no module directive")
+}
 
 // leafPackages are internal runtime packages that must not import any other
 // internal package.

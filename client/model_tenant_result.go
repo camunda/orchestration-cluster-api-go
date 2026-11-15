@@ -168,7 +168,6 @@ func (o *TenantResult) UnmarshalJSON(data []byte) (err error) {
 	varTenantResult := _TenantResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varTenantResult)
 
 	if err != nil {

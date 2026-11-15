@@ -225,7 +225,6 @@ func (o *ClusterRunningRebalance) UnmarshalJSON(data []byte) (err error) {
 	varClusterRunningRebalance := _ClusterRunningRebalance{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterRunningRebalance)
 
 	if err != nil {

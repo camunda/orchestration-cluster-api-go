@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A Camunda user task with a schedule and one task listener. PROCESS_ID,
+     TASK_ID, LISTENER_EVENT and LISTENER_TYPE are replaced per test run. -->
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="user-task-listener-definitions"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="PROCESS_ID" isExecutable="true">
+    <bpmn:startEvent id="start">
+      <bpmn:outgoing>flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="flow1" sourceRef="start" targetRef="TASK_ID" />
+    <bpmn:userTask id="TASK_ID" name="Review">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:taskSchedule dueDate="2030-01-01T10:00:00Z" followUpDate="2029-12-01T10:00:00Z" />
+        <zeebe:taskListeners>
+          <zeebe:taskListener eventType="LISTENER_EVENT" type="LISTENER_TYPE" />
+        </zeebe:taskListeners>
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow1</bpmn:incoming>
+      <bpmn:outgoing>flow2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="flow2" sourceRef="TASK_ID" targetRef="end" />
+    <bpmn:endEvent id="end">
+      <bpmn:incoming>flow2</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+</bpmn:definitions>

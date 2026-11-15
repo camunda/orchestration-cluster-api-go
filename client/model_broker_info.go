@@ -257,7 +257,6 @@ func (o *BrokerInfo) UnmarshalJSON(data []byte) (err error) {
 	varBrokerInfo := _BrokerInfo{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varBrokerInfo)
 
 	if err != nil {

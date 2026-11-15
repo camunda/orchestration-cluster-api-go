@@ -166,7 +166,6 @@ func (o *ClusterRestorePartitionOperation) UnmarshalJSON(data []byte) (err error
 	varClusterRestorePartitionOperation := _ClusterRestorePartitionOperation{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterRestorePartitionOperation)
 
 	if err != nil {

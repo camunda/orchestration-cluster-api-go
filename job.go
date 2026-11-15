@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strconv"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/pb"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
+	"github.com/camunda/orchestration-cluster-api-go/v11/pb"
 )
 
 // Job is an activated job passed to a JobHandler. It is transport-agnostic: the
@@ -22,6 +22,8 @@ type Job struct {
 	variables          map[string]any
 	leaseToken         string
 	clock              Clock
+	// result is the job result a CompletionHandler returned, sent on completion.
+	result *JobResult
 }
 
 // Key returns the job key.
@@ -39,10 +41,21 @@ func (j *Job) ProcessInstanceKey() string { return j.processInstanceKey }
 // ElementID returns the BPMN element id that created the job.
 func (j *Job) ElementID() string { return j.elementID }
 
-// CustomHeaders returns the job's custom headers.
+// CustomHeaders returns the job's custom headers. The map is never nil, so a
+// handler may read from or write to it on any transport (see RawVariables).
 func (j *Job) CustomHeaders() map[string]any { return j.customHeaders }
 
 // RawVariables returns the job variables as a decoded map.
+//
+// The map is never nil: a job with no variables (absent, null or empty) yields an
+// empty, writable map, identically on the REST and gRPC transports. Each job owns
+// its map, so a handler may add to it freely without affecting other jobs.
+//
+// Malformed payloads are handled differently per transport. The gRPC stream
+// carries variables as a JSON string, and one that cannot be decoded as an object
+// also yields an empty map. On REST the response is decoded before any Job is
+// built, so a malformed variables value fails the activation with an error and no
+// job reaches the handler.
 func (j *Job) RawVariables() map[string]any { return j.variables }
 
 // LeaseToken returns the activation lease token, or "" if the job was not leased.
@@ -76,8 +89,8 @@ func newRESTJob(aj camundaapi.ActivatedJobResult, clock Clock) *Job {
 		retries:            aj.GetRetries(),
 		processInstanceKey: string(aj.GetProcessInstanceKey()),
 		elementID:          string(aj.GetElementId()),
-		customHeaders:      aj.GetCustomHeaders(),
-		variables:          aj.GetVariables(),
+		customHeaders:      nonNilMap(aj.GetCustomHeaders()),
+		variables:          nonNilMap(aj.GetVariables()),
 		leaseToken:         string(aj.GetJobLeaseToken()),
 		clock:              clock,
 	}
@@ -99,12 +112,24 @@ func newGRPCJob(aj *pb.ActivatedJob, clock Clock) *Job {
 	}
 }
 
+// parseJSONObject decodes a JSON object into a map. It never returns nil: an empty
+// string, a malformed or non-object payload, and the JSON literal null (which
+// json.Unmarshal accepts but leaves the map nil) all yield an empty map.
 func parseJSONObject(s string) map[string]any {
 	if s == "" {
 		return map[string]any{}
 	}
 	var m map[string]any
 	if json.Unmarshal([]byte(s), &m) != nil {
+		return map[string]any{}
+	}
+	return nonNilMap(m)
+}
+
+// nonNilMap returns m, or a fresh empty map when m is nil, so a Job never hands a
+// handler a map it cannot write to.
+func nonNilMap(m map[string]any) map[string]any {
+	if m == nil {
 		return map[string]any{}
 	}
 	return m
@@ -126,4 +151,8 @@ func (e *BpmnError) Error() string {
 //   - returning (variables, nil) completes the job with those variables;
 //   - returning a *BpmnError throws a BPMN error;
 //   - returning any other error fails the job (decrementing its retries).
+//
+// To also complete the job with a job result (user task listener corrections or
+// denial, or an ad-hoc sub-process result), write a JobCompletionHandler and adapt
+// it with CompletionHandler.
 type JobHandler func(ctx context.Context, job *Job) (map[string]any, error)

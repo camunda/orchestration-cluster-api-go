@@ -1085,7 +1085,6 @@ func (o *AuditLogResult) UnmarshalJSON(data []byte) (err error) {
 	varAuditLogResult := _AuditLogResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varAuditLogResult)
 
 	if err != nil {

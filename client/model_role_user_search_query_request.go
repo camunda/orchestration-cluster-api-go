@@ -21,6 +21,8 @@ var _ MappedNullable = &RoleUserSearchQueryRequest{}
 type RoleUserSearchQueryRequest struct {
 	// Pagination criteria.
 	Page *SearchQueryPageRequest `json:"page,omitempty"`
+	// The user filter criteria.
+	Filter *RoleUserFilterRequest `json:"filter,omitempty"`
 	// Sort field criteria.
 	Sort []RoleUserSearchQuerySortRequest `json:"sort,omitempty"`
 }
@@ -74,6 +76,38 @@ func (o *RoleUserSearchQueryRequest) SetPage(v SearchQueryPageRequest) {
 	o.Page = &v
 }
 
+// GetFilter returns the Filter field value if set, zero value otherwise.
+func (o *RoleUserSearchQueryRequest) GetFilter() RoleUserFilterRequest {
+	if o == nil || IsNil(o.Filter) {
+		var ret RoleUserFilterRequest
+		return ret
+	}
+	return *o.Filter
+}
+
+// GetFilterOk returns a tuple with the Filter field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RoleUserSearchQueryRequest) GetFilterOk() (*RoleUserFilterRequest, bool) {
+	if o == nil || IsNil(o.Filter) {
+		return nil, false
+	}
+	return o.Filter, true
+}
+
+// HasFilter returns a boolean if a field has been set.
+func (o *RoleUserSearchQueryRequest) HasFilter() bool {
+	if o != nil && !IsNil(o.Filter) {
+		return true
+	}
+
+	return false
+}
+
+// SetFilter gets a reference to the given RoleUserFilterRequest and assigns it to the Filter field.
+func (o *RoleUserSearchQueryRequest) SetFilter(v RoleUserFilterRequest) {
+	o.Filter = &v
+}
+
 // GetSort returns the Sort field value if set, zero value otherwise.
 func (o *RoleUserSearchQueryRequest) GetSort() []RoleUserSearchQuerySortRequest {
 	if o == nil || IsNil(o.Sort) {
@@ -118,6 +152,9 @@ func (o RoleUserSearchQueryRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Page) {
 		toSerialize["page"] = o.Page
+	}
+	if !IsNil(o.Filter) {
+		toSerialize["filter"] = o.Filter
 	}
 	if !IsNil(o.Sort) {
 		toSerialize["sort"] = o.Sort

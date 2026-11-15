@@ -137,7 +137,6 @@ func (o *SignalBroadcastResult) UnmarshalJSON(data []byte) (err error) {
 	varSignalBroadcastResult := _SignalBroadcastResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varSignalBroadcastResult)
 
 	if err != nil {

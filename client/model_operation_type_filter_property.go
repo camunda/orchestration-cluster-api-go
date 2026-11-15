@@ -11,6 +11,7 @@ API version: 0.1
 package camundaapi
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -37,6 +38,19 @@ func OperationTypeExactMatchAsOperationTypeFilterProperty(v *OperationTypeExactM
 
 // Unmarshal JSON data into one of the pointers in the struct
 func (dst *OperationTypeFilterProperty) UnmarshalJSON(data []byte) error {
+	// Replace semantics: start from a zero receiver so decoding over a
+	// previously populated value never retains a stale branch that would be
+	// serialized again. This matters for unset wrappers (`null`/`{}`) and for
+	// one advanced/scalar branch decoded over another (orchestration-cluster-api-go#78).
+	*dst = OperationTypeFilterProperty{}
+	// An unset wrapper marshals to `null` (see MarshalJSON), so the decoder must
+	// accept its own output: `null` unmarshals into every pointer branch and
+	// would otherwise fail with "data matches more than one schema", breaking
+	// the decode-marshal-decode round trip (orchestration-cluster-api-go#78).
+	var raw bytes.Buffer
+	if err := json.Compact(&raw, data); err == nil && raw.String() == "null" {
+		return nil
+	}
 	var err error
 	match := 0
 	// try to unmarshal data into AdvancedOperationTypeFilter
@@ -74,6 +88,17 @@ func (dst *OperationTypeFilterProperty) UnmarshalJSON(data []byte) error {
 	} else if match == 1 {
 		return nil // exactly one match
 	} else { // no match
+		// `{}` is a valid instance of the advanced-filter variant (all of its
+		// properties are optional), but the empty-struct check above nils the
+		// match out again. Accept exactly that case as an unset wrapper,
+		// comparing whitespace-insensitively so pretty-printed stored queries
+		// (`{ }`, `{\n\t}`, …) decode the same as `{}`. Any other no-match
+		// input is genuinely invalid and keeps the oneOf error
+		// (orchestration-cluster-api-go#78).
+		var compacted bytes.Buffer
+		if err := json.Compact(&compacted, data); err == nil && compacted.String() == "{}" {
+			return nil
+		}
 		return fmt.Errorf("data failed to match schemas in oneOf(OperationTypeFilterProperty)")
 	}
 }
@@ -88,7 +113,10 @@ func (src OperationTypeFilterProperty) MarshalJSON() ([]byte, error) {
 		return json.Marshal(&src.OperationTypeExactMatch)
 	}
 
-	return nil, nil // no data in oneOf schemas
+	// An unset wrapper marshals to `null`: returning a nil slice here makes
+	// encoding/json fail with "unexpected end of JSON input"
+	// (orchestration-cluster-api-go#78).
+	return []byte("null"), nil // no data in oneOf schemas
 }
 
 // Get the actual instance

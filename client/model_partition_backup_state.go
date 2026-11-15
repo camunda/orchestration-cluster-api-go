@@ -256,7 +256,6 @@ func (o *PartitionBackupState) UnmarshalJSON(data []byte) (err error) {
 	varPartitionBackupState := _PartitionBackupState{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varPartitionBackupState)
 
 	if err != nil {

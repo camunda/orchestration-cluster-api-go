@@ -137,7 +137,6 @@ func (o *TakeHistoryBackupResponse) UnmarshalJSON(data []byte) (err error) {
 	varTakeHistoryBackupResponse := _TakeHistoryBackupResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varTakeHistoryBackupResponse)
 
 	if err != nil {

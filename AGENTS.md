@@ -4,12 +4,21 @@
 > https://raw.githubusercontent.com/camunda/.github/refs/heads/main/AGENTS.md
 > The instructions below extend those and take precedence on conflict.
 
+<!-- sdk-infra-delegation:start -->
+> **Note:** This file also delegates to the shared SDK AGENTS.md. Read and apply it too.
+
+**URL:**
+https://raw.githubusercontent.com/camunda/sdk-infra/refs/heads/main/policies/AGENTS.md
+
+It holds the conventions shared by all Camunda SDK repos (commits, bug fixes, tests, opening issues). Precedence on conflict: this file, then the shared SDK file, then the central Camunda file.
+<!-- sdk-infra-delegation:end -->
+
 ## Role & boundary
 
 This repo produces the **Go SDK** for the Camunda 8 Orchestration Cluster REST API,
 plus a **gRPC job-streaming worker**. It is a sibling of the JS / Python / C# / Rust
 SDKs and follows the same pattern: a generated low-level client wrapped by a
-hand-written ergonomic runtime. Target API version: **8.10** (`main`).
+hand-written ergonomic runtime. Target API version: **8.11** (`main`).
 
 Upstream dependencies — fix at the source when they misbehave, not by working around
 them here:
@@ -36,7 +45,7 @@ them here:
 | `cmd/facadegen/` | The AST-based facade and re-export generator. Primary edit surface for facade and re-export output. |
 | `scripts/generate.sh` | Pipeline orchestrator: bundle → fetch-proto → openapi-generator → buf → post-process → gofmt → build. |
 | `scripts/bundle-spec.sh`, `scripts/fetch-proto.sh` | Fetch the OpenAPI spec and `gateway.proto` (pinned to `$SPEC_REF`). |
-| `scripts/postprocess.py`, `scripts/hooks/` | Numbered post-processing hooks: Domain Type System, semantic field types, generator-quirk fixes, version-skew tolerance, then the facade (delegates to `cmd/facadegen`). Primary edit surface for fixing generated output. |
+| `scripts/postprocess.py`, `scripts/hooks/` | Numbered post-processing hooks: Domain Type System, semantic field types, generator-quirk fixes, version-skew tolerance, clearable date fields, then the facade (delegates to `cmd/facadegen`). Primary edit surface for fixing generated output. |
 | `external-spec/bundled/` | Bundled spec (`rest-api.bundle.json`) + `spec-metadata.json`. Generator inputs. |
 | `external-spec/proto/` | Fetched `gateway.proto`. Generator input. |
 | `external-spec/upstream/` | Transient sparse clone. **Never commit** (gitignored). |
@@ -120,11 +129,92 @@ Conventional Commits (enforced by commitlint via the shared `@camunda8/sdk-infra
 config). Use `fix` only for user-facing bug fixes (triggers a release); use `chore` for
 review-comment fix-ups and regeneration commits.
 
+## Backporting to stable branches
+
+`.github/workflows/backport.yml` calls camunda/sdk-infra's shared `sdk-backport.yml`
+(`korthout/backport-action`, running as `camunda-sdk-automation`; the same flow as the other
+SDKs). It is configured by `.github/backport.yml` and `.github/actions/codegen-setup`, both
+read from the **target** branch, so keep them on `main` and on every live `stable/N`. It
+opens cherry-pick PRs onto `stable/*` branches:
+
+- Add the label `backport stable/<N>` to a PR. The backport PR opens when the PR merges,
+  or right away if it is already merged.
+- Or comment `/backport` on a merged PR to re-run it for its labels. PRs from forks can
+  only be backported this way.
+- Labelling an already-merged PR and `/backport` comments only work for people with write
+  access.
+
+Backport hand-written runtime, infra and generator changes (root package, `internal/**`,
+`cmd/**`, `scripts/`) when the affected code exists on the stable branch. Never backport
+generated output on its own (e.g. `chore(gen): regenerate for upstream spec drift`); each
+branch regenerates from its own upstream spec.
+
+On each backport branch the workflow adds up to two commits after the cherry-pick:
+
+1. `chore: adapt backport of #N to stable/<N>`: the `post-cherry-pick` command rewrites
+   the module path in the backported hand-written `.go`/`.md` files (`main` is `/v11`,
+   `stable/10` is `/v10`). Don't fix imports by hand.
+2. `chore(gen): regenerate for backport of #N`: the derived files (`generated-paths`:
+   `external-spec/bundled`, `external-spec/proto`, `client/`, `pb/`, the root
+   `*_generated.go`) are restored from the target branch and regenerated with
+   `./scripts/generate.sh && go vet ./...`. PRs are squash-merged, so the cherry-pick
+   carries `main`'s copies, but a stable branch must build from its own `SPEC_REF`
+   (`stable/10` builds camunda `stable/8.10`). This also clears cherry-pick conflicts in
+   those files. When the derived paths change, update `generated-paths` on every branch.
+
+The generator runs in a job with a read-only token; a separate job pushes the commits only
+if the adapt commit touches nothing but backported hand-written files and the
+regeneration commit nothing but `generated-paths`.
+
+If the cherry-pick conflicts, the action opens a **draft** PR with the conflicts committed,
+and the workflow renames that commit to the source PR's title so it passes commitlint. It
+stops at the first conflicting commit, so for a PR merged with a merge commit the draft can
+be a **partial** backport. Resolve the conflicts on the backport branch, then comment
+`/backport` on the source PR to adapt and regenerate it.
+
+If adapting or regenerating fails, the bot comments on the backport PR. If the change
+depends on spec the stable branch doesn't have (e.g. it wraps an operation that only
+exists upstream on `main`, so the build fails), it can't be backported as-is: close the
+backport PR, or reduce it to what applies to the stable spec.
 ## Versioning
 
-Semantic versioning via `git` tags. The SDK major tracks the Camunda server minor
-(server 8.9 → SDK 9.x). Go majors ≥ 2 require the `/vN` module-path suffix; during
-Technical Preview the module stays at `v0`.
+Releases are automatic. On every push to `main` or `stable/**`, `release.yml` runs the
+build/test gate and then semantic-release (`release.config.cjs`, extending the shared
+`@camunda8/sdk-infra` base): `fix`/`perf`/`revert` → patch, `feat` → minor. It pushes
+the `vX.Y.Z` tag, a `chore(release)` CHANGELOG.md commit and a GitHub Release as the
+`camunda-sdk-automation` App (a ruleset bypass actor). There is no registry publish:
+pkg.go.dev indexes the tag. Never push a release tag by hand.
+
+- `main` publishes `-alpha.N` prereleases; `stable/N` publishes `N.x`. The current
+  stable major comes from the `CAMUNDA_SDK_CURRENT_STABLE_MAJOR` repo variable.
+- The SDK major tracks the Camunda server minor (server 8.10 → SDK v10.x), and Go
+  carries majors ≥ 2 in the module path: `stable/10` is `/v10`, `main` is `/v11`.
+  Pre-v10 releases (`v0.x`) used the unsuffixed path.
+- `scripts/verify-release-major.sh` runs as the verifyRelease step and stops a release
+  whose major disagrees with the module path. A `BREAKING CHANGE:` footer would cause
+  exactly that, so CI's `breaking-change-guard` rejects it unless the PR carries the
+  `breaking-change-approved` label.
+
+When `main` moves to a new server line, cut `stable/N` first, then on `main`:
+`go mod edit -module` to the next `/vN`, rewrite the Go import strings, update the
+`go_package` in `buf.gen.yaml`, and regenerate `pb/` with `buf generate` (the
+descriptor embeds the path, so do not hand-edit it). Everything else reads the path
+from `go.mod`; `TestModulePathLiteralsMatchGoMod` flags any literal that was missed.
+
+semantic-release derives the next version from the last tag reachable on the branch,
+so after the module-path move `main` must be seeded with the first prerelease of the
+new major, or it computes the old major and the verify step rejects it. Tag the
+module-path commit and attach the channel note semantic-release expects (on the
+commit, not on an annotated tag object, or semantic-release does not see it):
+
+```bash
+git tag vN.0.0-alpha.1 <sha>
+git notes --ref semantic-release-vN.0.0-alpha.1 add -m '{"channels":["alpha"]}' <sha>
+git push origin vN.0.0-alpha.1 refs/notes/semantic-release-vN.0.0-alpha.1
+gh release create vN.0.0-alpha.1 --prerelease --generate-notes --verify-tag
+```
+
+Also set `CAMUNDA_SDK_CURRENT_STABLE_MAJOR` to the newly cut stable major.
 
 ## Go conventions
 

@@ -228,7 +228,6 @@ func (o *DeploymentMetadataResult) UnmarshalJSON(data []byte) (err error) {
 	varDeploymentMetadataResult := _DeploymentMetadataResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDeploymentMetadataResult)
 
 	if err != nil {

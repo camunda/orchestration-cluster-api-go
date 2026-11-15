@@ -312,7 +312,6 @@ func (o *CreateProcessInstanceResult) UnmarshalJSON(data []byte) (err error) {
 	varCreateProcessInstanceResult := _CreateProcessInstanceResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varCreateProcessInstanceResult)
 
 	if err != nil {

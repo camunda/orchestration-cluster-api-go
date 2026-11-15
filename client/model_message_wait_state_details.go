@@ -168,7 +168,6 @@ func (o *MessageWaitStateDetails) UnmarshalJSON(data []byte) (err error) {
 	varMessageWaitStateDetails := _MessageWaitStateDetails{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varMessageWaitStateDetails)
 
 	if err != nil {

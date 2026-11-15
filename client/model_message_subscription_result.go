@@ -648,7 +648,6 @@ func (o *MessageSubscriptionResult) UnmarshalJSON(data []byte) (err error) {
 	varMessageSubscriptionResult := _MessageSubscriptionResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varMessageSubscriptionResult)
 
 	if err != nil {

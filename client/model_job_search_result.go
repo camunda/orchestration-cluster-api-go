@@ -46,16 +46,18 @@ type JobSearchResult struct {
 	JobKey            JobKey                   `json:"jobKey"`
 	Kind              JobKindEnum              `json:"kind"`
 	ListenerEventType JobListenerEventTypeEnum `json:"listenerEventType"`
-	// The process definition ID associated with the job.
-	ProcessDefinitionId ProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
-	// The process definition key associated with the job.
-	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
+	// The process definition ID associated with the job. This field is not present for jobs imported by Operate 8.7 and earlier.
+	ProcessDefinitionId NullableProcessDefinitionId `json:"processDefinitionId" validate:"regexp=^[\\\\p{L}_][\\\\p{L}\\\\p{N}_\\\\-\\\\.]*$"`
+	// The process definition key associated with the job. This field is not present for jobs imported by Operate 8.7 and earlier.
+	ProcessDefinitionKey NullableProcessDefinitionKey `json:"processDefinitionKey"`
 	// The process instance key associated with the job.
 	ProcessInstanceKey ProcessInstanceKey `json:"processInstanceKey"`
 	// The key of the root process instance. The root process instance is the top-level ancestor in the process instance hierarchy. This field is only present for data belonging to process instance hierarchies created in version 8.9 or later.
 	RootProcessInstanceKey NullableProcessInstanceKey `json:"rootProcessInstanceKey"`
 	// The business ID of the owning process instance, inherited when the job was created. This is `null` for jobs created before version 8.10 and for jobs whose owning process instance has no business ID.
 	BusinessId NullableBusinessId `json:"businessId"`
+	// The storage ordinal this job's data belongs to. This is `null` for data exported before storage ordinals were introduced in version 8.11.
+	StorageOrdinal NullableInt32 `json:"storageOrdinal"`
 	// The amount of retries left to this job.
 	Retries int32        `json:"retries"`
 	State   JobStateEnum `json:"state"`
@@ -79,7 +81,7 @@ type _JobSearchResult JobSearchResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId ProcessDefinitionId, processDefinitionKey ProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
+func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, deniedReason NullableString, elementId NullableElementId, elementInstanceKey ElementInstanceKey, endTime NullableTime, errorCode NullableString, errorMessage NullableString, hasFailedWithRetriesLeft bool, isDenied NullableBool, jobKey JobKey, kind JobKindEnum, listenerEventType JobListenerEventTypeEnum, processDefinitionId NullableProcessDefinitionId, processDefinitionKey NullableProcessDefinitionKey, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, businessId NullableBusinessId, storageOrdinal NullableInt32, retries int32, state JobStateEnum, tenantId TenantId, type_ string, worker string, creationTime NullableTime, lastUpdateTime NullableTime, priority int32) *JobSearchResult {
 	this := JobSearchResult{}
 	this.CustomHeaders = customHeaders
 	this.Deadline = deadline
@@ -99,6 +101,7 @@ func NewJobSearchResult(customHeaders map[string]string, deadline NullableTime, 
 	this.ProcessInstanceKey = processInstanceKey
 	this.RootProcessInstanceKey = rootProcessInstanceKey
 	this.BusinessId = businessId
+	this.StorageOrdinal = storageOrdinal
 	this.Retries = retries
 	this.State = state
 	this.TenantId = tenantId
@@ -445,51 +448,55 @@ func (o *JobSearchResult) SetListenerEventType(v JobListenerEventTypeEnum) {
 }
 
 // GetProcessDefinitionId returns the ProcessDefinitionId field value
+// If the value is explicit nil, the zero value for ProcessDefinitionId will be returned
 func (o *JobSearchResult) GetProcessDefinitionId() ProcessDefinitionId {
-	if o == nil {
+	if o == nil || o.ProcessDefinitionId.Get() == nil {
 		var ret ProcessDefinitionId
 		return ret
 	}
 
-	return o.ProcessDefinitionId
+	return *o.ProcessDefinitionId.Get()
 }
 
 // GetProcessDefinitionIdOk returns a tuple with the ProcessDefinitionId field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *JobSearchResult) GetProcessDefinitionIdOk() (*ProcessDefinitionId, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ProcessDefinitionId, true
+	return o.ProcessDefinitionId.Get(), o.ProcessDefinitionId.IsSet()
 }
 
 // SetProcessDefinitionId sets field value
 func (o *JobSearchResult) SetProcessDefinitionId(v ProcessDefinitionId) {
-	o.ProcessDefinitionId = v
+	o.ProcessDefinitionId.Set(&v)
 }
 
 // GetProcessDefinitionKey returns the ProcessDefinitionKey field value
+// If the value is explicit nil, the zero value for ProcessDefinitionKey will be returned
 func (o *JobSearchResult) GetProcessDefinitionKey() ProcessDefinitionKey {
-	if o == nil {
+	if o == nil || o.ProcessDefinitionKey.Get() == nil {
 		var ret ProcessDefinitionKey
 		return ret
 	}
 
-	return o.ProcessDefinitionKey
+	return *o.ProcessDefinitionKey.Get()
 }
 
 // GetProcessDefinitionKeyOk returns a tuple with the ProcessDefinitionKey field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *JobSearchResult) GetProcessDefinitionKeyOk() (*ProcessDefinitionKey, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ProcessDefinitionKey, true
+	return o.ProcessDefinitionKey.Get(), o.ProcessDefinitionKey.IsSet()
 }
 
 // SetProcessDefinitionKey sets field value
 func (o *JobSearchResult) SetProcessDefinitionKey(v ProcessDefinitionKey) {
-	o.ProcessDefinitionKey = v
+	o.ProcessDefinitionKey.Set(&v)
 }
 
 // GetProcessInstanceKey returns the ProcessInstanceKey field value
@@ -566,6 +573,32 @@ func (o *JobSearchResult) GetBusinessIdOk() (*BusinessId, bool) {
 // SetBusinessId sets field value
 func (o *JobSearchResult) SetBusinessId(v BusinessId) {
 	o.BusinessId.Set(&v)
+}
+
+// GetStorageOrdinal returns the StorageOrdinal field value
+// If the value is explicit nil, the zero value for int32 will be returned
+func (o *JobSearchResult) GetStorageOrdinal() int32 {
+	if o == nil || o.StorageOrdinal.Get() == nil {
+		var ret int32
+		return ret
+	}
+
+	return *o.StorageOrdinal.Get()
+}
+
+// GetStorageOrdinalOk returns a tuple with the StorageOrdinal field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *JobSearchResult) GetStorageOrdinalOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.StorageOrdinal.Get(), o.StorageOrdinal.IsSet()
+}
+
+// SetStorageOrdinal sets field value
+func (o *JobSearchResult) SetStorageOrdinal(v int32) {
+	o.StorageOrdinal.Set(&v)
 }
 
 // GetRetries returns the Retries field value
@@ -787,11 +820,12 @@ func (o JobSearchResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["jobKey"] = o.JobKey
 	toSerialize["kind"] = o.Kind
 	toSerialize["listenerEventType"] = o.ListenerEventType
-	toSerialize["processDefinitionId"] = o.ProcessDefinitionId
-	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey
+	toSerialize["processDefinitionId"] = o.ProcessDefinitionId.Get()
+	toSerialize["processDefinitionKey"] = o.ProcessDefinitionKey.Get()
 	toSerialize["processInstanceKey"] = o.ProcessInstanceKey
 	toSerialize["rootProcessInstanceKey"] = o.RootProcessInstanceKey.Get()
 	toSerialize["businessId"] = o.BusinessId.Get()
+	toSerialize["storageOrdinal"] = o.StorageOrdinal.Get()
 	toSerialize["retries"] = o.Retries
 	toSerialize["state"] = o.State
 	toSerialize["tenantId"] = o.TenantId
@@ -852,7 +886,6 @@ func (o *JobSearchResult) UnmarshalJSON(data []byte) (err error) {
 	varJobSearchResult := _JobSearchResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varJobSearchResult)
 
 	if err != nil {

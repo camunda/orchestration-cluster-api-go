@@ -136,7 +136,6 @@ func (o *BatchOperationItemSearchQueryResult) UnmarshalJSON(data []byte) (err er
 	varBatchOperationItemSearchQueryResult := _BatchOperationItemSearchQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varBatchOperationItemSearchQueryResult)
 
 	if err != nil {

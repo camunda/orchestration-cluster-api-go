@@ -924,6 +924,45 @@ func (c *CamundaClient) SuspendBatchOperation(ctx context.Context, batchOperatio
 	return c.wrapError(resp, err)
 }
 
+// AddClock calls the AddClock operation.
+//
+// Example:
+//
+//	// Move the cluster clock forward by an ISO 8601 duration (negative moves it back).
+//	clock, err := client.AddClock(ctx, *camunda.NewClockAddRequest("PT1H"))
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Println("cluster clock is now:", clock.GetTimestamp().Format(time.RFC3339))
+func (c *CamundaClient) AddClock(ctx context.Context, body ClockAddRequest, opts ...func(ApiAddClockRequest) ApiAddClockRequest) (*ClockResult, error) {
+	req := c.raw.ClockAPI.AddClock(ctx)
+	req = req.ClockAddRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// GetClock calls the GetClock operation.
+//
+// Example:
+//
+//	// Read the cluster clock. While the clock is pinned this reports the pinned instant.
+//	clock, err := client.GetClock(ctx)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Println("cluster clock:", clock.GetTimestamp().Format(time.RFC3339))
+func (c *CamundaClient) GetClock(ctx context.Context, opts ...func(ApiGetClockRequest) ApiGetClockRequest) (*ClockResult, error) {
+	req := c.raw.ClockAPI.GetClock(ctx)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // PinClock calls the PinClock operation.
 //
 // Example:
@@ -1309,6 +1348,9 @@ func (c *CamundaClient) EvaluateConditionals(ctx context.Context, body Condition
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	if b := req.GetConditionalEvaluationInstruction(); b != nil {
+		req = req.ConditionalEvaluationInstruction(c.withDefaultTenantConditionalEvaluation(*b))
+	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }
@@ -1332,6 +1374,9 @@ func (c *CamundaClient) EvaluateDecision(ctx context.Context, body DecisionEvalu
 	req = req.DecisionEvaluationInstruction(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetDecisionEvaluationInstruction(); b != nil {
+		req = req.DecisionEvaluationInstruction(c.withDefaultTenantDecisionEvaluation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -1842,6 +1887,9 @@ func (c *CamundaClient) EvaluateExpression(ctx context.Context, body ExpressionE
 	req = req.ExpressionEvaluationRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetExpressionEvaluationRequest(); b != nil {
+		req = req.ExpressionEvaluationRequest(c.withDefaultTenantExpressionEvaluation(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -2688,6 +2736,9 @@ func (c *CamundaClient) CorrelateMessage(ctx context.Context, body MessageCorrel
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	if b := req.GetMessageCorrelationRequest(); b != nil {
+		req = req.MessageCorrelationRequest(c.withDefaultTenantMessageCorrelation(*b))
+	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }
@@ -2710,6 +2761,9 @@ func (c *CamundaClient) PublishMessage(ctx context.Context, body MessagePublicat
 	req = req.MessagePublicationRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetMessagePublicationRequest(); b != nil {
+		req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublication(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -3500,6 +3554,7 @@ func (c *CamundaClient) CreateDeployment(ctx context.Context, opts ...func(ApiCr
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	req = c.withDefaultTenantCreateDeployment(req)
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }
@@ -3962,6 +4017,9 @@ func (c *CamundaClient) BroadcastSignal(ctx context.Context, body SignalBroadcas
 	req = req.SignalBroadcastRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetSignalBroadcastRequest(); b != nil {
+		req = req.SignalBroadcastRequest(c.withDefaultTenantSignalBroadcast(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -4432,8 +4490,7 @@ func (c *CamundaClient) UpdateUser(ctx context.Context, username string, body Us
 //
 // Example:
 //
-//	req := camunda.NewUserTaskAssignmentRequest()
-//	req.SetAssignee("alice")
+//	req := camunda.NewUserTaskAssignmentRequest("alice")
 //
 //	return client.AssignUserTask(ctx, camunda.MustUserTaskKey("2251799813685380"), *req)
 func (c *CamundaClient) AssignUserTask(ctx context.Context, userTaskKey UserTaskKey, body UserTaskAssignmentRequest, opts ...func(ApiAssignUserTaskRequest) ApiAssignUserTaskRequest) error {
@@ -4493,6 +4550,29 @@ func (c *CamundaClient) GetUserTask(ctx context.Context, userTaskKey UserTaskKey
 //	fmt.Printf("%v\n", form)
 func (c *CamundaClient) GetUserTaskForm(ctx context.Context, userTaskKey UserTaskKey, opts ...func(ApiGetUserTaskFormRequest) ApiGetUserTaskFormRequest) (*FormResult, error) {
 	req := c.raw.UserTaskAPI.GetUserTaskForm(ctx, userTaskKey)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// LookupUserTask calls the LookupUserTask operation.
+//
+// Example:
+//
+//	body := camunda.NewUserTaskLookupRequest()
+//	body.SetFetchVariables([]string{"recommendation", "applicant"})
+//	result, err := client.LookupUserTask(ctx,
+//		camunda.MustUserTaskKey("2251799813685380"),
+//		*body)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("state: %s, assignee: %s\n", result.GetState(), result.GetAssignee())
+func (c *CamundaClient) LookupUserTask(ctx context.Context, userTaskKey UserTaskKey, body UserTaskLookupRequest, opts ...func(ApiLookupUserTaskRequest) ApiLookupUserTaskRequest) (*UserTaskLookupResult, error) {
+	req := c.raw.UserTaskAPI.LookupUserTask(ctx, userTaskKey)
+	req = req.UserTaskLookupRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}

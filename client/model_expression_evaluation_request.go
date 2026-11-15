@@ -24,7 +24,7 @@ type ExpressionEvaluationRequest struct {
 	// The expression to evaluate (e.g., \"=x + y\")
 	Expression string `json:"expression"`
 	// Required when the expression references tenant-scoped cluster variables
-	TenantId *string `json:"tenantId,omitempty"`
+	TenantId *TenantId `json:"tenantId,omitempty" validate:"regexp=^(<default>|[\\\\w\\\\.\\\\-]{1,31})$"`
 	// Key of the process instance or element instance whose variables should be made visible to the expression. Use a process instance key to evaluate against the process instance scope, or an element instance key to evaluate against that element instance scope. If omitted, the expression is evaluated unscoped, using only cluster variables and request-body variables.
 	ScopeKey *ScopeKey `json:"scopeKey,omitempty"`
 	// Optional variables for expression evaluation. These variables are only used for the current evaluation and do not persist beyond it.
@@ -76,9 +76,9 @@ func (o *ExpressionEvaluationRequest) SetExpression(v string) {
 }
 
 // GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *ExpressionEvaluationRequest) GetTenantId() string {
+func (o *ExpressionEvaluationRequest) GetTenantId() TenantId {
 	if o == nil || IsNil(o.TenantId) {
-		var ret string
+		var ret TenantId
 		return ret
 	}
 	return *o.TenantId
@@ -86,7 +86,7 @@ func (o *ExpressionEvaluationRequest) GetTenantId() string {
 
 // GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ExpressionEvaluationRequest) GetTenantIdOk() (*string, bool) {
+func (o *ExpressionEvaluationRequest) GetTenantIdOk() (*TenantId, bool) {
 	if o == nil || IsNil(o.TenantId) {
 		return nil, false
 	}
@@ -102,8 +102,8 @@ func (o *ExpressionEvaluationRequest) HasTenantId() bool {
 	return false
 }
 
-// SetTenantId gets a reference to the given string and assigns it to the TenantId field.
-func (o *ExpressionEvaluationRequest) SetTenantId(v string) {
+// SetTenantId gets a reference to the given TenantId and assigns it to the TenantId field.
+func (o *ExpressionEvaluationRequest) SetTenantId(v TenantId) {
 	o.TenantId = &v
 }
 

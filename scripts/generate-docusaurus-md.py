@@ -52,7 +52,19 @@ SECTION_DIR = DOCS_MD_DIR / "go-sdk"
 OUTPUT_DIR = SECTION_DIR / "api-reference"
 
 GITHUB_BLOB = "https://github.com/camunda/orchestration-cluster-api-go/blob/main"
-PKG_GO_DEV = "https://pkg.go.dev/github.com/camunda/orchestration-cluster-api-go"
+
+
+def _module_path() -> str:
+    # Read from go.mod so pkg.go.dev links and import snippets follow a /vN path change.
+    for line in (REPO_ROOT / "go.mod").read_text(encoding="utf-8").splitlines():
+        fields = line.split()
+        if len(fields) >= 2 and fields[0] == "module":
+            return fields[1].strip('"')
+    raise SystemExit("go.mod has no module directive")
+
+
+MODULE_PATH = _module_path()
+PKG_GO_DEV = f"https://pkg.go.dev/{MODULE_PATH}"
 PKG_GO_DEV_CLIENT = f"{PKG_GO_DEV}/client"
 
 # ---------------------------------------------------------------------------
@@ -610,6 +622,8 @@ WORKER_TYPES = [
     "StreamWorkerOption",
     "Job",
     "JobHandler",
+    "JobCompletion",
+    "JobCompletionHandler",
 ]
 RUNTIME_TYPES = [
     "APIError",
@@ -641,6 +655,16 @@ VAR_BUCKETS = {
     "ConfigSchema": "configuration",
     "ErrConfig": "runtime",
     "SeedEnvVar": "runtime",
+}
+
+# Package-level functions not filed under a type are published on the Runtime
+# page unless routed elsewhere here.
+FUNC_BUCKETS = {
+    "UserTaskJobResult": "job-workers",
+    "CorrectUserTask": "job-workers",
+    "DenyUserTask": "job-workers",
+    "AdHocSubProcessJobResult": "job-workers",
+    "ActivateAdHocElement": "job-workers",
 }
 
 BUCKETS: dict[str, list[str]] = {
@@ -770,10 +794,7 @@ def generate_domain_keys(keys: list[TypeItem]) -> str:
         "`ProcessInstanceKey` where a `JobKey` is expected is a compile error, so whole "
         "classes of identifier mix-ups are caught before the request is sent.\n\n"
     )
-    out += (
-        '```go\nimport camunda "github.com/camunda/orchestration-cluster-api-go"'
-        "\n```\n\n"
-    )
+    out += f'```go\nimport camunda "{MODULE_PATH}"\n```\n\n'
 
     # Derive the shared constructor surface from a representative key rather
     # than hardcoding it, so the page cannot drift from the generated code.
@@ -1133,6 +1154,9 @@ def generate_api_reference() -> None:
     sdk = load_doc_json(SDK_JSON_PATH)
     buckets = classify_types(sdk.types)
     var_buckets = classify_vars(sdk.consts + sdk.vars)
+    func_buckets: dict[str, list[Func]] = {slug: [] for slug in BUCKETS}
+    for f in sdk.funcs:
+        func_buckets[FUNC_BUCKETS.get(f.name, "runtime")].append(f)
     examples = load_examples()
     generated = load_generated_types()
 
@@ -1179,7 +1203,7 @@ def generate_api_reference() -> None:
                 "outcome back to the cluster.",
                 buckets["job-workers"],
                 var_buckets["job-workers"],
-                [],
+                func_buckets["job-workers"],
                 examples,
                 generated,
             ),
@@ -1192,7 +1216,7 @@ def generate_api_reference() -> None:
                 "and the polling helper that absorbs eventual consistency.",
                 buckets["runtime"],
                 var_buckets["runtime"],
-                sdk.funcs,
+                func_buckets["runtime"],
                 examples,
                 generated,
             ),

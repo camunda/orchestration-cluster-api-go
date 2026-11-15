@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
-	"github.com/camunda/orchestration-cluster-api-go/examples/advanced/internal/exampleutil"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
+	"github.com/camunda/orchestration-cluster-api-go/v11/examples/advanced/internal/exampleutil"
 )
 
 const processID = "go-example-parcel-delivery"

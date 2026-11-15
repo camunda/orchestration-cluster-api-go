@@ -199,7 +199,6 @@ func (o *ExpressionEvaluationResult) UnmarshalJSON(data []byte) (err error) {
 	varExpressionEvaluationResult := _ExpressionEvaluationResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varExpressionEvaluationResult)
 
 	if err != nil {

@@ -197,7 +197,6 @@ func (o *ClusterRuntimeBackupTenantInfo) UnmarshalJSON(data []byte) (err error) 
 	varClusterRuntimeBackupTenantInfo := _ClusterRuntimeBackupTenantInfo{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterRuntimeBackupTenantInfo)
 
 	if err != nil {

@@ -4,14 +4,14 @@
 # camunda-schema-bundler into external-spec/bundled/.
 #
 # Usage:
-#   ./scripts/bundle-spec.sh          # bundle spec at ref $SPEC_REF (default: stable/8.10)
-#   SPEC_REF=main ./scripts/bundle-spec.sh
+#   ./scripts/bundle-spec.sh          # bundle spec at ref $SPEC_REF (default: main)
+#   SPEC_REF=stable/8.10 ./scripts/bundle-spec.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-SPEC_REF="${SPEC_REF:-stable/8.10}"
+SPEC_REF="${SPEC_REF:-main}"
 OUT_SPEC="external-spec/bundled/rest-api.bundle.json"
 OUT_META="external-spec/bundled/spec-metadata.json"
 
@@ -19,6 +19,7 @@ mkdir -p external-spec/bundled
 
 echo "==> Bundling upstream OpenAPI spec (ref: ${SPEC_REF}) via camunda-schema-bundler..."
 npx --yes camunda-schema-bundler@^2.4.3 --ref "$SPEC_REF" \
+  --deref-path-local \
   --output-spec "$OUT_SPEC" \
   --output-metadata "$OUT_META"
 

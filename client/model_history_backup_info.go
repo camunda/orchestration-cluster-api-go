@@ -197,7 +197,6 @@ func (o *HistoryBackupInfo) UnmarshalJSON(data []byte) (err error) {
 	varHistoryBackupInfo := _HistoryBackupInfo{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varHistoryBackupInfo)
 
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
 )
 
 // The tests below target the Cloudflare-fronted SaaS gateway, which closes a gRPC

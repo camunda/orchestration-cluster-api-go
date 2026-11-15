@@ -224,7 +224,6 @@ func (o *UsageMetricsResponse) UnmarshalJSON(data []byte) (err error) {
 	varUsageMetricsResponse := _UsageMetricsResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varUsageMetricsResponse)
 
 	if err != nil {

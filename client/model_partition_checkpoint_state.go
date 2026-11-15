@@ -225,7 +225,6 @@ func (o *PartitionCheckpointState) UnmarshalJSON(data []byte) (err error) {
 	varPartitionCheckpointState := _PartitionCheckpointState{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varPartitionCheckpointState)
 
 	if err != nil {

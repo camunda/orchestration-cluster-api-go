@@ -108,7 +108,6 @@ func (o *ClusterUpgradeStatusResponse) UnmarshalJSON(data []byte) (err error) {
 	varClusterUpgradeStatusResponse := _ClusterUpgradeStatusResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterUpgradeStatusResponse)
 
 	if err != nil {

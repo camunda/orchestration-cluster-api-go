@@ -1,6 +1,6 @@
 # Camunda 8 Orchestration Cluster API — Go SDK
 
-> **Technical Preview.** APIs may change before a stable `v1`/`v9` release. See
+> **Technical Preview.** APIs may change between releases. See
 > [versioning](#versioning).
 
 An idiomatic Go client for the [Camunda 8](https://camunda.io) Orchestration
@@ -19,11 +19,11 @@ the same two-layer architecture.
 ## Installation
 
 ```sh
-go get github.com/camunda/orchestration-cluster-api-go
+go get github.com/camunda/orchestration-cluster-api-go/v11
 ```
 
-Requires Go 1.25+. During Technical Preview the module path has no version suffix
-(see [versioning](#versioning)).
+Requires Go 1.25+. The `/v11` suffix is the Camunda server line this SDK targets
+(8.11); see [versioning](#versioning).
 
 ## Quick start
 
@@ -144,6 +144,28 @@ The OAuth token cache is two-tier: an in-memory cache backed by an on-disk cache
 valid token instead of re-authenticating on every start. Concurrent refreshes are
 collapsed into a single in-flight request.
 
+The on-disk tier is opt-in and holds a bearer token, so it is treated as
+credential storage. The directory is created mode `0700` and each entry is
+written mode `0600` through a temp file renamed into place — so the mode is
+reapplied on every rewrite and a concurrent reader never sees a partially written
+entry. An entry found expired is deleted rather than left behind, after a
+re-read confirms another process has not just published a fresh one.
+
+Entries are also checked before they are trusted. If the cache directory is
+writable by group or other, the cache is disabled rather than used: the entry
+path is derived from the token URL, client id and audience, so write access to
+that directory would be enough to substitute the token the SDK presents to the
+cluster. An individual entry whose own mode is wider than `0600` is ignored for
+the same reason — a restrictive directory does not stop someone rewriting a file
+their own permissions already allow — and the refetch that follows republishes it
+at `0600`.
+
+> **Windows:** none of the above is enforced by the operating system. Go's
+> permission bits are largely ignored on Windows — a file inherits the ACL of its
+> parent directory, and `0700` on the directory does not restrict that ACL — so
+> the group/other-writable check is skipped and the cache has no OS-enforced
+> protection. Leave the on-disk cache disabled on a shared Windows host.
+
 ## Configuration reference
 
 `CAMUNDA_*` variables are canonical; the `ZEEBE_*` names are accepted as
@@ -200,6 +222,44 @@ precedence over both.
 | --- | --- | --- |
 | `CAMUNDA_FALCON` | `true` | Enable the FALCON command-stream transport upgrade when the gateway advertises it. |
 | `CAMUNDA_FORCE_REST` | — | Force the pure-REST path even when the gateway advertises FALCON. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` | `256` | Max idle (keep-alive) HTTP connections across all hosts. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` | `256` | Max idle (keep-alive) HTTP connections per host. |
+
+The SDK never uses `http.DefaultTransport` directly: it clones it and sizes the
+idle-connection pool for job-worker workloads. Go's default pool keeps only 2
+idle connections per host, so a worker with many jobs in flight otherwise opens
+and closes a TCP connection per call — churning sockets into `TIME_WAIT`,
+exhausting ephemeral ports, and roughly halving throughput at moderate
+concurrency. Size `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` to at least the sum
+of your workers' `WithMaxConcurrentJobs` plus their pollers when running many
+workers against one gateway. `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` caps the idle pool
+across all hosts, so raise it too (to at least the per-host value, or `0` for no
+global limit) — otherwise the 256 global cap still evicts connections.
+
+For full control, supply your own HTTP plumbing:
+
+<!-- snippet-source: examples/readme.go | regions: CustomTransport -->
+```go
+// WithTransport replaces the base RoundTripper; the SDK's retry, backpressure
+// and auth layers still apply on top of it.
+client, err := camunda.New(camunda.WithTransport(&http.Transport{
+	MaxIdleConns:        1024,
+	MaxIdleConnsPerHost: 1024,
+}))
+```
+
+<!-- snippet-source: examples/readme.go | regions: CustomHTTPClient -->
+```go
+// WithHTTPClient replaces the whole HTTP client; it is used as-is, so the
+// SDK's retry, backpressure, auth and TLS layers are bypassed.
+client, err := camunda.New(camunda.WithHTTPClient(&http.Client{
+	Transport: &http.Transport{MaxIdleConnsPerHost: 1024},
+	Timeout:   30 * time.Second,
+}))
+```
+
+The two options are mutually exclusive — setting both fails `New` with a
+configuration error.
 
 Invalid values are rejected at construction with a configuration error rather
 than being silently coerced, so a typo in a deployment manifest fails the process
@@ -291,6 +351,127 @@ option as `camunda.WithJobLease(true)`. Leases are off by default (matching the
 engine) and need an engine that supports them: rather than degrade to unfenced
 commands, a worker that asked for a lease and is handed a job without a token
 rejects the activation with `camunda.ErrLeaseNotHonored`.
+
+### Job Corrections (User Task Listeners)
+
+When a job worker handles a [user task listener](https://docs.camunda.io/docs/components/concepts/user-task-listeners/),
+it can correct task properties (assignee, due date, candidate groups, etc.) by
+completing the job with a job result. Write the handler as a
+`camunda.JobCompletionHandler`, which returns a `camunda.JobCompletion`, and adapt
+it with `camunda.CompletionHandler`:
+
+<!-- snippet-source: examples/readme.go | regions: JobCorrections -->
+```go
+// A CompletionHandler returns a JobCompletion, which can carry a job result
+// alongside the variables. Adapt it for NewJobWorker or NewStreamJobWorker.
+worker := client.NewJobWorker("io.camunda:userTaskListener",
+	camunda.CompletionHandler(func(ctx context.Context, job *camunda.Job) (camunda.JobCompletion, error) {
+		corrections := camunda.NewJobResultCorrections()
+		corrections.SetAssignee("corrected-user")
+		corrections.SetPriority(80)
+		corrections.ClearFollowUpDate() // sent as "": removes the follow-up date
+		return camunda.JobCompletion{Result: camunda.CorrectUserTask(*corrections)}, nil
+	}),
+	camunda.WithMaxConcurrentJobs(5),
+)
+```
+
+To deny a task completion (reject the work):
+
+<!-- snippet-source: examples/readme.go | regions: JobCorrectionsDenial -->
+```go
+return camunda.JobCompletion{
+	Result: camunda.DenyUserTask("Insufficient documentation"),
+}, nil
+```
+
+| Correctable attribute | Setter on `JobResultCorrections` | Clear value |
+|---|---|---|
+| `assignee` | `SetAssignee(string)` | Empty string `""` |
+| `dueDate` | `SetDueDate(time.Time)` | `ClearDueDate()` (sent as `""`) |
+| `followUpDate` | `SetFollowUpDate(time.Time)` | `ClearFollowUpDate()` (sent as `""`) |
+| `candidateUsers` | `SetCandidateUsers([]string)` | Empty slice `[]string{}` |
+| `candidateGroups` | `SetCandidateGroups([]string)` | Empty slice `[]string{}` |
+| `priority` | `SetPriority(int32)` (0–100) | — |
+
+Leaving an attribute unset (or setting it to `nil` with its `Set…Nil` method)
+preserves the persisted value. For the two dates, the last of `Set…`, `Set…Nil`,
+`Unset…` and `Clear…` wins. The clear lives on the `JobResultCorrections` model, so
+it also applies when you build a `JobCompletionRequest` for `client.CompleteJob`
+yourself.
+
+### Ad-hoc sub-process results
+
+The job of an [ad-hoc sub-process](https://docs.camunda.io/docs/components/modeler/bpmn/ad-hoc-subprocesses/)
+completes with a result that names the inner elements to activate next and
+whether the sub-process is done:
+
+<!-- snippet-source: examples/readme.go | regions: AdHocSubProcessResult -->
+```go
+// The job of an ad-hoc sub-process decides which inner elements to activate
+// next, and whether the sub-process is done.
+worker := client.NewJobWorker("plan-next-steps",
+	camunda.CompletionHandler(func(ctx context.Context, job *camunda.Job) (camunda.JobCompletion, error) {
+		result := camunda.NewJobResultAdHocSubProcess()
+		result.SetActivateElements([]camunda.JobResultActivateElement{
+			camunda.ActivateAdHocElement("review_document", map[string]any{"reviewer": "alice"}),
+			camunda.ActivateAdHocElement("notify_customer", nil),
+		})
+		result.SetIsCompletionConditionFulfilled(false)
+		result.SetIsCancelRemainingInstances(false)
+		return camunda.JobCompletion{
+			Variables: map[string]any{"planned": true},
+			Result:    camunda.AdHocSubProcessJobResult(*result),
+		}, nil
+	}),
+)
+```
+
+The worker sets the result's `type` discriminator (`userTask` or
+`adHocSubProcess`) from the variant you populate, so a result built directly from
+the generated `JobResult` union is sent correctly too. A result with no variant —
+or both — fails the job rather than completing it without the result. Job results
+work with both workers: the gRPC streaming worker sends them on `CompleteJob`, and
+the REST worker on `POST /jobs/{jobKey}/completion`.
+
+The FALCON command stream (used by `NewJobWorker` when a nanobpmn gateway
+advertises it) cannot carry a job result: its completion frame has no result
+field. On FALCON, a handler that returns a result fails the job with a message
+saying so, rather than completing it without the result — which would, for
+example, approve a task the listener denied. To use job results against such a
+gateway, set `CAMUNDA_FORCE_REST=true` (or `camunda.WithForceREST(true)`) so the
+worker polls over REST.
+
+### Panicking handlers
+
+A handler runs on its own goroutine, and in Go an unrecovered panic on *any*
+goroutine terminates the whole process. The workers therefore recover a panicking
+handler and **fail the job** with it, on every transport (REST polling, the
+FALCON command stream, the gRPC stream, and the gRPC worker's REST sidecar poll):
+
+- The job is failed exactly as it would be for a returned error, so its retries
+  decrement and the engine schedules a retry instead of leaving the job to sit
+  until its activation timeout expires.
+- The recovered panic is observable through the SDK log and through the failed
+  job (and its incident) on the cluster. It is **not** returned to your code:
+  the worker consumes the resulting `camunda.ErrHandlerPanic` internally and
+  `Run` does not return per-job handler errors, so `errors.Is` cannot be used
+  to detect it from application code.
+- The panic value and a stack trace are written to the SDK log at **error**
+  level — the same detail the runtime would have printed to stderr as the process
+  died.
+- The panic value is **not** sent to the cluster. The failure message the engine
+  stores on the incident says only that the handler panicked, because that
+  message is durable and widely visible, and a panic value can carry job-variable
+  content.
+
+This is a deliberate choice rather than a silent one: a panic is a bug in the
+handler, but losing the host application (and every other job it was running) is
+a disproportionate consequence. If your handler must not be recovered — if a
+panic indicates corrupted process state that should stop the program — detect
+that in the handler and terminate the process explicitly rather than relying on
+the panic to propagate. There is deliberately no option to turn recovery off;
+adding one would be a design decision for the SDK team.
 
 ## Deploying and starting processes
 
@@ -596,7 +777,7 @@ first-class parameters and returns the deserialized result.
 Every request, response, key and enum type is available from the `camunda`
 package, so one import covers normal use. Only the raw HTTP-client machinery —
 the client `Raw()` returns, its configuration, and its error type — stays in the
-generated `github.com/camunda/orchestration-cluster-api-go/client` package.
+generated `github.com/camunda/orchestration-cluster-api-go/v11/client` package.
 
 When you need something the facade deliberately does not model — multipart
 uploads, unusual query-parameter combinations, or the raw `*http.Response` —
@@ -621,7 +802,7 @@ retry, and authentication all apply, because those are `http.RoundTripper` layer
 on the transport rather than facade-level wrappers.
 
 Full API documentation is published on
-[pkg.go.dev](https://pkg.go.dev/github.com/camunda/orchestration-cluster-api-go).
+[pkg.go.dev](https://pkg.go.dev/github.com/camunda/orchestration-cluster-api-go/v11).
 
 <!-- docs:cut:start -->
 
@@ -666,10 +847,17 @@ runs `make docs-md` and opens the update PR.
 
 ## Versioning
 
-The SDK major version tracks the Camunda server minor version (server 8.9 → SDK
-9.x). Per Go conventions, majors ≥ 2 use a `/vN` module-path suffix
-(`.../orchestration-cluster-api-go/v9`). During Technical Preview the module
-stays at `v0`.
+The SDK major version tracks the Camunda server minor version: use the SDK line
+that matches your server. Go requires majors ≥ 2 to carry a `/vN` module-path
+suffix, so the import path names the server line:
+
+| Camunda server        | Module path suffix | Branch      |
+| --------------------- | ------------------ | ----------- |
+| 8.10                  | `/v10`             | `stable/10` |
+| 8.11 (in development) | `/v11`             | `main`      |
+
+Moving to a new server minor means changing the import path. Releases before
+v10 (`v0.x`) used the module path without a suffix.
 
 ## License
 

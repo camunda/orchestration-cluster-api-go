@@ -48,6 +48,12 @@ VERSION_SKEW_OPTIONAL = [
     # emitted by 8.10.0-alpha3. Blocks CreateProcessInstance/searches/reads.
     # Drop when the pinned server emits it.
     "suspendedDate",
+    # TEMPORARY: added on camunda `main` (2026-10-22..27) and required on
+    # ProcessInstanceResult, IncidentResult, DecisionInstanceResult and
+    # DecisionInstanceGetQueryResult, but not emitted by 8.10.0-alpha3. Blocks
+    # process-instance, incident and decision-instance reads/searches. Drop when
+    # the pinned server emits it.
+    "storageOrdinal",
 ]
 
 # Fields relaxed only within a specific model file. DeploymentMetadataResult
@@ -73,6 +79,12 @@ MODEL_SCOPED_OPTIONAL = {
     "model_activated_job_result.go": [
         "physicalTenantId",
     ],
+    # TEMPORARY: variable `metadata` (protection mode, camunda/camunda@1755d626)
+    # is required on main but not emitted by 8.10.0-alpha3. Scoped because
+    # `metadata` is genuinely required on cluster-variable and document models.
+    "model_variable_result.go": ["metadata"],
+    "model_variable_result_base.go": ["metadata"],
+    "model_variable_search_result.go": ["metadata"],
 }
 
 

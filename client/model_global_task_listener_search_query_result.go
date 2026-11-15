@@ -136,7 +136,6 @@ func (o *GlobalTaskListenerSearchQueryResult) UnmarshalJSON(data []byte) (err er
 	varGlobalTaskListenerSearchQueryResult := _GlobalTaskListenerSearchQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varGlobalTaskListenerSearchQueryResult)
 
 	if err != nil {

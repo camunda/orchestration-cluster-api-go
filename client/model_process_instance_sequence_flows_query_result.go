@@ -108,7 +108,6 @@ func (o *ProcessInstanceSequenceFlowsQueryResult) UnmarshalJSON(data []byte) (er
 	varProcessInstanceSequenceFlowsQueryResult := _ProcessInstanceSequenceFlowsQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessInstanceSequenceFlowsQueryResult)
 
 	if err != nil {

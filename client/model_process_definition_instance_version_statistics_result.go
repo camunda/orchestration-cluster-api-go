@@ -284,7 +284,6 @@ func (o *ProcessDefinitionInstanceVersionStatisticsResult) UnmarshalJSON(data []
 	varProcessDefinitionInstanceVersionStatisticsResult := _ProcessDefinitionInstanceVersionStatisticsResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessDefinitionInstanceVersionStatisticsResult)
 
 	if err != nil {

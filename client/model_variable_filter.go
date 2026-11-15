@@ -33,6 +33,8 @@ type VariableFilter struct {
 	ScopeKey *ScopeKeyFilterProperty `json:"scopeKey,omitempty"`
 	// The key of the process instance of this variable.
 	ProcessInstanceKey *ProcessInstanceKeyFilterProperty `json:"processInstanceKey,omitempty"`
+	// The protection modes applied to the variable.
+	ProtectionMode *ProtectionModeFilterProperty `json:"protectionMode,omitempty"`
 }
 
 // NewVariableFilter instantiates a new VariableFilter object
@@ -276,6 +278,38 @@ func (o *VariableFilter) SetProcessInstanceKey(v ProcessInstanceKeyFilterPropert
 	o.ProcessInstanceKey = &v
 }
 
+// GetProtectionMode returns the ProtectionMode field value if set, zero value otherwise.
+func (o *VariableFilter) GetProtectionMode() ProtectionModeFilterProperty {
+	if o == nil || IsNil(o.ProtectionMode) {
+		var ret ProtectionModeFilterProperty
+		return ret
+	}
+	return *o.ProtectionMode
+}
+
+// GetProtectionModeOk returns a tuple with the ProtectionMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *VariableFilter) GetProtectionModeOk() (*ProtectionModeFilterProperty, bool) {
+	if o == nil || IsNil(o.ProtectionMode) {
+		return nil, false
+	}
+	return o.ProtectionMode, true
+}
+
+// HasProtectionMode returns a boolean if a field has been set.
+func (o *VariableFilter) HasProtectionMode() bool {
+	if o != nil && !IsNil(o.ProtectionMode) {
+		return true
+	}
+
+	return false
+}
+
+// SetProtectionMode gets a reference to the given ProtectionModeFilterProperty and assigns it to the ProtectionMode field.
+func (o *VariableFilter) SetProtectionMode(v ProtectionModeFilterProperty) {
+	o.ProtectionMode = &v
+}
+
 func (o VariableFilter) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -306,6 +340,9 @@ func (o VariableFilter) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ProcessInstanceKey) {
 		toSerialize["processInstanceKey"] = o.ProcessInstanceKey
+	}
+	if !IsNil(o.ProtectionMode) {
+		toSerialize["protectionMode"] = o.ProtectionMode
 	}
 	return toSerialize, nil
 }

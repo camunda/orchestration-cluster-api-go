@@ -148,6 +148,53 @@ func TestProducerCreateOverStream(t *testing.T) {
 	}
 }
 
+// The effective tenant must ride the createInstance frame: a configured default
+// tenant the gateway never hears about would create the instance under the
+// gateway-side default while the SDK reports the configured one.
+func TestProducerCreateSendsTenant(t *testing.T) {
+	frames := make(chan map[string]any, 2)
+	eps, d := startFalconServer(t, func(ctx context.Context, c *websocket.Conn) {
+		_ = writeJSON(ctx, c, map[string]any{"type": "welcome", "submissionCredits": 5, "heartbeatMs": 15000})
+		for {
+			f, err := readJSON(ctx, c)
+			if err != nil {
+				return
+			}
+			if f["type"] == "createInstance" {
+				frames <- f
+				_ = writeJSON(ctx, c, map[string]any{
+					"type":   "commandResult",
+					"corr":   f["corr"],
+					"status": 200,
+					"body":   map[string]any{"processInstanceKey": "1", "processCompleted": false},
+				})
+			}
+		}
+	})
+
+	p, err := StartProducer(eps, d)
+	if err != nil {
+		t.Fatalf("StartProducer: %v", err)
+	}
+	defer p.Close()
+
+	if _, err := p.Create(context.Background(), CreateArgs{ProcessDefinitionID: "p", TenantID: "acme"}); err != nil {
+		t.Fatalf("Create with tenant: %v", err)
+	}
+	if got := (<-frames)["tenantId"]; got != "acme" {
+		t.Errorf("frame tenantId = %v, want %q", got, "acme")
+	}
+
+	// No tenant resolved: the frame must omit tenantId so the gateway-side
+	// default applies.
+	if _, err := p.Create(context.Background(), CreateArgs{ProcessDefinitionID: "p"}); err != nil {
+		t.Fatalf("Create without tenant: %v", err)
+	}
+	if f := <-frames; f["tenantId"] != nil {
+		t.Errorf("frame carried tenantId without a resolved tenant: %v", f["tenantId"])
+	}
+}
+
 func TestProducerCreateAwaitCompletion(t *testing.T) {
 	eps, d := startFalconServer(t, func(ctx context.Context, c *websocket.Conn) {
 		_ = writeJSON(ctx, c, map[string]any{"type": "welcome", "submissionCredits": 1})

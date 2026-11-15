@@ -136,7 +136,6 @@ func (o *GroupMappingRuleSearchResult) UnmarshalJSON(data []byte) (err error) {
 	varGroupMappingRuleSearchResult := _GroupMappingRuleSearchResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varGroupMappingRuleSearchResult)
 
 	if err != nil {

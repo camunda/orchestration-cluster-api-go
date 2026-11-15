@@ -225,7 +225,6 @@ func (o *DocumentReference) UnmarshalJSON(data []byte) (err error) {
 	varDocumentReference := _DocumentReference{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDocumentReference)
 
 	if err != nil {

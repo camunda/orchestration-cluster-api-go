@@ -255,7 +255,6 @@ func (o *ResourceResult) UnmarshalJSON(data []byte) (err error) {
 	varResourceResult := _ResourceResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varResourceResult)
 
 	if err != nil {

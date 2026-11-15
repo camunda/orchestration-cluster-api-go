@@ -375,7 +375,6 @@ func (o *CamundaUserResult) UnmarshalJSON(data []byte) (err error) {
 	varCamundaUserResult := _CamundaUserResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varCamundaUserResult)
 
 	if err != nil {

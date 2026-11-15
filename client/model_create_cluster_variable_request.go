@@ -24,7 +24,7 @@ type CreateClusterVariableRequest struct {
 	// The name of the cluster variable. Must be unique within its scope (global or tenant-specific).
 	Name ClusterVariableName `json:"name" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The value of the cluster variable. Can be any JSON object or primitive value. Will be serialized as a JSON string in responses.
-	Value map[string]interface{} `json:"value"`
+	Value interface{} `json:"value"`
 	// A generic key-value metadata bag attached to the cluster variable. Values must be strings or numbers. Limited to 100 entries and a configurable maximum serialized size (default: 100 entries at max key length of a cluster variable name (256 chars) plus the maximum value length, 8192 characters).
 	Metadata map[string]CreateClusterVariableRequestMetadataValue `json:"metadata,omitempty"`
 	// The kind of the cluster variable. Defaults to JSON if not specified.
@@ -37,7 +37,7 @@ type _CreateClusterVariableRequest CreateClusterVariableRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateClusterVariableRequest(name ClusterVariableName, value map[string]interface{}) *CreateClusterVariableRequest {
+func NewCreateClusterVariableRequest(name ClusterVariableName, value interface{}) *CreateClusterVariableRequest {
 	this := CreateClusterVariableRequest{}
 	this.Name = name
 	this.Value = value
@@ -77,9 +77,10 @@ func (o *CreateClusterVariableRequest) SetName(v ClusterVariableName) {
 }
 
 // GetValue returns the Value field value
-func (o *CreateClusterVariableRequest) GetValue() map[string]interface{} {
+// If the value is explicit nil, the zero value for interface{} will be returned
+func (o *CreateClusterVariableRequest) GetValue() interface{} {
 	if o == nil {
-		var ret map[string]interface{}
+		var ret interface{}
 		return ret
 	}
 
@@ -88,15 +89,16 @@ func (o *CreateClusterVariableRequest) GetValue() map[string]interface{} {
 
 // GetValueOk returns a tuple with the Value field value
 // and a boolean to check if the value has been set.
-func (o *CreateClusterVariableRequest) GetValueOk() (map[string]interface{}, bool) {
-	if o == nil {
-		return map[string]interface{}{}, false
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *CreateClusterVariableRequest) GetValueOk() (*interface{}, bool) {
+	if o == nil || IsNil(o.Value) {
+		return nil, false
 	}
-	return o.Value, true
+	return &o.Value, true
 }
 
 // SetValue sets field value
-func (o *CreateClusterVariableRequest) SetValue(v map[string]interface{}) {
+func (o *CreateClusterVariableRequest) SetValue(v interface{}) {
 	o.Value = v
 }
 
@@ -175,7 +177,9 @@ func (o CreateClusterVariableRequest) MarshalJSON() ([]byte, error) {
 func (o CreateClusterVariableRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
-	toSerialize["value"] = o.Value
+	if o.Value != nil {
+		toSerialize["value"] = o.Value
+	}
 	if !IsNil(o.Metadata) {
 		toSerialize["metadata"] = o.Metadata
 	}

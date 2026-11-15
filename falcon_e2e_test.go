@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"sync/atomic"
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
 	"github.com/coder/websocket"
 )
 
@@ -156,6 +157,80 @@ func TestCreateProcessInstanceRoutesOverFalcon(t *testing.T) {
 	}
 }
 
+// captureCreateFrame runs a FALCON create and returns the raw createInstance
+// frame the gateway received, so tests can assert exactly which fields were sent.
+func captureCreateFrame(t *testing.T, clientOpts []camunda.Option, instr camundaapi.ProcessInstanceCreationInstruction) map[string]any {
+	t.Helper()
+	frameCh := make(chan map[string]any, 1)
+	srv := falconGateway(t, nil, func(ctx context.Context, c *websocket.Conn) {
+		wsWriteJSON(ctx, c, map[string]any{"type": "welcome", "submissionCredits": 5, "heartbeatMs": 15000})
+		for {
+			f, err := wsReadJSON(ctx, c)
+			if err != nil {
+				return
+			}
+			if f["type"] == "createInstance" {
+				frameCh <- f
+				wsWriteJSON(ctx, c, map[string]any{
+					"type": "commandResult", "corr": f["corr"], "status": 200,
+					"body": map[string]any{"processInstanceKey": "2251799813685340"},
+				})
+			}
+		}
+	})
+	opts := append([]camunda.Option{camunda.WithRestAddress(srv.URL + "/v2"), camunda.WithFalcon(true)}, clientOpts...)
+	c, err := camunda.New(opts...)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if _, err := c.CreateProcessInstance(context.Background(), instr); err != nil {
+		t.Fatalf("CreateProcessInstance: %v", err)
+	}
+	select {
+	case f := <-frameCh:
+		return f
+	case <-time.After(5 * time.Second):
+		t.Fatal("no createInstance frame reached the gateway")
+		return nil
+	}
+}
+
+// TestCreateProcessInstanceFalconOmitsTenantWhenUnset: with neither an
+// instruction tenant nor a configured default, the create frame must leave
+// tenantId absent so the gateway applies its own default — sending the
+// "<default>" marker would pin a literal tenant.
+func TestCreateProcessInstanceFalconOmitsTenantWhenUnset(t *testing.T) {
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+		camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process")))
+	frame := captureCreateFrame(t, nil, instr)
+	if _, present := frame["tenantId"]; present {
+		t.Errorf("tenantId present in create frame (%v), want absent so the gateway defaults it", frame["tenantId"])
+	}
+}
+
+// TestCreateProcessInstanceFalconSendsConfiguredDefault: a configured default
+// tenant is sent explicitly on the create frame.
+func TestCreateProcessInstanceFalconSendsConfiguredDefault(t *testing.T) {
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
+		camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process")))
+	frame := captureCreateFrame(t, []camunda.Option{camunda.WithDefaultTenantID("acme")}, instr)
+	if got := frame["tenantId"]; got != "acme" {
+		t.Errorf("tenantId = %v, want %q", got, "acme")
+	}
+}
+
+// TestCreateProcessInstanceFalconSendsExplicitTenant: an explicit tenant on the
+// instruction always wins over the configured default.
+func TestCreateProcessInstanceFalconSendsExplicitTenant(t *testing.T) {
+	byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process"))
+	byID.SetTenantId(camundaapi.MustTenantId("explicit"))
+	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
+	frame := captureCreateFrame(t, []camunda.Option{camunda.WithDefaultTenantID("acme")}, instr)
+	if got := frame["tenantId"]; got != "explicit" {
+		t.Errorf("tenantId = %v, want %q (explicit tenant must win over the default)", got, "explicit")
+	}
+}
+
 func TestCreateProcessInstanceForceRESTBypassesFalcon(t *testing.T) {
 	var restHit atomic.Bool
 	srv := falconGateway(t, &restHit, func(ctx context.Context, c *websocket.Conn) {
@@ -175,6 +250,97 @@ func TestCreateProcessInstanceForceRESTBypassesFalcon(t *testing.T) {
 	}
 	if !restHit.Load() {
 		t.Error("expected the create to go over REST")
+	}
+}
+
+// falconCarried mirrors the creation fields the command stream forwards.
+var falconCarried = map[string]bool{
+	"ProcessDefinitionId": true, "ProcessDefinitionKey": true, "TenantId": true,
+	"Variables": true, "AwaitCompletion": true, "FetchVariables": true, "RequestTimeout": true,
+}
+
+// TestCreateProcessInstanceFalconFallsBackForUncarriedFields guards the defect
+// class: a create that sets any field the command stream cannot carry (e.g.
+// variablesMetadata, whose REDACT protection would otherwise be silently lost)
+// must go over REST. Every exported field of every variant is tried, so a field a
+// future spec adds is covered without editing this test.
+func TestCreateProcessInstanceFalconFallsBackForUncarriedFields(t *testing.T) {
+	variants := map[string]func() (any, camundaapi.ProcessInstanceCreationInstruction){
+		"ById": func() (any, camundaapi.ProcessInstanceCreationInstruction) {
+			b := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process"))
+			return b, camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(b)
+		},
+		"ByKey": func() (any, camundaapi.ProcessInstanceCreationInstruction) {
+			b := camundaapi.NewProcessInstanceCreationInstructionByKey(camundaapi.ProcessDefinitionKey("555"))
+			return b, camundaapi.ProcessInstanceCreationInstructionByKeyAsProcessInstanceCreationInstruction(b)
+		},
+	}
+	checked := 0
+	for name, build := range variants {
+		probe, _ := build()
+		typ := reflect.TypeOf(probe).Elem()
+		for i := 0; i < typ.NumField(); i++ {
+			field := typ.Field(i)
+			if !field.IsExported() || falconCarried[field.Name] {
+				continue
+			}
+			checked++
+			t.Run(name+"/"+field.Name, func(t *testing.T) {
+				variant, instr := build()
+				reflect.ValueOf(variant).Elem().Field(i).Set(nonZero(field.Type))
+
+				var restHit atomic.Bool
+				srv := falconGateway(t, &restHit, func(ctx context.Context, c *websocket.Conn) {
+					wsWriteJSON(ctx, c, map[string]any{"type": "welcome", "submissionCredits": 5, "heartbeatMs": 15000})
+					for {
+						f, err := wsReadJSON(ctx, c)
+						if err != nil {
+							return
+						}
+						if f["type"] == "createInstance" {
+							t.Errorf("create with %s set went over the command stream", field.Name)
+							// Answer it so a regression fails fast instead of hanging the create.
+							wsWriteJSON(ctx, c, map[string]any{
+								"type": "commandResult", "corr": f["corr"], "status": 200,
+								"body": map[string]any{"processInstanceKey": "1"},
+							})
+						}
+					}
+				})
+				c, err := camunda.New(camunda.WithRestAddress(srv.URL+"/v2"), camunda.WithFalcon(true))
+				if err != nil {
+					t.Fatalf("New: %v", err)
+				}
+				if _, err := c.CreateProcessInstance(context.Background(), instr); err != nil {
+					t.Fatalf("CreateProcessInstance: %v", err)
+				}
+				if !restHit.Load() {
+					t.Errorf("create with %s set must go over REST", field.Name)
+				}
+			})
+		}
+	}
+	if checked == 0 {
+		t.Fatal("no uncarried fields found; the guard would pass vacuously")
+	}
+}
+
+// nonZero returns a non-zero value of typ that is not the constructor's "latest
+// version" default (-1); JSON validity is irrelevant to routing.
+func nonZero(typ reflect.Type) reflect.Value {
+	switch typ.Kind() {
+	case reflect.Pointer:
+		return reflect.New(typ.Elem())
+	case reflect.Slice:
+		return reflect.MakeSlice(typ, 0, 0)
+	case reflect.Map:
+		return reflect.MakeMap(typ)
+	case reflect.String:
+		return reflect.ValueOf("x").Convert(typ)
+	default:
+		v := reflect.New(typ).Elem()
+		v.SetInt(1)
+		return v
 	}
 }
 

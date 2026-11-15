@@ -136,7 +136,6 @@ func (o *VariableSearchQueryResult) UnmarshalJSON(data []byte) (err error) {
 	varVariableSearchQueryResult := _VariableSearchQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varVariableSearchQueryResult)
 
 	if err != nil {

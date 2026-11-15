@@ -199,7 +199,6 @@ func (o *ClusterBalanceResponse) UnmarshalJSON(data []byte) (err error) {
 	varClusterBalanceResponse := _ClusterBalanceResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterBalanceResponse)
 
 	if err != nil {

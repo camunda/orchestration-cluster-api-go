@@ -137,7 +137,6 @@ func (o *DocumentCreationBatchResponse) UnmarshalJSON(data []byte) (err error) {
 	varDocumentCreationBatchResponse := _DocumentCreationBatchResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDocumentCreationBatchResponse)
 
 	if err != nil {

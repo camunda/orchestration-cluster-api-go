@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- An ad-hoc sub-process driven by a job worker, with two inner tasks. Each
+     completed inner flow appends to the "done" output collection.
+     PROCESS_ID, AD_HOC_ID, AD_HOC_JOB_TYPE, TASK_A_ID and TASK_B_ID are replaced
+     per test run. -->
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:zeebe="http://camunda.org/schema/zeebe/1.0"
+                  id="ad-hoc-job-worker-definitions"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="PROCESS_ID" isExecutable="true">
+    <bpmn:startEvent id="start">
+      <bpmn:outgoing>flow1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="flow1" sourceRef="start" targetRef="AD_HOC_ID" />
+    <bpmn:adHocSubProcess id="AD_HOC_ID" name="Plan">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="AD_HOC_JOB_TYPE" />
+        <zeebe:adHoc outputCollection="done" outputElement="=true" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>flow1</bpmn:incoming>
+      <bpmn:outgoing>flow2</bpmn:outgoing>
+      <bpmn:task id="TASK_A_ID" name="Task A" />
+      <bpmn:task id="TASK_B_ID" name="Task B" />
+    </bpmn:adHocSubProcess>
+    <bpmn:sequenceFlow id="flow2" sourceRef="AD_HOC_ID" targetRef="end" />
+    <bpmn:endEvent id="end">
+      <bpmn:incoming>flow2</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+</bpmn:definitions>

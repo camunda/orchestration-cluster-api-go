@@ -166,7 +166,6 @@ func (o *ProcessInstanceCallHierarchyEntry) UnmarshalJSON(data []byte) (err erro
 	varProcessInstanceCallHierarchyEntry := _ProcessInstanceCallHierarchyEntry{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessInstanceCallHierarchyEntry)
 
 	if err != nil {

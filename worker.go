@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"runtime/debug"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/internal/falcon"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/falcon"
 )
 
 // JobWorker polls for jobs of a given type and dispatches them to a handler with
@@ -206,10 +208,24 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 	return nil
 }
 
+// falconJobResultUnsupported is the failure message for a job completed with a
+// job result over the FALCON command stream.
+const falconJobResultUnsupported = "Job results (user task corrections/denial, ad-hoc sub-process results) " +
+	"cannot be sent over the FALCON command stream; set CAMUNDA_FORCE_REST=true to use the REST transport"
+
 // handleFalcon runs the handler and acknowledges the job over the command stream.
 // Each ack (complete/fail/throw) replenishes one delivery credit.
+//
+// The command stream's completeJob frame has no result field, so a completion
+// carrying a job result fails the job instead. Completing it without the result
+// would be wrong, not just lossy: it would approve a task the handler denied.
 func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, job *Job) {
-	vars, err := w.handler(ctx, job)
+	vars, err := w.client.invokeHandler(ctx, w.handler, job)
+	if err == nil && job.result != nil {
+		w.client.logger.Error("job result not sent: "+falconJobResultUnsupported, "job", job.Key())
+		sw.Fail(job.Key(), max(job.Retries()-1, 0), falconJobResultUnsupported)
+		return
+	}
 	if err != nil {
 		var bpmn *BpmnError
 		if errors.As(err, &bpmn) {
@@ -314,8 +330,45 @@ func (w *JobWorker) activate(ctx context.Context, maxJobs int) ([]camundaapi.Act
 	return jobs, nil
 }
 
+// invokeHandler runs h and converts a panic into an ordinary handler error, so
+// the caller's existing fail path applies.
+//
+// A job handler runs on its own goroutine, and in Go an unrecovered panic on any
+// goroutine terminates the whole process. Without this, one handler that writes
+// to a nil map, indexes out of range, or asserts the wrong type on a job
+// variable takes down the host application — and because the job is never
+// acknowledged, it also sits unavailable until its timeout expires instead of
+// being retried promptly. Recovering turns that into one failed job.
+//
+// The panic value and its stack go to the SDK log at error level, where a
+// crashing process would have printed them anyway. They are kept out of the
+// returned error, because that message is sent to the cluster as the incident's
+// error message, where it is both widely visible and durable, and a panic value
+// can carry job-variable content (see camunda/sdk-infra#89).
+func (c *CamundaClient) invokeHandler(ctx context.Context, h JobHandler, job *Job) (vars map[string]any, err error) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			return
+		}
+		// Every attacker-influenceable field is quoted, not just the stack. The
+		// logger writes field values verbatim and one record per line, so a
+		// newline in a panic value — which may be job-variable content — would
+		// otherwise let a handler forge log records. %q escapes newlines and
+		// other control characters while keeping the detail readable.
+		c.logger.Error("job handler panicked; failing the job",
+			"job", fmt.Sprintf("%q", job.Key()),
+			"type", fmt.Sprintf("%q", job.Type()),
+			"panic", fmt.Sprintf("%q", fmt.Sprintf("%v", r)),
+			"stack", fmt.Sprintf("%q", debug.Stack()))
+		// Discard anything the handler returned before panicking.
+		vars, err = nil, ErrHandlerPanic
+	}()
+	return h(ctx, job)
+}
+
 func (w *JobWorker) handle(ctx context.Context, job *Job) {
-	vars, err := w.handler(ctx, job)
+	vars, err := w.client.invokeHandler(ctx, w.handler, job)
 
 	// Acknowledge the job even while the worker is shutting down: a handler that
 	// already did its work must not have its result dropped because Run's ctx was
@@ -330,6 +383,10 @@ func (w *JobWorker) handle(ctx context.Context, job *Job) {
 // on the handler outcome. It is used by the REST JobWorker and by the gRPC stream
 // worker's REST sidecar poll (poll-activated jobs are acknowledged over REST).
 func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]any, handlerErr error) {
+	var result *JobResult
+	if handlerErr == nil {
+		result, handlerErr = completionResult(job, vars)
+	}
 	if handlerErr != nil {
 		var bpmn *BpmnError
 		if errors.As(handlerErr, &bpmn) {
@@ -339,13 +396,18 @@ func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]a
 		}
 		return
 	}
-	c.restCompleteJob(ctx, job, vars)
+	c.restCompleteJob(ctx, job, vars, result)
 }
 
-func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any) {
+// restCompleteJob completes a job over REST. result must already have been passed
+// through completionResult, or be nil.
+func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any, result *JobResult) {
 	req := camundaapi.NewJobCompletionRequest()
 	if len(vars) > 0 {
 		req.SetVariables(vars)
+	}
+	if result != nil {
+		req.SetResult(*result)
 	}
 	if job.leaseToken != "" {
 		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))

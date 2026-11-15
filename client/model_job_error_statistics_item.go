@@ -166,7 +166,6 @@ func (o *JobErrorStatisticsItem) UnmarshalJSON(data []byte) (err error) {
 	varJobErrorStatisticsItem := _JobErrorStatisticsItem{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varJobErrorStatisticsItem)
 
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
 )
 
 // countingClock records every wait and returns immediately, so a test observes the

@@ -224,7 +224,6 @@ func (o *ProcessElementStatisticsResult) UnmarshalJSON(data []byte) (err error) 
 	varProcessElementStatisticsResult := _ProcessElementStatisticsResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessElementStatisticsResult)
 
 	if err != nil {

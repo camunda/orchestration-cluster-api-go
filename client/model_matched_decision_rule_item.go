@@ -166,7 +166,6 @@ func (o *MatchedDecisionRuleItem) UnmarshalJSON(data []byte) (err error) {
 	varMatchedDecisionRuleItem := _MatchedDecisionRuleItem{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varMatchedDecisionRuleItem)
 
 	if err != nil {

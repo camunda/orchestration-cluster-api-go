@@ -284,7 +284,6 @@ func (o *TopologyResponse) UnmarshalJSON(data []byte) (err error) {
 	varTopologyResponse := _TopologyResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varTopologyResponse)
 
 	if err != nil {

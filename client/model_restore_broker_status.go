@@ -195,7 +195,6 @@ func (o *RestoreBrokerStatus) UnmarshalJSON(data []byte) (err error) {
 	varRestoreBrokerStatus := _RestoreBrokerStatus{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varRestoreBrokerStatus)
 
 	if err != nil {

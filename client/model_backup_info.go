@@ -197,7 +197,6 @@ func (o *BackupInfo) UnmarshalJSON(data []byte) (err error) {
 	varBackupInfo := _BackupInfo{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varBackupInfo)
 
 	if err != nil {

@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
-	"github.com/camunda/orchestration-cluster-api-go/internal/auth"
-	"github.com/camunda/orchestration-cluster-api-go/pb"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/auth"
+	"github.com/camunda/orchestration-cluster-api-go/v11/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -71,8 +71,9 @@ func (c *CamundaClient) grpcConn() (*grpc.ClientConn, error) {
 }
 
 // StreamJobWorker activates jobs over the Zeebe gRPC StreamActivatedJobs stream
-// and completes, fails, or throws BPMN errors over gRPC. Unlike the REST
-// JobWorker it does not poll: the engine pushes jobs as they become available.
+// and completes (with any job result, see CompletionHandler), fails, or throws
+// BPMN errors over gRPC. Unlike the REST JobWorker it does not poll: the engine
+// pushes jobs as they become available.
 type StreamJobWorker struct {
 	client           *CamundaClient
 	jobType          string
@@ -330,7 +331,7 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 			go func() {
 				defer wg.Done()
 				defer func() { <-sem }()
-				vars, herr := w.handler(ctx, job)
+				vars, herr := w.client.invokeHandler(ctx, w.handler, job)
 				ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 				defer cancel()
 				w.client.restAck(ackCtx, job, vars, herr)
@@ -371,13 +372,20 @@ func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]camundaapi.ActivatedJ
 }
 
 func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *Job) {
-	vars, err := w.handler(ctx, job)
+	vars, err := w.client.invokeHandler(ctx, w.handler, job)
 
 	// Acknowledge even while shutting down so a completed handler's result is not
 	// dropped because Run's ctx was canceled. Bound the ack with its own timeout.
 	ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 	defer cancel()
 
+	var result *pb.JobResult
+	if err == nil {
+		var r *JobResult
+		if r, err = completionResult(job, vars); err == nil {
+			result, err = grpcJobResult(r)
+		}
+	}
 	if err != nil {
 		var bpmn *BpmnError
 		if errors.As(err, &bpmn) {
@@ -387,10 +395,10 @@ func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *
 		}
 		return
 	}
-	w.completeJob(ackCtx, gw, job, vars)
+	w.completeJob(ackCtx, gw, job, vars, result)
 }
 
-func (w *StreamJobWorker) completeJob(ctx context.Context, gw pb.GatewayClient, job *Job, vars map[string]any) {
+func (w *StreamJobWorker) completeJob(ctx context.Context, gw pb.GatewayClient, job *Job, vars map[string]any, result *pb.JobResult) {
 	key, err := strconv.ParseInt(job.key, 10, 64)
 	if err != nil {
 		w.client.logger.Error("complete job failed: invalid key", "job", job.key, "error", err)
@@ -402,6 +410,7 @@ func (w *StreamJobWorker) completeJob(ctx context.Context, gw pb.GatewayClient, 
 			req.Variables = string(b)
 		}
 	}
+	req.Result = result
 	if job.leaseToken != "" {
 		req.JobLeaseToken = &job.leaseToken
 	}

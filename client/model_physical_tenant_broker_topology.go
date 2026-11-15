@@ -137,7 +137,6 @@ func (o *PhysicalTenantBrokerTopology) UnmarshalJSON(data []byte) (err error) {
 	varPhysicalTenantBrokerTopology := _PhysicalTenantBrokerTopology{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varPhysicalTenantBrokerTopology)
 
 	if err != nil {

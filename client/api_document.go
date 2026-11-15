@@ -167,6 +167,17 @@ func (a *DocumentAPIService) CreateDocumentExecute(r ApiCreateDocumentRequest) (
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 415 {
 			var v ProblemDetail
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
@@ -196,9 +207,14 @@ type ApiCreateDocumentLinkRequest struct {
 	ctx                 context.Context
 	ApiService          *DocumentAPIService
 	documentId          string
+	documentLinkRequest *DocumentLinkRequest
 	storeId             *string
 	contentHash         *string
-	documentLinkRequest *DocumentLinkRequest
+}
+
+func (r ApiCreateDocumentLinkRequest) DocumentLinkRequest(documentLinkRequest DocumentLinkRequest) ApiCreateDocumentLinkRequest {
+	r.documentLinkRequest = &documentLinkRequest
+	return r
 }
 
 // The ID of the document store where the document is located.
@@ -210,11 +226,6 @@ func (r ApiCreateDocumentLinkRequest) StoreId(storeId string) ApiCreateDocumentL
 // The hash of the document content that was computed by the document store during upload. The hash is part of the document reference that is returned when uploading a document. If the client fails to provide the correct hash, the request will be rejected.
 func (r ApiCreateDocumentLinkRequest) ContentHash(contentHash string) ApiCreateDocumentLinkRequest {
 	r.contentHash = &contentHash
-	return r
-}
-
-func (r ApiCreateDocumentLinkRequest) DocumentLinkRequest(documentLinkRequest DocumentLinkRequest) ApiCreateDocumentLinkRequest {
-	r.documentLinkRequest = &documentLinkRequest
 	return r
 }
 
@@ -263,6 +274,9 @@ func (a *DocumentAPIService) CreateDocumentLinkExecute(r ApiCreateDocumentLinkRe
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if r.documentLinkRequest == nil {
+		return localVarReturnValue, nil, reportError("documentLinkRequest is required and must be specified")
+	}
 
 	if r.storeId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "storeId", r.storeId, "form", "")
@@ -280,7 +294,7 @@ func (a *DocumentAPIService) CreateDocumentLinkExecute(r ApiCreateDocumentLinkRe
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -310,6 +324,16 @@ func (a *DocumentAPIService) CreateDocumentLinkExecute(r ApiCreateDocumentLinkRe
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -426,7 +450,7 @@ func (a *DocumentAPIService) CreateDocumentsExecute(r ApiCreateDocumentsRequest)
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -475,6 +499,27 @@ func (a *DocumentAPIService) CreateDocumentsExecute(r ApiCreateDocumentsRequest)
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 415 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -599,6 +644,16 @@ func (a *DocumentAPIService) DeleteDocumentExecute(r ApiDeleteDocumentRequest) (
 			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 			newErr.model = v
 			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
 		}
 		return localVarHTTPResponse, newErr
 	}
@@ -728,6 +783,16 @@ func (a *DocumentAPIService) GetDocumentExecute(r ApiGetDocumentRequest) (*os.Fi
 			newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -742,3 +807,41 @@ func (a *DocumentAPIService) GetDocumentExecute(r ApiGetDocumentRequest) (*os.Fi
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetFile returns the file field value, or nil when unset.
+func (r ApiCreateDocumentRequest) GetFile() *os.File { return r.file }
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiCreateDocumentRequest) GetStoreId() *string { return r.storeId }
+
+// GetDocumentId returns the documentId field value, or nil when unset.
+func (r ApiCreateDocumentRequest) GetDocumentId() *string { return r.documentId }
+
+// GetMetadata returns the metadata field value, or nil when unset.
+func (r ApiCreateDocumentRequest) GetMetadata() *DocumentMetadata { return r.metadata }
+
+// GetDocumentLinkRequest returns the documentLinkRequest field value, or nil when unset.
+func (r ApiCreateDocumentLinkRequest) GetDocumentLinkRequest() *DocumentLinkRequest {
+	return r.documentLinkRequest
+}
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiCreateDocumentLinkRequest) GetStoreId() *string { return r.storeId }
+
+// GetContentHash returns the contentHash field value, or nil when unset.
+func (r ApiCreateDocumentLinkRequest) GetContentHash() *string { return r.contentHash }
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiCreateDocumentsRequest) GetStoreId() *string { return r.storeId }
+
+// GetMetadataList returns the metadataList field value, or nil when unset.
+func (r ApiCreateDocumentsRequest) GetMetadataList() *[]DocumentMetadata { return r.metadataList }
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiDeleteDocumentRequest) GetStoreId() *string { return r.storeId }
+
+// GetStoreId returns the storeId field value, or nil when unset.
+func (r ApiGetDocumentRequest) GetStoreId() *string { return r.storeId }
+
+// GetContentHash returns the contentHash field value, or nil when unset.
+func (r ApiGetDocumentRequest) GetContentHash() *string { return r.contentHash }

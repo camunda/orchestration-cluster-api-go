@@ -136,7 +136,6 @@ func (o *DecisionInstanceSearchQueryResult) UnmarshalJSON(data []byte) (err erro
 	varDecisionInstanceSearchQueryResult := _DecisionInstanceSearchQueryResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varDecisionInstanceSearchQueryResult)
 
 	if err != nil {

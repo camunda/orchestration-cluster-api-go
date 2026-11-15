@@ -137,7 +137,6 @@ func (o *ClusterRestoreResponse) UnmarshalJSON(data []byte) (err error) {
 	varClusterRestoreResponse := _ClusterRestoreResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterRestoreResponse)
 
 	if err != nil {

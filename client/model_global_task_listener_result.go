@@ -321,7 +321,6 @@ func (o *GlobalTaskListenerResult) UnmarshalJSON(data []byte) (err error) {
 	varGlobalTaskListenerResult := _GlobalTaskListenerResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varGlobalTaskListenerResult)
 
 	if err != nil {

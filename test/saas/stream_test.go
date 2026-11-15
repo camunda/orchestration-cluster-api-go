@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go"
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/client"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
 )
 
 // reconnectLogLine is what StreamJobWorker.Run logs, at Warn, each time the stream

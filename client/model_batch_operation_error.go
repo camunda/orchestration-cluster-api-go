@@ -166,7 +166,6 @@ func (o *BatchOperationError) UnmarshalJSON(data []byte) (err error) {
 	varBatchOperationError := _BatchOperationError{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varBatchOperationError)
 
 	if err != nil {

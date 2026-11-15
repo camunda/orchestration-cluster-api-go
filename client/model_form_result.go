@@ -224,7 +224,6 @@ func (o *FormResult) UnmarshalJSON(data []byte) (err error) {
 	varFormResult := _FormResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varFormResult)
 
 	if err != nil {

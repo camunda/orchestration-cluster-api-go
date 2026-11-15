@@ -225,7 +225,6 @@ func (o *ClusterCompletedRebalance) UnmarshalJSON(data []byte) (err error) {
 	varClusterCompletedRebalance := _ClusterCompletedRebalance{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varClusterCompletedRebalance)
 
 	if err != nil {

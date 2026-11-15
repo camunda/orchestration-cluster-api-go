@@ -137,7 +137,6 @@ func (o *ProcessInstanceReference) UnmarshalJSON(data []byte) (err error) {
 	varProcessInstanceReference := _ProcessInstanceReference{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varProcessInstanceReference)
 
 	if err != nil {

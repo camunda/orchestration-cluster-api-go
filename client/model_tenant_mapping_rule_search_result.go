@@ -136,7 +136,6 @@ func (o *TenantMappingRuleSearchResult) UnmarshalJSON(data []byte) (err error) {
 	varTenantMappingRuleSearchResult := _TenantMappingRuleSearchResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varTenantMappingRuleSearchResult)
 
 	if err != nil {

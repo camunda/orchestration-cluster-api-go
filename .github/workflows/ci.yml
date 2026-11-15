@@ -81,7 +81,7 @@ jobs:
           cache: true
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.15"
       # The README code blocks are injected from examples/readme.go; building the
       # examples type-checks them, and --check fails if the README drifted.
       - name: Build examples
@@ -101,6 +101,16 @@ jobs:
     # before/after range is degenerate, so scope it to PRs.
     if: github.event_name == 'pull_request'
     uses: camunda/sdk-infra/.github/workflows/sdk-commitlint.yml@v1
+
+  # A `BREAKING CHANGE:` footer makes semantic-release cut a new major, which the
+  # module path (`/vN`) cannot follow, so every later release on the branch would
+  # fail. Bypass with the `breaking-change-approved` label.
+  breaking-change-guard:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: camunda/sdk-infra/.github/workflows/sdk-breaking-change-guard.yml@v1
 
   integration:
     name: Integration tests
@@ -158,7 +168,7 @@ jobs:
           java-version: 21
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.15"
       - name: Refresh upstream inputs
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |

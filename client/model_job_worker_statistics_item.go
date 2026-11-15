@@ -192,7 +192,6 @@ func (o *JobWorkerStatisticsItem) UnmarshalJSON(data []byte) (err error) {
 	varJobWorkerStatisticsItem := _JobWorkerStatisticsItem{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
 	err = decoder.Decode(&varJobWorkerStatisticsItem)
 
 	if err != nil {

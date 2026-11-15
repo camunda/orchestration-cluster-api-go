@@ -2,10 +2,57 @@
 
 package camundaapi
 
-// *ExactMatch union branches are exact-value matches on a semantic key. Each is
-// an alias to its base key type (hook 01) so the generated union structs compile
-// and (un)marshal as the underlying scalar.
+// *ExactMatch union branches are exact-value matches on a key or enum. Each is
+// an alias to its base type so the generated union structs compile and
+// (un)marshal as the underlying scalar.
+type AgentDefinitionKeyExactMatch = AgentDefinitionKey
+type AgentDefinitionTypeExactMatch = AgentDefinitionTypeEnum
+type AgentHistoryItemKeyExactMatch = AgentHistoryItemKey
+type AgentInstanceHistoryCommitStatusExactMatch = AgentInstanceHistoryCommitStatusEnum
+type AgentInstanceHistoryRoleExactMatch = AgentInstanceHistoryRoleEnum
+type AgentInstanceKeyExactMatch = AgentInstanceKey
+type AgentInstanceStatusExactMatch = AgentInstanceStatusEnum
+type AuditLogActorTypeExactMatch = AuditLogActorTypeEnum
 type AuditLogEntityKeyExactMatch = AuditLogEntityKey
+type AuditLogKeyExactMatch = AuditLogKey
+type AuditLogResultExactMatch = AuditLogResultEnum
+type BatchOperationItemStateExactMatch = BatchOperationItemStateEnum
+type BatchOperationStateExactMatch = BatchOperationStateEnum
+type BatchOperationTypeExactMatch = BatchOperationTypeEnum
+type CategoryExactMatch = AuditLogCategoryEnum
+type ClusterVariableKindExactMatch = ClusterVariableKindEnum
+type ClusterVariableScopeExactMatch = ClusterVariableScopeEnum
+type DecisionDefinitionKeyExactMatch = DecisionDefinitionKey
 type DecisionEvaluationInstanceKeyExactMatch = DecisionEvaluationInstanceKey
+type DecisionEvaluationKeyExactMatch = DecisionEvaluationKey
+type DecisionInstanceStateExactMatch = DecisionInstanceStateEnum
+type DecisionRequirementsKeyExactMatch = DecisionRequirementsKey
+type DeploymentKeyExactMatch = DeploymentKey
 type ElementIdExactMatch = ElementId
+type ElementInstanceKeyExactMatch = ElementInstanceKey
+type ElementInstanceStateExactMatch = ElementInstanceStateEnum
+type EntityTypeExactMatch = AuditLogEntityTypeEnum
+type FormKeyExactMatch = FormKey
+type GlobalListenerSourceExactMatch = GlobalListenerSourceEnum
+type GlobalTaskListenerEventTypeExactMatch = GlobalTaskListenerEventTypeEnum
+type IncidentErrorTypeExactMatch = IncidentErrorTypeEnum
+type IncidentStateExactMatch = IncidentStateEnum
+type JobKeyExactMatch = JobKey
+type JobKindExactMatch = JobKindEnum
+type JobListenerEventTypeExactMatch = JobListenerEventTypeEnum
+type JobStateExactMatch = JobStateEnum
+type MessageSubscriptionKeyExactMatch = MessageSubscriptionKey
+type MessageSubscriptionStateExactMatch = MessageSubscriptionStateEnum
+type MessageSubscriptionTypeExactMatch = MessageSubscriptionTypeEnum
+type OperationTypeExactMatch = AuditLogOperationTypeEnum
 type ProcessDefinitionIdExactMatch = ProcessDefinitionId
+type ProcessDefinitionKeyExactMatch = ProcessDefinitionKey
+type ProcessInstanceKeyExactMatch = ProcessInstanceKey
+type ProcessInstanceStateExactMatch = ProcessInstanceStateEnum
+type ProtectionModeExactMatch = ProtectionModeEnum
+type ResourceKeyExactMatch = ResourceKey
+type ScopeKeyExactMatch = ScopeKey
+type UserTaskStateExactMatch = UserTaskStateEnum
+type VariableKeyExactMatch = VariableKey
+type WaitStateElementTypeExactMatch = WaitStateElementTypeEnum
+type WaitStateTypeExactMatch = WaitStateTypeEnum
