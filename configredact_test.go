@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/camunda/orchestration-cluster-api-go/v11/internal/diag"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/diag"
 )
 
 // cfgSentinel values are distinctive so a leak into formatted output is
