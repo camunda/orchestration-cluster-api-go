@@ -1,3 +1,15 @@
+## [10.0.5](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.4...v10.0.5) (2026-11-15)
+
+
+### Bug Fixes
+
+* **auth:** stop echoing the token-endpoint response body in errors ([#143](https://github.com/camunda/orchestration-cluster-api-go/issues/143)) ([#174](https://github.com/camunda/orchestration-cluster-api-go/issues/174)) ([455dc2a](https://github.com/camunda/orchestration-cluster-api-go/commit/455dc2a5916bad8907a9570f89a9197fe63f82ab)), closes [camunda/sdk-infra#88](https://github.com/camunda/sdk-infra/issues/88)
+* **auth:** write the oauth token cache atomically with owner-only permissions ([#145](https://github.com/camunda/orchestration-cluster-api-go/issues/145)) ([#176](https://github.com/camunda/orchestration-cluster-api-go/issues/176)) ([6121865](https://github.com/camunda/orchestration-cluster-api-go/commit/61218652576d02efa93335b080197f1404800f3b)), closes [camunda/sdk-infra#88](https://github.com/camunda/sdk-infra/issues/88)
+* **config:** redact credentials in Config and TLSConfig formatting (backport ([#171](https://github.com/camunda/orchestration-cluster-api-go/issues/171)) ([f882dbd](https://github.com/camunda/orchestration-cluster-api-go/commit/f882dbdcdc790c1393dfb4ddfed43d076c29919f)), closes [#144](https://github.com/camunda/orchestration-cluster-api-go/issues/144) [camunda/sdk-infra#88](https://github.com/camunda/sdk-infra/issues/88) [#v](https://github.com/camunda/orchestration-cluster-api-go/issues/v)
+* **diag:** drive environment snapshot redaction from ConfigSchema secrets (backport ([#173](https://github.com/camunda/orchestration-cluster-api-go/issues/173)) ([2693884](https://github.com/camunda/orchestration-cluster-api-go/commit/26938841a0cb733ab7eaed077abd16f5aa1337bc)), closes [#151](https://github.com/camunda/orchestration-cluster-api-go/issues/151) [#150](https://github.com/camunda/orchestration-cluster-api-go/issues/150) [#144](https://github.com/camunda/orchestration-cluster-api-go/issues/144)
+* **job:** never return a nil map from RawVariables or CustomHeaders (backport ([#172](https://github.com/camunda/orchestration-cluster-api-go/issues/172)) ([e766a14](https://github.com/camunda/orchestration-cluster-api-go/commit/e766a14c805881b9207b119e964ac96669c5460a)), closes [#152](https://github.com/camunda/orchestration-cluster-api-go/issues/152) [#147](https://github.com/camunda/orchestration-cluster-api-go/issues/147)
+* **worker:** recover a panicking job handler and fail the job ([#149](https://github.com/camunda/orchestration-cluster-api-go/issues/149)) ([#175](https://github.com/camunda/orchestration-cluster-api-go/issues/175)) ([003fa97](https://github.com/camunda/orchestration-cluster-api-go/commit/003fa9788d0b24667ca59983c202271c4d288b29))
+
 ## [10.0.4](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.3...v10.0.4) (2026-11-14)
 
 
