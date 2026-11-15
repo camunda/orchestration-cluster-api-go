@@ -42,6 +42,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -196,7 +197,7 @@ func (ts *TokenSource) fetch(ctx context.Context, now time.Time) (string, time.T
 
 	var tr tokenResponse
 	if err := json.Unmarshal(body, &tr); err != nil {
-		return "", time.Time{}, fmt.Errorf("decoding token response: %w", err)
+		return "", time.Time{}, decodeError(err)
 	}
 	if tr.AccessToken == "" {
 		return "", time.Time{}, fmt.Errorf("token endpoint returned an empty access_token")
@@ -386,4 +387,22 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		// no-op
 	}
 	return t.base().RoundTrip(r)
+}
+
+// decodeError describes a token-response decoding failure without the
+// response content. encoding/json quotes body content in its errors (the
+// offending value of a wrongly-typed field, the unexpected character of a
+// syntax error), and this error is logged by the job worker on every poll, so
+// only what does not come from the body is kept: the field, its expected type
+// and the byte offset.
+func decodeError(err error) error {
+	var typeErr *json.UnmarshalTypeError
+	if errors.As(err, &typeErr) {
+		return fmt.Errorf("decoding token response: field %q is not a valid %s (offset %d)", typeErr.Field, typeErr.Type, typeErr.Offset)
+	}
+	var syntaxErr *json.SyntaxError
+	if errors.As(err, &syntaxErr) {
+		return fmt.Errorf("decoding token response: invalid JSON at offset %d", syntaxErr.Offset)
+	}
+	return errors.New("decoding token response: malformed response")
 }
