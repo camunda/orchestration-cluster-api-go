@@ -3,8 +3,8 @@ package camunda
 import (
 	"testing"
 
-	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
-	"github.com/camunda/orchestration-cluster-api-go/v11/pb"
+	camundaapi "github.com/camunda/orchestration-cluster-api-go/v10/client"
+	"github.com/camunda/orchestration-cluster-api-go/v10/pb"
 )
 
 // TestJobMapsAreNeverNil pins the contract that RawVariables() and CustomHeaders()
