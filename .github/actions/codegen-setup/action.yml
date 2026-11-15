@@ -1,0 +1,11 @@
+# Toolchain that sdk-backport.yml's setup-sdk-toolchain (language: go) lacks:
+# Java for openapi-generator. Read from the backport's TARGET branch.
+name: Codegen setup
+description: Install Java for openapi-generator.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@v5
+      with:
+        distribution: temurin
+        java-version: 21

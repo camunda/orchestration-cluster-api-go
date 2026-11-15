@@ -125,16 +125,16 @@ review-comment fix-ups and regeneration commits.
 
 ## Backporting to stable branches
 
-`.github/workflows/backport.yml` (`korthout/backport-action`, running as
-`camunda-sdk-automation`; ported from orchestration-cluster-api-js) opens cherry-pick PRs
-onto `stable/*` branches:
+`.github/workflows/backport.yml` calls camunda/sdk-infra's shared `sdk-backport.yml`
+(`korthout/backport-action`, running as `camunda-sdk-automation`; the same flow as the other
+SDKs). It is configured by `.github/backport.yml` and `.github/actions/codegen-setup`, both
+read from the **target** branch, so keep them on `main` and on every live `stable/N`. It
+opens cherry-pick PRs onto `stable/*` branches:
 
 - Add the label `backport stable/<N>` to a PR. The backport PR opens when the PR merges,
   or right away if it is already merged.
-- Or comment `/backport` on a merged PR to re-run it for its labels.
-- If the cherry-pick conflicts, the action opens a **draft** PR with the conflicts
-  committed. It stops at the first conflicting commit, so for a PR merged with a merge
-  commit the draft can be a **partial** backport.
+- Or comment `/backport` on a merged PR to re-run it for its labels. PRs from forks can
+  only be backported this way.
 - Labelling an already-merged PR and `/backport` comments only work for people with write
   access.
 
@@ -143,38 +143,33 @@ Backport hand-written runtime, infra and generator changes (root package, `inter
 generated output on its own (e.g. `chore(gen): regenerate for upstream spec drift`); each
 branch regenerates from its own upstream spec.
 
-**Generated code and the spec.** We commit files derived from the upstream spec:
-`external-spec/`, `client/`, `pb/` and the root `*_generated.go` files. PRs are
-squash-merged, so the cherry-picked commit carries `main`'s copies of all of them, even when
-the PR kept its generator and `chore(gen)` commits separate. On a stable branch they must
-come from that branch's own `SPEC_REF` (`stable/10` builds camunda `stable/8.10`).
+On each backport branch the workflow adds up to two commits after the cherry-pick:
 
-The workflow handles this. After creating each backport PR it restores those paths from the
-target branch, runs `./scripts/generate.sh` (as CI's Generation drift job does), and pushes
-any result as a separate `chore(gen): regenerate for backport of #N` commit. This also
-clears cherry-pick conflicts in those files.
+1. `chore: adapt backport of #N to stable/<N>`: the `post-cherry-pick` command rewrites
+   the module path in the backported hand-written `.go`/`.md` files (`main` is `/v11`,
+   `stable/10` is `/v10`). Don't fix imports by hand.
+2. `chore(gen): regenerate for backport of #N`: the derived files (`generated-paths`:
+   `external-spec/bundled`, `external-spec/proto`, `client/`, `pb/`, the root
+   `*_generated.go`) are restored from the target branch and regenerated with
+   `./scripts/generate.sh && go vet ./...`. PRs are squash-merged, so the cherry-pick
+   carries `main`'s copies, but a stable branch must build from its own `SPEC_REF`
+   (`stable/10` builds camunda `stable/8.10`). This also clears cherry-pick conflicts in
+   those files. When the derived paths change, update `generated-paths` on every branch.
 
-Regeneration runs code from the backport branch, which anyone with write access can change,
-so it is split across two jobs. `regenerate` runs `generate.sh` with only a read-only
-`GITHUB_TOKEN` (no App token, no Vault OIDC, no caches) and uploads the result as a patch.
-`push` mints the App token, never executes branch code, and applies the patch only if
-every changed path passes `scripts/check-derived-paths.sh` (the allowlist of derived
-paths, run from the workflow's own commit; fails closed). It pushes only while the branch
-head is the one that was regenerated. When the derived paths change, update that script
-(its self-test, `scripts/check-derived-paths.test.sh`, runs in CI).
+The generator runs in a job with a read-only token; a separate job pushes the commits only
+if the adapt commit touches nothing but backported hand-written files and the
+regeneration commit nothing but `generated-paths`.
 
-If that step fails, the bot comments on the backport PR. Causes:
+If the cherry-pick conflicts, the action opens a **draft** PR with the conflicts committed,
+and the workflow renames that commit to the source PR's title so it passes commitlint. It
+stops at the first conflicting commit, so for a PR merged with a merge commit the draft can
+be a **partial** backport. Resolve the conflicts on the backport branch, then comment
+`/backport` on the source PR to adapt and regenerate it.
 
-- **Conflicts in hand-written code.** Resolve them on the backport branch first, then
-  repeat the step yourself: `git restore --source=origin/stable/<N> --staged --worktree --
-  external-spec client pb facade_generated.go reexport_generated.go consistency_generated.go
-  presentwhen_generated.go`, run `./scripts/generate.sh`, and commit the output separately.
-- **The change depends on spec the stable branch doesn't have** (e.g. it wraps an
-  operation that only exists upstream on `main`, so the build fails). It can't be
-  backported as-is: close the backport PR, or reduce it to what applies to the stable spec.
-- **The patch touched non-generated paths, or the branch moved** while it regenerated.
-  Fix the generator output or comment `/backport` again on the source PR.
-
+If adapting or regenerating fails, the bot comments on the backport PR. If the change
+depends on spec the stable branch doesn't have (e.g. it wraps an operation that only
+exists upstream on `main`, so the build fails), it can't be backported as-is: close the
+backport PR, or reduce it to what applies to the stable spec.
 ## Versioning
 
 Releases are automatic. On every push to `main` or `stable/**`, `release.yml` runs the
