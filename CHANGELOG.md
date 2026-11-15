@@ -1,3 +1,11 @@
+## [10.0.6](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.5...v10.0.6) (2026-11-15)
+
+
+### Bug Fixes
+
+* **auth:** keep token-response content out of decoding errors ([#178](https://github.com/camunda/orchestration-cluster-api-go/issues/178)) ([#185](https://github.com/camunda/orchestration-cluster-api-go/issues/185)) ([dbab815](https://github.com/camunda/orchestration-cluster-api-go/commit/dbab8150d1b158f8407d75dd133d1a0f5b4acf67)), closes [#143](https://github.com/camunda/orchestration-cluster-api-go/issues/143) [#174](https://github.com/camunda/orchestration-cluster-api-go/issues/174)
+* **config:** render HTTPClient by type in Config formatting ([#177](https://github.com/camunda/orchestration-cluster-api-go/issues/177)) ([#184](https://github.com/camunda/orchestration-cluster-api-go/issues/184)) ([446261c](https://github.com/camunda/orchestration-cluster-api-go/commit/446261cbe1a671606de913791a026b84dfc27903)), closes [#171](https://github.com/camunda/orchestration-cluster-api-go/issues/171)
+
 ## [10.0.5](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.4...v10.0.5) (2026-11-15)
 
 
