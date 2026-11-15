@@ -1,0 +1,32 @@
+# Backport configuration for camunda/sdk-infra's sdk-backport.yml
+# (schema: https://github.com/camunda/sdk-infra/blob/main/schema/backport.schema.json).
+# Read from the TARGET branch: keep a copy on main and on every live stable/N.
+language: go
+
+# Files derived from the upstream spec or the generator. Restored from the target
+# branch and regenerated there. Keep in sync with GOFMT_TARGETS in scripts/generate.sh.
+generated-paths:
+  - external-spec/bundled
+  - external-spec/proto
+  - client
+  - pb
+  - facade_generated.go
+  - reexport_generated.go
+  - consistency_generated.go
+  - presentwhen_generated.go
+
+# Regenerates from the committed spec (no refetch). go vet compiles the tests too,
+# so a backport that breaks only test files fails here rather than in CI.
+regenerate: ./scripts/generate.sh && go vet ./...
+
+# main and stable/N carry different SDK majors in the module path (/v11 vs /v10).
+# Rewrite the source PR's module path to this branch's in the hand-written files
+# the backport changes.
+post-cherry-pick: |
+  src=$(git show "${BACKPORT_SOURCE_COMMIT}:go.mod" | awk '$1 == "module" {print $2; exit}')
+  dst=$(awk '$1 == "module" {print $2; exit}' go.mod)
+  [ "$src" = "$dst" ] && exit 0
+  while IFS= read -r -d '' f; do
+    [ -f "$f" ] || continue   # deleted, or a rename's old path
+    case "$f" in *.go|*.md) SRC="$src" DST="$dst" perl -pi -e 's{\Q$ENV{SRC}\E(?=["/`\s])}{$ENV{DST}}g' -- "$f" || exit 1 ;; esac
+  done < "$BACKPORT_CHANGED_FILES"
