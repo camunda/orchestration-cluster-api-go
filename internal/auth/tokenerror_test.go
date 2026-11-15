@@ -20,6 +20,10 @@ const sentinelSecret = "CAMUNDA-SENTINEL-DO-NOT-LOG-9f3a"
 // treats the whole body as potentially credential-bearing.
 const sentinelBody = "CAMUNDA-SENTINEL-RESPONSE-BODY-4c71"
 
+// sentinelNumber is a recognisable numeric response value, for the branches
+// where the body can only carry a number into an error. It overflows int64.
+const sentinelNumber = "73190482651730948265"
+
 // TestTokenFetchErrorsDoNotEchoResponseBody covers the defect class rather than
 // the single reported instance: *no* failure branch of TokenSource.fetch may put
 // token-endpoint response content, or the configured client secret, into the
@@ -63,6 +67,22 @@ func TestTokenFetchErrorsDoNotEchoResponseBody(t *testing.T) {
 			},
 		},
 		{
+			// A wrongly-typed field makes encoding/json quote the offending value
+			// in its error, so this reaches body content a syntax error does not.
+			name: "2xx with an overflowing expires_in",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, `{"access_token":"tok","expires_in":`+sentinelNumber+`}`)
+			},
+		},
+		{
+			name: "2xx with a wrongly-typed access_token",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, `{"access_token":`+sentinelNumber+`}`)
+			},
+		},
+		{
 			name: "2xx with an empty access_token",
 			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
@@ -92,6 +112,9 @@ func TestTokenFetchErrorsDoNotEchoResponseBody(t *testing.T) {
 			msg := err.Error()
 			if strings.Contains(msg, sentinelBody) {
 				t.Errorf("error echoes the token-endpoint response body: %q", msg)
+			}
+			if strings.Contains(msg, sentinelNumber) {
+				t.Errorf("error echoes a value from the token-endpoint response: %q", msg)
 			}
 			if strings.Contains(msg, sentinelSecret) {
 				t.Errorf("error leaks the configured client secret: %q", msg)
