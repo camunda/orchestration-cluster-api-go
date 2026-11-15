@@ -1,3 +1,10 @@
+# [11.0.0-alpha.12](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.11...v11.0.0-alpha.12) (2026-11-15)
+
+
+### Bug Fixes
+
+* **auth:** keep token-response content out of decoding errors ([#178](https://github.com/camunda/orchestration-cluster-api-go/issues/178)) ([73f9ce2](https://github.com/camunda/orchestration-cluster-api-go/commit/73f9ce27db965e7fb1c2ece856c5a963dcc34a55)), closes [#143](https://github.com/camunda/orchestration-cluster-api-go/issues/143) [#174](https://github.com/camunda/orchestration-cluster-api-go/issues/174)
+
 # [11.0.0-alpha.11](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.10...v11.0.0-alpha.11) (2026-11-15)
 
 
