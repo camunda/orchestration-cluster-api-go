@@ -65,6 +65,36 @@ func sentinelIDP(t *testing.T, handler http.HandlerFunc) *httptest.Server {
 	return srv
 }
 
+// hitIDP is a token endpoint that counts the requests it serves, so a failure
+// scenario can prove its response-specific handler was reached rather than passing
+// on some unrelated transport error.
+func hitIDP(t *testing.T, handler http.HandlerFunc) (*httptest.Server, *atomic.Int32) {
+	t.Helper()
+	var hits atomic.Int32
+	srv := sentinelIDP(t, func(w http.ResponseWriter, r *http.Request) {
+		hits.Add(1)
+		handler(w, r)
+	})
+	return srv, &hits
+}
+
+// requireDiagnostic fails unless the handler was reached and both the first
+// returned error and the worker log carry the expected diagnostic. Without it a
+// failure scenario would accept any error plus any "activate jobs failed" line.
+func requireDiagnostic(t *testing.T, hits *atomic.Int32, want string, errs []error, logs string) {
+	t.Helper()
+	if hits.Load() == 0 {
+		t.Fatal("the token endpoint handler was never reached; the scenario did not process its response")
+	}
+	requireFailure(t, errs)
+	if !strings.Contains(errs[0].Error(), want) {
+		t.Fatalf("returned error does not contain %q: %v", want, errs[0])
+	}
+	if !strings.Contains(logs, "activate jobs failed") || !strings.Contains(logs, want) {
+		t.Fatalf("worker log does not report an activation failure containing %q:\n%s", want, logs)
+	}
+}
+
 // validTopologyJSON satisfies every required field of TopologyResponse, so a
 // success scenario really decodes successfully.
 const validTopologyJSON = `{"brokers":[],"clusterId":null,"clusterSize":1,"partitionsCount":1,"replicationFactor":1,"gatewayVersion":"8.11.0","lastCompletedChangeId":"0"}`
@@ -236,13 +266,13 @@ func sentinelScenarios() []sentinelScenario {
 			name: "oauth token endpoint rejects with sentinel body",
 			run: func(t *testing.T) (string, []error) {
 				api := newSentinelAPI(t, http.StatusOK)
-				idp := sentinelIDP(t, func(w http.ResponseWriter, _ *http.Request) {
+				idp, hits := hitIDP(t, func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusBadRequest)
 					_, _ = io.WriteString(w, `{"error":"invalid_client","error_description":"`+sentinelIDPBody+`"}`)
 				})
 				client, logs := newSentinelClient(t, oauthSentinelConfig(t, api, idp.URL))
 				out, errs := callAndPoll(t, client, logs, api, true)
-				requireFailure(t, errs)
+				requireDiagnostic(t, hits, "token endpoint returned HTTP 400", errs, out)
 				return out, errs
 			},
 		},
@@ -250,14 +280,14 @@ func sentinelScenarios() []sentinelScenario {
 			name: "oauth token endpoint echoes the submitted form",
 			run: func(t *testing.T) (string, []error) {
 				api := newSentinelAPI(t, http.StatusOK)
-				idp := sentinelIDP(t, func(w http.ResponseWriter, r *http.Request) {
+				idp, hits := hitIDP(t, func(w http.ResponseWriter, r *http.Request) {
 					body, _ := io.ReadAll(r.Body)
 					w.WriteHeader(http.StatusUnauthorized)
 					_, _ = w.Write(body)
 				})
 				client, logs := newSentinelClient(t, oauthSentinelConfig(t, api, idp.URL))
 				out, errs := callAndPoll(t, client, logs, api, true)
-				requireFailure(t, errs)
+				requireDiagnostic(t, hits, "token endpoint returned HTTP 401", errs, out)
 				return out, errs
 			},
 		},
@@ -265,12 +295,12 @@ func sentinelScenarios() []sentinelScenario {
 			name: "oauth token endpoint returns a malformed body",
 			run: func(t *testing.T) (string, []error) {
 				api := newSentinelAPI(t, http.StatusOK)
-				idp := sentinelIDP(t, func(w http.ResponseWriter, _ *http.Request) {
+				idp, hits := hitIDP(t, func(w http.ResponseWriter, _ *http.Request) {
 					_, _ = io.WriteString(w, "not json "+sentinelIDPBody+" "+sentinelAccessToken)
 				})
 				client, logs := newSentinelClient(t, oauthSentinelConfig(t, api, idp.URL))
 				out, errs := callAndPoll(t, client, logs, api, true)
-				requireFailure(t, errs)
+				requireDiagnostic(t, hits, "decoding token response", errs, out)
 				return out, errs
 			},
 		},
@@ -278,12 +308,12 @@ func sentinelScenarios() []sentinelScenario {
 			name: "oauth token endpoint returns an empty access token",
 			run: func(t *testing.T) (string, []error) {
 				api := newSentinelAPI(t, http.StatusOK)
-				idp := sentinelIDP(t, func(w http.ResponseWriter, _ *http.Request) {
+				idp, hits := hitIDP(t, func(w http.ResponseWriter, _ *http.Request) {
 					_, _ = io.WriteString(w, `{"access_token":"","expires_in":3600,"note":"`+sentinelIDPBody+`"}`)
 				})
 				client, logs := newSentinelClient(t, oauthSentinelConfig(t, api, idp.URL))
 				out, errs := callAndPoll(t, client, logs, api, true)
-				requireFailure(t, errs)
+				requireDiagnostic(t, hits, "token endpoint returned an empty access_token", errs, out)
 				return out, errs
 			},
 		},
@@ -297,6 +327,9 @@ func sentinelScenarios() []sentinelScenario {
 				client, logs := newSentinelClient(t, oauthSentinelConfig(t, api, url))
 				out, errs := callAndPoll(t, client, logs, api, true)
 				requireFailure(t, errs)
+				if !strings.Contains(errs[0].Error(), "token request failed") || !strings.Contains(out, "token request failed") {
+					t.Fatalf("expected a token request failure in the error and the log; error: %v\nlogs:\n%s", errs[0], out)
+				}
 				return out, errs
 			},
 		},
@@ -336,6 +369,9 @@ func sentinelScenarios() []sentinelScenario {
 				client, logs := newSentinelClient(t, cfg)
 				out, errs := callAndPoll(t, client, logs, api, true)
 				requireFailure(t, errs)
+				if !strings.Contains(errs[0].Error(), "HTTP 401") || !strings.Contains(out, "HTTP 401") {
+					t.Fatalf("expected the 401 rejection in the error and the log; error: %v\nlogs:\n%s", errs[0], out)
+				}
 				return out, errs
 			},
 		},
