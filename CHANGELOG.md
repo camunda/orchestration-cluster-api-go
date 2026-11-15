@@ -1,3 +1,14 @@
+# [11.0.0-alpha.10](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.9...v11.0.0-alpha.10) (2026-11-15)
+
+
+### Bug Fixes
+
+* **auth:** stop echoing the token-endpoint response body in errors ([#143](https://github.com/camunda/orchestration-cluster-api-go/issues/143)) ([e93832c](https://github.com/camunda/orchestration-cluster-api-go/commit/e93832cffc46aae944d7120eebf492c96d993c93)), closes [camunda/sdk-infra#88](https://github.com/camunda/sdk-infra/issues/88)
+* **auth:** write the oauth token cache atomically with owner-only permissions ([#145](https://github.com/camunda/orchestration-cluster-api-go/issues/145)) ([73c20aa](https://github.com/camunda/orchestration-cluster-api-go/commit/73c20aa53da38e2328a992f5d7c6671d6d36a010)), closes [camunda/sdk-infra#88](https://github.com/camunda/sdk-infra/issues/88)
+* **diag:** drive environment snapshot redaction from ConfigSchema secrets ([#151](https://github.com/camunda/orchestration-cluster-api-go/issues/151)) ([05e8a7d](https://github.com/camunda/orchestration-cluster-api-go/commit/05e8a7d590065822abaac491b62bc76340c5f52a)), closes [#150](https://github.com/camunda/orchestration-cluster-api-go/issues/150) [#144](https://github.com/camunda/orchestration-cluster-api-go/issues/144)
+* **job:** never return a nil map from RawVariables or CustomHeaders ([#152](https://github.com/camunda/orchestration-cluster-api-go/issues/152)) ([906d817](https://github.com/camunda/orchestration-cluster-api-go/commit/906d817103d21185bf6af249380e9eb717a38a57)), closes [#147](https://github.com/camunda/orchestration-cluster-api-go/issues/147)
+* **worker:** recover a panicking job handler and fail the job ([#149](https://github.com/camunda/orchestration-cluster-api-go/issues/149)) ([9945420](https://github.com/camunda/orchestration-cluster-api-go/commit/9945420c426e5ac9325eee4ea8f7c07ac4611a03)), closes [camunda/sdk-infra#89](https://github.com/camunda/sdk-infra/issues/89) [camunda/sdk-infra#90](https://github.com/camunda/sdk-infra/issues/90)
+
 # [11.0.0-alpha.9](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.8...v11.0.0-alpha.9) (2026-11-15)
 
 
