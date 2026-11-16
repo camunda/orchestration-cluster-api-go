@@ -20,6 +20,13 @@ on:
       - main
       - "stable/**"
   workflow_dispatch:
+    inputs:
+      api_break_approved:
+        description: >-
+          Release even though the public API breaks compatibility with the last release on
+          this stable branch (for breaks with no PR to label, e.g. from upstream spec drift).
+        type: boolean
+        default: false
 
 concurrency:
   group: release-${{ github.ref_name }}
@@ -44,9 +51,83 @@ jobs:
       - name: Test
         run: go test -race ./...
 
+  # Stable branches must not break customer code that compiled against the last release
+  # of the major. This checks the commit about to be tagged, which includes generated
+  # code from upstream spec changes that no PR reviewed. Override: the api-break-approved
+  # label on any PR merged since that release, or the api_break_approved input of a
+  # manual run. A no-op on main, whose prereleases make no compatibility promise.
+  api-compat:
+    name: API compatibility gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read # find the PRs merged since the baseline and their labels
+    steps:
+      - uses: actions/checkout@v7
+        if: startsWith(github.ref_name, 'stable/')
+        with:
+          # Tags are needed to list the commits since the baseline release.
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        if: startsWith(github.ref_name, 'stable/')
+        with:
+          go-version-file: tools/apicompat/go.mod
+          cache-dependency-path: |
+            go.sum
+            tools/apicompat/go.sum
+      - name: Check API compatibility
+        if: startsWith(github.ref_name, 'stable/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCH_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.api_break_approved }}
+        run: |
+          set -uo pipefail
+          go -C tools/apicompat build -o "$RUNNER_TEMP/apicompat" . || exit 2
+          # The newest published release of this stable major, not the nearest tag: a
+          # stable branch is cut from main at an alpha.
+          major="${GITHUB_REF_NAME#stable/}"
+          version=$("$RUNNER_TEMP/apicompat" --print-baseline-major "$major") || exit 2
+          if [ -z "$version" ]; then
+            echo "::notice::No ${major}.x release published yet; nothing to compare against."
+            exit 0
+          fi
+          tag="v${version}"
+          git rev-parse -q --verify "refs/tags/${tag}" >/dev/null || {
+            echo "::error::Baseline ${version} has no ${tag} tag to list the PRs merged since."
+            exit 2
+          }
+          echo "Baseline: ${tag}"
+          rc=0
+          "$RUNNER_TEMP/apicompat" --baseline-version "$version" | tee "$RUNNER_TEMP/apicompat.txt" || rc=$?
+          {
+            echo '## API compatibility'
+            echo '```'
+            cat "$RUNNER_TEMP/apicompat.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          [ "$rc" -eq 1 ] || exit "$rc"
+          if [ "$DISPATCH_APPROVED" = "true" ]; then
+            echo "::warning::Breaking API changes approved by the api_break_approved input of this run."
+            exit 0
+          fi
+          approved=""
+          while read -r sha; do
+            prs=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls" \
+              --jq '.[] | select(.merged_at != null) | select(any(.labels[]; .name == "api-break-approved")) | "#\(.number)"') || exit 2
+            approved="${approved} ${prs}"
+          done < <(git log --format=%H "${tag}..HEAD")
+          approved=$(echo "$approved" | xargs -n1 2>/dev/null | sort -u | xargs)
+          if [ -n "$approved" ]; then
+            echo "::warning::Breaking API changes approved with the api-break-approved label on: ${approved}"
+            exit 0
+          fi
+          echo "::error::Release blocked: the public API breaks compatibility with ${tag}. If intended, label the PR that made the change api-break-approved (or re-run this workflow manually with api_break_approved), then re-run."
+          exit 1
+
   release:
     name: Version & release (${{ github.ref_name }})
-    needs: gate
+    needs: [gate, api-compat]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
