@@ -109,7 +109,7 @@ docs-md: docs-json
 # exit 2 (setup error) behind exit 1 (breaking changes).
 api-compat:
 	@mkdir -p dist
-	$(GO) -C tools/apicompat build -o $(CURDIR)/dist/apicompat .
+	GOWORK=off $(GO) -C tools/apicompat build -o $(CURDIR)/dist/apicompat .
 	./dist/apicompat --repo . $(API_COMPAT_ARGS)
 
 check: fmt-check tidy-check vet build test examples sync-readme-check docs-md coverage
