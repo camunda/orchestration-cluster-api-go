@@ -101,8 +101,31 @@ func TestRunAgainstPublishedReleases(t *testing.T) {
 		t.Errorf("breaking tree vs 2.1.0 = %d, want 1 listing the Username change", code)
 	}
 	// v2.0.0 had OnlyInOld, so the same compatible tree breaks against it.
-	if code, _ := runApicompat(t, "--repo", compatible, "--baseline-version", "2.0.0"); code != exitBreaking {
+	if code, _ := runApicompat(t, "--repo", compatible, "--proxy", proxy, "--baseline-version", "2.0.0"); code != exitBreaking {
 		t.Errorf("compatible tree vs 2.0.0 exited %d, want 1", code)
+	}
+}
+
+// A stable-branch change that renames the module path (and rewrites its imports)
+// must not slip past the gate by resolving an unpublished new path with no
+// baseline. The baseline path comes from the published release's own go.mod, so
+// the rename is reported as the break it is.
+func TestRunRenamedModulePathIsBreaking(t *testing.T) {
+	proxy := fakeProxy(t)
+	// Same code as the published v2.1.0, but the go.mod declares a new path.
+	renamed := writeModule(t, applyEdits(t, []edit{
+		{"go.mod", "module " + testModPath, "module example.com/sdk/v3"},
+		{"sdk.go", `import "example.com/sdk/v2/client"`, `import "example.com/sdk/v3/client"`},
+	}))
+	code, out := runApicompat(t, "--repo", renamed, "--proxy", proxy, "--baseline-version", "2.1.0")
+	if code != exitBreaking || !strings.Contains(out, "module path changed from "+testModPath+" to example.com/sdk/v3") {
+		t.Errorf("renamed module = %d %q, want 1 reporting the path change", code, out)
+	}
+	// The --baseline-major path resolves the version through the renamed tree's
+	// candidate (/v2) and must still catch the rename against the published go.mod.
+	code, out = runApicompat(t, "--repo", renamed, "--proxy", proxy, "--baseline-major", "2")
+	if code != exitBreaking || !strings.Contains(out, "module path changed from "+testModPath+" to example.com/sdk/v3") {
+		t.Errorf("renamed module via --baseline-major = %d %q, want 1 reporting the path change", code, out)
 	}
 }
 
@@ -132,6 +155,7 @@ type workflowFixture struct {
 	approved         bool
 	dispatchApproved bool
 	prs              string
+	gitTags          string // newline-separated tags `git tag --list` returns
 }
 
 func runWorkflowCheck(t *testing.T, workflow string, fixture workflowFixture) int {
@@ -168,6 +192,7 @@ exit "$CHECKER_CODE"
 		"git": `case "$1" in
   rev-parse) exit 0 ;;
   log) printf 'checked-commit\n' ;;
+  tag) printf '%s\n' "$GIT_TAGS" | grep . | sort -Vr ;;
   *) exit 2 ;;
 esac
 `,
@@ -199,6 +224,7 @@ esac
 		fmt.Sprintf("APPROVED=%t", fixture.approved),
 		fmt.Sprintf("DISPATCH_APPROVED=%t", fixture.dispatchApproved),
 		"PR_RECORDS="+fixture.prs,
+		"GIT_TAGS="+fixture.gitTags,
 	)
 	output, err := command.CombinedOutput()
 	if err != nil {
@@ -268,6 +294,37 @@ func TestReleaseApprovalRequiresTargetBranchAndCheckedMerge(t *testing.T) {
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
 			code := runWorkflowCheck(t, "release.yml", workflowFixture{checkerCode: exitBreaking, prs: scenario.prs})
+			if code != scenario.want {
+				t.Errorf("exit %d, want %d", code, scenario.want)
+			}
+		})
+	}
+}
+
+// The proxy version list can lag a just-pushed release tag (golang/go#75191). When
+// git already holds a newer stable tag for the major than the proxy returned, the
+// baseline is stale and the gate must fail closed (setup error), not compare against
+// an outdated release and pass a break to the real latest.
+func TestReleaseFailsClosedOnAStaleProxyBaseline(t *testing.T) {
+	for _, scenario := range []struct {
+		name    string
+		gitTags string
+		want    int
+	}{
+		// The stub checker resolves the proxy baseline to 10.0.6 (tag v10.0.6).
+		{"proxy current", "v10.0.6", exitBreaking},
+		{"git behind proxy", "v10.0.5", exitBreaking},
+		{"no stable tags", "", exitBreaking},
+		{"prerelease only newer", "v10.0.6\nv10.1.0-alpha.1", exitBreaking},
+		{"stale proxy", "v10.0.6\nv10.0.7", exitError},
+		{"stale proxy minor", "v10.0.6\nv10.1.0", exitError},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			code := runWorkflowCheck(t, "release.yml", workflowFixture{
+				checkerCode: exitBreaking, // would pass approval if reached; the stale guard must fire first
+				approved:    true,
+				gitTags:     scenario.gitTags,
+			})
 			if code != scenario.want {
 				t.Errorf("exit %d, want %d", code, scenario.want)
 			}

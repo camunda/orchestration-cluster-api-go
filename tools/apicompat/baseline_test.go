@@ -86,3 +86,50 @@ func TestLatestReleaseFailsOnAProxyError(t *testing.T) {
 		t.Fatal("latestRelease succeeded on a 500; a proxy outage must not read as \"no baseline\"")
 	}
 }
+
+func TestPublishedModulePathReadsTheServedGoMod(t *testing.T) {
+	var gotPath string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		_, _ = w.Write([]byte("module example.com/Camunda/sdk/v10\n\ngo 1.26.0\n"))
+	}))
+	defer srv.Close()
+
+	got, err := publishedModulePath(context.Background(), srv.URL, "example.com/Camunda/sdk/v10", "10.0.6")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "example.com/Camunda/sdk/v10" {
+		t.Errorf("publishedModulePath = %q, want example.com/Camunda/sdk/v10", got)
+	}
+	if want := "/example.com/!camunda/sdk/v10/@v/v10.0.6.mod"; gotPath != want {
+		t.Errorf("requested %q, want %q", gotPath, want)
+	}
+}
+
+func TestPublishedModulePathFailsWithoutAModuleLine(t *testing.T) {
+	for name, body := range map[string]string{
+		"no module line": "go 1.26.0\n",
+		"not a go.mod":   "boom",
+	} {
+		t.Run(name, func(t *testing.T) {
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte(body))
+			}))
+			defer srv.Close()
+			if _, err := publishedModulePath(context.Background(), srv.URL, "example.com/sdk/v10", "10.0.6"); err == nil {
+				t.Fatal("publishedModulePath succeeded on a go.mod with no module path")
+			}
+		})
+	}
+}
+
+func TestPublishedModulePathFailsOnAProxyError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "boom", http.StatusInternalServerError)
+	}))
+	defer srv.Close()
+	if _, err := publishedModulePath(context.Background(), srv.URL, "example.com/sdk/v10", "10.0.6"); err == nil {
+		t.Fatal("publishedModulePath succeeded on a 500; a proxy outage must not read as a baseline")
+	}
+}

@@ -142,7 +142,10 @@ API with no one reviewing it (e.g. a field going from `T` to a `Nullable` wrappe
 with the newest non-prerelease `vN.x.y` on proxy.golang.org, using `apidiff` in module
 mode. Removed or changed types, funcs, methods, fields and constant values fail it, as
 does a new method on an exported interface; additions pass. No `N.x` release yet passes
-with a notice. Exit codes: 0 compatible, 1 breaking (each break listed), 2 setup error.
+with a notice. The baseline module path comes from the published release's own go.mod,
+not the working tree, so renaming the module path on a stable branch is itself reported
+as a break (it is one: importers of the old path stop resolving). Exit codes:
+0 compatible, 1 breaking (each break listed), 2 setup error.
 
 - `make api-compat` checks the working tree against the newest release of its module
   path's major (`API_COMPAT_ARGS="--baseline-version 10.0.0"` to pick one).
@@ -151,7 +154,10 @@ with a notice. Exit codes: 0 compatible, 1 breaking (each break listed), 2 setup
   but passes.
 - `release.yml` repeats the check on `stable/**` before semantic-release tags. It passes
   if any PR merged since the baseline tag carries `api-break-approved`, or on a manual
-  run with the `api_break_approved` input (for drift no PR introduced).
+  run with the `api_break_approved` input (for drift no PR introduced). The proxy's
+  version list can lag a just-pushed tag (golang/go#75191), so the release job fails
+  closed (a setup error, not a pass) when git already holds a newer stable tag for the
+  major than the proxy returned — re-run once the proxy has indexed it.
 
 When `main` moves to a new server line, cut `stable/N` first, then on `main`:
 `go mod edit -module` to the next `/vN`, rewrite the Go import strings, update the

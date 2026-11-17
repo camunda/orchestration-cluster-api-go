@@ -97,6 +97,20 @@ jobs:
             echo "::error::Baseline ${version} has no ${tag} tag to list the PRs merged since."
             exit 2
           }
+          # The proxy's version list can lag a just-pushed tag (golang/go#75191). If git
+          # already has a newer stable tag for this major than the proxy returned, the
+          # proxy baseline is stale: comparing against it could pass a change that breaks
+          # the real latest release. Fail closed (a setup error) rather than guess.
+          newest_tag=$(git tag --list "v${major}.*" --sort=-v:refname \
+            | grep -E "^v${major}\.[0-9]+\.[0-9]+$" | head -n1 || true)
+          if [ -n "$newest_tag" ] && [ "$newest_tag" != "$tag" ]; then
+            newest_version="${newest_tag#v}"
+            higher=$(printf '%s\n%s\n' "$version" "$newest_version" | sort -V | tail -n1)
+            if [ "$higher" = "$newest_version" ]; then
+              echo "::error::Proxy baseline ${tag} is stale: git already has the newer tag ${newest_tag}. Re-run once the proxy has indexed it."
+              exit 2
+            fi
+          fi
           echo "Baseline: ${tag}"
           pipeline_status=(0 0)
           "$RUNNER_TEMP/apicompat" --baseline-version "$version" | tee "$RUNNER_TEMP/apicompat.txt" || pipeline_status=("${PIPESTATUS[@]}")
