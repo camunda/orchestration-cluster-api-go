@@ -153,17 +153,11 @@ func WithMaxIdleConns(n int) Option {
 // connections the SDK's HTTP transport keeps open per host. It maps to the
 // CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST environment variable and applies only
 // when the SDK builds the base transport itself (not with [WithHTTPClient] or
-<<<<<<< HEAD
-// [WithTransport]). Size it to at least the sum of your workers'
-// WithMaxConcurrentJobs plus their pollers when running many workers against one
-// gateway.
-=======
 // [WithTransport]). Without this option the SDK grows the pool automatically to
 // the sum of the client's workers' MaxConcurrentJobs plus one poller each;
 // setting it pins the value. When pinning, the global [WithMaxIdleConns] limit
 // still caps the whole idle pool, so raise it as well (to at least this value,
 // or 0 for no global limit).
->>>>>>> 58ff322 (fix: size the HTTP idle pool from job workers' in-flight capacity (#197))
 func WithMaxIdleConnsPerHost(n int) Option {
 	return func(c *Config) { c.MaxIdleConnsPerHost, c.MaxIdleConnsPerHostPinned = n, true }
 }

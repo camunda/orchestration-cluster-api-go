@@ -230,11 +230,6 @@ idle-connection pool for job-worker workloads. Go's default pool keeps only 2
 idle connections per host, so a worker with many jobs in flight otherwise opens
 and closes a TCP connection per call — churning sockets into `TIME_WAIT`,
 exhausting ephemeral ports, and roughly halving throughput at moderate
-<<<<<<< HEAD
-concurrency. Size `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` to at least the sum
-of your workers' `WithMaxConcurrentJobs` plus their pollers when running many
-workers against one gateway.
-=======
 concurrency.
 
 The 256 default is a floor: each time you create a job worker (`NewJobWorker`
@@ -251,7 +246,6 @@ that limit and turns off automatic growth for it. A transport supplied with
 `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST`, remember that
 `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` caps the idle pool across all hosts, so raise
 it too (or set `0` for no global limit).
->>>>>>> 58ff322 (fix: size the HTTP idle pool from job workers' in-flight capacity (#197))
 
 For full control, supply your own HTTP plumbing:
 
