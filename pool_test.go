@@ -76,6 +76,23 @@ func TestPoolExplicitSettingsWin(t *testing.T) {
 	}
 }
 
+// An explicit CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS=0 means "no global idle limit" (as
+// documented), not the 256 default: it is pinned at 0 while the per-host pool
+// still grows to cover the workers.
+func TestPoolEnvZeroGlobalMeansUnlimited(t *testing.T) {
+	c := newPoolTestClient(t, map[string]string{"CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS": "0"})
+	for i := 0; i < 50; i++ {
+		c.NewJobWorker("t", noopHandler, WithMaxConcurrentJobs(32))
+	}
+	tr := c.pool.transport()
+	if tr.MaxIdleConns != 0 {
+		t.Errorf("global = %d, want 0 (unlimited)", tr.MaxIdleConns)
+	}
+	if tr.MaxIdleConnsPerHost < 50*32 {
+		t.Errorf("per-host = %d, want grown to >= %d", tr.MaxIdleConnsPerHost, 50*32)
+	}
+}
+
 func TestPoolOneDimensionExplicit(t *testing.T) {
 	c := newPoolTestClient(t, map[string]string{}, WithMaxIdleConnsPerHost(100))
 	for i := 0; i < 20; i++ {
