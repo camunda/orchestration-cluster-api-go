@@ -33,7 +33,7 @@ const (
 	// roughly halving throughput at moderate concurrency (see
 	// camunda/orchestration-cluster-api-go#162). The SDK therefore never uses
 	// http.DefaultTransport directly: it clones it and sizes the pool to a
-	// workload-appropriate default. Override with
+	// workload-appropriate default, grown to fit job-worker capacity (#196). Override with
 	// CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS(_PER_HOST), WithMaxIdleConns(PerHost), or
 	// supply your own transport with WithTransport / WithHTTPClient.
 	defaultMaxIdleConns        = 256
@@ -231,8 +231,19 @@ type Config struct {
 	// or WithMaxIdleConns / WithMaxIdleConnsPerHost). They apply only when the SDK
 	// builds the base transport itself — a user-supplied HTTPClient or Transport
 	// is used as-is.
+	//
+	// Unless set explicitly, each dimension grows automatically as job workers
+	// are created so it covers the sum of their MaxConcurrentJobs plus one
+	// activation poll each (the configured value acts as a floor).
 	MaxIdleConns        int
 	MaxIdleConnsPerHost int
+
+	// MaxIdleConnsPinned / MaxIdleConnsPerHostPinned pin the corresponding pool
+	// dimension, disabling automatic growth from worker capacity. They are set
+	// when the value comes from WithMaxIdleConns(PerHost) or
+	// CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS(_PER_HOST).
+	MaxIdleConnsPinned        bool
+	MaxIdleConnsPerHostPinned bool
 
 	// HTTPClient, when set (WithHTTPClient), is used for all REST calls as-is:
 	// the SDK's retry, backpressure, auth, and TLS layers are bypassed, and the
@@ -358,6 +369,8 @@ func resolveFromEnv(getenv func(string) string, overrides map[string]string) (*C
 		return nil, err
 	}
 	cfg.MaxIdleConns, cfg.MaxIdleConnsPerHost, err = resolveHTTPPool(get)
+	cfg.MaxIdleConnsPinned = strings.TrimSpace(get("CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS")) != ""
+	cfg.MaxIdleConnsPerHostPinned = strings.TrimSpace(get("CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST")) != ""
 	if err != nil {
 		return nil, err
 	}
