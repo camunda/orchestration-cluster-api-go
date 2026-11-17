@@ -1,3 +1,10 @@
+## [10.0.7](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.6...v10.0.7) (2026-11-17)
+
+
+### Bug Fixes
+
+* size the HTTP idle pool from job workers' in-flight capacity (backport [#197](https://github.com/camunda/orchestration-cluster-api-go/issues/197) to stable/10) ([#198](https://github.com/camunda/orchestration-cluster-api-go/issues/198)) ([165e7d0](https://github.com/camunda/orchestration-cluster-api-go/commit/165e7d0d10d7cef32a73d69a55a9b381ed9b7b25)), closes [#163](https://github.com/camunda/orchestration-cluster-api-go/issues/163) [#164](https://github.com/camunda/orchestration-cluster-api-go/issues/164)
+
 ## [10.0.6](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.5...v10.0.6) (2026-11-15)
 
 
