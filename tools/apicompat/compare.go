@@ -40,10 +40,11 @@ func modulePath(ctx context.Context, dir string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-// compareWithRelease downloads modPath@version through the go command (so
-// GOPROXY, GOSUMDB and GOFLAGS apply) and returns the changes in dir that are
-// incompatible with it.
-func compareWithRelease(ctx context.Context, modPath, version, dir string) ([]string, error) {
+// compareWithRelease downloads modPath@version through the go command from proxy
+// (the same proxy the version and go.mod were resolved from, so a baseline that
+// resolves also downloads; GOSUMDB and GOFLAGS still apply) and returns the
+// changes in dir that are incompatible with it.
+func compareWithRelease(ctx context.Context, proxy, modPath, version, dir string) ([]string, error) {
 	tmp, err := os.MkdirTemp("", "apicompat-")
 	if err != nil {
 		return nil, err
@@ -52,7 +53,7 @@ func compareWithRelease(ctx context.Context, modPath, version, dir string) ([]st
 
 	cmd := exec.CommandContext(ctx, "go", "mod", "download", "-json", modPath+"@"+version)
 	cmd.Dir = tmp
-	cmd.Env = goEnv()
+	cmd.Env = append(goEnv(), "GOPROXY="+proxy)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	out, runErr := cmd.Output()

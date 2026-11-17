@@ -135,8 +135,8 @@ func TestRunSetupErrorsExitTwo(t *testing.T) {
 	for name, args := range map[string][]string{
 		"no mode":             {"--repo", repo},
 		"two modes":           {"--repo", repo, "--baseline-major", "2", "--baseline-version", "2.1.0"},
-		"unpublished version": {"--repo", repo, "--baseline-version", "2.9.9"},
-		"prerelease baseline": {"--repo", repo, "--baseline-version", "2.2.0-alpha.1"},
+		"unpublished version": {"--repo", repo, "--baseline-version", "2.9.9", "--proxy", proxy},
+		"prerelease baseline": {"--repo", repo, "--baseline-version", "2.2.0-alpha.1", "--proxy", proxy},
 		"not a module":        {"--repo", t.TempDir(), "--baseline-major", "2", "--proxy", proxy},
 		"proxy down":          {"--repo", repo, "--baseline-major", "2", "--proxy", "http://127.0.0.1:1"},
 	} {
@@ -156,6 +156,7 @@ type workflowFixture struct {
 	dispatchApproved bool
 	prs              string
 	gitTags          string // newline-separated tags `git tag --list` returns
+	noBaseline       bool   // the proxy lists no release for the major
 }
 
 func runWorkflowCheck(t *testing.T, workflow string, fixture workflowFixture) int {
@@ -183,7 +184,7 @@ func runWorkflowCheck(t *testing.T, workflow string, fixture workflowFixture) in
 	for name, body := range map[string]string{
 		"go": "exit 0\n",
 		"apicompat": `if [ "$1" = "--print-baseline-major" ]; then
-  printf '10.0.6\n'
+  [ "$NO_BASELINE" = "true" ] || printf '10.0.6\n'
   exit 0
 fi
 printf 'fixture report\n'
@@ -225,6 +226,7 @@ esac
 		fmt.Sprintf("DISPATCH_APPROVED=%t", fixture.dispatchApproved),
 		"PR_RECORDS="+fixture.prs,
 		"GIT_TAGS="+fixture.gitTags,
+		fmt.Sprintf("NO_BASELINE=%t", fixture.noBaseline),
 	)
 	output, err := command.CombinedOutput()
 	if err != nil {
@@ -323,6 +325,32 @@ func TestReleaseFailsClosedOnAStaleProxyBaseline(t *testing.T) {
 			code := runWorkflowCheck(t, "release.yml", workflowFixture{
 				checkerCode: exitBreaking, // would pass approval if reached; the stale guard must fire first
 				approved:    true,
+				gitTags:     scenario.gitTags,
+			})
+			if code != scenario.want {
+				t.Errorf("exit %d, want %d", code, scenario.want)
+			}
+		})
+	}
+}
+
+// An empty proxy list (or cached 404) is only "nothing released yet" when git holds
+// no stable tag for the major either; otherwise the proxy lags and the release gate
+// must fail closed rather than skip the comparison.
+func TestReleaseFailsClosedWhenProxyListsNoReleaseButGitHasOne(t *testing.T) {
+	for _, scenario := range []struct {
+		name    string
+		gitTags string
+		want    int
+	}{
+		{"nothing released", "", 0},
+		{"only prereleases", "v10.0.0-alpha.1", 0},
+		{"stable tag not yet indexed", "v10.0.0", exitError},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			code := runWorkflowCheck(t, "release.yml", workflowFixture{
+				checkerCode: exitBreaking,
+				noBaseline:  true,
 				gitTags:     scenario.gitTags,
 			})
 			if code != scenario.want {

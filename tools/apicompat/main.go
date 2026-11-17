@@ -103,7 +103,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	}
 	fmt.Fprintf(stdout, "Comparing the public API of %s (working tree) with %s@v%s\n", modPath, baselinePath, version)
 
-	breaks, err := compareWithRelease(ctx, baselinePath, "v"+version, *repo)
+	breaks, err := compareWithRelease(ctx, *proxy, baselinePath, "v"+version, *repo)
 	if err != nil {
 		fmt.Fprintf(stderr, "apicompat: %v\n", err)
 		return exitError

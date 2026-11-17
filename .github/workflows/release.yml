@@ -88,7 +88,15 @@ jobs:
           # stable branch is cut from main at an alpha.
           major="${GITHUB_REF_NAME#stable/}"
           version=$("$RUNNER_TEMP/apicompat" --print-baseline-major "$major") || exit 2
+          # Newest stable tag git holds for this major; the proxy's list can lag a
+          # just-pushed tag (golang/go#75191), so git is the cross-check.
+          newest_tag=$(git tag --list "v${major}.*" --sort=-v:refname \
+            | grep -E "^v${major}\.[0-9]+\.[0-9]+$" | head -n1 || true)
           if [ -z "$version" ]; then
+            if [ -n "$newest_tag" ]; then
+              echo "::error::Proxy lists no ${major}.x release but git has ${newest_tag}. Re-run once the proxy has indexed it."
+              exit 2
+            fi
             echo "::notice::No ${major}.x release published yet; nothing to compare against."
             exit 0
           fi
@@ -101,8 +109,6 @@ jobs:
           # already has a newer stable tag for this major than the proxy returned, the
           # proxy baseline is stale: comparing against it could pass a change that breaks
           # the real latest release. Fail closed (a setup error) rather than guess.
-          newest_tag=$(git tag --list "v${major}.*" --sort=-v:refname \
-            | grep -E "^v${major}\.[0-9]+\.[0-9]+$" | head -n1 || true)
           if [ -n "$newest_tag" ] && [ "$newest_tag" != "$tag" ]; then
             newest_version="${newest_tag#v}"
             higher=$(printf '%s\n%s\n' "$version" "$newest_version" | sort -V | tail -n1)
