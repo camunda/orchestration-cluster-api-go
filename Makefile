@@ -1,9 +1,12 @@
-.PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy tidy-check examples sync-readme sync-readme-check coverage docs-json docs-md check clean
+.PHONY: help install-tools bundle fetch-proto generate build test test-race lint vet fmt fmt-check tidy tidy-check examples sync-readme sync-readme-check coverage docs-json docs-md api-compat check clean
 
 SPEC_REF ?= stable/8.10
 GO ?= go
 # GOWORK=off: under a go.work, `go list -m` prints every workspace module.
 MODULE = $(shell GOWORK=off $(GO) list -m)
+# The /vN suffix of the module path.
+MAJOR = $(lastword $(subst /v, ,$(MODULE)))
+API_COMPAT_ARGS ?= --baseline-major $(MAJOR)
 
 help:
 	@echo "Camunda Orchestration Cluster API — Go SDK"
@@ -26,6 +29,7 @@ help:
 	@echo "  make coverage      Verify every operation has an example (operation-map.json)"
 	@echo "  make docs-json     Snapshot the exported Go API to docs-json/ (cmd/docgen)"
 	@echo "  make docs-md       Render docs-md/ for docs.camunda.io (README + docs-json)"
+	@echo "  make api-compat    Fail on public API breaks vs the last published release of this major"
 	@echo "  make check         Full local CI gate"
 	@echo "  make clean         Remove build artifacts"
 
@@ -100,6 +104,13 @@ docs-json:
 # Render the Docusaurus pages published at docs.camunda.io.
 docs-md: docs-json
 	python3 scripts/generate-docusaurus-md.py --validate-links
+
+# Built rather than `go run`, which reports every non-zero exit as 1 and would hide
+# exit 2 (setup error) behind exit 1 (breaking changes).
+api-compat:
+	@mkdir -p dist
+	GOWORK=off $(GO) -C tools/apicompat build -o $(CURDIR)/dist/apicompat .
+	./dist/apicompat --repo . $(API_COMPAT_ARGS)
 
 check: fmt-check tidy-check vet build test examples sync-readme-check docs-md coverage
 

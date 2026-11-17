@@ -20,6 +20,13 @@ on:
       - main
       - "stable/**"
   workflow_dispatch:
+    inputs:
+      api_break_approved:
+        description: >-
+          Release even though the public API breaks compatibility with the last release on
+          this stable branch (for breaks with no PR to label, e.g. from upstream spec drift).
+        type: boolean
+        default: false
 
 concurrency:
   group: release-${{ github.ref_name }}
@@ -44,9 +51,111 @@ jobs:
       - name: Test
         run: go test -race ./...
 
+  # Stable branches must not break customer code that compiled against the last release
+  # of the major. This checks the commit about to be tagged, which includes generated
+  # code from upstream spec changes that no PR reviewed. Override: the api-break-approved
+  # label on any PR merged since that release, or the api_break_approved input of a
+  # manual run. A no-op on main, whose prereleases make no compatibility promise.
+  api-compat:
+    name: API compatibility gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read # find the PRs merged since the baseline and their labels
+    steps:
+      - uses: actions/checkout@v7
+        if: startsWith(github.ref_name, 'stable/')
+        with:
+          # Tags are needed to list the commits since the baseline release.
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        if: startsWith(github.ref_name, 'stable/')
+        with:
+          go-version-file: tools/apicompat/go.mod
+          cache-dependency-path: |
+            go.sum
+            tools/apicompat/go.sum
+      - name: Check API compatibility
+        if: startsWith(github.ref_name, 'stable/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCH_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.api_break_approved }}
+        run: |
+          set -uo pipefail
+          go -C tools/apicompat build -o "$RUNNER_TEMP/apicompat" . || exit 2
+          # The newest published release of this stable major, not the nearest tag: a
+          # stable branch is cut from main at an alpha.
+          major="${GITHUB_REF_NAME#stable/}"
+          version=$("$RUNNER_TEMP/apicompat" --print-baseline-major "$major") || exit 2
+          # Newest stable tag git holds for this major; the proxy's list can lag a
+          # just-pushed tag (golang/go#75191), so git is the cross-check.
+          newest_tag=$(git tag --list "v${major}.*" --sort=-v:refname \
+            | grep -E "^v${major}\.[0-9]+\.[0-9]+$" | head -n1 || true)
+          if [ -z "$version" ]; then
+            if [ -n "$newest_tag" ]; then
+              echo "::error::Proxy lists no ${major}.x release but git has ${newest_tag}. Re-run once the proxy has indexed it."
+              exit 2
+            fi
+            echo "::notice::No ${major}.x release published yet; nothing to compare against."
+            exit 0
+          fi
+          tag="v${version}"
+          git rev-parse -q --verify "refs/tags/${tag}" >/dev/null || {
+            echo "::error::Baseline ${version} has no ${tag} tag to list the PRs merged since."
+            exit 2
+          }
+          # The proxy's version list can lag a just-pushed tag (golang/go#75191). If git
+          # already has a newer stable tag for this major than the proxy returned, the
+          # proxy baseline is stale: comparing against it could pass a change that breaks
+          # the real latest release. Fail closed (a setup error) rather than guess.
+          if [ -n "$newest_tag" ] && [ "$newest_tag" != "$tag" ]; then
+            newest_version="${newest_tag#v}"
+            higher=$(printf '%s\n%s\n' "$version" "$newest_version" | sort -V | tail -n1)
+            if [ "$higher" = "$newest_version" ]; then
+              echo "::error::Proxy baseline ${tag} is stale: git already has the newer tag ${newest_tag}. Re-run once the proxy has indexed it."
+              exit 2
+            fi
+          fi
+          echo "Baseline: ${tag}"
+          pipeline_status=(0 0)
+          "$RUNNER_TEMP/apicompat" --baseline-version "$version" | tee "$RUNNER_TEMP/apicompat.txt" || pipeline_status=("${PIPESTATUS[@]}")
+          [ "${pipeline_status[1]}" -eq 0 ] || exit 2
+          rc="${pipeline_status[0]}"
+          {
+            echo '## API compatibility'
+            echo '```'
+            cat "$RUNNER_TEMP/apicompat.txt" || exit 2
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY" || exit 2
+          [ "$rc" -eq 1 ] || exit "$rc"
+          if [ "$DISPATCH_APPROVED" = "true" ]; then
+            echo "::warning::Breaking API changes approved by the api_break_approved input of this run."
+            exit 0
+          fi
+          approved=""
+          commits=$(git log --format=%H "${tag}..HEAD") || exit 2
+          while read -r sha; do
+            [ -n "$sha" ] || continue
+            prs=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls" \
+              --jq '.[] | select(.merged_at != null) | select(any(.labels[]; .name == "api-break-approved")) | [.number, .base.ref, .merge_commit_sha] | @tsv') || exit 2
+            while IFS=$'\t' read -r number base merge; do
+              if [ "$base" = "$GITHUB_REF_NAME" ] && [ -n "$merge" ] && grep -Fxq "$merge" <<< "$commits"; then
+                approved="${approved} #${number}"
+              fi
+            done <<< "$prs"
+          done <<< "$commits"
+          approved=$(echo "$approved" | xargs -n1 2>/dev/null | sort -u | xargs)
+          if [ -n "$approved" ]; then
+            echo "::warning::Breaking API changes approved with the api-break-approved label on: ${approved}"
+            exit 0
+          fi
+          echo "::error::Release blocked: the public API breaks compatibility with ${tag}. If intended, label the PR that made the change api-break-approved (or re-run this workflow manually with api_break_approved), then re-run."
+          exit 1
+
   release:
     name: Version & release (${{ github.ref_name }})
-    needs: gate
+    needs: [gate, api-compat]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

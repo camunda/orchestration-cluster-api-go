@@ -34,6 +34,7 @@ them here:
 | `client/` | **Generated.** REST client from `openapi-generator`. Never hand-edit. |
 | `pb/` | **Generated.** gRPC stubs from `buf`. Never hand-edit. |
 | `cmd/facadegen/` | The AST-based facade and re-export generator. Primary edit surface for facade and re-export output. |
+| `tools/apicompat/` | Stable-branch API compatibility checker (separate module, so its `golang.org/x/exp` dependency never reaches SDK consumers). |
 | `scripts/generate.sh` | Pipeline orchestrator: bundle → fetch-proto → openapi-generator → buf → post-process → gofmt → build. |
 | `scripts/bundle-spec.sh`, `scripts/fetch-proto.sh` | Fetch the OpenAPI spec and `gateway.proto` (pinned to `$SPEC_REF`). |
 | `scripts/postprocess.py`, `scripts/hooks/` | Numbered post-processing hooks: Domain Type System, semantic field types, generator-quirk fixes, version-skew tolerance, then the facade (delegates to `cmd/facadegen`). Primary edit surface for fixing generated output. |
@@ -132,6 +133,31 @@ pkg.go.dev indexes the tag. Never push a release tag by hand.
   whose major disagrees with the module path. A `BREAKING CHANGE:` footer would cause
   exactly that, so CI's `breaking-change-guard` rejects it unless the PR carries the
   `breaking-change-approved` label.
+
+### API compatibility on stable branches
+
+`stable/N` regenerates from upstream `stable/8.N`, so spec drift can change the public
+API with no one reviewing it (e.g. a field going from `T` to a `Nullable` wrapper).
+`tools/apicompat` compares the public packages (not `internal/`, `cmd/`, `examples/`)
+with the newest non-prerelease `vN.x.y` on proxy.golang.org, using `apidiff` in module
+mode. Removed or changed types, funcs, methods, fields and constant values fail it, as
+does a new method on an exported interface; additions pass. No `N.x` release yet passes
+with a notice. The baseline module path comes from the published release's own go.mod,
+not the working tree, so renaming the module path on a stable branch is itself reported
+as a break (it is one: importers of the old path stop resolving). Exit codes:
+0 compatible, 1 breaking (each break listed), 2 setup error.
+
+- `make api-compat` checks the working tree against the newest release of its module
+  path's major (`API_COMPAT_ARGS="--baseline-version 10.0.0"` to pick one).
+- The `API compatibility` check (`api-compat.yml`) runs on PRs to `stable/**`. If a
+  break is intended, label the PR `api-break-approved`: the check still lists the breaks
+  but passes.
+- `release.yml` repeats the check on `stable/**` before semantic-release tags. It passes
+  if any PR merged since the baseline tag carries `api-break-approved`, or on a manual
+  run with the `api_break_approved` input (for drift no PR introduced). The proxy's
+  version list can lag a just-pushed tag (golang/go#75191), so the release job fails
+  closed (a setup error, not a pass) when git already holds a newer stable tag for the
+  major than the proxy returned — re-run once the proxy has indexed it.
 
 When `main` moves to a new server line, cut `stable/N` first, then on `main`:
 `go mod edit -module` to the next `/vN`, rewrite the Go import strings, update the
