@@ -33,6 +33,10 @@ type CamundaClient struct {
 	clock  Clock
 	random Random
 
+	// pool is the SDK-owned base transport, sized from job-worker capacity;
+	// nil when the user supplied WithTransport / WithHTTPClient.
+	pool *sizedTransport
+
 	// FALCON (nanobpmn command-stream) state, lazily resolved and shared for the
 	// client's lifetime. falconMu guards a probe that caches a definitive result
 	// (nano detected, or confirmed stock) but retries after a transient failure;
@@ -77,6 +81,11 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	if err != nil {
 		return nil, err
 	}
+	var pool *sizedTransport
+	if tr, ok := base.(*http.Transport); ok && cfg.Transport == nil {
+		pool = newSizedTransport(tr, cfg.MaxIdleConnsPinned, cfg.MaxIdleConnsPerHostPinned)
+		base = pool
+	}
 	bp := backpressure.New(backpressureProfile(cfg.BackpressureProfile), clk)
 
 	rt := transport.New(transport.Options{
@@ -107,6 +116,7 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 		bp:     bp,
 		clock:  clk,
 		random: rnd,
+		pool:   pool,
 	}, nil
 }
 

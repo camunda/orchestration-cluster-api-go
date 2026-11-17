@@ -222,17 +222,36 @@ precedence over both.
 | --- | --- | --- |
 | `CAMUNDA_FALCON` | `true` | Enable the FALCON command-stream transport upgrade when the gateway advertises it. |
 | `CAMUNDA_FORCE_REST` | — | Force the pure-REST path even when the gateway advertises FALCON. |
-| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` | `256` | Max idle (keep-alive) HTTP connections across all hosts. |
-| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` | `256` | Max idle (keep-alive) HTTP connections per host. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` | `256`, grown to fit workers | Max idle (keep-alive) HTTP connections across all hosts. Setting it pins the value. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` | `256`, grown to fit workers | Max idle (keep-alive) HTTP connections per host. Setting it pins the value. |
 
 The SDK never uses `http.DefaultTransport` directly: it clones it and sizes the
 idle-connection pool for job-worker workloads. Go's default pool keeps only 2
 idle connections per host, so a worker with many jobs in flight otherwise opens
 and closes a TCP connection per call — churning sockets into `TIME_WAIT`,
 exhausting ephemeral ports, and roughly halving throughput at moderate
+<<<<<<< HEAD
 concurrency. Size `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` to at least the sum
 of your workers' `WithMaxConcurrentJobs` plus their pollers when running many
 workers against one gateway.
+=======
+concurrency.
+
+The 256 default is a floor: each time you create a job worker (`NewJobWorker`
+or `NewStreamJobWorker`) the SDK grows the pool so it covers the sum of all the
+client's workers' `MaxConcurrentJobs` plus one activation poll per worker. For
+example, 50 workers × 32 concurrent jobs raises both limits to 1,650. The pool
+is resized by swapping in a resized clone of the SDK's own transport, so
+in-flight requests are never disturbed. The pool never shrinks.
+
+Explicit settings always win: a value set through
+`CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS(_PER_HOST)` or `WithMaxIdleConns(PerHost)` pins
+that limit and turns off automatic growth for it. A transport supplied with
+`WithTransport` / `WithHTTPClient` is never touched. When pinning
+`CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST`, remember that
+`CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` caps the idle pool across all hosts, so raise
+it too (or set `0` for no global limit).
+>>>>>>> 58ff322 (fix: size the HTTP idle pool from job workers' in-flight capacity (#197))
 
 For full control, supply your own HTTP plumbing:
 

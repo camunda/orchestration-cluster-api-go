@@ -187,6 +187,7 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 	for _, o := range opts {
 		o(w)
 	}
+	c.registerWorkerCapacity(w.maxConcurrent)
 	w.startupDelay = startupJitter(c.random, wd.StartupJitterMaxSeconds)
 	return w
 }
