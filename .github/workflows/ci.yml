@@ -36,6 +36,9 @@ jobs:
         run: go build ./...
       - name: Test
         run: go test -race ./...
+      # tools/apicompat is its own module, so ./... above doesn't reach it.
+      - name: Test API compatibility checker
+        run: GOWORK=off go -C tools/apicompat test -race ./...
 
   lint:
     name: golangci-lint
