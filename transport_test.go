@@ -170,3 +170,29 @@ func TestWithTransportStaysUnderSDKChain(t *testing.T) {
 		t.Error("expected the SDK auth layer to set an Authorization header above the user transport")
 	}
 }
+
+// Explicit env pool values are preserved (not replaced by the default) so that
+// negatives are rejected and zero matches the equivalent option.
+func TestHTTPPoolEnvExplicitValuesPreserved(t *testing.T) {
+	for _, key := range []string{"CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS", "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST"} {
+		t.Run(key+"=-1", func(t *testing.T) {
+			_, err := loadConfig(envFrom(map[string]string{key: "-1"}), nil)
+			if !errors.Is(err, ErrConfig) {
+				t.Fatalf("expected ErrConfig for negative %s, got %v", key, err)
+			}
+		})
+		t.Run(key+"=0", func(t *testing.T) {
+			cfg, err := loadConfig(envFrom(map[string]string{key: "0"}), nil)
+			if err != nil {
+				t.Fatalf("loadConfig: %v", err)
+			}
+			got := cfg.MaxIdleConns
+			if key == "CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST" {
+				got = cfg.MaxIdleConnsPerHost
+			}
+			if got != 0 {
+				t.Fatalf("%s=0 resolved to %d, want 0", key, got)
+			}
+		})
+	}
+}
