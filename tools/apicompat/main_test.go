@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -118,6 +120,156 @@ func TestRunSetupErrorsExitTwo(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			if code, _ := runApicompat(t, args...); code != exitError {
 				t.Errorf("exit %d, want 2", code)
+			}
+		})
+	}
+}
+
+type workflowFixture struct {
+	checkerCode      int
+	reportError      bool
+	summaryError     bool
+	approved         bool
+	dispatchApproved bool
+	prs              string
+}
+
+func runWorkflowCheck(t *testing.T, workflow string, fixture workflowFixture) int {
+	t.Helper()
+	content, err := os.ReadFile(filepath.Join("..", "..", ".github", "workflows", workflow))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, step, found := strings.Cut(string(content), "- name: Check API compatibility\n")
+	if !found {
+		t.Fatal("missing compatibility step")
+	}
+	_, block, found := strings.Cut(step, "        run: |\n")
+	if !found {
+		t.Fatal("missing compatibility shell block")
+	}
+	var script strings.Builder
+	for _, line := range strings.Split(block, "\n") {
+		if line != "" && !strings.HasPrefix(line, "          ") {
+			break
+		}
+		script.WriteString(strings.TrimPrefix(line, "          ") + "\n")
+	}
+	temp := t.TempDir()
+	for name, body := range map[string]string{
+		"go": "exit 0\n",
+		"apicompat": `if [ "$1" = "--print-baseline-major" ]; then
+  printf '10.0.6\n'
+  exit 0
+fi
+printf 'fixture report\n'
+exit "$CHECKER_CODE"
+`,
+		"git": `case "$1" in
+  rev-parse) exit 0 ;;
+  log) printf 'checked-commit\n' ;;
+  *) exit 2 ;;
+esac
+`,
+		"gh": "printf '%s\\n' \"$PR_RECORDS\"\n",
+	} {
+		if err := os.WriteFile(filepath.Join(temp, name), []byte("#!/bin/sh\n"+body), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if fixture.reportError {
+		if err := os.Mkdir(filepath.Join(temp, "apicompat.txt"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	summary := filepath.Join(temp, "summary.txt")
+	if fixture.summaryError {
+		summary = temp
+	}
+	command := exec.Command("bash", "-e", "-s")
+	command.Stdin = strings.NewReader(script.String())
+	command.Env = append(os.Environ(),
+		"PATH="+temp+string(os.PathListSeparator)+os.Getenv("PATH"),
+		"RUNNER_TEMP="+temp,
+		"GITHUB_STEP_SUMMARY="+summary,
+		"BASE_REF=stable/10",
+		"GITHUB_REF_NAME=stable/10",
+		"GITHUB_REPOSITORY=fixture/sdk",
+		fmt.Sprintf("CHECKER_CODE=%d", fixture.checkerCode),
+		fmt.Sprintf("APPROVED=%t", fixture.approved),
+		fmt.Sprintf("DISPATCH_APPROVED=%t", fixture.dispatchApproved),
+		"PR_RECORDS="+fixture.prs,
+	)
+	output, err := command.CombinedOutput()
+	if err != nil {
+		if _, ok := err.(*exec.ExitError); !ok {
+			t.Fatal(err)
+		}
+	}
+	t.Logf("%s exit %d: %s", workflow, command.ProcessState.ExitCode(), output)
+	return command.ProcessState.ExitCode()
+}
+
+func TestWorkflowReportErrorsCannotBeApproved(t *testing.T) {
+	for _, workflow := range []string{"api-compat.yml", "release.yml"} {
+		for _, checkerCode := range []int{0, 1, 2} {
+			for _, failure := range []string{"report", "summary"} {
+				t.Run(fmt.Sprintf("%s/%s/exit%d", workflow, failure, checkerCode), func(t *testing.T) {
+					code := runWorkflowCheck(t, workflow, workflowFixture{
+						checkerCode:      checkerCode,
+						reportError:      failure == "report",
+						summaryError:     failure == "summary",
+						approved:         true,
+						dispatchApproved: true,
+					})
+					if code != exitError {
+						t.Errorf("report failure exited %d, want setup error 2", code)
+					}
+				})
+			}
+		}
+	}
+}
+
+func TestWorkflowApprovalExitCodes(t *testing.T) {
+	for _, workflow := range []string{"api-compat.yml", "release.yml"} {
+		for _, checkerCode := range []int{0, 1, 2} {
+			for _, approved := range []bool{false, true} {
+				t.Run(fmt.Sprintf("%s/exit%d/approved%t", workflow, checkerCode, approved), func(t *testing.T) {
+					code := runWorkflowCheck(t, workflow, workflowFixture{
+						checkerCode: checkerCode, approved: approved, dispatchApproved: approved,
+					})
+					want := checkerCode
+					if checkerCode == exitBreaking && approved {
+						want = exitCompatible
+					}
+					if code != want {
+						t.Errorf("exit %d, want %d", code, want)
+					}
+				})
+			}
+		}
+	}
+}
+
+func TestReleaseApprovalRequiresTargetBranchAndCheckedMerge(t *testing.T) {
+	for _, scenario := range []struct {
+		name string
+		prs  string
+		want int
+	}{
+		{"none", "", exitBreaking},
+		{"main", "123\tmain\tchecked-commit", exitBreaking},
+		{"other stable", "123\tstable/9\tchecked-commit", exitBreaking},
+		{"outside range", "123\tstable/10\tolder-commit", exitBreaking},
+		{"missing merge", "123\tstable/10\t", exitBreaking},
+		{"target merge", "123\tstable/10\tchecked-commit", exitCompatible},
+		{"mixed", "123\tmain\tchecked-commit\n124\tstable/10\tchecked-commit", exitCompatible},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			code := runWorkflowCheck(t, "release.yml", workflowFixture{checkerCode: exitBreaking, prs: scenario.prs})
+			if code != scenario.want {
+				t.Errorf("exit %d, want %d", code, scenario.want)
 			}
 		})
 	}

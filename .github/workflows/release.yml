@@ -98,25 +98,33 @@ jobs:
             exit 2
           }
           echo "Baseline: ${tag}"
-          rc=0
-          "$RUNNER_TEMP/apicompat" --baseline-version "$version" | tee "$RUNNER_TEMP/apicompat.txt" || rc=$?
+          pipeline_status=(0 0)
+          "$RUNNER_TEMP/apicompat" --baseline-version "$version" | tee "$RUNNER_TEMP/apicompat.txt" || pipeline_status=("${PIPESTATUS[@]}")
+          [ "${pipeline_status[1]}" -eq 0 ] || exit 2
+          rc="${pipeline_status[0]}"
           {
             echo '## API compatibility'
             echo '```'
-            cat "$RUNNER_TEMP/apicompat.txt"
+            cat "$RUNNER_TEMP/apicompat.txt" || exit 2
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } >> "$GITHUB_STEP_SUMMARY" || exit 2
           [ "$rc" -eq 1 ] || exit "$rc"
           if [ "$DISPATCH_APPROVED" = "true" ]; then
             echo "::warning::Breaking API changes approved by the api_break_approved input of this run."
             exit 0
           fi
           approved=""
+          commits=$(git log --format=%H "${tag}..HEAD") || exit 2
           while read -r sha; do
+            [ -n "$sha" ] || continue
             prs=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls" \
-              --jq '.[] | select(.merged_at != null) | select(any(.labels[]; .name == "api-break-approved")) | "#\(.number)"') || exit 2
-            approved="${approved} ${prs}"
-          done < <(git log --format=%H "${tag}..HEAD")
+              --jq '.[] | select(.merged_at != null) | select(any(.labels[]; .name == "api-break-approved")) | [.number, .base.ref, .merge_commit_sha] | @tsv') || exit 2
+            while IFS=$'\t' read -r number base merge; do
+              if [ "$base" = "$GITHUB_REF_NAME" ] && [ -n "$merge" ] && grep -Fxq "$merge" <<< "$commits"; then
+                approved="${approved} #${number}"
+              fi
+            done <<< "$prs"
+          done <<< "$commits"
           approved=$(echo "$approved" | xargs -n1 2>/dev/null | sort -u | xargs)
           if [ -n "$approved" ]; then
             echo "::warning::Breaking API changes approved with the api-break-approved label on: ${approved}"

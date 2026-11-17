@@ -48,17 +48,19 @@ jobs:
           APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'api-break-approved') }}
         run: |
           set -uo pipefail
-          rc=0
-          "$RUNNER_TEMP/apicompat" --baseline-major "${BASE_REF#stable/}" | tee "$RUNNER_TEMP/apicompat.txt" || rc=$?
+          pipeline_status=(0 0)
+          "$RUNNER_TEMP/apicompat" --baseline-major "${BASE_REF#stable/}" | tee "$RUNNER_TEMP/apicompat.txt" || pipeline_status=("${PIPESTATUS[@]}")
+          [ "${pipeline_status[1]}" -eq 0 ] || exit 2
+          rc="${pipeline_status[0]}"
           {
             echo '## API compatibility'
             echo '```'
-            cat "$RUNNER_TEMP/apicompat.txt"
+            cat "$RUNNER_TEMP/apicompat.txt" || exit 2
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } >> "$GITHUB_STEP_SUMMARY" || exit 2
           if [ "$rc" -eq 1 ] && [ "$APPROVED" = "true" ]; then
             echo "::warning::Breaking API changes approved with the api-break-approved label."
-            echo "Approved with the \`api-break-approved\` label." >> "$GITHUB_STEP_SUMMARY"
+            echo "Approved with the \`api-break-approved\` label." >> "$GITHUB_STEP_SUMMARY" || exit 2
             exit 0
           fi
           if [ "$rc" -eq 1 ]; then
