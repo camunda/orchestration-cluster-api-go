@@ -212,6 +212,7 @@ type workflowFixture struct {
 	prs              string
 	gitTags          string // newline-separated tags `git tag --list` returns
 	noBaseline       bool   // the proxy lists no release for the major
+	renamedModule    bool
 	gitLog           string // newline-separated `git log` commits, newest first (default: HEAD)
 	gitHead          string // `git rev-parse HEAD` (default: checked-commit)
 	sinceCode        int    // exit of the comparison with the newest approved merge
@@ -250,6 +251,7 @@ func runWorkflow(t *testing.T, workflow string, fixture workflowFixture) (int, s
 	for name, body := range map[string]string{
 		"go": "exit 0\n",
 		"apicompat": `if [ "$1" = "--print-baseline-major" ]; then
+  if [ "$RENAMED_MODULE" = true ] && [ "${3-} ${4-}" != "--repo .api-compat-base" ]; then exit 0; fi
   [ "$NO_BASELINE" = "true" ] || printf '10.0.6\n'
   exit 0
 fi
@@ -303,6 +305,7 @@ esac
 		"PR_RECORDS="+fixture.prs,
 		"GIT_TAGS="+fixture.gitTags,
 		fmt.Sprintf("NO_BASELINE=%t", fixture.noBaseline),
+		fmt.Sprintf("RENAMED_MODULE=%t", fixture.renamedModule),
 		"GIT_LOG="+fixture.gitLog,
 		"GIT_HEAD="+fixture.gitHead,
 		fmt.Sprintf("SINCE_CODE=%d", fixture.sinceCode),
@@ -424,6 +427,9 @@ func TestReleaseApprovalCoversTheAPIUpToItsMerge(t *testing.T) {
 // The PR check compares a PR with its base branch, not the last release, so an
 // approved break already merged does not fail every later PR.
 func TestPullRequestComparesWithTheBaseBranch(t *testing.T) {
+	if code := runWorkflowCheck(t, "api-compat.yml", workflowFixture{renamedModule: true, checkerCode: exitBreaking}); code != exitBreaking {
+		t.Errorf("renaming a published module: exit %d, want %d", code, exitBreaking)
+	}
 	code, calls := runWorkflow(t, "api-compat.yml", workflowFixture{checkerCode: exitCompatible})
 	if code != exitCompatible || !strings.Contains(calls, "--baseline-dir .api-compat-base") {
 		t.Errorf("exit %d, calls:\n%s\nwant 0 comparing with .api-compat-base", code, calls)
