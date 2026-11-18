@@ -214,7 +214,8 @@ type workflowFixture struct {
 	noBaseline       bool   // the proxy lists no release for the major
 	renamedModule    bool
 	gitLog           string // newline-separated `git log` commits, newest first (default: HEAD)
-	gitDiverged      string // commits in tag..HEAD that do not descend from the tag
+	gitDiverged      string // commits in tag..HEAD that are not on HEAD's first-parent line
+	tagOffFirstLine  bool   // the tag is reachable from HEAD only through a second parent
 	gitHead          string // `git rev-parse HEAD` (default: checked-commit)
 	sinceCode        int    // exit of the comparison with the newest approved merge
 }
@@ -262,9 +263,10 @@ printf 'fixture report\n'
 exit "$CHECKER_CODE"
 `,
 		"git": `case "$1" in
-  rev-parse) [ "$2" = HEAD ] && printf '%s\n' "$GIT_HEAD"; exit 0 ;;
+  rev-parse) case "$*" in *'^{commit}'*) printf 'tag-commit\n' ;; *) [ "$2" = HEAD ] && printf '%s\n' "$GIT_HEAD" ;; esac; exit 0 ;;
+  rev-list) printf '%s\n' "$GIT_LOG"; [ "$TAG_OFF_FIRST_LINE" = true ] || printf 'tag-commit\n' ;;
   log) printf '%s\n' "$GIT_LOG"
-    case " $* " in *' --ancestry-path '*) ;; *) [ -z "$GIT_DIVERGED" ] || printf '%s\n' "$GIT_DIVERGED" ;; esac ;;
+    case " $* " in *' --first-parent '*) ;; *) [ -z "$GIT_DIVERGED" ] || printf '%s\n' "$GIT_DIVERGED" ;; esac ;;
   tag) printf '%s\n' "$GIT_TAGS" | grep . | sort -Vr ;;
   worktree) echo "git $*" >> "$CALLS" ;;
   *) exit 2 ;;
@@ -310,6 +312,7 @@ esac
 		fmt.Sprintf("RENAMED_MODULE=%t", fixture.renamedModule),
 		"GIT_LOG="+fixture.gitLog,
 		"GIT_DIVERGED="+fixture.gitDiverged,
+		fmt.Sprintf("TAG_OFF_FIRST_LINE=%t", fixture.tagOffFirstLine),
 		"GIT_HEAD="+fixture.gitHead,
 		fmt.Sprintf("SINCE_CODE=%d", fixture.sinceCode),
 		"CALLS="+calls,
@@ -397,6 +400,19 @@ func TestReleaseApprovalIgnoresMergesOutsideThePublishedHistory(t *testing.T) {
 		checkerCode: exitBreaking,
 		prs:         "123\tstable/10\tdiverged-commit",
 		gitDiverged: "diverged-commit",
+	})
+	if code != exitBreaking {
+		t.Errorf("exit %d, want %d", code, exitBreaking)
+	}
+}
+
+// A reset release branch that merged the published history back in: every later merge
+// descends from the tag, but none was made on the line the tag was released from.
+func TestReleaseApprovalRequiresTheTagOnTheFirstParentLine(t *testing.T) {
+	code := runWorkflowCheck(t, "release.yml", workflowFixture{
+		checkerCode:     exitBreaking,
+		prs:             "123\tstable/10\tchecked-commit",
+		tagOffFirstLine: true,
 	})
 	if code != exitBreaking {
 		t.Errorf("exit %d, want %d", code, exitBreaking)
