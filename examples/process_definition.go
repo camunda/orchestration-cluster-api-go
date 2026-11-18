@@ -130,7 +130,7 @@ func suspendProcessDefinitionsExample(ctx context.Context, client *camunda.Camun
 	if err != nil {
 		return err
 	}
-	if key, ok := result.GetBatchOperationKeyOk(); ok {
+	if key, ok := result.GetBatchOperationKeyOk(); ok && key != nil {
 		fmt.Printf("Batch operation: %s\n", *key)
 	}
 	// endregion SuspendProcessDefinitions
