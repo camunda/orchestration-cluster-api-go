@@ -1,10 +1,11 @@
 name: API compatibility
 
-# Blocks PRs to stable branches whose public Go API would stop customer code compiled
-# against the last release of that major from compiling (see tools/apicompat). When a
-# break is intended (e.g. a bug fix that must change the API), apply the
+# Blocks PRs to stable branches that change the public Go API in a way that stops customer
+# code from compiling (see tools/apicompat). A PR is compared with its base branch, so it
+# answers only for its own changes: an approved break already merged does not fail every
+# later PR. When a break is intended (e.g. a bug fix that must change the API), apply the
 # `api-break-approved` label: the check still runs and lists the breaks, but passes. The
-# release workflow repeats the check on the code it is about to tag.
+# release workflow compares the code it is about to tag with the last release.
 
 on:
   pull_request:
@@ -30,6 +31,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      - name: Check out the base branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .api-compat-base
+          persist-credentials: false
       - uses: actions/setup-go@v6
         with:
           go-version-file: tools/apicompat/go.mod
@@ -42,14 +49,19 @@ jobs:
 
       - name: Check API compatibility
         env:
-          # stable/<N>: compared with the newest published N.x.y. A branch with no N.x
-          # release yet (just cut from main) has nothing to compare with and passes.
+          # stable/<N> with no N.x release yet (just cut from main) has no published API
+          # to protect and passes.
           BASE_REF: ${{ github.base_ref }}
           APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'api-break-approved') }}
         run: |
           set -uo pipefail
+          released=$("$RUNNER_TEMP/apicompat" --print-baseline-major "${BASE_REF#stable/}" --repo .api-compat-base) || exit 2
+          if [ -z "$released" ]; then
+            echo "::notice::No ${BASE_REF#stable/}.x release published yet; nothing to protect."
+            exit 0
+          fi
           pipeline_status=(0 0)
-          "$RUNNER_TEMP/apicompat" --baseline-major "${BASE_REF#stable/}" | tee "$RUNNER_TEMP/apicompat.txt" || pipeline_status=("${PIPESTATUS[@]}")
+          "$RUNNER_TEMP/apicompat" --baseline-dir .api-compat-base | tee "$RUNNER_TEMP/apicompat.txt" || pipeline_status=("${PIPESTATUS[@]}")
           [ "${pipeline_status[1]}" -eq 0 ] || exit 2
           rc="${pipeline_status[0]}"
           {
