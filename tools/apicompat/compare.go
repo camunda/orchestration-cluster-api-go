@@ -40,10 +40,11 @@ func modulePath(ctx context.Context, dir string) (string, error) {
 	return strings.TrimSpace(string(out)), nil
 }
 
-// compareWithRelease downloads modPath@version through the go command (so
-// GOPROXY, GOSUMDB and GOFLAGS apply) and returns the changes in dir that are
-// incompatible with it.
-func compareWithRelease(ctx context.Context, modPath, version, dir string) ([]string, error) {
+// compareWithRelease downloads modPath@version through the go command from proxy
+// (the same proxy the version and go.mod were resolved from, so a baseline that
+// resolves also downloads; GOSUMDB and GOFLAGS still apply) and returns the
+// changes in dir that are incompatible with it.
+func compareWithRelease(ctx context.Context, proxy, modPath, version, dir string) ([]string, error) {
 	tmp, err := os.MkdirTemp("", "apicompat-")
 	if err != nil {
 		return nil, err
@@ -52,7 +53,7 @@ func compareWithRelease(ctx context.Context, modPath, version, dir string) ([]st
 
 	cmd := exec.CommandContext(ctx, "go", "mod", "download", "-json", modPath+"@"+version)
 	cmd.Dir = tmp
-	cmd.Env = goEnv()
+	cmd.Env = append(goEnv(), "GOPROXY="+proxy)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	out, runErr := cmd.Output()
@@ -66,13 +67,19 @@ func compareWithRelease(ctx context.Context, modPath, version, dir string) ([]st
 	if err := copyTree(dl.Dir, oldDir); err != nil {
 		return nil, err
 	}
-	return compareDirs(oldDir, dir)
+	// Its dependencies resolve from the same proxy, or a baseline that downloads can
+	// still fail to load.
+	return compareDirsEnv(oldDir, dir, "GOPROXY="+proxy)
 }
 
 // compareDirs returns the changes in the public API of the module in newDir that
 // are incompatible with the module in oldDir, one apidiff message each.
 func compareDirs(oldDir, newDir string) ([]string, error) {
-	oldMod, err := loadModule(oldDir)
+	return compareDirsEnv(oldDir, newDir)
+}
+
+func compareDirsEnv(oldDir, newDir string, oldEnv ...string) ([]string, error) {
+	oldMod, err := loadModule(oldDir, oldEnv...)
 	if err != nil {
 		return nil, fmt.Errorf("loading baseline: %w", err)
 	}
@@ -96,10 +103,10 @@ func compareDirs(oldDir, newDir string) ([]string, error) {
 	return breaks, nil
 }
 
-func loadModule(dir string) (*apidiff.Module, error) {
+func loadModule(dir string, env ...string) (*apidiff.Module, error) {
 	cfg := &packages.Config{
 		Dir:  dir,
-		Env:  goEnv(),
+		Env:  append(goEnv(), env...),
 		Fset: token.NewFileSet(),
 		Mode: packages.NeedName | packages.NeedTypes | packages.NeedModule,
 	}

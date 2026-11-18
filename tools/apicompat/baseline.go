@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/mod/modfile"
 	"golang.org/x/mod/module"
 	"golang.org/x/mod/semver"
 )
@@ -58,6 +59,43 @@ func latestRelease(ctx context.Context, proxy, modPath string, major int) (strin
 		return "", fmt.Errorf("listing versions of %s: %w", modPath, err)
 	}
 	return newestRelease(strings.Fields(string(body)), major), nil
+}
+
+// publishedModulePath returns the module path declared by the go.mod the proxy
+// serves for modPath@vversion — trusted metadata about what was actually
+// published. Deriving the baseline path from the working tree instead would let
+// a stable-branch change that renames the module path (and rewrites its imports)
+// resolve an unpublished new path, find no baseline, and pass both gates while
+// every existing importer breaks. The published path is the ground truth.
+func publishedModulePath(ctx context.Context, proxy, modPath, version string) (string, error) {
+	escaped, err := module.EscapePath(modPath)
+	if err != nil {
+		return "", err
+	}
+	url := strings.TrimSuffix(proxy, "/") + "/" + escaped + "/@v/v" + version + ".mod"
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("fetching %s@v%s go.mod: %w", modPath, version, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("fetching %s@v%s go.mod: GET %s: %s", modPath, version, url, resp.Status)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("fetching %s@v%s go.mod: %w", modPath, version, err)
+	}
+	path := modfile.ModulePath(body)
+	if path == "" {
+		return "", fmt.Errorf("%s@v%s go.mod declares no module path", modPath, version)
+	}
+	return path, nil
 }
 
 func newestRelease(versions []string, major int) string {
