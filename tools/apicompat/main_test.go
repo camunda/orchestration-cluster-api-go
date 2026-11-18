@@ -214,6 +214,7 @@ type workflowFixture struct {
 	noBaseline       bool   // the proxy lists no release for the major
 	renamedModule    bool
 	gitLog           string // newline-separated `git log` commits, newest first (default: HEAD)
+	gitDiverged      string // commits in tag..HEAD that do not descend from the tag
 	gitHead          string // `git rev-parse HEAD` (default: checked-commit)
 	sinceCode        int    // exit of the comparison with the newest approved merge
 }
@@ -262,7 +263,8 @@ exit "$CHECKER_CODE"
 `,
 		"git": `case "$1" in
   rev-parse) [ "$2" = HEAD ] && printf '%s\n' "$GIT_HEAD"; exit 0 ;;
-  log) printf '%s\n' "$GIT_LOG" ;;
+  log) printf '%s\n' "$GIT_LOG"
+    case " $* " in *' --ancestry-path '*) ;; *) [ -z "$GIT_DIVERGED" ] || printf '%s\n' "$GIT_DIVERGED" ;; esac ;;
   tag) printf '%s\n' "$GIT_TAGS" | grep . | sort -Vr ;;
   worktree) echo "git $*" >> "$CALLS" ;;
   *) exit 2 ;;
@@ -307,6 +309,7 @@ esac
 		fmt.Sprintf("NO_BASELINE=%t", fixture.noBaseline),
 		fmt.Sprintf("RENAMED_MODULE=%t", fixture.renamedModule),
 		"GIT_LOG="+fixture.gitLog,
+		"GIT_DIVERGED="+fixture.gitDiverged,
 		"GIT_HEAD="+fixture.gitHead,
 		fmt.Sprintf("SINCE_CODE=%d", fixture.sinceCode),
 		"CALLS="+calls,
@@ -384,6 +387,19 @@ func TestReleaseApprovalRequiresTargetBranchAndCheckedMerge(t *testing.T) {
 				t.Errorf("exit %d, want %d", code, scenario.want)
 			}
 		})
+	}
+}
+
+// After a stable branch reset, tag..HEAD also lists commits from a history that
+// diverged before the published tag; a label merged there must not approve a release.
+func TestReleaseApprovalIgnoresMergesOutsideThePublishedHistory(t *testing.T) {
+	code := runWorkflowCheck(t, "release.yml", workflowFixture{
+		checkerCode: exitBreaking,
+		prs:         "123\tstable/10\tdiverged-commit",
+		gitDiverged: "diverged-commit",
+	})
+	if code != exitBreaking {
+		t.Errorf("exit %d, want %d", code, exitBreaking)
 	}
 }
 
