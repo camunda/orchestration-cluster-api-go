@@ -134,6 +134,34 @@ func TestRunRenamedModulePathIsBreaking(t *testing.T) {
 	}
 }
 
+// The baseline's dependencies resolve through --proxy too, not the ambient GOPROXY:
+// otherwise a baseline that downloads still fails to load (#195 review).
+func TestRunLoadsTheBaselineThroughTheSelectedProxy(t *testing.T) {
+	proxyDir := t.TempDir()
+	publishModule(t, proxyDir, "example.com/dep", "v1.0.0", map[string]string{
+		"go.mod": "module example.com/dep\n\ngo 1.26\n",
+		"dep.go": "package dep\n\ntype Thing struct{}\n",
+	})
+	files := applyEdits(t, []edit{
+		{"go.mod", "go 1.26\n", "go 1.26\n\nrequire example.com/dep v1.0.0\n"},
+		{"sdk.go", `import "example.com/sdk/v2/client"`, "import (\n\t\"example.com/dep\"\n\t\"example.com/sdk/v2/client\"\n)\n\nvar _ dep.Thing"},
+	})
+	publish(t, proxyDir, "v2.1.0", files)
+	srv := httptest.NewServer(http.FileServer(http.Dir(proxyDir)))
+	t.Cleanup(srv.Close)
+	t.Setenv("GOPROXY", "off")
+	t.Setenv("GOSUMDB", "off")
+	t.Setenv("GOMODCACHE", t.TempDir())
+	// The fixtures carry no go.sum; let the go command record the sums it fetches.
+	t.Setenv("GOFLAGS", "-modcacherw -mod=mod")
+
+	// The working tree's own dependencies are the caller's to provide; the baseline
+	// load fetches the shared one first, so the cache serves both.
+	if code, _ := runApicompat(t, "--repo", writeModule(t, files), "--proxy", srv.URL, "--baseline-version", "2.1.0"); code != exitCompatible {
+		t.Errorf("identical tree exited %d, want 0", code)
+	}
+}
+
 func TestRunAgainstABaselineDirectory(t *testing.T) {
 	base := writeModule(t, baseModule)
 	compatible := writeModule(t, applyEdits(t, []edit{{"sdk.go", "", "\nfunc Added() {}\n"}}))
