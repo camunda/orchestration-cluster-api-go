@@ -85,10 +85,25 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "apicompat: baseline %q: %v\n", version, err)
 		return exitError
 	}
-	baselinePath := majorModulePath(modPath, major)
+	// Resolve the baseline module path from the published release's own go.mod,
+	// not from the working tree: a stable-branch change that renames the module
+	// path (and rewrites its imports) would otherwise look the new path up, find
+	// no published baseline, and pass while every existing importer breaks. The
+	// candidate path locates the version; the .mod it serves is the ground truth.
+	candidate := majorModulePath(modPath, major)
+	baselinePath, err := publishedModulePath(ctx, *proxy, candidate, version)
+	if err != nil {
+		fmt.Fprintf(stderr, "apicompat: %v\n", err)
+		return exitError
+	}
+	if baselinePath != modPath {
+		fmt.Fprintf(stdout, "Breaking API changes (1):\n")
+		fmt.Fprintf(stdout, "- module path changed from %s to %s: importers of the published path no longer resolve this module\n", baselinePath, modPath)
+		return exitBreaking
+	}
 	fmt.Fprintf(stdout, "Comparing the public API of %s (working tree) with %s@v%s\n", modPath, baselinePath, version)
 
-	breaks, err := compareWithRelease(ctx, baselinePath, "v"+version, *repo)
+	breaks, err := compareWithRelease(ctx, *proxy, baselinePath, "v"+version, *repo)
 	if err != nil {
 		fmt.Fprintf(stderr, "apicompat: %v\n", err)
 		return exitError
