@@ -55,7 +55,7 @@ jobs:
           APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'api-break-approved') }}
         run: |
           set -uo pipefail
-          released=$("$RUNNER_TEMP/apicompat" --print-baseline-major "${BASE_REF#stable/}") || exit 2
+          released=$("$RUNNER_TEMP/apicompat" --print-baseline-major "${BASE_REF#stable/}" --repo .api-compat-base) || exit 2
           if [ -z "$released" ]; then
             echo "::notice::No ${BASE_REF#stable/}.x release published yet; nothing to protect."
             exit 0
