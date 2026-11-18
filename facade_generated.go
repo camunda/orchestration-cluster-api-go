@@ -2949,6 +2949,17 @@ func (c *CamundaClient) GetStartProcessForm(ctx context.Context, processDefiniti
 	return value, c.wrapError(resp, err)
 }
 
+// ResumeProcessDefinitions calls the ResumeProcessDefinitions operation.
+func (c *CamundaClient) ResumeProcessDefinitions(ctx context.Context, body ProcessDefinitionResumptionInstruction, opts ...func(ApiResumeProcessDefinitionsRequest) ApiResumeProcessDefinitionsRequest) (*ProcessDefinitionResumptionResult, error) {
+	req := c.raw.ProcessDefinitionAPI.ResumeProcessDefinitions(ctx)
+	req = req.ProcessDefinitionResumptionInstruction(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // SearchProcessDefinitionVariableNames calls the SearchProcessDefinitionVariableNames operation.
 //
 // Example:
@@ -2984,6 +2995,17 @@ func (c *CamundaClient) SearchProcessDefinitionVariableNames(ctx context.Context
 func (c *CamundaClient) SearchProcessDefinitions(ctx context.Context, body ProcessDefinitionSearchQuery, opts ...func(ApiSearchProcessDefinitionsRequest) ApiSearchProcessDefinitionsRequest) (*ProcessDefinitionSearchQueryResult, error) {
 	req := c.raw.ProcessDefinitionAPI.SearchProcessDefinitions(ctx)
 	req = req.ProcessDefinitionSearchQuery(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// SuspendProcessDefinitions calls the SuspendProcessDefinitions operation.
+func (c *CamundaClient) SuspendProcessDefinitions(ctx context.Context, body ProcessDefinitionSuspensionInstruction, opts ...func(ApiSuspendProcessDefinitionsRequest) ApiSuspendProcessDefinitionsRequest) (*ProcessDefinitionSuspensionResult, error) {
+	req := c.raw.ProcessDefinitionAPI.SuspendProcessDefinitions(ctx)
+	req = req.ProcessDefinitionSuspensionInstruction(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}
