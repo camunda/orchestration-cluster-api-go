@@ -19,8 +19,13 @@ import (
 // publish lays out files as version of testModPath in a GOPROXY directory.
 func publish(t *testing.T, proxyDir, version string, files map[string]string) {
 	t.Helper()
+	publishModule(t, proxyDir, testModPath, version, files)
+}
+
+func publishModule(t *testing.T, proxyDir, modPath, version string, files map[string]string) {
+	t.Helper()
 	src := writeModule(t, files)
-	dir := filepath.Join(proxyDir, filepath.FromSlash(testModPath), "@v")
+	dir := filepath.Join(proxyDir, filepath.FromSlash(modPath), "@v")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -28,7 +33,7 @@ func publish(t *testing.T, proxyDir, version string, files map[string]string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := modzip.CreateFromDir(zf, module.Version{Path: testModPath, Version: version}, src); err != nil {
+	if err := modzip.CreateFromDir(zf, module.Version{Path: modPath, Version: version}, src); err != nil {
 		t.Fatal(err)
 	}
 	if err := zf.Close(); err != nil {
@@ -129,6 +134,28 @@ func TestRunRenamedModulePathIsBreaking(t *testing.T) {
 	}
 }
 
+func TestRunAgainstABaselineDirectory(t *testing.T) {
+	base := writeModule(t, baseModule)
+	compatible := writeModule(t, applyEdits(t, []edit{{"sdk.go", "", "\nfunc Added() {}\n"}}))
+	breaking := writeModule(t, applyEdits(t, []edit{{"client/client.go", "Username string", "Username *string"}}))
+	renamed := writeModule(t, applyEdits(t, []edit{
+		{"go.mod", "module " + testModPath, "module example.com/sdk/v3"},
+		{"sdk.go", `import "example.com/sdk/v2/client"`, `import "example.com/sdk/v3/client"`},
+	}))
+	if code, _ := runApicompat(t, "--repo", compatible, "--baseline-dir", base); code != exitCompatible {
+		t.Errorf("compatible tree exited %d, want 0", code)
+	}
+	if code, out := runApicompat(t, "--repo", breaking, "--baseline-dir", base); code != exitBreaking || !strings.Contains(out, "Username: changed from string to *string") {
+		t.Errorf("breaking tree = %d %q, want 1 listing the Username change", code, out)
+	}
+	if code, out := runApicompat(t, "--repo", renamed, "--baseline-dir", base); code != exitBreaking || !strings.Contains(out, "module path changed") {
+		t.Errorf("renamed module = %d %q, want 1 reporting the path change", code, out)
+	}
+	if code, _ := runApicompat(t, "--repo", compatible, "--baseline-dir", base, "--baseline-major", "2"); code != exitError {
+		t.Errorf("two modes exited %d, want 2", code)
+	}
+}
+
 func TestRunSetupErrorsExitTwo(t *testing.T) {
 	proxy := fakeProxy(t)
 	repo := writeModule(t, baseModule)
@@ -157,9 +184,20 @@ type workflowFixture struct {
 	prs              string
 	gitTags          string // newline-separated tags `git tag --list` returns
 	noBaseline       bool   // the proxy lists no release for the major
+	gitLog           string // newline-separated `git log` commits, newest first (default: HEAD)
+	gitHead          string // `git rev-parse HEAD` (default: checked-commit)
+	sinceCode        int    // exit of the comparison with the newest approved merge
 }
 
 func runWorkflowCheck(t *testing.T, workflow string, fixture workflowFixture) int {
+	t.Helper()
+	code, _ := runWorkflow(t, workflow, fixture)
+	return code
+}
+
+// runWorkflow runs the workflow's compatibility step against stubs and returns its
+// exit code and the stubbed git/apicompat calls it made.
+func runWorkflow(t *testing.T, workflow string, fixture workflowFixture) (int, string) {
 	t.Helper()
 	content, err := os.ReadFile(filepath.Join("..", "..", ".github", "workflows", workflow))
 	if err != nil {
@@ -187,13 +225,16 @@ func runWorkflowCheck(t *testing.T, workflow string, fixture workflowFixture) in
   [ "$NO_BASELINE" = "true" ] || printf '10.0.6\n'
   exit 0
 fi
+echo "apicompat $*" >> "$CALLS"
+case "$2" in */approved) printf 'since report\n'; exit "$SINCE_CODE" ;; esac
 printf 'fixture report\n'
 exit "$CHECKER_CODE"
 `,
 		"git": `case "$1" in
-  rev-parse) exit 0 ;;
-  log) printf 'checked-commit\n' ;;
+  rev-parse) [ "$2" = HEAD ] && printf '%s\n' "$GIT_HEAD"; exit 0 ;;
+  log) printf '%s\n' "$GIT_LOG" ;;
   tag) printf '%s\n' "$GIT_TAGS" | grep . | sort -Vr ;;
+  worktree) echo "git $*" >> "$CALLS" ;;
   *) exit 2 ;;
 esac
 `,
@@ -212,6 +253,13 @@ esac
 	if fixture.summaryError {
 		summary = temp
 	}
+	calls := filepath.Join(t.TempDir(), "calls")
+	if fixture.gitHead == "" {
+		fixture.gitHead = "checked-commit"
+	}
+	if fixture.gitLog == "" {
+		fixture.gitLog = fixture.gitHead
+	}
 	command := exec.Command("bash", "-e", "-s")
 	command.Stdin = strings.NewReader(script.String())
 	command.Env = append(os.Environ(),
@@ -227,6 +275,10 @@ esac
 		"PR_RECORDS="+fixture.prs,
 		"GIT_TAGS="+fixture.gitTags,
 		fmt.Sprintf("NO_BASELINE=%t", fixture.noBaseline),
+		"GIT_LOG="+fixture.gitLog,
+		"GIT_HEAD="+fixture.gitHead,
+		fmt.Sprintf("SINCE_CODE=%d", fixture.sinceCode),
+		"CALLS="+calls,
 	)
 	output, err := command.CombinedOutput()
 	if err != nil {
@@ -235,7 +287,8 @@ esac
 		}
 	}
 	t.Logf("%s exit %d: %s", workflow, command.ProcessState.ExitCode(), output)
-	return command.ProcessState.ExitCode()
+	recorded, _ := os.ReadFile(calls)
+	return command.ProcessState.ExitCode(), string(recorded)
 }
 
 func TestWorkflowReportErrorsCannotBeApproved(t *testing.T) {
@@ -300,6 +353,55 @@ func TestReleaseApprovalRequiresTargetBranchAndCheckedMerge(t *testing.T) {
 				t.Errorf("exit %d, want %d", code, scenario.want)
 			}
 		})
+	}
+}
+
+// An approval covers the API as of that PR's merge. When the newest approved merge
+// is not HEAD, the gate compares HEAD with it and blocks breaks added since.
+func TestReleaseApprovalCoversTheAPIUpToItsMerge(t *testing.T) {
+	const approvedEarlier = "123\tstable/10\tapproved-commit"
+	history := "checked-commit\napproved-commit"
+	for _, scenario := range []struct {
+		name      string
+		prs       string
+		sinceCode int
+		want      int
+		compares  bool
+	}{
+		{"approval at HEAD", "123\tstable/10\tchecked-commit", 0, exitCompatible, false},
+		{"nothing added since", approvedEarlier, exitCompatible, exitCompatible, true},
+		{"break added since", approvedEarlier, exitBreaking, exitBreaking, true},
+		{"comparison error", approvedEarlier, exitError, exitError, true},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			code, calls := runWorkflow(t, "release.yml", workflowFixture{
+				checkerCode: exitBreaking,
+				prs:         scenario.prs,
+				gitLog:      history,
+				sinceCode:   scenario.sinceCode,
+			})
+			if code != scenario.want {
+				t.Errorf("exit %d, want %d", code, scenario.want)
+			}
+			compared := strings.Contains(calls, "worktree add -q --detach") &&
+				strings.Contains(calls, "approved-commit") &&
+				strings.Contains(calls, "--baseline-dir")
+			if compared != scenario.compares {
+				t.Errorf("compared with the approved merge = %t, want %t; calls:\n%s", compared, scenario.compares, calls)
+			}
+		})
+	}
+}
+
+// The PR check compares a PR with its base branch, not the last release, so an
+// approved break already merged does not fail every later PR.
+func TestPullRequestComparesWithTheBaseBranch(t *testing.T) {
+	code, calls := runWorkflow(t, "api-compat.yml", workflowFixture{checkerCode: exitCompatible})
+	if code != exitCompatible || !strings.Contains(calls, "--baseline-dir .api-compat-base") {
+		t.Errorf("exit %d, calls:\n%s\nwant 0 comparing with .api-compat-base", code, calls)
+	}
+	if code, calls := runWorkflow(t, "api-compat.yml", workflowFixture{noBaseline: true, checkerCode: exitBreaking}); code != exitCompatible || calls != "" {
+		t.Errorf("no release yet: exit %d, calls %q, want 0 without comparing", code, calls)
 	}
 }
 

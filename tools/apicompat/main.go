@@ -36,17 +36,18 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	baselineMajor := fs.Int("baseline-major", -1, "compare against the newest published N.x.y release")
 	baselineVersion := fs.String("baseline-version", "", "compare against this published release (X.Y.Z)")
 	printMajor := fs.Int("print-baseline-major", -1, "print the newest published N.x.y release, or nothing if there is none")
+	baselineDir := fs.String("baseline-dir", "", "compare against the module checked out in this directory")
 	if err := fs.Parse(args); err != nil {
 		return exitError
 	}
 	modes := 0
-	for _, set := range []bool{*baselineMajor >= 0, *baselineVersion != "", *printMajor >= 0} {
+	for _, set := range []bool{*baselineMajor >= 0, *baselineVersion != "", *printMajor >= 0, *baselineDir != ""} {
 		if set {
 			modes++
 		}
 	}
 	if modes != 1 || fs.NArg() != 0 {
-		fmt.Fprintln(stderr, "apicompat: pass exactly one of --baseline-major, --baseline-version or --print-baseline-major")
+		fmt.Fprintln(stderr, "apicompat: pass exactly one of --baseline-major, --baseline-version, --baseline-dir or --print-baseline-major")
 		return exitError
 	}
 
@@ -54,6 +55,24 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		fmt.Fprintf(stderr, "apicompat: %v\n", err)
 		return exitError
+	}
+
+	if *baselineDir != "" {
+		baselinePath, err := modulePath(ctx, *baselineDir)
+		if err != nil {
+			fmt.Fprintf(stderr, "apicompat: %v\n", err)
+			return exitError
+		}
+		if baselinePath != modPath {
+			return reportPathChange(stdout, baselinePath, modPath)
+		}
+		fmt.Fprintf(stdout, "Comparing the public API of %s (working tree) with %s\n", modPath, *baselineDir)
+		breaks, err := compareDirs(*baselineDir, *repo)
+		if err != nil {
+			fmt.Fprintf(stderr, "apicompat: %v\n", err)
+			return exitError
+		}
+		return report(stdout, breaks)
 	}
 
 	version := strings.TrimPrefix(*baselineVersion, "v")
@@ -97,9 +116,7 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return exitError
 	}
 	if baselinePath != modPath {
-		fmt.Fprintf(stdout, "Breaking API changes (1):\n")
-		fmt.Fprintf(stdout, "- module path changed from %s to %s: importers of the published path no longer resolve this module\n", baselinePath, modPath)
-		return exitBreaking
+		return reportPathChange(stdout, baselinePath, modPath)
 	}
 	fmt.Fprintf(stdout, "Comparing the public API of %s (working tree) with %s@v%s\n", modPath, baselinePath, version)
 
@@ -108,6 +125,16 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "apicompat: %v\n", err)
 		return exitError
 	}
+	return report(stdout, breaks)
+}
+
+func reportPathChange(stdout io.Writer, from, to string) int {
+	fmt.Fprintf(stdout, "Breaking API changes (1):\n")
+	fmt.Fprintf(stdout, "- module path changed from %s to %s: importers of the published path no longer resolve this module\n", from, to)
+	return exitBreaking
+}
+
+func report(stdout io.Writer, breaks []string) int {
 	if len(breaks) == 0 {
 		fmt.Fprintln(stdout, "No breaking API changes.")
 		return exitCompatible

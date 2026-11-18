@@ -201,13 +201,17 @@ does a new method on an exported interface; additions pass. No `N.x` release yet
 with a notice. Exit codes: 0 compatible, 1 breaking (each break listed), 2 setup error.
 
 - `make api-compat` checks the working tree against the newest release of its module
-  path's major (`API_COMPAT_ARGS="--baseline-version 10.0.0"` to pick one).
-- The `API compatibility` check (`api-compat.yml`) runs on PRs to `stable/**`. If a
+  path's major (`API_COMPAT_ARGS="--baseline-version 10.0.0"` to pick one, or
+  `--baseline-dir <checkout>` to compare with a local module).
+- The `API compatibility` check (`api-compat.yml`) runs on PRs to `stable/**` and
+  compares each PR with its base branch, so it answers only for its own changes. If a
   break is intended, label the PR `api-break-approved`: the check still lists the breaks
   but passes.
-- `release.yml` repeats the check on `stable/**` before semantic-release tags. It passes
-  if any PR merged since the baseline tag carries `api-break-approved`, or on a manual
-  run with the `api_break_approved` input (for drift no PR introduced).
+- `release.yml` compares the commit about to be tagged on `stable/**` with the newest
+  release. It passes on the `api-break-approved` label of a PR merged into that branch
+  since the baseline tag, but only for the API as of that PR's merge: a break added
+  afterwards needs its own approval. A manual run with the `api_break_approved` input
+  covers drift no PR introduced.
 
 When `main` moves to a new server line, cut `stable/N` first, then on `main`:
 `go mod edit -module` to the next `/vN`, rewrite the Go import strings, update the

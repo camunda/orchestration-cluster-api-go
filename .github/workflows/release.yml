@@ -134,6 +134,7 @@ jobs:
             exit 0
           fi
           approved=""
+          merges=""
           commits=$(git log --format=%H "${tag}..HEAD") || exit 2
           while read -r sha; do
             [ -n "$sha" ] || continue
@@ -142,16 +143,39 @@ jobs:
             while IFS=$'\t' read -r number base merge; do
               if [ "$base" = "$GITHUB_REF_NAME" ] && [ -n "$merge" ] && grep -Fxq "$merge" <<< "$commits"; then
                 approved="${approved} #${number}"
+                merges="${merges}${merge} #${number}"$'\n'
               fi
             done <<< "$prs"
           done <<< "$commits"
           approved=$(echo "$approved" | xargs -n1 2>/dev/null | sort -u | xargs)
-          if [ -n "$approved" ]; then
-            echo "::warning::Breaking API changes approved with the api-break-approved label on: ${approved}"
-            exit 0
+          if [ -z "$approved" ]; then
+            echo "::error::Release blocked: the public API breaks compatibility with ${tag}. If intended, label the PR that made the change api-break-approved (or re-run this workflow manually with api_break_approved), then re-run."
+            exit 1
           fi
-          echo "::error::Release blocked: the public API breaks compatibility with ${tag}. If intended, label the PR that made the change api-break-approved (or re-run this workflow manually with api_break_approved), then re-run."
-          exit 1
+          # An approval covers the API as of that PR's merge: breaks added after the newest
+          # approved merge need their own approval. `git log` lists the newest first.
+          latest=""
+          latest_pr=""
+          while read -r sha; do
+            hit=$(grep -m1 "^${sha} " <<< "$merges" || true)
+            if [ -n "$hit" ]; then
+              latest="$sha"
+              latest_pr="${hit#* }"
+              break
+            fi
+          done <<< "$commits"
+          if [ "$latest" != "$(git rev-parse HEAD)" ]; then
+            git worktree add -q --detach "$RUNNER_TEMP/approved" "$latest" || exit 2
+            since=0
+            "$RUNNER_TEMP/apicompat" --baseline-dir "$RUNNER_TEMP/approved" || since=$?
+            if [ "$since" -eq 1 ]; then
+              echo "::error::Release blocked: breaking API changes were added after ${latest_pr} (${latest}), the newest approved PR. Label the PR that made them api-break-approved (or re-run this workflow manually with api_break_approved), then re-run."
+              exit 1
+            fi
+            [ "$since" -eq 0 ] || exit "$since"
+          fi
+          echo "::warning::Breaking API changes approved with the api-break-approved label on: ${approved}"
+          exit 0
 
   release:
     name: Version & release (${{ github.ref_name }})
