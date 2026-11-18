@@ -603,11 +603,17 @@ type ApiGetProcessDefinitionXMLRequest = camundaapi.ApiGetProcessDefinitionXMLRe
 // Fields and methods are documented on [camundaapi.ApiGetStartProcessFormRequest].
 type ApiGetStartProcessFormRequest = camundaapi.ApiGetStartProcessFormRequest
 
+// Fields and methods are documented on [camundaapi.ApiResumeProcessDefinitionsRequest].
+type ApiResumeProcessDefinitionsRequest = camundaapi.ApiResumeProcessDefinitionsRequest
+
 // Fields and methods are documented on [camundaapi.ApiSearchProcessDefinitionVariableNamesRequest].
 type ApiSearchProcessDefinitionVariableNamesRequest = camundaapi.ApiSearchProcessDefinitionVariableNamesRequest
 
 // Fields and methods are documented on [camundaapi.ApiSearchProcessDefinitionsRequest].
 type ApiSearchProcessDefinitionsRequest = camundaapi.ApiSearchProcessDefinitionsRequest
+
+// Fields and methods are documented on [camundaapi.ApiSuspendProcessDefinitionsRequest].
+type ApiSuspendProcessDefinitionsRequest = camundaapi.ApiSuspendProcessDefinitionsRequest
 
 // ProcessInstanceAPIService ProcessInstanceAPI service
 //
@@ -12920,6 +12926,7 @@ const (
 	PERMISSIONTYPEENUM_READ_TASK_LISTENER                                PermissionTypeEnum = "READ_TASK_LISTENER"
 	PERMISSIONTYPEENUM_RESTORE                                           PermissionTypeEnum = "RESTORE"
 	PERMISSIONTYPEENUM_REVEAL                                            PermissionTypeEnum = "REVEAL"
+	PERMISSIONTYPEENUM_SUSPEND_PROCESS_DEFINITION                        PermissionTypeEnum = "SUSPEND_PROCESS_DEFINITION"
 	PERMISSIONTYPEENUM_SUSPEND_PROCESS_INSTANCE                          PermissionTypeEnum = "SUSPEND_PROCESS_INSTANCE"
 	PERMISSIONTYPEENUM_UPDATE                                            PermissionTypeEnum = "UPDATE"
 	PERMISSIONTYPEENUM_UPDATE_PROCESS_INSTANCE                           PermissionTypeEnum = "UPDATE_PROCESS_INSTANCE"
@@ -13502,6 +13509,136 @@ func NewNullableProcessDefinitionResult(val *ProcessDefinitionResult) *NullableP
 	return camundaapi.NewNullableProcessDefinitionResult(val)
 }
 
+// ProcessDefinitionResumptionInstruction - Instruction to resume process definitions, selected either by key or by ID.
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionResumptionInstruction].
+type ProcessDefinitionResumptionInstruction = camundaapi.ProcessDefinitionResumptionInstruction
+
+// ProcessDefinitionResumptionInstructionByIdAsProcessDefinitionResumptionInstruction is a convenience function that returns ProcessDefinitionResumptionInstructionById wrapped in ProcessDefinitionResumptionInstruction
+func ProcessDefinitionResumptionInstructionByIdAsProcessDefinitionResumptionInstruction(v *ProcessDefinitionResumptionInstructionById) ProcessDefinitionResumptionInstruction {
+	return camundaapi.ProcessDefinitionResumptionInstructionByIdAsProcessDefinitionResumptionInstruction(v)
+}
+
+// ProcessDefinitionResumptionInstructionByKeyAsProcessDefinitionResumptionInstruction is a convenience function that returns ProcessDefinitionResumptionInstructionByKey wrapped in ProcessDefinitionResumptionInstruction
+func ProcessDefinitionResumptionInstructionByKeyAsProcessDefinitionResumptionInstruction(v *ProcessDefinitionResumptionInstructionByKey) ProcessDefinitionResumptionInstruction {
+	return camundaapi.ProcessDefinitionResumptionInstructionByKeyAsProcessDefinitionResumptionInstruction(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionResumptionInstruction].
+type NullableProcessDefinitionResumptionInstruction = camundaapi.NullableProcessDefinitionResumptionInstruction
+
+func NewNullableProcessDefinitionResumptionInstruction(val *ProcessDefinitionResumptionInstruction) *NullableProcessDefinitionResumptionInstruction {
+	return camundaapi.NewNullableProcessDefinitionResumptionInstruction(val)
+}
+
+// ProcessDefinitionResumptionInstructionById struct for ProcessDefinitionResumptionInstructionById
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionResumptionInstructionById].
+type ProcessDefinitionResumptionInstructionById = camundaapi.ProcessDefinitionResumptionInstructionById
+
+// NewProcessDefinitionResumptionInstructionById instantiates a new ProcessDefinitionResumptionInstructionById object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessDefinitionResumptionInstructionById(processDefinitionId ProcessDefinitionId) *ProcessDefinitionResumptionInstructionById {
+	return camundaapi.NewProcessDefinitionResumptionInstructionById(processDefinitionId)
+}
+
+// NewProcessDefinitionResumptionInstructionByIdWithDefaults instantiates a new ProcessDefinitionResumptionInstructionById object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessDefinitionResumptionInstructionByIdWithDefaults() *ProcessDefinitionResumptionInstructionById {
+	return camundaapi.NewProcessDefinitionResumptionInstructionByIdWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionResumptionInstructionById].
+type NullableProcessDefinitionResumptionInstructionById = camundaapi.NullableProcessDefinitionResumptionInstructionById
+
+func NewNullableProcessDefinitionResumptionInstructionById(val *ProcessDefinitionResumptionInstructionById) *NullableProcessDefinitionResumptionInstructionById {
+	return camundaapi.NewNullableProcessDefinitionResumptionInstructionById(val)
+}
+
+// ProcessDefinitionResumptionInstructionByKey struct for ProcessDefinitionResumptionInstructionByKey
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionResumptionInstructionByKey].
+type ProcessDefinitionResumptionInstructionByKey = camundaapi.ProcessDefinitionResumptionInstructionByKey
+
+// NewProcessDefinitionResumptionInstructionByKey instantiates a new ProcessDefinitionResumptionInstructionByKey object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessDefinitionResumptionInstructionByKey(processDefinitionKey ProcessDefinitionKey) *ProcessDefinitionResumptionInstructionByKey {
+	return camundaapi.NewProcessDefinitionResumptionInstructionByKey(processDefinitionKey)
+}
+
+// NewProcessDefinitionResumptionInstructionByKeyWithDefaults instantiates a new ProcessDefinitionResumptionInstructionByKey object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessDefinitionResumptionInstructionByKeyWithDefaults() *ProcessDefinitionResumptionInstructionByKey {
+	return camundaapi.NewProcessDefinitionResumptionInstructionByKeyWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionResumptionInstructionByKey].
+type NullableProcessDefinitionResumptionInstructionByKey = camundaapi.NullableProcessDefinitionResumptionInstructionByKey
+
+func NewNullableProcessDefinitionResumptionInstructionByKey(val *ProcessDefinitionResumptionInstructionByKey) *NullableProcessDefinitionResumptionInstructionByKey {
+	return camundaapi.NewNullableProcessDefinitionResumptionInstructionByKey(val)
+}
+
+// ProcessDefinitionResumptionResult struct for ProcessDefinitionResumptionResult
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionResumptionResult].
+type ProcessDefinitionResumptionResult = camundaapi.ProcessDefinitionResumptionResult
+
+// NewProcessDefinitionResumptionResult instantiates a new ProcessDefinitionResumptionResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessDefinitionResumptionResult(processDefinitions []ProcessDefinitionResumptionVersionResult, batchOperationKey NullableBatchOperationKey) *ProcessDefinitionResumptionResult {
+	return camundaapi.NewProcessDefinitionResumptionResult(processDefinitions, batchOperationKey)
+}
+
+// NewProcessDefinitionResumptionResultWithDefaults instantiates a new ProcessDefinitionResumptionResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessDefinitionResumptionResultWithDefaults() *ProcessDefinitionResumptionResult {
+	return camundaapi.NewProcessDefinitionResumptionResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionResumptionResult].
+type NullableProcessDefinitionResumptionResult = camundaapi.NullableProcessDefinitionResumptionResult
+
+func NewNullableProcessDefinitionResumptionResult(val *ProcessDefinitionResumptionResult) *NullableProcessDefinitionResumptionResult {
+	return camundaapi.NewNullableProcessDefinitionResumptionResult(val)
+}
+
+// ProcessDefinitionResumptionVersionResult struct for ProcessDefinitionResumptionVersionResult
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionResumptionVersionResult].
+type ProcessDefinitionResumptionVersionResult = camundaapi.ProcessDefinitionResumptionVersionResult
+
+// NewProcessDefinitionResumptionVersionResult instantiates a new ProcessDefinitionResumptionVersionResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessDefinitionResumptionVersionResult(processDefinitionKey ProcessDefinitionKey, processDefinitionVersion int32, outcome string) *ProcessDefinitionResumptionVersionResult {
+	return camundaapi.NewProcessDefinitionResumptionVersionResult(processDefinitionKey, processDefinitionVersion, outcome)
+}
+
+// NewProcessDefinitionResumptionVersionResultWithDefaults instantiates a new ProcessDefinitionResumptionVersionResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessDefinitionResumptionVersionResultWithDefaults() *ProcessDefinitionResumptionVersionResult {
+	return camundaapi.NewProcessDefinitionResumptionVersionResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionResumptionVersionResult].
+type NullableProcessDefinitionResumptionVersionResult = camundaapi.NullableProcessDefinitionResumptionVersionResult
+
+func NewNullableProcessDefinitionResumptionVersionResult(val *ProcessDefinitionResumptionVersionResult) *NullableProcessDefinitionResumptionVersionResult {
+	return camundaapi.NewNullableProcessDefinitionResumptionVersionResult(val)
+}
+
 // ProcessDefinitionSearchQuery struct for ProcessDefinitionSearchQuery
 //
 // Fields and methods are documented on [camundaapi.ProcessDefinitionSearchQuery].
@@ -13608,6 +13745,136 @@ type NullableProcessDefinitionStatisticsFilter = camundaapi.NullableProcessDefin
 
 func NewNullableProcessDefinitionStatisticsFilter(val *ProcessDefinitionStatisticsFilter) *NullableProcessDefinitionStatisticsFilter {
 	return camundaapi.NewNullableProcessDefinitionStatisticsFilter(val)
+}
+
+// ProcessDefinitionSuspensionInstruction - Instruction to suspend process definitions, selected either by key or by ID.
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionSuspensionInstruction].
+type ProcessDefinitionSuspensionInstruction = camundaapi.ProcessDefinitionSuspensionInstruction
+
+// ProcessDefinitionSuspensionInstructionByIdAsProcessDefinitionSuspensionInstruction is a convenience function that returns ProcessDefinitionSuspensionInstructionById wrapped in ProcessDefinitionSuspensionInstruction
+func ProcessDefinitionSuspensionInstructionByIdAsProcessDefinitionSuspensionInstruction(v *ProcessDefinitionSuspensionInstructionById) ProcessDefinitionSuspensionInstruction {
+	return camundaapi.ProcessDefinitionSuspensionInstructionByIdAsProcessDefinitionSuspensionInstruction(v)
+}
+
+// ProcessDefinitionSuspensionInstructionByKeyAsProcessDefinitionSuspensionInstruction is a convenience function that returns ProcessDefinitionSuspensionInstructionByKey wrapped in ProcessDefinitionSuspensionInstruction
+func ProcessDefinitionSuspensionInstructionByKeyAsProcessDefinitionSuspensionInstruction(v *ProcessDefinitionSuspensionInstructionByKey) ProcessDefinitionSuspensionInstruction {
+	return camundaapi.ProcessDefinitionSuspensionInstructionByKeyAsProcessDefinitionSuspensionInstruction(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionSuspensionInstruction].
+type NullableProcessDefinitionSuspensionInstruction = camundaapi.NullableProcessDefinitionSuspensionInstruction
+
+func NewNullableProcessDefinitionSuspensionInstruction(val *ProcessDefinitionSuspensionInstruction) *NullableProcessDefinitionSuspensionInstruction {
+	return camundaapi.NewNullableProcessDefinitionSuspensionInstruction(val)
+}
+
+// ProcessDefinitionSuspensionInstructionById struct for ProcessDefinitionSuspensionInstructionById
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionSuspensionInstructionById].
+type ProcessDefinitionSuspensionInstructionById = camundaapi.ProcessDefinitionSuspensionInstructionById
+
+// NewProcessDefinitionSuspensionInstructionById instantiates a new ProcessDefinitionSuspensionInstructionById object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessDefinitionSuspensionInstructionById(processDefinitionId ProcessDefinitionId) *ProcessDefinitionSuspensionInstructionById {
+	return camundaapi.NewProcessDefinitionSuspensionInstructionById(processDefinitionId)
+}
+
+// NewProcessDefinitionSuspensionInstructionByIdWithDefaults instantiates a new ProcessDefinitionSuspensionInstructionById object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessDefinitionSuspensionInstructionByIdWithDefaults() *ProcessDefinitionSuspensionInstructionById {
+	return camundaapi.NewProcessDefinitionSuspensionInstructionByIdWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionSuspensionInstructionById].
+type NullableProcessDefinitionSuspensionInstructionById = camundaapi.NullableProcessDefinitionSuspensionInstructionById
+
+func NewNullableProcessDefinitionSuspensionInstructionById(val *ProcessDefinitionSuspensionInstructionById) *NullableProcessDefinitionSuspensionInstructionById {
+	return camundaapi.NewNullableProcessDefinitionSuspensionInstructionById(val)
+}
+
+// ProcessDefinitionSuspensionInstructionByKey struct for ProcessDefinitionSuspensionInstructionByKey
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionSuspensionInstructionByKey].
+type ProcessDefinitionSuspensionInstructionByKey = camundaapi.ProcessDefinitionSuspensionInstructionByKey
+
+// NewProcessDefinitionSuspensionInstructionByKey instantiates a new ProcessDefinitionSuspensionInstructionByKey object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessDefinitionSuspensionInstructionByKey(processDefinitionKey ProcessDefinitionKey) *ProcessDefinitionSuspensionInstructionByKey {
+	return camundaapi.NewProcessDefinitionSuspensionInstructionByKey(processDefinitionKey)
+}
+
+// NewProcessDefinitionSuspensionInstructionByKeyWithDefaults instantiates a new ProcessDefinitionSuspensionInstructionByKey object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessDefinitionSuspensionInstructionByKeyWithDefaults() *ProcessDefinitionSuspensionInstructionByKey {
+	return camundaapi.NewProcessDefinitionSuspensionInstructionByKeyWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionSuspensionInstructionByKey].
+type NullableProcessDefinitionSuspensionInstructionByKey = camundaapi.NullableProcessDefinitionSuspensionInstructionByKey
+
+func NewNullableProcessDefinitionSuspensionInstructionByKey(val *ProcessDefinitionSuspensionInstructionByKey) *NullableProcessDefinitionSuspensionInstructionByKey {
+	return camundaapi.NewNullableProcessDefinitionSuspensionInstructionByKey(val)
+}
+
+// ProcessDefinitionSuspensionResult struct for ProcessDefinitionSuspensionResult
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionSuspensionResult].
+type ProcessDefinitionSuspensionResult = camundaapi.ProcessDefinitionSuspensionResult
+
+// NewProcessDefinitionSuspensionResult instantiates a new ProcessDefinitionSuspensionResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessDefinitionSuspensionResult(processDefinitions []ProcessDefinitionSuspensionVersionResult, batchOperationKey NullableBatchOperationKey) *ProcessDefinitionSuspensionResult {
+	return camundaapi.NewProcessDefinitionSuspensionResult(processDefinitions, batchOperationKey)
+}
+
+// NewProcessDefinitionSuspensionResultWithDefaults instantiates a new ProcessDefinitionSuspensionResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessDefinitionSuspensionResultWithDefaults() *ProcessDefinitionSuspensionResult {
+	return camundaapi.NewProcessDefinitionSuspensionResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionSuspensionResult].
+type NullableProcessDefinitionSuspensionResult = camundaapi.NullableProcessDefinitionSuspensionResult
+
+func NewNullableProcessDefinitionSuspensionResult(val *ProcessDefinitionSuspensionResult) *NullableProcessDefinitionSuspensionResult {
+	return camundaapi.NewNullableProcessDefinitionSuspensionResult(val)
+}
+
+// ProcessDefinitionSuspensionVersionResult struct for ProcessDefinitionSuspensionVersionResult
+//
+// Fields and methods are documented on [camundaapi.ProcessDefinitionSuspensionVersionResult].
+type ProcessDefinitionSuspensionVersionResult = camundaapi.ProcessDefinitionSuspensionVersionResult
+
+// NewProcessDefinitionSuspensionVersionResult instantiates a new ProcessDefinitionSuspensionVersionResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProcessDefinitionSuspensionVersionResult(processDefinitionKey ProcessDefinitionKey, processDefinitionVersion int32, outcome string) *ProcessDefinitionSuspensionVersionResult {
+	return camundaapi.NewProcessDefinitionSuspensionVersionResult(processDefinitionKey, processDefinitionVersion, outcome)
+}
+
+// NewProcessDefinitionSuspensionVersionResultWithDefaults instantiates a new ProcessDefinitionSuspensionVersionResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProcessDefinitionSuspensionVersionResultWithDefaults() *ProcessDefinitionSuspensionVersionResult {
+	return camundaapi.NewProcessDefinitionSuspensionVersionResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProcessDefinitionSuspensionVersionResult].
+type NullableProcessDefinitionSuspensionVersionResult = camundaapi.NullableProcessDefinitionSuspensionVersionResult
+
+func NewNullableProcessDefinitionSuspensionVersionResult(val *ProcessDefinitionSuspensionVersionResult) *NullableProcessDefinitionSuspensionVersionResult {
+	return camundaapi.NewNullableProcessDefinitionSuspensionVersionResult(val)
 }
 
 // ProcessDefinitionVariableNameFilter Process definition variable name filter request.

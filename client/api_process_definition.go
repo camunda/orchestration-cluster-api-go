@@ -1109,6 +1109,198 @@ func (a *ProcessDefinitionAPIService) GetStartProcessFormExecute(r ApiGetStartPr
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiResumeProcessDefinitionsRequest struct {
+	ctx                                    context.Context
+	ApiService                             *ProcessDefinitionAPIService
+	processDefinitionResumptionInstruction *ProcessDefinitionResumptionInstruction
+}
+
+func (r ApiResumeProcessDefinitionsRequest) ProcessDefinitionResumptionInstruction(processDefinitionResumptionInstruction ProcessDefinitionResumptionInstruction) ApiResumeProcessDefinitionsRequest {
+	r.processDefinitionResumptionInstruction = &processDefinitionResumptionInstruction
+	return r
+}
+
+func (r ApiResumeProcessDefinitionsRequest) Execute() (*ProcessDefinitionResumptionResult, *http.Response, error) {
+	return r.ApiService.ResumeProcessDefinitionsExecute(r)
+}
+
+/*
+ResumeProcessDefinitions Resume process definitions
+
+Resumes suspended process definitions so that process instances can be created from them again.
+The definition is selected either by `processDefinitionKey`, which identifies exactly one
+version, or by `processDefinitionId` with an optional `processDefinitionVersion` and
+`tenantId`. Without a version, all versions of the process definition ID are resumed.
+Set `includeProcessInstances` to also resume the suspended process instances of the affected
+versions; the instances are changed by a batch operation, returned as `batchOperationKey`.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiResumeProcessDefinitionsRequest
+*/
+func (a *ProcessDefinitionAPIService) ResumeProcessDefinitions(ctx context.Context) ApiResumeProcessDefinitionsRequest {
+	return ApiResumeProcessDefinitionsRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return ProcessDefinitionResumptionResult
+func (a *ProcessDefinitionAPIService) ResumeProcessDefinitionsExecute(r ApiResumeProcessDefinitionsRequest) (*ProcessDefinitionResumptionResult, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessDefinitionResumptionResult
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessDefinitionAPIService.ResumeProcessDefinitions")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process-definitions/resumption"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.processDefinitionResumptionInstruction == nil {
+		return localVarReturnValue, nil, reportError("processDefinitionResumptionInstruction is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.processDefinitionResumptionInstruction
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiSearchProcessDefinitionVariableNamesRequest struct {
 	ctx                                      context.Context
 	ApiService                               *ProcessDefinitionAPIService
@@ -1415,6 +1607,198 @@ func (a *ProcessDefinitionAPIService) SearchProcessDefinitionsExecute(r ApiSearc
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiSuspendProcessDefinitionsRequest struct {
+	ctx                                    context.Context
+	ApiService                             *ProcessDefinitionAPIService
+	processDefinitionSuspensionInstruction *ProcessDefinitionSuspensionInstruction
+}
+
+func (r ApiSuspendProcessDefinitionsRequest) ProcessDefinitionSuspensionInstruction(processDefinitionSuspensionInstruction ProcessDefinitionSuspensionInstruction) ApiSuspendProcessDefinitionsRequest {
+	r.processDefinitionSuspensionInstruction = &processDefinitionSuspensionInstruction
+	return r
+}
+
+func (r ApiSuspendProcessDefinitionsRequest) Execute() (*ProcessDefinitionSuspensionResult, *http.Response, error) {
+	return r.ApiService.SuspendProcessDefinitionsExecute(r)
+}
+
+/*
+SuspendProcessDefinitions Suspend process definitions
+
+Suspends process definitions so that no new process instances can be created from them.
+The definition is selected either by `processDefinitionKey`, which identifies exactly one
+version, or by `processDefinitionId` with an optional `processDefinitionVersion` and
+`tenantId`. Without a version, all versions of the process definition ID are suspended.
+Set `includeProcessInstances` to also suspend the running process instances of the affected
+versions; the instances are changed by a batch operation, returned as `batchOperationKey`.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSuspendProcessDefinitionsRequest
+*/
+func (a *ProcessDefinitionAPIService) SuspendProcessDefinitions(ctx context.Context) ApiSuspendProcessDefinitionsRequest {
+	return ApiSuspendProcessDefinitionsRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return ProcessDefinitionSuspensionResult
+func (a *ProcessDefinitionAPIService) SuspendProcessDefinitionsExecute(r ApiSuspendProcessDefinitionsRequest) (*ProcessDefinitionSuspensionResult, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessDefinitionSuspensionResult
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessDefinitionAPIService.SuspendProcessDefinitions")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process-definitions/suspension"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.processDefinitionSuspensionInstruction == nil {
+		return localVarReturnValue, nil, reportError("processDefinitionSuspensionInstruction is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.processDefinitionSuspensionInstruction
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 // GetProcessDefinitionInstanceStatisticsQuery returns the processDefinitionInstanceStatisticsQuery field value, or nil when unset.
 func (r ApiGetProcessDefinitionInstanceStatisticsRequest) GetProcessDefinitionInstanceStatisticsQuery() *ProcessDefinitionInstanceStatisticsQuery {
 	return r.processDefinitionInstanceStatisticsQuery
@@ -1435,6 +1819,11 @@ func (r ApiGetProcessDefinitionStatisticsRequest) GetProcessDefinitionElementSta
 	return r.processDefinitionElementStatisticsQuery
 }
 
+// GetProcessDefinitionResumptionInstruction returns the processDefinitionResumptionInstruction field value, or nil when unset.
+func (r ApiResumeProcessDefinitionsRequest) GetProcessDefinitionResumptionInstruction() *ProcessDefinitionResumptionInstruction {
+	return r.processDefinitionResumptionInstruction
+}
+
 // GetProcessDefinitionVariableNameSearchQuery returns the processDefinitionVariableNameSearchQuery field value, or nil when unset.
 func (r ApiSearchProcessDefinitionVariableNamesRequest) GetProcessDefinitionVariableNameSearchQuery() *ProcessDefinitionVariableNameSearchQuery {
 	return r.processDefinitionVariableNameSearchQuery
@@ -1443,4 +1832,9 @@ func (r ApiSearchProcessDefinitionVariableNamesRequest) GetProcessDefinitionVari
 // GetProcessDefinitionSearchQuery returns the processDefinitionSearchQuery field value, or nil when unset.
 func (r ApiSearchProcessDefinitionsRequest) GetProcessDefinitionSearchQuery() *ProcessDefinitionSearchQuery {
 	return r.processDefinitionSearchQuery
+}
+
+// GetProcessDefinitionSuspensionInstruction returns the processDefinitionSuspensionInstruction field value, or nil when unset.
+func (r ApiSuspendProcessDefinitionsRequest) GetProcessDefinitionSuspensionInstruction() *ProcessDefinitionSuspensionInstruction {
+	return r.processDefinitionSuspensionInstruction
 }

@@ -811,6 +811,20 @@
       "label": "Get process definition XML"
     }
   ],
+  "suspendProcessDefinitions": [
+    {
+      "file": "process_definition.go",
+      "region": "SuspendProcessDefinitions",
+      "label": "Suspend process definitions"
+    }
+  ],
+  "resumeProcessDefinitions": [
+    {
+      "file": "process_definition.go",
+      "region": "ResumeProcessDefinitions",
+      "label": "Resume process definitions"
+    }
+  ],
   "getProcessDefinitionInstanceVersionStatistics": [
     {
       "file": "process_definition.go",
