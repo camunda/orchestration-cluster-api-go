@@ -103,7 +103,7 @@ func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
 		if err != nil {
 			return nil, err
 		}
-		httpClient := &http.Client{Transport: &falconAuthTransport{base: c.cfg.Transport, header: header}}
+		httpClient := &http.Client{Transport: &falconAuthTransport{base: c.cfg.Transport, header: header, userAgent: userAgent(c.cfg)}}
 		return &falcon.Dialer{HTTPClient: httpClient, Random: c.random}, nil
 	}
 	tlsConf, err := buildTLSConfig(c.cfg.TLS)
@@ -123,7 +123,7 @@ func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
 	if err != nil {
 		return nil, err
 	}
-	httpClient := &http.Client{Transport: &falconAuthTransport{base: base, header: header}}
+	httpClient := &http.Client{Transport: &falconAuthTransport{base: base, header: header, userAgent: userAgent(c.cfg)}}
 	return &falcon.Dialer{HTTPClient: httpClient, Random: c.random}, nil
 }
 
@@ -139,6 +139,7 @@ func (c *CamundaClient) falconAuthHeader() (func(context.Context) (http.Header, 
 			Audience:     c.cfg.TokenAudience,
 			Scope:        c.cfg.OAuthScope,
 			CacheDir:     c.cfg.OAuthCacheDir,
+			UserAgent:    userAgent(c.cfg),
 		}, c.clock)
 		return func(ctx context.Context) (http.Header, error) {
 			tok, err := ts.Token(ctx)
@@ -163,6 +164,8 @@ func (c *CamundaClient) falconAuthHeader() (func(context.Context) (http.Header, 
 type falconAuthTransport struct {
 	base   http.RoundTripper
 	header func(context.Context) (http.Header, error)
+	// userAgent, when non-empty, is set as the User-Agent of every request.
+	userAgent string
 }
 
 func (t *falconAuthTransport) RoundTrip(r *http.Request) (*http.Response, error) {
@@ -178,6 +181,10 @@ func (t *falconAuthTransport) RoundTrip(r *http.Request) (*http.Response, error)
 				r.Header.Add(k, v)
 			}
 		}
+	}
+	if t.userAgent != "" {
+		r = r.Clone(r.Context())
+		r.Header.Set("User-Agent", t.userAgent)
 	}
 	return t.base.RoundTrip(r)
 }

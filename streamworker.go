@@ -55,7 +55,7 @@ func (c *CamundaClient) grpcConn() (*grpc.ClientConn, error) {
 		creds = insecure.NewCredentials()
 	}
 
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(creds), grpc.WithUserAgent(userAgent(c.cfg))}
 	if c.cfg.AuthStrategy == AuthOAuth {
 		ts := auth.NewTokenSource(auth.OAuthConfig{
 			TokenURL:     c.cfg.OAuthURL,
@@ -64,6 +64,7 @@ func (c *CamundaClient) grpcConn() (*grpc.ClientConn, error) {
 			Audience:     c.cfg.TokenAudience,
 			Scope:        c.cfg.OAuthScope,
 			CacheDir:     c.cfg.OAuthCacheDir,
+			UserAgent:    userAgent(c.cfg),
 		}, c.clock)
 		opts = append(opts, grpc.WithPerRPCCredentials(&oauthPerRPC{ts: ts, secure: secure}))
 	}

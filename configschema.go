@@ -50,6 +50,8 @@ var ConfigSchema = []ConfigField{
 
 	{Keys: []string{"CAMUNDA_DEFAULT_TENANT_ID", "CAMUNDA_TENANT_ID"}, Description: "Default tenant id applied to operations that accept one."},
 
+	{Keys: []string{"CAMUNDA_USER_AGENT"}, Description: "Application identifier appended after the SDK's camunda-orchestration-sdk-go/<version> User-Agent token (never replaces it)."},
+
 	{Keys: []string{"CAMUNDA_FALCON"}, Default: "true", Description: "Enable the FALCON (nanobpmn command-stream) transport upgrade when the gateway advertises it."},
 	{Keys: []string{"CAMUNDA_FORCE_REST"}, Description: "Force the pure-REST path even when the gateway advertises FALCON (e.g. where WebSockets are blocked)."},
 

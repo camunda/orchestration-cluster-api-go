@@ -73,6 +73,13 @@ func WithNoAuth() Option {
 	return func(c *Config) { c.AuthStrategy = AuthNone }
 }
 
+// WithUserAgent names the calling application (e.g. "my-app/1.2"). The value is
+// appended after the SDK's camunda-orchestration-sdk-go/<version> token in the
+// User-Agent of every REST, OAuth and gRPC request; it never replaces it.
+func WithUserAgent(ua string) Option {
+	return func(c *Config) { c.UserAgent = ua }
+}
+
 // WithBackpressureProfile sets the adaptive backpressure profile.
 func WithBackpressureProfile(p BackpressureProfile) Option {
 	return func(c *Config) { c.BackpressureProfile = p }
