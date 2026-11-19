@@ -74,6 +74,8 @@ type OAuthConfig struct {
 	Scope        string
 	// CacheDir, when non-empty, persists fetched tokens to disk.
 	CacheDir string
+	// UserAgent, when non-empty, is sent as the token request's User-Agent.
+	UserAgent string
 	// HTTPClient is used to fetch tokens. If nil, a client with a 30s timeout is used.
 	HTTPClient *http.Client
 }
@@ -176,6 +178,9 @@ func (ts *TokenSource) fetch(ctx context.Context, now time.Time) (string, time.T
 	}
 	httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	httpReq.Header.Set("Accept", "application/json")
+	if ts.cfg.UserAgent != "" {
+		httpReq.Header.Set("User-Agent", ts.cfg.UserAgent)
+	}
 
 	resp, err := ts.cfg.HTTPClient.Do(httpReq)
 	if err != nil {

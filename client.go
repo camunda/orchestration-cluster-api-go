@@ -97,6 +97,7 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	}, clk, rnd)
 
 	oc := camundaapi.NewConfiguration()
+	oc.UserAgent = userAgent(cfg)
 	if cfg.HTTPClient != nil {
 		// A user-supplied HTTP client is used as-is: the SDK's retry,
 		// backpressure, auth, and TLS layers are bypassed (see WithHTTPClient).
@@ -165,6 +166,7 @@ func buildAuthTransport(cfg *Config, clk auth.Clock) (*auth.Transport, error) {
 			Audience:     cfg.TokenAudience,
 			Scope:        cfg.OAuthScope,
 			CacheDir:     cfg.OAuthCacheDir,
+			UserAgent:    userAgent(cfg),
 		}, clk)
 		return &auth.Transport{Strategy: auth.OAuth, TokenSource: ts}, nil
 	case AuthBasic:
