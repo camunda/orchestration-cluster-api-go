@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/camunda/orchestration-cluster-api-go/v11/pb"
+	"github.com/camunda/orchestration-cluster-api-go/v10/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -179,18 +179,16 @@ func TestVersionFromBuildInfo(t *testing.T) {
 	}
 }
 
-type uaCapture struct{ ua string }
-
-func (c *uaCapture) RoundTrip(r *http.Request) (*http.Response, error) {
-	c.ua = r.Header.Get("User-Agent")
-	return &http.Response{StatusCode: 200, Body: http.NoBody, Request: r}, nil
-}
-
-// TestUserAgentOnFalconDialer: the FALCON detect/upgrade HTTP client also leads
-// with the SDK identifier.
+// TestUserAgentOnFalconDialer: the FALCON topology probe and WebSocket upgrade
+// carry the SDK User-Agent, including any application value. On this branch the
+// dialer always builds its own transport, so exercise it against a real server.
 func TestUserAgentOnFalconDialer(t *testing.T) {
-	capture := &uaCapture{}
-	client, err := New(WithNoAuth(), WithTransport(capture), WithLogLevel(LogOff))
+	var got string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = r.Header.Get("User-Agent")
+	}))
+	defer srv.Close()
+	client, err := New(WithNoAuth(), WithUserAgent("my-app/1.0"), WithLogLevel(LogOff))
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
@@ -198,41 +196,12 @@ func TestUserAgentOnFalconDialer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildFalconDialer: %v", err)
 	}
-	req, _ := http.NewRequest(http.MethodGet, "http://example.invalid/", nil)
-	resp, err := d.HTTPClient.Do(req)
+	resp, err := d.HTTPClient.Get(srv.URL)
 	if err != nil {
-		t.Fatalf("Do: %v", err)
+		t.Fatalf("Get: %v", err)
 	}
 	_ = resp.Body.Close()
-	if !strings.HasPrefix(capture.ua, sdkUAPrefix) {
-		t.Errorf("FALCON User-Agent = %q, want prefix %q", capture.ua, sdkUAPrefix)
-	}
-}
-
-// TestUserAgentOnFalconDialerCustomHTTPClient: with WithHTTPClient the caller's
-// client is still used (its transport sees the request) but the SDK User-Agent,
-// including any application value, is set.
-func TestUserAgentOnFalconDialerCustomHTTPClient(t *testing.T) {
-	capture := &uaCapture{}
-	hc := &http.Client{Transport: capture}
-	client, err := New(WithNoAuth(), WithHTTPClient(hc), WithUserAgent("my-app/1.0"), WithLogLevel(LogOff))
-	if err != nil {
-		t.Fatalf("New: %v", err)
-	}
-	d, err := client.buildFalconDialer()
-	if err != nil {
-		t.Fatalf("buildFalconDialer: %v", err)
-	}
-	req, _ := http.NewRequest(http.MethodGet, "http://example.invalid/", nil)
-	resp, err := d.HTTPClient.Do(req)
-	if err != nil {
-		t.Fatalf("Do: %v", err)
-	}
-	_ = resp.Body.Close()
-	if !strings.HasPrefix(capture.ua, sdkUAPrefix) || !strings.HasSuffix(capture.ua, " my-app/1.0") {
-		t.Errorf("FALCON User-Agent = %q, want SDK prefix and app suffix", capture.ua)
-	}
-	if hc.Transport != capture {
-		t.Error("caller-owned HTTP client was mutated")
+	if !strings.HasPrefix(got, sdkUAPrefix) || !strings.HasSuffix(got, " my-app/1.0") {
+		t.Errorf("FALCON User-Agent = %q, want SDK prefix and app suffix", got)
 	}
 }
