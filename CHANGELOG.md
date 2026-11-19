@@ -1,3 +1,10 @@
+## [10.0.8](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.7...v10.0.8) (2026-11-19)
+
+
+### Bug Fixes
+
+* alias *ExactMatch filter branches to their key/enum base (stable/10) ([#189](https://github.com/camunda/orchestration-cluster-api-go/issues/189)) ([74969b2](https://github.com/camunda/orchestration-cluster-api-go/commit/74969b28622b22590844720eda1c05f5fffb7c32))
+
 ## [10.0.7](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.6...v10.0.7) (2026-11-17)
 
 
