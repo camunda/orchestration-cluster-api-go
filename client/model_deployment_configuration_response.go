@@ -174,7 +174,6 @@ func (o *DeploymentConfigurationResponse) UnmarshalJSON(data []byte) (err error)
 	requiredProperties := []string{
 		"isMultiTenancyEnabled",
 		"isTenantsApiEnabled",
-		"isWaitStatesEnabled",
 		"maxRequestSize",
 	}
 
