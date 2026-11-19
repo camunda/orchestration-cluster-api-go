@@ -87,9 +87,6 @@ MODEL_SCOPED_OPTIONAL = {
     # only ever returned authenticated users. Scoped to the user-result models.
     "model_camunda_user_result.go": ["isAnonymous"],
     "model_authenticated_camunda_user_result.go": ["isAnonymous"],
-    # `isWaitStatesEnabled` added in 8.11; servers predating it omit it. Absent
-    # means false (wait states disabled).
-    "model_deployment_configuration_response.go": ["isWaitStatesEnabled"],
     "model_variable_result.go": ["metadata"],
     "model_variable_result_base.go": ["metadata"],
     "model_variable_search_result.go": ["metadata"],
