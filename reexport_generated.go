@@ -5066,8 +5066,8 @@ type CamundaUserResult = camundaapi.CamundaUserResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCamundaUserResult(username Username, displayName NullableString, email NullableString, authorizedComponents []string, tenants []TenantResult, groups []string, roles []string, salesPlanType NullableString, c8Links map[string]string, canLogout bool) *CamundaUserResult {
-	return camundaapi.NewCamundaUserResult(username, displayName, email, authorizedComponents, tenants, groups, roles, salesPlanType, c8Links, canLogout)
+func NewCamundaUserResult(isAnonymous bool, username NullableUsername, displayName NullableString, email NullableString, authorizedComponents []string, tenants []TenantResult, groups []string, roles []string, salesPlanType NullableString, c8Links map[string]string, canLogout bool) *CamundaUserResult {
+	return camundaapi.NewCamundaUserResult(isAnonymous, username, displayName, email, authorizedComponents, tenants, groups, roles, salesPlanType, c8Links, canLogout)
 }
 
 // NewCamundaUserResultWithDefaults instantiates a new CamundaUserResult object
@@ -12776,6 +12776,7 @@ type PermissionTypeEnum = camundaapi.PermissionTypeEnum
 // List of PermissionTypeEnum
 const (
 	PERMISSIONTYPEENUM_ACCESS                                            PermissionTypeEnum = "ACCESS"
+	PERMISSIONTYPEENUM_ANSWER                                            PermissionTypeEnum = "ANSWER"
 	PERMISSIONTYPEENUM_CANCEL_PROCESS_INSTANCE                           PermissionTypeEnum = "CANCEL_PROCESS_INSTANCE"
 	PERMISSIONTYPEENUM_CLAIM                                             PermissionTypeEnum = "CLAIM"
 	PERMISSIONTYPEENUM_CLAIM_USER_TASK                                   PermissionTypeEnum = "CLAIM_USER_TASK"
@@ -14944,6 +14945,7 @@ const (
 	RESOURCETYPEENUM_GROUP                            ResourceTypeEnum = "GROUP"
 	RESOURCETYPEENUM_MAPPING_RULE                     ResourceTypeEnum = "MAPPING_RULE"
 	RESOURCETYPEENUM_MESSAGE                          ResourceTypeEnum = "MESSAGE"
+	RESOURCETYPEENUM_PROBE                            ResourceTypeEnum = "PROBE"
 	RESOURCETYPEENUM_PROCESS_DEFINITION               ResourceTypeEnum = "PROCESS_DEFINITION"
 	RESOURCETYPEENUM_RESOURCE                         ResourceTypeEnum = "RESOURCE"
 	RESOURCETYPEENUM_ROLE                             ResourceTypeEnum = "ROLE"
@@ -19617,6 +19619,17 @@ type NullableUserTaskKey = camundaapi.NullableUserTaskKey
 // NewNullableUserTaskKey returns a set NullableUserTaskKey wrapping val.
 func NewNullableUserTaskKey(val *UserTaskKey) *NullableUserTaskKey {
 	return camundaapi.NewNullableUserTaskKey(val)
+}
+
+// NullableUsername is the generator's Nullable wrapper for Username (referenced by
+// generated models such as AuditLogResult).
+//
+// Fields and methods are documented on [camundaapi.NullableUsername].
+type NullableUsername = camundaapi.NullableUsername
+
+// NewNullableUsername returns a set NullableUsername wrapping val.
+func NewNullableUsername(val *Username) *NullableUsername {
+	return camundaapi.NewNullableUsername(val)
 }
 
 // *ExactMatch union branches are exact-value matches on a key or enum. Each is

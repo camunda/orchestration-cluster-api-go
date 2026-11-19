@@ -192,3 +192,32 @@ func TestProcessInstanceResultDecodesWithoutSuspendedDate(t *testing.T) {
 		t.Error("omitted suspendedDate should be unset")
 	}
 }
+
+// TestCamundaUserResultDecodesWithoutIsAnonymous guards isAnonymous, added to
+// CamundaUserResult in 8.10.10. 8.10.0-8.10.9 omit it, and GetAuthentication
+// must keep decoding their responses. Relaxed by the version-skew hook.
+func TestCamundaUserResultDecodesWithoutIsAnonymous(t *testing.T) {
+	const olderServerResponse = `{
+  "username": "demo",
+  "displayName": "Demo User",
+  "email": "demo@example.com",
+  "authorizedComponents": ["*"],
+  "tenants": [],
+  "groups": [],
+  "roles": [],
+  "salesPlanType": null,
+  "c8Links": {},
+  "canLogout": true
+}`
+
+	var result camundaapi.CamundaUserResult
+	if err := json.Unmarshal([]byte(olderServerResponse), &result); err != nil {
+		t.Fatalf("an authenticated-user response from a server predating isAnonymous must decode: %v", err)
+	}
+	if result.GetIsAnonymous() {
+		t.Error("omitted isAnonymous should default to false")
+	}
+	if got := result.GetUsername(); got != "demo" {
+		t.Errorf("username = %q, want demo", got)
+	}
+}
