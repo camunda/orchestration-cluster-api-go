@@ -2950,6 +2950,19 @@ func (c *CamundaClient) GetStartProcessForm(ctx context.Context, processDefiniti
 }
 
 // ResumeProcessDefinitions calls the ResumeProcessDefinitions operation.
+//
+// Example:
+//
+//	// ProcessDefinitionResumptionInstruction is a union; resume one version by key.
+//	byKey := camunda.NewProcessDefinitionResumptionInstructionByKey(
+//		camunda.MustProcessDefinitionKey("2251799813685330"))
+//
+//	result, err := client.ResumeProcessDefinitions(ctx,
+//		camunda.ProcessDefinitionResumptionInstructionByKeyAsProcessDefinitionResumptionInstruction(byKey))
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("%v\n", result)
 func (c *CamundaClient) ResumeProcessDefinitions(ctx context.Context, body ProcessDefinitionResumptionInstruction, opts ...func(ApiResumeProcessDefinitionsRequest) ApiResumeProcessDefinitionsRequest) (*ProcessDefinitionResumptionResult, error) {
 	req := c.raw.ProcessDefinitionAPI.ResumeProcessDefinitions(ctx)
 	req = req.ProcessDefinitionResumptionInstruction(body)
@@ -3003,6 +3016,22 @@ func (c *CamundaClient) SearchProcessDefinitions(ctx context.Context, body Proce
 }
 
 // SuspendProcessDefinitions calls the SuspendProcessDefinitions operation.
+//
+// Example:
+//
+//	// ProcessDefinitionSuspensionInstruction is a union; suspend every version
+//	// of a process definition id, including its running process instances.
+//	byID := camunda.NewProcessDefinitionSuspensionInstructionById("order-process")
+//	byID.SetIncludeProcessInstances(true)
+//
+//	result, err := client.SuspendProcessDefinitions(ctx,
+//		camunda.ProcessDefinitionSuspensionInstructionByIdAsProcessDefinitionSuspensionInstruction(byID))
+//	if err != nil {
+//		return err
+//	}
+//	if key, ok := result.GetBatchOperationKeyOk(); ok && key != nil {
+//		fmt.Printf("Batch operation: %s\n", *key)
+//	}
 func (c *CamundaClient) SuspendProcessDefinitions(ctx context.Context, body ProcessDefinitionSuspensionInstruction, opts ...func(ApiSuspendProcessDefinitionsRequest) ApiSuspendProcessDefinitionsRequest) (*ProcessDefinitionSuspensionResult, error) {
 	req := c.raw.ProcessDefinitionAPI.SuspendProcessDefinitions(ctx)
 	req = req.ProcessDefinitionSuspensionInstruction(body)

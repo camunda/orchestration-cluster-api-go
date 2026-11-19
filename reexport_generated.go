@@ -7856,8 +7856,8 @@ type DeploymentConfigurationResponse = camundaapi.DeploymentConfigurationRespons
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentConfigurationResponse(isMultiTenancyEnabled bool, isTenantsApiEnabled bool, maxRequestSize int64) *DeploymentConfigurationResponse {
-	return camundaapi.NewDeploymentConfigurationResponse(isMultiTenancyEnabled, isTenantsApiEnabled, maxRequestSize)
+func NewDeploymentConfigurationResponse(isMultiTenancyEnabled bool, isTenantsApiEnabled bool, isWaitStatesEnabled bool, maxRequestSize int64) *DeploymentConfigurationResponse {
+	return camundaapi.NewDeploymentConfigurationResponse(isMultiTenancyEnabled, isTenantsApiEnabled, isWaitStatesEnabled, maxRequestSize)
 }
 
 // NewDeploymentConfigurationResponseWithDefaults instantiates a new DeploymentConfigurationResponse object
