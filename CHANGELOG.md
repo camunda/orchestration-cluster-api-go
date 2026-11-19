@@ -1,3 +1,10 @@
+# [10.1.0](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.8...v10.1.0) (2026-11-19)
+
+
+### Features
+
+* send attributable User-Agent on REST, OAuth and gRPC (backport [#208](https://github.com/camunda/orchestration-cluster-api-go/issues/208) to stable/10) ([#209](https://github.com/camunda/orchestration-cluster-api-go/issues/209)) ([f1a821c](https://github.com/camunda/orchestration-cluster-api-go/commit/f1a821cc320686e42bd80a71dd0ace3eeb4836b7))
+
 ## [10.0.8](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.0.7...v10.0.8) (2026-11-19)
 
 
