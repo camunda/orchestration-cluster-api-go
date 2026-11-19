@@ -218,3 +218,26 @@ func TestVariableResultsDecodeWithoutMetadata(t *testing.T) {
 		})
 	}
 }
+
+// TestDeploymentConfigurationDecodesWithoutIsWaitStatesEnabled guards
+// isWaitStatesEnabled, added to DeploymentConfigurationResponse in 8.11.
+// Servers that predate it omit the flag, and GetSystemConfiguration must keep
+// decoding their responses. Relaxed by the version-skew hook.
+func TestDeploymentConfigurationDecodesWithoutIsWaitStatesEnabled(t *testing.T) {
+	const olderServerResponse = `{
+  "isMultiTenancyEnabled": false,
+  "isTenantsApiEnabled": true,
+  "maxRequestSize": 4194304
+}`
+
+	var result camundaapi.DeploymentConfigurationResponse
+	if err := json.Unmarshal([]byte(olderServerResponse), &result); err != nil {
+		t.Fatalf("a deployment configuration from a server predating isWaitStatesEnabled must decode: %v", err)
+	}
+	if result.GetIsWaitStatesEnabled() {
+		t.Error("omitted isWaitStatesEnabled should default to false")
+	}
+	if got := result.GetMaxRequestSize(); got != 4194304 {
+		t.Errorf("maxRequestSize = %d, want 4194304", got)
+	}
+}
