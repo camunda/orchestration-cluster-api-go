@@ -135,7 +135,15 @@ jobs:
           fi
           approved=""
           merges=""
-          commits=$(git log --format=%H "${tag}..HEAD") || exit 2
+          # A reset or merged-back branch can reach the tag only through a second parent.
+          tag_sha=$(git rev-parse --verify "${tag}^{commit}") || exit 2
+          line=$(git rev-list --first-parent HEAD) || exit 2
+          commits=""
+          if grep -Fxq "$tag_sha" <<< "$line"; then
+            commits=$(git log --first-parent --format=%H "${tag}..HEAD") || exit 2
+          else
+            echo "::notice::${tag} is not on the first-parent history of HEAD; no label can approve this release."
+          fi
           while read -r sha; do
             [ -n "$sha" ] || continue
             prs=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls" \
