@@ -141,7 +141,7 @@ func TestUserAgentOnGRPCStream(t *testing.T) {
 	if err != nil {
 		t.Fatalf("grpcConn: %v", err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	if _, err := pb.NewGatewayClient(conn).StreamActivatedJobs(ctx, &pb.StreamActivatedJobsRequest{Type: "x"}); err != nil {
