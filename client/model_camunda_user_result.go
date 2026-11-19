@@ -21,13 +21,15 @@ var _ MappedNullable = &CamundaUserResult{}
 
 // CamundaUserResult struct for CamundaUserResult
 type CamundaUserResult struct {
-	// The username of the user.
-	Username Username `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
+	// Whether the caller has no identity. Only an unprotected API answers an anonymous caller; a protected API returns `401` instead. When `true`, `username`, `displayName` and `email` are `null` and the lists are empty.
+	IsAnonymous bool `json:"isAnonymous"`
+	// The username of the user. `null` when `isAnonymous` is `true`.
+	Username NullableUsername `json:"username" validate:"regexp=^[a-zA-Z0-9_~@.+-]+$"`
 	// The display name of the user.
 	DisplayName NullableString `json:"displayName"`
 	// The email of the user.
 	Email NullableString `json:"email"`
-	// The web components the user is authorized to use. When authorizations are disabled for the cluster, this always returns `[\"*\"]`, regardless of the user's actual permissions, since access is not restricted in that case.
+	// The web components the user is authorized to use. When authorizations are disabled for the cluster, this always returns `[\"*\"]`, regardless of the user's actual permissions, since access is not restricted in that case. An anonymous caller of an unprotected API also gets `[\"*\"]`, for the same reason.
 	AuthorizedComponents []string `json:"authorizedComponents"`
 	// The tenants the user is a member of.
 	Tenants []TenantResult `json:"tenants"`
@@ -49,8 +51,9 @@ type _CamundaUserResult CamundaUserResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCamundaUserResult(username Username, displayName NullableString, email NullableString, authorizedComponents []string, tenants []TenantResult, groups []string, roles []string, salesPlanType NullableString, c8Links map[string]string, canLogout bool) *CamundaUserResult {
+func NewCamundaUserResult(isAnonymous bool, username NullableUsername, displayName NullableString, email NullableString, authorizedComponents []string, tenants []TenantResult, groups []string, roles []string, salesPlanType NullableString, c8Links map[string]string, canLogout bool) *CamundaUserResult {
 	this := CamundaUserResult{}
+	this.IsAnonymous = isAnonymous
 	this.Username = username
 	this.DisplayName = displayName
 	this.Email = email
@@ -72,28 +75,54 @@ func NewCamundaUserResultWithDefaults() *CamundaUserResult {
 	return &this
 }
 
-// GetUsername returns the Username field value
-func (o *CamundaUserResult) GetUsername() Username {
+// GetIsAnonymous returns the IsAnonymous field value
+func (o *CamundaUserResult) GetIsAnonymous() bool {
 	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.IsAnonymous
+}
+
+// GetIsAnonymousOk returns a tuple with the IsAnonymous field value
+// and a boolean to check if the value has been set.
+func (o *CamundaUserResult) GetIsAnonymousOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.IsAnonymous, true
+}
+
+// SetIsAnonymous sets field value
+func (o *CamundaUserResult) SetIsAnonymous(v bool) {
+	o.IsAnonymous = v
+}
+
+// GetUsername returns the Username field value
+// If the value is explicit nil, the zero value for Username will be returned
+func (o *CamundaUserResult) GetUsername() Username {
+	if o == nil || o.Username.Get() == nil {
 		var ret Username
 		return ret
 	}
 
-	return o.Username
+	return *o.Username.Get()
 }
 
 // GetUsernameOk returns a tuple with the Username field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *CamundaUserResult) GetUsernameOk() (*Username, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Username, true
+	return o.Username.Get(), o.Username.IsSet()
 }
 
 // SetUsername sets field value
 func (o *CamundaUserResult) SetUsername(v Username) {
-	o.Username = v
+	o.Username.Set(&v)
 }
 
 // GetDisplayName returns the DisplayName field value
@@ -328,7 +357,8 @@ func (o CamundaUserResult) MarshalJSON() ([]byte, error) {
 
 func (o CamundaUserResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["username"] = o.Username
+	toSerialize["isAnonymous"] = o.IsAnonymous
+	toSerialize["username"] = o.Username.Get()
 	toSerialize["displayName"] = o.DisplayName.Get()
 	toSerialize["email"] = o.Email.Get()
 	toSerialize["authorizedComponents"] = o.AuthorizedComponents
@@ -346,6 +376,7 @@ func (o *CamundaUserResult) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"isAnonymous",
 		"username",
 		"displayName",
 		"email",

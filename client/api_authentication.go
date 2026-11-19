@@ -33,7 +33,7 @@ func (r ApiGetAuthenticationRequest) Execute() (*CamundaUserResult, *http.Respon
 /*
 GetAuthentication Get current user
 
-Retrieves the current authenticated user.
+Retrieves the current authenticated user. On an unprotected API (`camunda.security.authentication.unprotected-api=true`) a caller without an identity gets a result with `isAnonymous` set to `true` instead of a `401`, because no credentials can authenticate it there.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetAuthenticationRequest

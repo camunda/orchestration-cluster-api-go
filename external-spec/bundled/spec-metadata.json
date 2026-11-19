@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "specHash": "sha256:4f859bb25976a5cb65013e1576979c4f636052de039093f0c258de6752ccc10d",
+  "specHash": "sha256:5e576aaaf222a649dc8cc7fd18d3f494bec8e8a28d50c79de38ec11ada7389f3",
   "semanticKeys": [
     {
       "name": "AgentDefinitionKey",
@@ -3514,7 +3514,7 @@
         "Authentication"
       ],
       "summary": "Get current user",
-      "description": "Retrieves the current authenticated user.",
+      "description": "Retrieves the current authenticated user. On an unprotected API (`camunda.security.authentication.unprotected-api=true`) a caller without an identity gets a result with `isAnonymous` set to `true` instead of a `401`, because no credentials can authenticate it there.",
       "eventuallyConsistent": false,
       "hasRequestBody": false,
       "requestBodyUnion": false,
@@ -8245,7 +8245,7 @@
         "ProcessInstanceCreationInstructionById",
         "ProcessInstanceCreationInstructionByVersionTag"
       ],
-      "optionalTenantIdInBody": false,
+      "optionalTenantIdInBody": true,
       "sourceFile": "process-instances.yaml",
       "requestBodyContentTypes": [
         "application/json"
