@@ -91,12 +91,21 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 // both the topology probe and the WebSocket upgrade handshake.
 //
 // Caller-supplied plumbing is honoured so a required proxy, dialer, CA or
-// custom auth is never bypassed: WithHTTPClient is used as-is (the caller owns
-// auth and TLS, exactly as for REST), and WithTransport replaces the SDK-built
+// custom auth is never bypassed: WithHTTPClient is honoured (the caller owns
+// auth and TLS, exactly as for REST; only the User-Agent is added), and WithTransport replaces the SDK-built
 // base transport underneath the SDK auth layer.
 func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
 	if c.cfg.HTTPClient != nil {
-		return &falcon.Dialer{HTTPClient: c.cfg.HTTPClient, Random: c.random}, nil
+		// Keep the caller's client (auth, TLS, proxy, timeouts) but layer
+		// the SDK User-Agent on top, on a shallow copy so the caller-owned
+		// client is never mutated.
+		hc := *c.cfg.HTTPClient
+		base := hc.Transport
+		if base == nil {
+			base = http.DefaultTransport
+		}
+		hc.Transport = &falconAuthTransport{base: base, userAgent: userAgent(c.cfg)}
+		return &falcon.Dialer{HTTPClient: &hc, Random: c.random}, nil
 	}
 	if c.cfg.Transport != nil {
 		header, err := c.falconAuthHeader()

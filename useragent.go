@@ -38,7 +38,10 @@ func versionFromBuildInfo(bi *debug.BuildInfo, modPath string) string {
 	}
 	for _, d := range bi.Deps {
 		if d.Path == modPath {
-			if d.Replace != nil && d.Replace.Version != "" {
+			// A replacement is authoritative: an unversioned (local
+			// directory) replacement is a development build, not the
+			// originally required release.
+			if d.Replace != nil {
 				return clean(d.Replace.Version)
 			}
 			return clean(d.Version)

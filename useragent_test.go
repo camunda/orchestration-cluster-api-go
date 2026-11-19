@@ -168,6 +168,7 @@ func TestVersionFromBuildInfo(t *testing.T) {
 	}{
 		{"dep", debug.BuildInfo{Deps: []*debug.Module{{Path: mod, Version: "v11.0.3"}}}, "11.0.3"},
 		{"replaced", debug.BuildInfo{Deps: []*debug.Module{{Path: mod, Version: "v11.0.0", Replace: &debug.Module{Version: "v11.0.9"}}}}, "11.0.9"},
+		{"local dir replace", debug.BuildInfo{Deps: []*debug.Module{{Path: mod, Version: "v11.0.0", Replace: &debug.Module{Path: "../sdk"}}}}, "development"},
 		{"main devel", debug.BuildInfo{Main: debug.Module{Path: mod, Version: "(devel)"}}, "development"},
 		{"absent", debug.BuildInfo{}, "development"},
 	}
@@ -205,5 +206,33 @@ func TestUserAgentOnFalconDialer(t *testing.T) {
 	_ = resp.Body.Close()
 	if !strings.HasPrefix(capture.ua, sdkUAPrefix) {
 		t.Errorf("FALCON User-Agent = %q, want prefix %q", capture.ua, sdkUAPrefix)
+	}
+}
+
+// TestUserAgentOnFalconDialerCustomHTTPClient: with WithHTTPClient the caller's
+// client is still used (its transport sees the request) but the SDK User-Agent,
+// including any application value, is set.
+func TestUserAgentOnFalconDialerCustomHTTPClient(t *testing.T) {
+	capture := &uaCapture{}
+	hc := &http.Client{Transport: capture}
+	client, err := New(WithNoAuth(), WithHTTPClient(hc), WithUserAgent("my-app/1.0"), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	d, err := client.buildFalconDialer()
+	if err != nil {
+		t.Fatalf("buildFalconDialer: %v", err)
+	}
+	req, _ := http.NewRequest(http.MethodGet, "http://example.invalid/", nil)
+	resp, err := d.HTTPClient.Do(req)
+	if err != nil {
+		t.Fatalf("Do: %v", err)
+	}
+	_ = resp.Body.Close()
+	if !strings.HasPrefix(capture.ua, sdkUAPrefix) || !strings.HasSuffix(capture.ua, " my-app/1.0") {
+		t.Errorf("FALCON User-Agent = %q, want SDK prefix and app suffix", capture.ua)
+	}
+	if hc.Transport != capture {
+		t.Error("caller-owned HTTP client was mutated")
 	}
 }

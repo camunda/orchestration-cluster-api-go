@@ -214,7 +214,11 @@ func TestWithHTTPClientSkipsSDKTransportSetup(t *testing.T) {
 
 // FALCON probes/upgrades must go through caller-supplied plumbing.
 func TestFalconDialerUsesCustomPlumbing(t *testing.T) {
-	mine := &http.Client{}
+	mineCalled := false
+	mine := &http.Client{Transport: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		mineCalled = true
+		return okResponse(r), nil
+	})}
 	c, err := New(WithHTTPClient(mine))
 	if err != nil {
 		t.Fatalf("New: %v", err)
@@ -223,8 +227,14 @@ func TestFalconDialerUsesCustomPlumbing(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildFalconDialer: %v", err)
 	}
-	if d.HTTPClient != mine {
-		t.Fatal("falcon dialer did not use the WithHTTPClient client")
+	req0, _ := http.NewRequest(http.MethodGet, "http://example.invalid/", nil)
+	if resp, err := d.HTTPClient.Do(req0); err != nil {
+		t.Fatalf("Do: %v", err)
+	} else {
+		_ = resp.Body.Close()
+	}
+	if !mineCalled {
+		t.Fatal("falcon dialer did not use the WithHTTPClient client's transport")
 	}
 
 	called := false
