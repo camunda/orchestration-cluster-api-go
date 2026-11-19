@@ -73,6 +73,9 @@ MODEL_SCOPED_OPTIONAL = {
     "model_activated_job_result.go": [
         "physicalTenantId",
     ],
+    # `isAnonymous` added to CamundaUserResult in 8.10.10; 8.10.0-8.10.9 omit
+    # it. Absent means false: those servers never answer an anonymous caller.
+    "model_camunda_user_result.go": ["isAnonymous"],
 }
 
 
