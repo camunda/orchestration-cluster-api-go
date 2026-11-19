@@ -196,3 +196,70 @@ func TestHTTPPoolEnvExplicitValuesPreserved(t *testing.T) {
 		})
 	}
 }
+<<<<<<< HEAD
+=======
+
+func TestWithTransportTypedNilRejected(t *testing.T) {
+	_, err := New(WithTransport((*http.Transport)(nil)))
+	if !errors.Is(err, ErrConfig) {
+		t.Fatalf("expected ErrConfig for typed-nil transport, got %v", err)
+	}
+}
+
+// WithHTTPClient bypasses SDK TLS: an unreadable SDK CA path must not fail New.
+func TestWithHTTPClientSkipsSDKTransportSetup(t *testing.T) {
+	t.Setenv("CAMUNDA_MTLS_CA_PATH", "/nonexistent/ca.pem")
+	if _, err := New(WithHTTPClient(&http.Client{})); err != nil {
+		t.Fatalf("New with custom HTTP client: %v", err)
+	}
+}
+
+// FALCON probes/upgrades must go through caller-supplied plumbing.
+func TestFalconDialerUsesCustomPlumbing(t *testing.T) {
+	mineCalled := false
+	mine := &http.Client{Transport: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		mineCalled = true
+		return okResponse(r), nil
+	})}
+	c, err := New(WithHTTPClient(mine))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	d, err := c.buildFalconDialer()
+	if err != nil {
+		t.Fatalf("buildFalconDialer: %v", err)
+	}
+	req0, _ := http.NewRequest(http.MethodGet, "http://example.invalid/", nil)
+	if resp, err := d.HTTPClient.Do(req0); err != nil {
+		t.Fatalf("Do: %v", err)
+	} else {
+		_ = resp.Body.Close()
+	}
+	if !mineCalled {
+		t.Fatal("falcon dialer did not use the WithHTTPClient client's transport")
+	}
+
+	called := false
+	rt := roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		called = true
+		return okResponse(r), nil
+	})
+	c2, err := New(WithTransport(rt))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	d2, err := c2.buildFalconDialer()
+	if err != nil {
+		t.Fatalf("buildFalconDialer: %v", err)
+	}
+	req, _ := http.NewRequest(http.MethodGet, "http://example.invalid/", nil)
+	resp, err := d2.HTTPClient.Do(req)
+	if err != nil {
+		t.Fatalf("Do: %v", err)
+	}
+	_ = resp.Body.Close()
+	if !called {
+		t.Fatal("falcon dialer bypassed the WithTransport round tripper")
+	}
+}
+>>>>>>> aca7251 (feat: send attributable User-Agent on REST, OAuth and gRPC (#208))

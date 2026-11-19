@@ -211,6 +211,12 @@ type Config struct {
 
 	DefaultTenantID string
 
+	// UserAgent is an application identifier (e.g. "my-app/1.2",
+	// CAMUNDA_USER_AGENT) appended after the SDK's own
+	// camunda-orchestration-sdk-go/<version> token on every REST, OAuth and gRPC
+	// request. It never replaces the SDK token.
+	UserAgent string
+
 	// Falcon enables the FALCON (nanobpmn command-stream) transport upgrade when
 	// the gateway advertises it (CAMUNDA_FALCON, default true). ForceREST forces
 	// the pure-REST path even when FALCON is advertised (CAMUNDA_FORCE_REST),
@@ -314,6 +320,7 @@ func resolveFromEnv(getenv func(string) string, overrides map[string]string) (*C
 		BasicAuthUsername:   get("CAMUNDA_BASIC_AUTH_USERNAME"),
 		BasicAuthPassword:   get("CAMUNDA_BASIC_AUTH_PASSWORD"),
 		DefaultTenantID:     get("CAMUNDA_DEFAULT_TENANT_ID", "CAMUNDA_TENANT_ID"),
+		UserAgent:           get("CAMUNDA_USER_AGENT"),
 		EventualPollDefault: defaultEventualPollDefault,
 		TLS: TLSConfig{
 			Cert:          get("CAMUNDA_MTLS_CERT"),

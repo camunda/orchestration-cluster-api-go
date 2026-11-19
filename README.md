@@ -180,6 +180,7 @@ precedence over both.
 | `CAMUNDA_REST_ADDRESS_EXACT` | — | Use `CAMUNDA_REST_ADDRESS` exactly as provided, without appending the `/v2` suffix (for gateway/reverse-proxy fronted deployments). |
 | `CAMUNDA_GRPC_ADDRESS` / `ZEEBE_GRPC_ADDRESS` | `localhost:26500` | Zeebe gRPC gateway address (`host:port`) for the streaming job worker. |
 | `CAMUNDA_DEFAULT_TENANT_ID` / `CAMUNDA_TENANT_ID` | — | Default tenant id applied to operations that accept one. |
+| `CAMUNDA_USER_AGENT` | — | Application identifier (e.g. `my-app/1.2`) appended after the SDK's `camunda-orchestration-sdk-go/<version>` User-Agent token on REST, OAuth and gRPC requests. Never replaces it. Also `WithUserAgent`. |
 
 ### Authentication
 
