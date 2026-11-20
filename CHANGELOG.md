@@ -1,3 +1,10 @@
+# [11.0.0-alpha.16](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.15...v11.0.0-alpha.16) (2026-11-20)
+
+
+### Features
+
+* back off the stream worker sidecar poll on empty results ([#213](https://github.com/camunda/orchestration-cluster-api-go/issues/213)) ([825df0f](https://github.com/camunda/orchestration-cluster-api-go/commit/825df0f54bc7c1d5e64e638d9808f8e7ed16f4fb)), closes [#212](https://github.com/camunda/orchestration-cluster-api-go/issues/212)
+
 # [11.0.0-alpha.15](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.14...v11.0.0-alpha.15) (2026-11-19)
 
 
