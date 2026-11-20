@@ -1349,7 +1349,7 @@ func (c *CamundaClient) EvaluateConditionals(ctx context.Context, body Condition
 		req = opt(req)
 	}
 	if b := req.GetConditionalEvaluationInstruction(); b != nil {
-		req = req.ConditionalEvaluationInstruction(c.withDefaultTenantConditionalEvaluation(*b))
+		req = req.ConditionalEvaluationInstruction(c.withDefaultTenantConditionalEvaluationInstruction(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -1376,7 +1376,7 @@ func (c *CamundaClient) EvaluateDecision(ctx context.Context, body DecisionEvalu
 		req = opt(req)
 	}
 	if b := req.GetDecisionEvaluationInstruction(); b != nil {
-		req = req.DecisionEvaluationInstruction(c.withDefaultTenantDecisionEvaluation(*b))
+		req = req.DecisionEvaluationInstruction(c.withDefaultTenantDecisionEvaluationInstruction(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -1889,7 +1889,7 @@ func (c *CamundaClient) EvaluateExpression(ctx context.Context, body ExpressionE
 		req = opt(req)
 	}
 	if b := req.GetExpressionEvaluationRequest(); b != nil {
-		req = req.ExpressionEvaluationRequest(c.withDefaultTenantExpressionEvaluation(*b))
+		req = req.ExpressionEvaluationRequest(c.withDefaultTenantExpressionEvaluationRequest(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -2740,7 +2740,7 @@ func (c *CamundaClient) CorrelateMessage(ctx context.Context, body MessageCorrel
 		req = opt(req)
 	}
 	if b := req.GetMessageCorrelationRequest(); b != nil {
-		req = req.MessageCorrelationRequest(c.withDefaultTenantMessageCorrelation(*b))
+		req = req.MessageCorrelationRequest(c.withDefaultTenantMessageCorrelationRequest(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -2766,7 +2766,7 @@ func (c *CamundaClient) PublishMessage(ctx context.Context, body MessagePublicat
 		req = opt(req)
 	}
 	if b := req.GetMessagePublicationRequest(); b != nil {
-		req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublication(*b))
+		req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublicationRequest(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -2972,6 +2972,9 @@ func (c *CamundaClient) ResumeProcessDefinitions(ctx context.Context, body Proce
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	if b := req.GetProcessDefinitionResumptionInstruction(); b != nil {
+		req = req.ProcessDefinitionResumptionInstruction(c.withDefaultTenantProcessDefinitionResumptionInstruction(*b))
+	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }
@@ -3040,6 +3043,9 @@ func (c *CamundaClient) SuspendProcessDefinitions(ctx context.Context, body Proc
 	req = req.ProcessDefinitionSuspensionInstruction(body)
 	for _, opt := range opts {
 		req = opt(req)
+	}
+	if b := req.GetProcessDefinitionSuspensionInstruction(); b != nil {
+		req = req.ProcessDefinitionSuspensionInstruction(c.withDefaultTenantProcessDefinitionSuspensionInstruction(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -4073,7 +4079,7 @@ func (c *CamundaClient) BroadcastSignal(ctx context.Context, body SignalBroadcas
 		req = opt(req)
 	}
 	if b := req.GetSignalBroadcastRequest(); b != nil {
-		req = req.SignalBroadcastRequest(c.withDefaultTenantSignalBroadcast(*b))
+		req = req.SignalBroadcastRequest(c.withDefaultTenantSignalBroadcastRequest(*b))
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
@@ -4788,4 +4794,104 @@ func (c *CamundaClient) SearchVariables(ctx context.Context, body VariableSearch
 	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
+}
+
+// withDefaultTenantConditionalEvaluationInstruction injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantConditionalEvaluationInstruction(body ConditionalEvaluationInstruction) ConditionalEvaluationInstruction {
+	if body.TenantId == nil {
+		t := TenantId(c.effectiveDefaultTenant())
+		body.TenantId = &t
+	}
+	return body
+}
+
+// withDefaultTenantDecisionEvaluationInstruction injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantDecisionEvaluationInstruction(body DecisionEvaluationInstruction) DecisionEvaluationInstruction {
+	if v := body.DecisionEvaluationById; v != nil && v.TenantId == nil {
+		cp := *v
+		t := TenantId(c.effectiveDefaultTenant())
+		cp.TenantId = &t
+		body.DecisionEvaluationById = &cp
+	}
+	if v := body.DecisionEvaluationByKey; v != nil && v.TenantId == nil {
+		cp := *v
+		t := TenantId(c.effectiveDefaultTenant())
+		cp.TenantId = &t
+		body.DecisionEvaluationByKey = &cp
+	}
+	return body
+}
+
+// withDefaultTenantExpressionEvaluationRequest injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantExpressionEvaluationRequest(body ExpressionEvaluationRequest) ExpressionEvaluationRequest {
+	if body.TenantId == nil {
+		t := TenantId(c.effectiveDefaultTenant())
+		body.TenantId = &t
+	}
+	return body
+}
+
+// withDefaultTenantMessageCorrelationRequest injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantMessageCorrelationRequest(body MessageCorrelationRequest) MessageCorrelationRequest {
+	if body.TenantId == nil {
+		t := TenantId(c.effectiveDefaultTenant())
+		body.TenantId = &t
+	}
+	return body
+}
+
+// withDefaultTenantMessagePublicationRequest injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantMessagePublicationRequest(body MessagePublicationRequest) MessagePublicationRequest {
+	if body.TenantId == nil {
+		t := TenantId(c.effectiveDefaultTenant())
+		body.TenantId = &t
+	}
+	return body
+}
+
+// withDefaultTenantProcessDefinitionResumptionInstruction injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantProcessDefinitionResumptionInstruction(body ProcessDefinitionResumptionInstruction) ProcessDefinitionResumptionInstruction {
+	if v := body.ProcessDefinitionResumptionInstructionById; v != nil && v.TenantId == nil {
+		cp := *v
+		t := TenantId(c.effectiveDefaultTenant())
+		cp.TenantId = &t
+		body.ProcessDefinitionResumptionInstructionById = &cp
+	}
+	return body
+}
+
+// withDefaultTenantProcessDefinitionSuspensionInstruction injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantProcessDefinitionSuspensionInstruction(body ProcessDefinitionSuspensionInstruction) ProcessDefinitionSuspensionInstruction {
+	if v := body.ProcessDefinitionSuspensionInstructionById; v != nil && v.TenantId == nil {
+		cp := *v
+		t := TenantId(c.effectiveDefaultTenant())
+		cp.TenantId = &t
+		body.ProcessDefinitionSuspensionInstructionById = &cp
+	}
+	return body
+}
+
+// withDefaultTenantSignalBroadcastRequest injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantSignalBroadcastRequest(body SignalBroadcastRequest) SignalBroadcastRequest {
+	if body.TenantId == nil {
+		t := TenantId(c.effectiveDefaultTenant())
+		body.TenantId = &t
+	}
+	return body
 }
