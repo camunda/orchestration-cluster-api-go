@@ -2,6 +2,11 @@ package camunda
 
 import (
 	"context"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -123,5 +128,48 @@ func TestSidecarSleepWakesOnStreamStateChange(t *testing.T) {
 	w.setStreamUp(false)
 	if len(w.streamChanged) != 0 {
 		t.Fatal("unchanged state signalled")
+	}
+}
+
+// A flapping stream wakes the sidecar on every transition, but REST polls must
+// still respect the base interval (backoff disabled): a wake never polls sooner
+// than pollInterval after the previous poll.
+func TestSidecarPollFlappingStreamRespectsBaseInterval(t *testing.T) {
+	var polls atomic.Int32
+	rest := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		polls.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"jobs":[]}`)
+	}))
+	defer rest.Close()
+	c, err := New(WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := func(_ context.Context, _ *Job) (map[string]any, error) { return nil, nil }
+	w := c.NewStreamJobWorker("t", h, WithStreamPollInterval(200*time.Millisecond),
+		WithStreamPollBackoff(StreamPollBackoff{}))
+	ctx, cancel := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
+	done := make(chan struct{})
+	go func() { defer close(done); w.runSidecarPoll(ctx, make(chan struct{}, 1), &wg) }()
+	stop := time.After(time.Second)
+	up := false
+flap:
+	for {
+		select {
+		case <-stop:
+			break flap
+		case <-time.After(5 * time.Millisecond):
+			up = !up
+			w.setStreamUp(up)
+		}
+	}
+	cancel()
+	<-done
+	wg.Wait()
+	// ~1s / 200ms ≈ 6 polls; without the floor this is ~200.
+	if n := polls.Load(); n > 8 {
+		t.Fatalf("flapping stream drove %d polls in 1s, want <= 8", n)
 	}
 }

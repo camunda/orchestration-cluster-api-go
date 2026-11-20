@@ -422,6 +422,7 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 		} else if !w.streamUp.Load() {
 			delay = w.pollInterval
 		}
+		start := w.client.clock.Now()
 		woke, err := w.sidecarSleep(ctx, delay)
 		if err != nil {
 			return
@@ -429,8 +430,15 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 		if woke {
 			// Stream state changed mid-sleep: a disconnect makes the poll the only
 			// channel, a reconnect starts a fresh backoff. Either way, restart from
-			// the base interval and poll now.
+			// the base interval — but never poll sooner than pollInterval after the
+			// previous poll, so a flapping stream cannot drive REST polls at the
+			// reconnect cadence.
 			delay = w.pollInterval
+			if rest := w.pollInterval - w.client.clock.Now().Sub(start); rest > 0 {
+				if sleepCtx(ctx, w.client.clock, rest) != nil {
+					return
+				}
+			}
 		}
 	}
 }
