@@ -620,6 +620,7 @@ WORKER_TYPES = [
     "StreamJobWorker",
     "WorkerOption",
     "StreamWorkerOption",
+    "StreamPollBackoff",
     "Job",
     "JobHandler",
 ]
@@ -653,6 +654,7 @@ VAR_BUCKETS = {
     "ConfigSchema": "configuration",
     "ErrConfig": "runtime",
     "SeedEnvVar": "runtime",
+    "DefaultStreamPollBackoff": "job-workers",
 }
 
 BUCKETS: dict[str, list[str]] = {
