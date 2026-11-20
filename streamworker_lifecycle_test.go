@@ -1,0 +1,495 @@
+package camunda
+
+import (
+	"context"
+	"errors"
+	"io"
+	"math/rand/v2"
+	"net/http"
+	"net/http/httptest"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	"github.com/camunda/orchestration-cluster-api-go/v11/pb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/test/bufconn"
+)
+
+// seqGateway sends one job per stream, keyed by the stream ordinal (1, 2, ...),
+// then holds the stream open until the client cancels it. With `silent` set it
+// sends nothing, so only the inactivity watchdog can end a stream. sent2 closes
+// when stream 2's job has been sent, so a test can synchronize on a second
+// stream's job being in flight.
+type seqGateway struct {
+	pb.UnimplementedGatewayServer
+	silent    bool
+	streams   atomic.Int32
+	sent2     chan struct{}
+	sent2Once sync.Once
+	mu        sync.Mutex
+	completed map[int64]int
+	completes chan int64
+}
+
+func (g *seqGateway) StreamActivatedJobs(_ *pb.StreamActivatedJobsRequest, stream grpc.ServerStreamingServer[pb.ActivatedJob]) error {
+	n := g.streams.Add(1)
+	if !g.silent {
+		if err := stream.Send(&pb.ActivatedJob{Key: int64(n), Type: "t"}); err != nil {
+			return err
+		}
+		if n == 2 && g.sent2 != nil {
+			g.sent2Once.Do(func() { close(g.sent2) })
+		}
+	}
+	<-stream.Context().Done()
+	return stream.Context().Err()
+}
+
+func (g *seqGateway) CompleteJob(_ context.Context, req *pb.CompleteJobRequest) (*pb.CompleteJobResponse, error) {
+	g.mu.Lock()
+	g.completed[req.JobKey]++
+	g.mu.Unlock()
+	g.completes <- req.JobKey
+	return &pb.CompleteJobResponse{}, nil
+}
+
+// flakyOpenGateway embeds seqGateway but fails the failFrom-th and later
+// StreamActivatedJobs opens, simulating a gateway that refuses new streams
+// after the first one.
+type flakyOpenGateway struct {
+	seqGateway
+	failFrom int32
+}
+
+func (g *flakyOpenGateway) StreamActivatedJobs(req *pb.StreamActivatedJobsRequest, stream grpc.ServerStreamingServer[pb.ActivatedJob]) error {
+	if g.streams.Load()+1 >= g.failFrom {
+		g.streams.Add(1)
+		return status.Error(codes.Unavailable, "stream opens failing on purpose")
+	}
+	return g.seqGateway.StreamActivatedJobs(req, stream)
+}
+
+// waitForSignal fails the test unless ch is closed within 5 seconds.
+func waitForSignal(t *testing.T, ch <-chan struct{}, what string) {
+	t.Helper()
+	select {
+	case <-ch:
+	case <-time.After(5 * time.Second):
+		t.Fatalf("timed out waiting for %s", what)
+	}
+}
+
+// waitForStreams fails the test unless the gateway has seen at least n streams
+// within 5 seconds.
+func waitForStreams(t *testing.T, g *seqGateway, n int32) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for g.streams.Load() < n {
+		if time.Now().After(deadline) {
+			t.Fatalf("streams = %d, want >= %d (watchdog recycles and reopens)", g.streams.Load(), n)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+}
+
+func startSeqWorker(t *testing.T, g *seqGateway, opts ...StreamWorkerOption) context.CancelFunc {
+	t.Helper()
+	return startSeqWorkerWith(t, g, func(context.Context, *Job) (map[string]any, error) { return nil, nil }, opts...)
+}
+
+func startSeqWorkerWith(t *testing.T, g *seqGateway, h func(context.Context, *Job) (map[string]any, error), opts ...StreamWorkerOption) context.CancelFunc {
+	t.Helper()
+	lis := bufconn.Listen(1024 * 1024)
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, g)
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+	client, err := New(WithNoAuth())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	opts = append([]StreamWorkerOption{WithStreamPollInterval(-1), WithStreamReconnectBackoff(time.Hour)}, opts...)
+	w := client.NewStreamJobWorker("t", h, opts...)
+	w.dial = bufDial(lis)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() { _ = w.Run(ctx) }()
+	t.Cleanup(cancel)
+	return cancel
+}
+
+// A stream that reaches its max lifetime is reopened at once (the 1h reconnect
+// backoff is skipped), and every job is completed exactly once.
+func TestStreamJobWorkerRecyclesAtMaxLifetime(t *testing.T) {
+	g := &seqGateway{completed: map[int64]int{}, completes: make(chan int64, 16)}
+	startSeqWorker(t, g, WithStreamMaxLifetime(50*time.Millisecond), WithStreamInactivityTimeout(0))
+	// Jobs run concurrently, so completions may arrive in any order.
+	// One overall deadline: later jobs completing must not mask a stranded one.
+	seen := map[int64]bool{}
+	deadline := time.After(5 * time.Second)
+	for len(seen) < 3 {
+		select {
+		case got := <-g.completes:
+			if got >= 1 && got <= 3 {
+				seen[got] = true
+			}
+		case <-deadline:
+			t.Fatalf("timed out waiting for jobs 1-3 to complete; got %v", seen)
+		}
+	}
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	for k, n := range g.completed {
+		if n != 1 {
+			t.Errorf("job %d completed %d times, want 1", k, n)
+		}
+	}
+}
+
+// A job in flight when its stream is recycled keeps a live handler context and
+// is completed exactly once after the stream has been reopened.
+func TestStreamJobWorkerInFlightJobSurvivesRecycle(t *testing.T) {
+	g := &seqGateway{completed: map[int64]int{}, completes: make(chan int64, 16)}
+	started := make(chan struct{})
+	release := make(chan struct{})
+	ctxErr := make(chan error, 1)
+	h := func(ctx context.Context, j *Job) (map[string]any, error) {
+		if j.Key() != "1" {
+			return nil, nil
+		}
+		close(started)
+		<-release
+		ctxErr <- ctx.Err()
+		return nil, nil
+	}
+	startSeqWorkerWith(t, g, h, WithStreamMaxLifetime(50*time.Millisecond), WithStreamInactivityTimeout(0))
+	waitForSignal(t, started, "job 1 handler start")
+	waitForStreams(t, g, 2)
+	close(release)
+	select {
+	case err := <-ctxErr:
+		if err != nil {
+			t.Fatalf("handler context ended by recycle: %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("handler did not finish")
+	}
+	deadline := time.After(5 * time.Second)
+	for done := false; !done; {
+		select {
+		case k := <-g.completes:
+			done = k == 1
+		case <-deadline:
+			t.Fatal("job 1 was not completed after recycle")
+		}
+	}
+	time.Sleep(50 * time.Millisecond)
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if n := g.completed[1]; n != 1 {
+		t.Errorf("job 1 completed %d times, want 1", n)
+	}
+}
+
+// The watchdog recycles a silent stream after the inactivity timeout.
+func TestStreamJobWorkerInactivityWatchdogFires(t *testing.T) {
+	g := &seqGateway{silent: true, completed: map[int64]int{}, completes: make(chan int64, 1)}
+	startSeqWorker(t, g, WithStreamMaxLifetime(0), WithStreamInactivityTimeout(30*time.Millisecond))
+	waitForStreams(t, g, 3)
+}
+
+// With both safeguards disabled a stream is never recycled.
+func TestStreamJobWorkerLifecycleDisabled(t *testing.T) {
+	g := &seqGateway{completed: map[int64]int{}, completes: make(chan int64, 4)}
+	startSeqWorker(t, g, WithStreamMaxLifetime(0), WithStreamInactivityTimeout(0))
+	waitFor(t, g.completes)
+	time.Sleep(150 * time.Millisecond)
+	if n := g.streams.Load(); n != 1 {
+		t.Errorf("streams = %d, want 1", n)
+	}
+}
+
+// The watchdog resets on each job: jobs arriving faster than the timeout keep
+// the stream alive.
+func TestStreamJobWorkerWatchdogResetsOnJob(t *testing.T) {
+	client, err := New(WithNoAuth())
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := client.NewStreamJobWorker("t", nil, WithStreamMaxLifetime(0), WithStreamInactivityTimeout(80*time.Millisecond))
+	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
+	activity := make(chan struct{})
+	done := make(chan struct{})
+	go func() { defer close(done); w.watchStream(ctx, cancel, activity) }()
+	for i := 0; i < 10; i++ {
+		time.Sleep(20 * time.Millisecond)
+		// Bound the send: if the watchdog has already exited (a regression
+		// firing the deadline despite activity), an unbuffered send here would
+		// block forever, so fail on the cancelled context instead.
+		select {
+		case activity <- struct{}{}:
+		case <-ctx.Done():
+			t.Fatalf("watchdog exited during activity: %v", context.Cause(ctx))
+		}
+	}
+	if ctx.Err() != nil {
+		t.Fatalf("stream recycled despite activity: %v", context.Cause(ctx))
+	}
+	// Bound the wait: if a regression prevents the deadline from ever firing,
+	// fail with a diagnostic instead of hanging.
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("watchdog did not fire after activity stopped")
+	}
+	if !errors.Is(context.Cause(ctx), errStreamRecycled) {
+		t.Fatalf("cause = %v, want errStreamRecycled", context.Cause(ctx))
+	}
+}
+
+func TestStreamJobWorkerRejectsInactivityNotBelowLifetime(t *testing.T) {
+	client, err := New(WithNoAuth())
+	if err != nil {
+		t.Fatal(err)
+	}
+	w := client.NewStreamJobWorker("t", nil, WithStreamMaxLifetime(time.Minute), WithStreamInactivityTimeout(time.Minute))
+	if err := w.Run(context.Background()); !errors.Is(err, ErrConfig) {
+		t.Fatalf("Run = %v, want ErrConfig", err)
+	}
+}
+
+// Jittered deadlines of many workers spread across [0.9d, d].
+func TestJitterDeadlineSpreadsAcrossWindow(t *testing.T) {
+	d := 8 * time.Hour
+	r := rngAdapter{rand.New(rand.NewPCG(1, 2))}
+	lo, hi := d, time.Duration(0)
+	for i := 0; i < 1000; i++ {
+		got := jitterDeadline(r, d)
+		if got < d*9/10 || got > d {
+			t.Fatalf("deadline %s outside [0.9d, d]", got)
+		}
+		lo, hi = min(lo, got), max(hi, got)
+	}
+	if hi-lo < d/20 {
+		t.Errorf("deadlines spread over %s, want most of the %s window", hi-lo, d/10)
+	}
+	if jitterDeadline(r, 0) != 0 {
+		t.Error("disabled deadline should stay 0")
+	}
+}
+
+type rngAdapter struct{ r *rand.Rand }
+
+func (a rngAdapter) Float64() float64 { return a.r.Float64() }
+
+// recordingController counts engine-clock pin requests.
+type recordingController struct{ pins atomic.Int32 }
+
+func (r *recordingController) PinAt(context.Context, time.Time) error {
+	r.pins.Add(1)
+	return nil
+}
+
+func (r *recordingController) ResetToLive(context.Context) error { return nil }
+
+// The stream-lifecycle watchdogs bound a transport, so they run on real time
+// even when the client's clock is an EngineClock: they must neither advance the
+// engine clock nor fire early because of one.
+func TestStreamJobWorkerWatchdogUsesRealTimeWithEngineClock(t *testing.T) {
+	ctrl := &recordingController{}
+	client, err := New(WithNoAuth(), WithClock(NewEngineClock(ctrl)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
+	w := client.NewStreamJobWorker("t", nil,
+		WithStreamMaxLifetime(40*time.Millisecond), WithStreamInactivityTimeout(0))
+	done := make(chan struct{})
+	go func() { defer close(done); w.watchStream(ctx, cancel, make(chan struct{})) }()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("watchdog did not fire in real time")
+	}
+	if !errors.Is(context.Cause(ctx), errStreamRecycled) {
+		t.Fatalf("cause = %v, want errStreamRecycled", context.Cause(ctx))
+	}
+	if n := ctrl.pins.Load(); n != 0 {
+		t.Errorf("engine clock pinned %d times by a transport watchdog, want 0", n)
+	}
+}
+
+// A saturated worker keeps reopening a recycled stream: the capacity wait
+// selects on the worker context, so a recycle propagates and Run reopens at
+// once even while a received job is parked behind a busy handler.
+func TestStreamJobWorkerRecyclesWhileSaturated(t *testing.T) {
+	lis := bufconn.Listen(1024 * 1024)
+	release := make(chan struct{})
+	handlerStarted := make(chan struct{})
+	var handlerOnce sync.Once
+	g := &seqGateway{sent2: make(chan struct{}), completed: map[int64]int{}, completes: make(chan int64, 16)}
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, g)
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	client, err := New(WithNoAuth())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	w := client.NewStreamJobWorker("t",
+		func(context.Context, *Job) (map[string]any, error) {
+			handlerOnce.Do(func() { close(handlerStarted) })
+			<-release
+			return nil, nil
+		},
+		WithStreamMaxConcurrentJobs(1),
+		WithStreamMaxLifetime(50*time.Millisecond),
+		WithStreamInactivityTimeout(0),
+		WithStreamPollInterval(-1),
+		WithStreamReconnectBackoff(time.Hour))
+	w.dial = bufDial(lis)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	go func() { _ = w.Run(ctx) }()
+
+	// Stream 1 delivers job 1, which occupies the only handler slot.
+	waitForSignal(t, handlerStarted, "handler to start on stream 1's job")
+	// The max lifetime recycles stream 1; stream 2 opens and delivers job 2,
+	// which parks on the busy handler slot.
+	waitForSignal(t, g.sent2, "stream 2's job to arrive while the handler slot is busy")
+	// With a received job waiting on capacity, stream 2 is recycled in turn and
+	// stream 3 must still open at once -- the reopen must not wait for the
+	// busy handler.
+	waitForStreams(t, g, 3)
+	close(release)
+}
+
+// A deliberate recycle is not an outage: with the sidecar poll enabled it must
+// neither wake a backed-off poll nor reset its backoff, so the poll cadence
+// after a recycle is still the backed-off delay, not the base interval. A real
+// disconnect (the gateway ends the stream) still drops the sidecar-visible
+// state and wakes the poll.
+func TestStreamJobWorkerRecycleLeavesSidecarIndependent(t *testing.T) {
+	var polls atomic.Int32
+	rest := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
+		polls.Add(1)
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(rw, `{"jobs":[]}`)
+	}))
+	t.Cleanup(rest.Close)
+
+	g := &seqGateway{completed: map[int64]int{}, completes: make(chan int64, 16)}
+	lis := bufconn.Listen(1024 * 1024)
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, g)
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	client, err := New(WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	w := client.NewStreamJobWorker("t",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+		WithStreamMaxLifetime(60*time.Millisecond),
+		WithStreamInactivityTimeout(0),
+		WithStreamPollInterval(20*time.Millisecond),
+		WithStreamPollBackoff(StreamPollBackoff{Multiplier: 100, Jitter: 0, Max: 10 * time.Second}),
+		WithStreamReconnectBackoff(time.Hour))
+	w.dial = bufDial(lis)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	go func() { _ = w.Run(ctx) }()
+
+	// Wait for the stream to open and the first poll to happen.
+	waitForStreams(t, g, 1)
+	waitForCond(t, func() bool { return polls.Load() >= 1 }, "first sidecar poll")
+	if !w.streamUp.Load() {
+		t.Fatal("stream not up after opening")
+	}
+
+	// Let the stream recycle several times while the empty polls back off.
+	// A recycle that signalled the sidecar would reset its delay to the 20ms
+	// base and drive a poll within ~40ms; an undisturbed backoff sleeps ~2s.
+	time.Sleep(400 * time.Millisecond)
+	if n := g.streams.Load(); n < 3 {
+		t.Fatalf("streams = %d, want >= 3 (watchdog recycles and reopens)", n)
+	}
+	if got := polls.Load(); got > 2 {
+		t.Fatalf("polls = %d after ~6 recycles, want <= 2: a recycle reset the sidecar backoff", got)
+	}
+
+	// A real disconnect still reports down and wakes the poll.
+	w.setStreamUp(false)
+	waitForCond(t, func() bool { return polls.Load() >= 2 }, "sidecar poll after a real disconnect")
+}
+
+// A failed reopen right after a deliberate recycle is a real disconnect, not
+// part of the recycle: the recycle left streamUp=true, and the failed open must
+// drop it so the sidecar falls out of backoff and keeps polling while no stream
+// is available.
+func TestStreamJobWorkerFailedReopenAfterRecycleDropsStreamUp(t *testing.T) {
+	var polls atomic.Int32
+	rest := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
+		polls.Add(1)
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(rw, `{"jobs":[]}`)
+	}))
+	t.Cleanup(rest.Close)
+
+	// failFrom causes the Nth and later stream opens to fail; opens before that
+	// succeed and hold the stream until the client cancels it.
+	g := &flakyOpenGateway{seqGateway: seqGateway{completed: map[int64]int{}, completes: make(chan int64, 16)}, failFrom: 2}
+	lis := bufconn.Listen(1024 * 1024)
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, g)
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	client, err := New(WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	w := client.NewStreamJobWorker("t",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+		WithStreamMaxLifetime(30*time.Millisecond),
+		WithStreamInactivityTimeout(0),
+		WithStreamPollInterval(100*time.Millisecond),
+		WithStreamPollBackoff(StreamPollBackoff{Multiplier: 1000, Jitter: 0, Max: 10 * time.Second}),
+		WithStreamReconnectBackoff(time.Hour))
+	w.dial = bufDial(lis)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	go func() { _ = w.Run(ctx) }()
+
+	// Stream 1 opens and the first poll happens; the empty polls then back off.
+	waitForStreams(t, &g.seqGateway, 1)
+	waitForCond(t, func() bool { return polls.Load() >= 1 }, "first sidecar poll")
+	waitForCond(t, w.streamUp.Load, "stream up after opening")
+
+	// The max lifetime recycles stream 1 (state stays up), then the reopen
+	// fails: streamUp must drop and the backed-off sidecar must wake and keep
+	// polling at the base interval while every reopen fails. Without the fix
+	// the state stays up and the backoff (~20s at Multiplier 1000) is
+	// undisturbed, so no further poll lands in this window.
+	waitForCond(t, func() bool { return !w.streamUp.Load() }, "streamUp to drop after the failed reopen")
+	waitForCond(t, func() bool { return polls.Load() >= 2 }, "sidecar poll after the failed reopen")
+}
+
+// waitForCond fails the test unless cond holds within 5 seconds.
+func waitForCond(t *testing.T, cond func() bool, what string) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for !cond() {
+		if time.Now().After(deadline) {
+			t.Fatalf("timed out waiting for %s", what)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
+}
