@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 	"time"
 
@@ -492,5 +493,50 @@ func TestSubscribeClampsJobCredits(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("did not receive subscribe frame")
+	}
+}
+
+func TestSubscribeSendsTenantIDs(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		tenants []string
+		want    []any
+	}{
+		{"default tenant", []string{"<default>"}, []any{"<default>"}},
+		{"multiple tenants", []string{"a", "b"}, []any{"a", "b"}},
+		{"no tenants omits field", nil, nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got := make(chan map[string]any, 1)
+			eps, d := startFalconServer(t, func(ctx context.Context, c *websocket.Conn) {
+				sub, err := readJSON(ctx, c)
+				if err != nil {
+					return
+				}
+				got <- sub
+				_ = writeJSON(ctx, c, map[string]any{"type": "welcome", "heartbeatMs": 15000})
+				<-ctx.Done()
+			})
+			w, err := Subscribe(eps, d, SubscribeArgs{JobType: "x", JobCredits: 1, TenantIDs: tc.tenants})
+			if err != nil {
+				t.Fatalf("Subscribe: %v", err)
+			}
+			defer w.Close()
+			select {
+			case sub := <-got:
+				v, present := sub["tenantIds"]
+				if tc.want == nil {
+					if present {
+						t.Errorf("tenantIds present without tenants: %v", v)
+					}
+					return
+				}
+				if !reflect.DeepEqual(v, tc.want) {
+					t.Errorf("tenantIds = %v, want %v", v, tc.want)
+				}
+			case <-time.After(2 * time.Second):
+				t.Fatal("did not receive subscribe frame")
+			}
+		})
 	}
 }

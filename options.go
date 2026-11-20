@@ -95,8 +95,12 @@ func WithRetry(rc RetryConfig) Option {
 	return func(c *Config) { c.Retry = rc }
 }
 
-// WithDefaultTenantID sets the default tenant id applied to operations that
-// accept one.
+// WithDefaultTenantID sets the default tenant id applied to tenant-scoped
+// commands (deploy, create process instance, publish/correlate message,
+// broadcast signal, evaluate decision/expression/conditionals, activate jobs)
+// when the caller does not pass one explicitly. When unset, the effective
+// default tenant is "<default>" (camunda.DefaultTenantIdentifier), matching
+// the Camunda Java client.
 func WithDefaultTenantID(id string) Option {
 	return func(c *Config) { c.DefaultTenantID = id }
 }

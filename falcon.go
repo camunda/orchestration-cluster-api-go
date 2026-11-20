@@ -418,8 +418,8 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 // resolveTenant resolves the tenant shown on a synthesized create result: the
 // tenant the instruction carried (already defaulted by tenantIDOrDefault), then
 // the configured default, then the server-side default marker. It is only a
-// display fallback for the result — the create frame itself omits tenantId when
-// no tenant is set so the gateway applies its own default.
+// display fallback for the result; the create frame always carries the
+// effective default tenant.
 func (c *CamundaClient) resolveTenant(provided *string) string {
 	if provided != nil && *provided != "" {
 		return *provided
