@@ -1,3 +1,10 @@
+# [11.0.0-alpha.17](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.16...v11.0.0-alpha.17) (2026-11-20)
+
+
+### Features
+
+* send the default tenant (<default> unless configured) on tenant-scoped commands ([#169](https://github.com/camunda/orchestration-cluster-api-go/issues/169)) ([da18278](https://github.com/camunda/orchestration-cluster-api-go/commit/da182783bf4adffa59aa492da33768c7f738f104)), closes [#168](https://github.com/camunda/orchestration-cluster-api-go/issues/168)
+
 # [11.0.0-alpha.16](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.15...v11.0.0-alpha.16) (2026-11-20)
 
 
