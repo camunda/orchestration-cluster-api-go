@@ -488,16 +488,25 @@ func (w *StreamJobWorker) watchStream(ctx context.Context, cancel context.Cancel
 	if d := jitterDeadline(rnd, w.maxLifetime); d > 0 {
 		lifetimeC = time.After(d) //nolint:forbidigo // a transport bound, not cadence: engine time would misfire it
 	}
+	// One inactivity timer per stream, reset on activity: the receive path is
+	// hot, so it must not allocate a fresh timer per job.
+	var idle *time.Timer
+	var idleC <-chan time.Time
+	if d := jitterDeadline(rnd, w.inactivityTimeout); d > 0 {
+		idle = time.NewTimer(d) //nolint:forbidigo // a transport bound, not cadence: engine time would misfire it
+		defer idle.Stop()
+		idleC = idle.C
+	}
 	for {
-		var idleC <-chan time.Time
-		if d := jitterDeadline(rnd, w.inactivityTimeout); d > 0 {
-			idleC = time.After(d) //nolint:forbidigo // a transport bound, not cadence: engine time would misfire it
-		}
 		select {
 		case <-ctx.Done():
 			return
 		case <-activity:
-			// A job arrived: restart the inactivity timer.
+			// A job arrived: restart the inactivity timer. Since Go 1.23 Reset
+			// on an unstopped timer discards any stale pending value.
+			if idle != nil {
+				idle.Reset(jitterDeadline(rnd, w.inactivityTimeout))
+			}
 		case <-lifetimeC:
 			w.client.logger.Debug("job stream reached max lifetime; recycling", "type", w.jobType)
 			cancel(fmt.Errorf("%w: max lifetime reached", errStreamRecycled))

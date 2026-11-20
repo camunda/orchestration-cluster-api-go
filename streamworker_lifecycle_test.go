@@ -77,6 +77,11 @@ func waitForStreams(t *testing.T, g *seqGateway, n int32) {
 
 func startSeqWorker(t *testing.T, g *seqGateway, opts ...StreamWorkerOption) context.CancelFunc {
 	t.Helper()
+	return startSeqWorkerWith(t, g, func(context.Context, *Job) (map[string]any, error) { return nil, nil }, opts...)
+}
+
+func startSeqWorkerWith(t *testing.T, g *seqGateway, h func(context.Context, *Job) (map[string]any, error), opts ...StreamWorkerOption) context.CancelFunc {
+	t.Helper()
 	lis := bufconn.Listen(1024 * 1024)
 	srv := grpc.NewServer()
 	pb.RegisterGatewayServer(srv, g)
@@ -87,8 +92,7 @@ func startSeqWorker(t *testing.T, g *seqGateway, opts ...StreamWorkerOption) con
 		t.Fatalf("New: %v", err)
 	}
 	opts = append([]StreamWorkerOption{WithStreamPollInterval(-1), WithStreamReconnectBackoff(time.Hour)}, opts...)
-	w := client.NewStreamJobWorker("t",
-		func(context.Context, *Job) (map[string]any, error) { return nil, nil }, opts...)
+	w := client.NewStreamJobWorker("t", h, opts...)
 	w.dial = bufDial(lis)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() { _ = w.Run(ctx) }()
@@ -121,6 +125,51 @@ func TestStreamJobWorkerRecyclesAtMaxLifetime(t *testing.T) {
 		if n != 1 {
 			t.Errorf("job %d completed %d times, want 1", k, n)
 		}
+	}
+}
+
+// A job in flight when its stream is recycled keeps a live handler context and
+// is completed exactly once after the stream has been reopened.
+func TestStreamJobWorkerInFlightJobSurvivesRecycle(t *testing.T) {
+	g := &seqGateway{completed: map[int64]int{}, completes: make(chan int64, 16)}
+	started := make(chan struct{})
+	release := make(chan struct{})
+	ctxErr := make(chan error, 1)
+	h := func(ctx context.Context, j *Job) (map[string]any, error) {
+		if j.Key() != "1" {
+			return nil, nil
+		}
+		close(started)
+		<-release
+		ctxErr <- ctx.Err()
+		return nil, nil
+	}
+	startSeqWorkerWith(t, g, h, WithStreamMaxLifetime(50*time.Millisecond), WithStreamInactivityTimeout(0))
+	waitForSignal(t, started, "job 1 handler start")
+	waitForStreams(t, g, 2)
+	close(release)
+	select {
+	case err := <-ctxErr:
+		if err != nil {
+			t.Fatalf("handler context ended by recycle: %v", err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("handler did not finish")
+	}
+	deadline := time.After(5 * time.Second)
+	for done := false; !done; {
+		select {
+		case k := <-g.completes:
+			done = k == 1
+		case <-deadline:
+			t.Fatal("job 1 was not completed after recycle")
+		}
+	}
+	time.Sleep(50 * time.Millisecond)
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if n := g.completed[1]; n != 1 {
+		t.Errorf("job 1 completed %d times, want 1", n)
 	}
 }
 
