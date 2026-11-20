@@ -417,8 +417,19 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	if err != nil {
 		return err
 	}
-	w.setStreamUp(true)
-	defer w.setStreamUp(false)
+	// A deliberate recycle (max lifetime / inactivity) is not an outage: the
+	// sidecar-visible stream state stays up across it, so a healthy recycle
+	// neither wakes a backed-off poll nor resets its delay. Only a real
+	// disconnect -- a failed open or a stream that ends for any other reason --
+	// flips it down (and back up once a new stream actually opens).
+	if !w.streamUp.Load() {
+		w.setStreamUp(true)
+	}
+	defer func() {
+		if !errors.Is(context.Cause(streamCtx), errStreamRecycled) {
+			w.setStreamUp(false)
+		}
+	}()
 
 	activity := make(chan struct{}, 1)
 	watchDone := make(chan struct{})

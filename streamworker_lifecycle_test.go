@@ -3,7 +3,10 @@ package camunda
 import (
 	"context"
 	"errors"
+	"io"
 	"math/rand/v2"
+	"net/http"
+	"net/http/httptest"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -347,4 +350,76 @@ func TestStreamJobWorkerRecyclesWhileSaturated(t *testing.T) {
 	// busy handler.
 	waitForStreams(t, g, 3)
 	close(release)
+}
+
+// A deliberate recycle is not an outage: with the sidecar poll enabled it must
+// neither wake a backed-off poll nor reset its backoff, so the poll cadence
+// after a recycle is still the backed-off delay, not the base interval. A real
+// disconnect (the gateway ends the stream) still drops the sidecar-visible
+// state and wakes the poll.
+func TestStreamJobWorkerRecycleLeavesSidecarIndependent(t *testing.T) {
+	var polls atomic.Int32
+	rest := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
+		polls.Add(1)
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(rw, `{"jobs":[]}`)
+	}))
+	t.Cleanup(rest.Close)
+
+	g := &seqGateway{completed: map[int64]int{}, completes: make(chan int64, 16)}
+	lis := bufconn.Listen(1024 * 1024)
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, g)
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	client, err := New(WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	w := client.NewStreamJobWorker("t",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+		WithStreamMaxLifetime(60*time.Millisecond),
+		WithStreamInactivityTimeout(0),
+		WithStreamPollInterval(20*time.Millisecond),
+		WithStreamPollBackoff(StreamPollBackoff{Multiplier: 100, Jitter: 0, Max: 10 * time.Second}),
+		WithStreamReconnectBackoff(time.Hour))
+	w.dial = bufDial(lis)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	go func() { _ = w.Run(ctx) }()
+
+	// Wait for the stream to open and the first poll to happen.
+	waitForStreams(t, g, 1)
+	waitForCond(t, func() bool { return polls.Load() >= 1 }, "first sidecar poll")
+	if !w.streamUp.Load() {
+		t.Fatal("stream not up after opening")
+	}
+
+	// Let the stream recycle several times while the empty polls back off.
+	// A recycle that signalled the sidecar would reset its delay to the 20ms
+	// base and drive a poll within ~40ms; an undisturbed backoff sleeps ~2s.
+	time.Sleep(400 * time.Millisecond)
+	if n := g.streams.Load(); n < 3 {
+		t.Fatalf("streams = %d, want >= 3 (watchdog recycles and reopens)", n)
+	}
+	if got := polls.Load(); got > 2 {
+		t.Fatalf("polls = %d after ~6 recycles, want <= 2: a recycle reset the sidecar backoff", got)
+	}
+
+	// A real disconnect still reports down and wakes the poll.
+	w.setStreamUp(false)
+	waitForCond(t, func() bool { return polls.Load() >= 2 }, "sidecar poll after a real disconnect")
+}
+
+// waitForCond fails the test unless cond holds within 5 seconds.
+func waitForCond(t *testing.T, cond func() bool, what string) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for !cond() {
+		if time.Now().After(deadline) {
+			t.Fatalf("timed out waiting for %s", what)
+		}
+		time.Sleep(5 * time.Millisecond)
+	}
 }
