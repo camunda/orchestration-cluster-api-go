@@ -14,6 +14,8 @@ import (
 
 	"github.com/camunda/orchestration-cluster-api-go/v11/pb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -53,6 +55,22 @@ func (g *seqGateway) CompleteJob(_ context.Context, req *pb.CompleteJobRequest) 
 	g.mu.Unlock()
 	g.completes <- req.JobKey
 	return &pb.CompleteJobResponse{}, nil
+}
+
+// flakyOpenGateway embeds seqGateway but fails the failFrom-th and later
+// StreamActivatedJobs opens, simulating a gateway that refuses new streams
+// after the first one.
+type flakyOpenGateway struct {
+	seqGateway
+	failFrom int32
+}
+
+func (g *flakyOpenGateway) StreamActivatedJobs(req *pb.StreamActivatedJobsRequest, stream grpc.ServerStreamingServer[pb.ActivatedJob]) error {
+	if g.streams.Load()+1 >= g.failFrom {
+		g.streams.Add(1)
+		return status.Error(codes.Unavailable, "stream opens failing on purpose")
+	}
+	return g.seqGateway.StreamActivatedJobs(req, stream)
 }
 
 // waitForSignal fails the test unless ch is closed within 5 seconds.
@@ -410,6 +428,58 @@ func TestStreamJobWorkerRecycleLeavesSidecarIndependent(t *testing.T) {
 	// A real disconnect still reports down and wakes the poll.
 	w.setStreamUp(false)
 	waitForCond(t, func() bool { return polls.Load() >= 2 }, "sidecar poll after a real disconnect")
+}
+
+// A failed reopen right after a deliberate recycle is a real disconnect, not
+// part of the recycle: the recycle left streamUp=true, and the failed open must
+// drop it so the sidecar falls out of backoff and keeps polling while no stream
+// is available.
+func TestStreamJobWorkerFailedReopenAfterRecycleDropsStreamUp(t *testing.T) {
+	var polls atomic.Int32
+	rest := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
+		polls.Add(1)
+		rw.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(rw, `{"jobs":[]}`)
+	}))
+	t.Cleanup(rest.Close)
+
+	// failFrom causes the Nth and later stream opens to fail; opens before that
+	// succeed and hold the stream until the client cancels it.
+	g := &flakyOpenGateway{seqGateway: seqGateway{completed: map[int64]int{}, completes: make(chan int64, 16)}, failFrom: 2}
+	lis := bufconn.Listen(1024 * 1024)
+	srv := grpc.NewServer()
+	pb.RegisterGatewayServer(srv, g)
+	go func() { _ = srv.Serve(lis) }()
+	t.Cleanup(srv.Stop)
+
+	client, err := New(WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	w := client.NewStreamJobWorker("t",
+		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
+		WithStreamMaxLifetime(30*time.Millisecond),
+		WithStreamInactivityTimeout(0),
+		WithStreamPollInterval(100*time.Millisecond),
+		WithStreamPollBackoff(StreamPollBackoff{Multiplier: 1000, Jitter: 0, Max: 10 * time.Second}),
+		WithStreamReconnectBackoff(time.Hour))
+	w.dial = bufDial(lis)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	go func() { _ = w.Run(ctx) }()
+
+	// Stream 1 opens and the first poll happens; the empty polls then back off.
+	waitForStreams(t, &g.seqGateway, 1)
+	waitForCond(t, func() bool { return polls.Load() >= 1 }, "first sidecar poll")
+	waitForCond(t, w.streamUp.Load, "stream up after opening")
+
+	// The max lifetime recycles stream 1 (state stays up), then the reopen
+	// fails: streamUp must drop and the backed-off sidecar must wake and keep
+	// polling at the base interval while every reopen fails. Without the fix
+	// the state stays up and the backoff (~20s at Multiplier 1000) is
+	// undisturbed, so no further poll lands in this window.
+	waitForCond(t, func() bool { return !w.streamUp.Load() }, "streamUp to drop after the failed reopen")
+	waitForCond(t, func() bool { return polls.Load() >= 2 }, "sidecar poll after the failed reopen")
 }
 
 // waitForCond fails the test unless cond holds within 5 seconds.
