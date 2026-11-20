@@ -104,3 +104,24 @@ func TestStreamSidecarDelayNoBackoffWhileStreamDown(t *testing.T) {
 		t.Fatalf("stream up: delay = %v, want growth", got)
 	}
 }
+
+func TestSidecarSleepWakesOnStreamStateChange(t *testing.T) {
+	c := &CamundaClient{clock: LiveClock{}}
+	w := &StreamJobWorker{client: c, streamChanged: make(chan struct{}, 1)}
+	w.setStreamUp(true)
+	<-w.streamChanged // drain the up signal
+	go func() { time.Sleep(20 * time.Millisecond); w.setStreamUp(false) }()
+	start := time.Now()
+	woke, err := w.sidecarSleep(context.Background(), time.Minute)
+	if err != nil || !woke {
+		t.Fatalf("woke=%v err=%v", woke, err)
+	}
+	if time.Since(start) > 5*time.Second {
+		t.Fatal("sleep not interrupted by disconnect")
+	}
+	// No-op transition must not signal.
+	w.setStreamUp(false)
+	if len(w.streamChanged) != 0 {
+		t.Fatal("unchanged state signalled")
+	}
+}

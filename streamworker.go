@@ -94,6 +94,10 @@ type StreamJobWorker struct {
 	// only backs off while it is: during a stream outage the poll is the only
 	// delivery channel and must run at the base interval.
 	streamUp atomic.Bool
+	// streamChanged is signalled (non-blocking, capacity 1) whenever streamUp
+	// flips, so a sidecar sleeping out a backed-off delay wakes immediately and
+	// polls again from the base interval.
+	streamChanged chan struct{}
 	// startupDelay is drawn once, when the worker is built; see startupJitter.
 	startupDelay time.Duration
 
@@ -247,6 +251,7 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 		maxConcurrent:    wd.MaxConcurrentJobs,
 		timeout:          time.Duration(wd.TimeoutMs) * time.Millisecond,
 		reconnectBackoff: time.Second,
+		streamChanged:    make(chan struct{}, 1),
 		pollInterval:     30 * time.Second,
 		pollMaxJobs:      32,
 		pollBackoff:      DefaultStreamPollBackoff,
@@ -346,8 +351,8 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	if err != nil {
 		return err
 	}
-	w.streamUp.Store(true)
-	defer w.streamUp.Store(false)
+	w.setStreamUp(true)
+	defer w.setStreamUp(false)
 
 	for {
 		aj, err := stream.Recv()
@@ -417,10 +422,55 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 		} else if !w.streamUp.Load() {
 			delay = w.pollInterval
 		}
-		if err := sleepCtx(ctx, w.client.clock, delay); err != nil {
+		woke, err := w.sidecarSleep(ctx, delay)
+		if err != nil {
 			return
 		}
+		if woke {
+			// Stream state changed mid-sleep: a disconnect makes the poll the only
+			// channel, a reconnect starts a fresh backoff. Either way, restart from
+			// the base interval and poll now.
+			delay = w.pollInterval
+		}
 	}
+}
+
+// setStreamUp records the stream state and wakes the sidecar poll if it changed.
+func (w *StreamJobWorker) setStreamUp(up bool) {
+	if w.streamUp.Swap(up) == up {
+		return
+	}
+	select {
+	case w.streamChanged <- struct{}{}:
+	default:
+	}
+}
+
+// sidecarSleep sleeps for d, returning early with woke=true when the stream
+// state changes. It returns ctx's error if ctx is done.
+func (w *StreamJobWorker) sidecarSleep(ctx context.Context, d time.Duration) (woke bool, err error) {
+	sleepCtx2, cancel := context.WithCancel(ctx)
+	defer cancel()
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		select {
+		case <-w.streamChanged:
+			woke = true
+			cancel()
+		case <-sleepCtx2.Done():
+		}
+	}()
+	serr := sleepCtx(sleepCtx2, w.client.clock, d)
+	cancel()
+	<-done
+	if ctx.Err() != nil {
+		return false, ctx.Err()
+	}
+	if woke {
+		return true, nil
+	}
+	return false, serr
 }
 
 // pollOnce activates up to pollMaxJobs jobs over REST.
