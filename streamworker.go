@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
@@ -89,6 +90,10 @@ type StreamJobWorker struct {
 	pollBackoff      StreamPollBackoff
 	tenantIDs        []string
 	withLease        bool
+	// streamUp reports whether a gRPC stream is currently open. The sidecar poll
+	// only backs off while it is: during a stream outage the poll is the only
+	// delivery channel and must run at the base interval.
+	streamUp atomic.Bool
 	// startupDelay is drawn once, when the worker is built; see startupJitter.
 	startupDelay time.Duration
 
@@ -139,7 +144,9 @@ func WithStreamPollInterval(d time.Duration) StreamWorkerOption {
 // StreamPollBackoff configures how the REST sidecar poll backs off while it
 // keeps coming back empty (Camunda Java client parity). After a poll that
 // activates no jobs, the next delay is the current delay × Multiplier, capped at
-// Max, then jittered by ±Jitter (a fraction of the delay). A poll that activates
+// Max, then jittered by ±Jitter (a fraction of the delay) and clamped to Max
+// again. Backoff applies only while the gRPC stream is open; while it is
+// disconnected the poll runs at the poll interval. A poll that activates
 // at least one job resets the delay to the poll interval (WithStreamPollInterval).
 // A failed poll keeps the current delay.
 //
@@ -176,11 +183,24 @@ func (b StreamPollBackoff) nextDelay(current, base time.Duration, activated int,
 	if b.Jitter > 0 && r != nil {
 		next += next * b.Jitter * (r.Float64()*2 - 1)
 	}
+	if b.Max > 0 && next > float64(b.Max) {
+		next = float64(b.Max)
+	}
 	d := time.Duration(next)
 	if d < base {
 		d = base
 	}
 	return d
+}
+
+// sidecarDelay returns the next sidecar-poll delay. While the gRPC stream is
+// down the poll is the only delivery channel, so it runs at the base interval
+// instead of backing off.
+func (w *StreamJobWorker) sidecarDelay(current time.Duration, activated int, streamUp bool) time.Duration {
+	if !streamUp {
+		return w.pollInterval
+	}
+	return w.pollBackoff.nextDelay(current, w.pollInterval, activated, w.client.random)
 }
 
 // WithStreamPollMaxJobs caps the number of jobs activated per REST sidecar-poll cycle.
@@ -326,6 +346,8 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	if err != nil {
 		return err
 	}
+	w.streamUp.Store(true)
+	defer w.streamUp.Store(false)
 
 	for {
 		aj, err := stream.Recv()
@@ -354,7 +376,7 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 
 // runSidecarPoll runs an immediate backfill poll and then a recurring poll until
 // ctx is canceled. The delay starts at pollInterval, grows by pollBackoff while
-// polls come back empty, and resets to pollInterval when a poll activates jobs. Poll errors are swallowed (the stream is
+// polls come back empty while the stream is open, and resets to pollInterval when a poll activates jobs or the stream is down. Poll errors are swallowed (the stream is
 // the primary channel); the next cycle retries. Poll-activated jobs are
 // acknowledged over REST.
 func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{}, wg *sync.WaitGroup) {
@@ -391,7 +413,9 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 			}()
 		}
 		if err == nil {
-			delay = w.pollBackoff.nextDelay(delay, w.pollInterval, len(jobs), w.client.random)
+			delay = w.sidecarDelay(delay, len(jobs), w.streamUp.Load())
+		} else if !w.streamUp.Load() {
+			delay = w.pollInterval
 		}
 		if err := sleepCtx(ctx, w.client.clock, delay); err != nil {
 			return

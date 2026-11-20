@@ -79,3 +79,28 @@ func TestStreamWorkerPollBackoffOption(t *testing.T) {
 		t.Fatalf("override backoff = %+v", w.pollBackoff)
 	}
 }
+
+// Positive jitter at the cap must not push the delay past Max.
+func TestStreamPollBackoffJitterClampedToMax(t *testing.T) {
+	b := DefaultStreamPollBackoff
+	if got := b.nextDelay(time.Minute, time.Second, 0, fixedRandom(0.999999)); got > b.Max {
+		t.Fatalf("jittered delay %v exceeds Max %v", got, b.Max)
+	}
+}
+
+// While the gRPC stream is down the sidecar poll is the only delivery channel:
+// empty polls must not back off, and a reconnect resumes backoff from base.
+func TestStreamSidecarDelayNoBackoffWhileStreamDown(t *testing.T) {
+	c, err := New(WithNoAuth(), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := func(_ context.Context, _ *Job) (map[string]any, error) { return nil, nil }
+	w := c.NewStreamJobWorker("t", h, WithStreamPollInterval(time.Second))
+	if got := w.sidecarDelay(30*time.Second, 0, false); got != time.Second {
+		t.Fatalf("stream down: delay = %v, want base", got)
+	}
+	if got := w.sidecarDelay(time.Second, 0, true); got <= time.Second {
+		t.Fatalf("stream up: delay = %v, want growth", got)
+	}
+}
