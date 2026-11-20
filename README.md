@@ -87,7 +87,10 @@ generated code stays pure and regenerable.
   (decrementing its retries). The streaming worker also runs a low-frequency REST
   sidecar poll (a safety net for jobs re-queued after a timeout or a brief
   reconnect); poll-activated jobs are acknowledged over REST, streamed jobs over
-  gRPC. Set `WithStreamPollInterval` to tune or disable it.
+  gRPC. Set `WithStreamPollInterval` to tune or disable it. While polls come
+  back empty the interval backs off (×1.6, ±10% jitter, up to 60 s, as in the
+  Camunda Java client) and resets when a poll activates jobs; tune or disable
+  this with `WithStreamPollBackoff`.
 
 ## Configuration
 

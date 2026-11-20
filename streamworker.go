@@ -86,6 +86,7 @@ type StreamJobWorker struct {
 	reconnectBackoff time.Duration
 	pollInterval     time.Duration
 	pollMaxJobs      int
+	pollBackoff      StreamPollBackoff
 	tenantIDs        []string
 	withLease        bool
 	// startupDelay is drawn once, when the worker is built; see startupJitter.
@@ -135,6 +136,53 @@ func WithStreamPollInterval(d time.Duration) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.pollInterval = d }
 }
 
+// StreamPollBackoff configures how the REST sidecar poll backs off while it
+// keeps coming back empty (Camunda Java client parity). After a poll that
+// activates no jobs, the next delay is the current delay × Multiplier, capped at
+// Max, then jittered by ±Jitter (a fraction of the delay). A poll that activates
+// at least one job resets the delay to the poll interval (WithStreamPollInterval).
+// A failed poll keeps the current delay.
+//
+// A Multiplier <= 1 disables the backoff: the poll then runs at the fixed poll
+// interval regardless of the result.
+type StreamPollBackoff struct {
+	Multiplier float64
+	Jitter     float64
+	Max        time.Duration
+}
+
+// DefaultStreamPollBackoff is the sidecar-poll empty-result backoff the Camunda
+// Java client uses: ×1.6, ±10% jitter, capped at 60 s.
+var DefaultStreamPollBackoff = StreamPollBackoff{Multiplier: 1.6, Jitter: 0.1, Max: time.Minute}
+
+// WithStreamPollBackoff sets the empty-poll backoff of the REST sidecar poll.
+// Defaults to DefaultStreamPollBackoff; pass StreamPollBackoff{} to disable it
+// and poll at the fixed WithStreamPollInterval.
+func WithStreamPollBackoff(b StreamPollBackoff) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.pollBackoff = b }
+}
+
+// nextDelay returns the delay before the next sidecar poll, given the delay
+// that preceded the poll just made and how many jobs it activated. base is the
+// configured poll interval; the result is never below it.
+func (b StreamPollBackoff) nextDelay(current, base time.Duration, activated int, r Random) time.Duration {
+	if activated > 0 || b.Multiplier <= 1 {
+		return base
+	}
+	next := float64(current) * b.Multiplier
+	if b.Max > 0 && next > float64(b.Max) {
+		next = float64(b.Max)
+	}
+	if b.Jitter > 0 && r != nil {
+		next += next * b.Jitter * (r.Float64()*2 - 1)
+	}
+	d := time.Duration(next)
+	if d < base {
+		d = base
+	}
+	return d
+}
+
 // WithStreamPollMaxJobs caps the number of jobs activated per REST sidecar-poll cycle.
 func WithStreamPollMaxJobs(n int) StreamWorkerOption {
 	return func(w *StreamJobWorker) {
@@ -181,6 +229,7 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 		reconnectBackoff: time.Second,
 		pollInterval:     30 * time.Second,
 		pollMaxJobs:      32,
+		pollBackoff:      DefaultStreamPollBackoff,
 		tenantIDs:        defaultTenantIDs(c.cfg.DefaultTenantID),
 	}
 	if w.maxConcurrent <= 0 {
@@ -303,11 +352,13 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	}
 }
 
-// runSidecarPoll runs an immediate backfill poll and then a recurring poll every
-// pollInterval until ctx is canceled. Poll errors are swallowed (the stream is
+// runSidecarPoll runs an immediate backfill poll and then a recurring poll until
+// ctx is canceled. The delay starts at pollInterval, grows by pollBackoff while
+// polls come back empty, and resets to pollInterval when a poll activates jobs. Poll errors are swallowed (the stream is
 // the primary channel); the next cycle retries. Poll-activated jobs are
 // acknowledged over REST.
 func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{}, wg *sync.WaitGroup) {
+	delay := w.pollInterval
 	for ctx.Err() == nil {
 		jobs, err := w.pollOnce(ctx)
 		if err != nil && ctx.Err() == nil {
@@ -339,7 +390,10 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 				w.client.restAck(ackCtx, job, vars, herr)
 			}()
 		}
-		if err := sleepCtx(ctx, w.client.clock, w.pollInterval); err != nil {
+		if err == nil {
+			delay = w.pollBackoff.nextDelay(delay, w.pollInterval, len(jobs), w.client.random)
+		}
+		if err := sleepCtx(ctx, w.client.clock, delay); err != nil {
 			return
 		}
 	}
