@@ -41,63 +41,11 @@ func (c *CamundaClient) tenantIDOrDefault(t *camundaapi.TenantId) *string {
 // omitted the tenant, the effective default tenant — the configured
 // WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or "<default>" when nothing
 // is configured — is injected so the request matches the other Camunda SDKs.
-// An explicitly set tenant always wins. The generated facade calls these for
-// the tenant-accepting operations; see defaultTenantBodyOps in cmd/facadegen.
-
-func (c *CamundaClient) withDefaultTenantMessagePublication(body MessagePublicationRequest) MessagePublicationRequest {
-	if body.TenantId == nil {
-		body.SetTenantId(camundaapi.MustTenantId(c.effectiveDefaultTenant()))
-	}
-	return body
-}
-
-func (c *CamundaClient) withDefaultTenantMessageCorrelation(body MessageCorrelationRequest) MessageCorrelationRequest {
-	if body.TenantId == nil {
-		body.SetTenantId(camundaapi.MustTenantId(c.effectiveDefaultTenant()))
-	}
-	return body
-}
-
-func (c *CamundaClient) withDefaultTenantSignalBroadcast(body SignalBroadcastRequest) SignalBroadcastRequest {
-	if body.TenantId == nil {
-		body.SetTenantId(camundaapi.MustTenantId(c.effectiveDefaultTenant()))
-	}
-	return body
-}
-
-func (c *CamundaClient) withDefaultTenantConditionalEvaluation(body ConditionalEvaluationInstruction) ConditionalEvaluationInstruction {
-	if body.TenantId == nil {
-		body.SetTenantId(camundaapi.MustTenantId(c.effectiveDefaultTenant()))
-	}
-	return body
-}
-
-func (c *CamundaClient) withDefaultTenantExpressionEvaluation(body ExpressionEvaluationRequest) ExpressionEvaluationRequest {
-	if body.TenantId == nil {
-		body.SetTenantId(camundaapi.MustTenantId(c.effectiveDefaultTenant()))
-	}
-	return body
-}
-
-// withDefaultTenantDecisionEvaluation injects the default tenant into whichever
-// variant of the decision-evaluation union is set. The union carries pointers,
-// so the variant is copied before mutation: the caller's instruction must stay
-// untouched (reusing it across clients would otherwise retain the first client's
-// tenant, and concurrent reuse would race).
-func (c *CamundaClient) withDefaultTenantDecisionEvaluation(body DecisionEvaluationInstruction) DecisionEvaluationInstruction {
-	d := c.effectiveDefaultTenant()
-	if b := body.DecisionEvaluationById; b != nil && b.TenantId == nil {
-		cp := *b
-		cp.SetTenantId(camundaapi.MustTenantId(d))
-		body.DecisionEvaluationById = &cp
-	}
-	if b := body.DecisionEvaluationByKey; b != nil && b.TenantId == nil {
-		cp := *b
-		cp.SetTenantId(camundaapi.MustTenantId(d))
-		body.DecisionEvaluationByKey = &cp
-	}
-	return body
-}
+// An explicitly set tenant always wins. Bodies with an optional top-level
+// tenantId (directly or in a oneOf variant) get generated withDefaultTenant<Body>
+// helpers in facade_generated.go; the helpers here cover what that structural
+// rule cannot: CreateProcessInstance (hand-written for FALCON), ActivateJobs
+// (tenantIds list + tenantFilter) and CreateDeployment (multipart form field).
 
 // withDefaultTenantProcessInstanceCreation injects the default tenant into
 // whichever variant of the process-instance-creation union is set. The union
