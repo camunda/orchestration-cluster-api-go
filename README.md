@@ -368,6 +368,20 @@ engine) and need an engine that supports them: rather than degrade to unfenced
 commands, a worker that asked for a lease and is handed a job without a token
 rejects the activation with `camunda.ErrLeaseNotHonored`.
 
+Each job stream is recycled proactively, matching the Camunda Java client.
+`camunda.WithStreamMaxLifetime` (default 8 h) closes a stream and opens a new one
+at once, so streams rebalance across gateways after a scale-out or restart.
+`camunda.WithStreamInactivityTimeout` (default 10 min, must be less than the max
+lifetime) recycles a stream that has delivered no job for that long, catching
+streams that stay connected but stop delivering. Both deadlines are jittered
+down by up to 10% per stream, so a fleet started together does not recycle in
+lockstep; pass `0` to disable either. Jobs already received keep running and are
+acknowledged normally, and each recycle is logged at debug level. Rebalancing
+needs a request-level (L7) gRPC load balancer (Envoy, nginx gRPC, the SaaS
+ingress): behind a plain L4 load balancer the worker reuses its HTTP/2
+connection, so the new stream lands on the same gateway; use DNS or client-side
+balancing there.
+
 ### Job variables are untrusted input
 
 Job variables reach your handler through the cluster, but their **content** is

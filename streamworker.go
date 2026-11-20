@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -98,6 +99,10 @@ type StreamJobWorker struct {
 	// flips, so a sidecar sleeping out a backed-off delay wakes immediately and
 	// polls again from the base interval.
 	streamChanged chan struct{}
+	// maxLifetime and inactivityTimeout bound each stream; <= 0 disables. See
+	// WithStreamMaxLifetime and WithStreamInactivityTimeout.
+	maxLifetime       time.Duration
+	inactivityTimeout time.Duration
 	// startupDelay is drawn once, when the worker is built; see startupJitter.
 	startupDelay time.Duration
 
@@ -238,6 +243,56 @@ func WithStreamJobLease(enabled bool) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.withLease = enabled }
 }
 
+// Defaults for the stream-lifecycle safeguards, matching the Camunda Java client.
+const (
+	DefaultStreamMaxLifetime       = 8 * time.Hour
+	DefaultStreamInactivityTimeout = 10 * time.Minute
+)
+
+// streamDeadlineJitter is the fraction by which each stream's lifetime and
+// inactivity deadlines are shortened at random: a deadline is drawn uniformly
+// from [(1-streamDeadlineJitter)*d, d], so a fleet started together does not
+// recycle all its streams in the same instant.
+const streamDeadlineJitter = 0.1
+
+// errStreamRecycled is the cancellation cause for a stream the worker recycles
+// itself (max lifetime or inactivity). Run reopens such a stream immediately.
+var errStreamRecycled = errors.New("job stream recycled")
+
+// WithStreamMaxLifetime sets the maximum lifetime of one job stream (default
+// DefaultStreamMaxLifetime, 8h). When it is reached the stream is closed and a
+// new one opened at once, so streams rebalance across gateways after a scale-out
+// or restart. Jobs already received keep running and are acknowledged normally.
+// Each stream's deadline is jittered down by up to 10% to spread recycling
+// across a fleet. A value <= 0 disables it.
+//
+// Rebalancing only helps when a new stream can reach a different gateway: true
+// behind a request-level (L7) gRPC load balancer, but not behind a plain L4 load
+// balancer, because the worker reuses its HTTP/2 connection. L4 deployments need
+// DNS or client-side balancing to benefit.
+func WithStreamMaxLifetime(d time.Duration) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.maxLifetime = d }
+}
+
+// WithStreamInactivityTimeout sets how long a stream may go without delivering a
+// job before it is canceled and reopened (default
+// DefaultStreamInactivityTimeout, 10m). The timer resets on every received job,
+// and is jittered down by up to 10%. It catches streams whose transport stays
+// healthy but which no longer deliver jobs. A value <= 0 disables it. When both
+// are enabled it must be less than the max lifetime, or Run returns an ErrConfig
+// error.
+func WithStreamInactivityTimeout(d time.Duration) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.inactivityTimeout = d }
+}
+
+// jitterDeadline draws a deadline uniformly from [(1-streamDeadlineJitter)*d, d].
+func jitterDeadline(r Random, d time.Duration) time.Duration {
+	if d <= 0 {
+		return 0
+	}
+	return d - time.Duration(r.Float64()*streamDeadlineJitter*float64(d))
+}
+
 // NewStreamJobWorker creates a gRPC streaming worker for jobType. Defaults are
 // seeded from the client's CAMUNDA_WORKER_* configuration and can be overridden
 // with options.
@@ -256,6 +311,9 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 		pollMaxJobs:      32,
 		pollBackoff:      DefaultStreamPollBackoff,
 		tenantIDs:        defaultTenantIDs(c.cfg.DefaultTenantID),
+
+		maxLifetime:       DefaultStreamMaxLifetime,
+		inactivityTimeout: DefaultStreamInactivityTimeout,
 	}
 	if w.maxConcurrent <= 0 {
 		w.maxConcurrent = 1
@@ -277,6 +335,10 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 // A worker configured with a startup jitter (CAMUNDA_WORKER_STARTUP_JITTER_MAX_SECONDS)
 // first waits out its delay on the client's clock.
 func (w *StreamJobWorker) Run(ctx context.Context) error {
+	if w.maxLifetime > 0 && w.inactivityTimeout > 0 && w.inactivityTimeout >= w.maxLifetime {
+		return configErrorf("stream inactivity timeout (%s) must be less than the max stream lifetime (%s)",
+			w.inactivityTimeout, w.maxLifetime)
+	}
 	if err := waitStartup(ctx, w.client.clock, w.startupDelay); err != nil {
 		return err
 	}
@@ -311,6 +373,10 @@ func (w *StreamJobWorker) Run(ctx context.Context) error {
 		if ctx.Err() != nil {
 			break
 		}
+		if errors.Is(streamErr, errStreamRecycled) {
+			// A deliberate recycle: reopen at once, with no backoff.
+			continue
+		}
 		if streamErr != nil {
 			w.client.logger.Warn("job stream ended; reconnecting", "type", w.jobType, "error", streamErr)
 		}
@@ -344,8 +410,8 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	// stream is still healthy (a rejected lease) would leave the gateway holding it
 	// open and delivering onto it while Run reconnects. Handlers keep the worker's
 	// ctx, so canceling this one does not disturb jobs already dispatched.
-	streamCtx, cancelStream := context.WithCancel(ctx)
-	defer cancelStream()
+	streamCtx, cancelStream := context.WithCancelCause(ctx)
+	defer cancelStream(nil)
 
 	stream, err := gw.StreamActivatedJobs(streamCtx, req)
 	if err != nil {
@@ -354,10 +420,26 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	w.setStreamUp(true)
 	defer w.setStreamUp(false)
 
+	activity := make(chan struct{}, 1)
+	watchDone := make(chan struct{})
+	// Cancel before waiting: the watcher only returns once the stream ends.
+	defer func() { cancelStream(nil); <-watchDone }()
+	go func() {
+		defer close(watchDone)
+		w.watchStream(streamCtx, cancelStream, activity)
+	}()
+
 	for {
 		aj, err := stream.Recv()
 		if err != nil {
+			if cause := context.Cause(streamCtx); errors.Is(cause, errStreamRecycled) && ctx.Err() == nil {
+				return cause
+			}
 			return err
+		}
+		select {
+		case activity <- struct{}{}:
+		default:
 		}
 		// Ending the stream rather than skipping the job: the reconnect loop logs and
 		// backs off, where skipping would spin silently on every job the server sends.
@@ -365,8 +447,22 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 			return err
 		}
 		job := newGRPCJob(aj, w.client.clock)
+		// A deliberately recycled stream must not wait on a free handler slot to
+		// reopen: with every slot busy, parking here only on the worker context
+		// would miss the recycle -- the watchdog cancels streamCtx and returns,
+		// so nothing wakes this select until a handler finishes, and with a
+		// permanently parked handler the stream would never be recycled nor
+		// reopened. Select on streamCtx too, so the recycle interrupts the wait
+		// and Run reopens the stream at once; the received job is not lost,
+		// because the gateway requeues an activated job that is never
+		// acknowledged once its lock expires.
 		select {
 		case sem <- struct{}{}:
+		case <-streamCtx.Done():
+			if cause := context.Cause(streamCtx); errors.Is(cause, errStreamRecycled) && ctx.Err() == nil {
+				return cause
+			}
+			return streamCtx.Err()
 		case <-ctx.Done():
 			return ctx.Err()
 		}
@@ -376,6 +472,41 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 			defer func() { <-sem }()
 			w.handle(ctx, gw, job)
 		}()
+	}
+}
+
+// watchStream enforces the stream's max lifetime and inactivity timeout,
+// canceling the stream with errStreamRecycled when either expires. It returns
+// when the stream context ends. Each received job is signaled on activity.
+//
+// The deadlines are real time, not the injected clock: they bound a transport,
+// so they must pass in wall time even for a client running on an EngineClock,
+// whose After would advance engine time instead of waiting.
+func (w *StreamJobWorker) watchStream(ctx context.Context, cancel context.CancelCauseFunc, activity <-chan struct{}) {
+	rnd := w.client.random
+	var lifetimeC <-chan time.Time
+	if d := jitterDeadline(rnd, w.maxLifetime); d > 0 {
+		lifetimeC = time.After(d) //nolint:forbidigo // a transport bound, not cadence: engine time would misfire it
+	}
+	for {
+		var idleC <-chan time.Time
+		if d := jitterDeadline(rnd, w.inactivityTimeout); d > 0 {
+			idleC = time.After(d) //nolint:forbidigo // a transport bound, not cadence: engine time would misfire it
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-activity:
+			// A job arrived: restart the inactivity timer.
+		case <-lifetimeC:
+			w.client.logger.Debug("job stream reached max lifetime; recycling", "type", w.jobType)
+			cancel(fmt.Errorf("%w: max lifetime reached", errStreamRecycled))
+			return
+		case <-idleC:
+			w.client.logger.Debug("job stream inactive; recycling", "type", w.jobType)
+			cancel(fmt.Errorf("%w: inactivity timeout", errStreamRecycled))
+			return
+		}
 	}
 }
 
