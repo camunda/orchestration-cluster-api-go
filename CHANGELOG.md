@@ -1,3 +1,10 @@
+# [11.0.0-alpha.18](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.17...v11.0.0-alpha.18) (2026-11-20)
+
+
+### Features
+
+* recycle job streams at a jittered max lifetime and on inactivity ([#215](https://github.com/camunda/orchestration-cluster-api-go/issues/215)) ([5501207](https://github.com/camunda/orchestration-cluster-api-go/commit/5501207d9bb1156bcc453fb1fdbab586640f29a5)), closes [#214](https://github.com/camunda/orchestration-cluster-api-go/issues/214)
+
 # [11.0.0-alpha.17](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.16...v11.0.0-alpha.17) (2026-11-20)
 
 
