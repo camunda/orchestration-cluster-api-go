@@ -620,6 +620,7 @@ WORKER_TYPES = [
     "StreamJobWorker",
     "WorkerOption",
     "StreamWorkerOption",
+    "StreamPollBackoff",
     "Job",
     "JobHandler",
     "JobCompletion",
@@ -655,6 +656,7 @@ VAR_BUCKETS = {
     "ConfigSchema": "configuration",
     "ErrConfig": "runtime",
     "SeedEnvVar": "runtime",
+    "DefaultStreamPollBackoff": "job-workers",
 }
 
 # Package-level functions not filed under a type are published on the Runtime
