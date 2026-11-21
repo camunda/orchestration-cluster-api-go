@@ -495,22 +495,57 @@ func TestStreamJobWorkerAcksAfterContextCancel(t *testing.T) {
 	}
 }
 
-// TestStreamJobWorkerAppliesDefaultTenant verifies that the client's default
-// tenant is sent as the stream's tenant filter.
+// TestStreamJobWorkerAppliesDefaultTenant verifies that the effective default
+// tenant (the configured one, or "<default>" when none is configured) is sent
+// as the tenant filter on both the gRPC stream request and the REST sidecar
+// activation body, including when the tenant options are empty.
 func TestStreamJobWorkerAppliesDefaultTenant(t *testing.T) {
-	for _, tc := range []struct {
-		name string
-		opts []StreamWorkerOption
+	for _, cfg := range []struct {
+		name       string
+		configured string
+		want       string
 	}{
-		{name: "no tenant option"},
-		{name: "empty WithStreamTenantIDs()", opts: []StreamWorkerOption{WithStreamTenantIDs()}},
-		{name: "empty slice", opts: []StreamWorkerOption{WithStreamTenantIDs([]string{}...)}},
+		{name: "configured", configured: "acme", want: "acme"},
+		{name: "unconfigured", want: DefaultTenantIdentifier},
 	} {
-		t.Run(tc.name, func(t *testing.T) { testStreamWorkerDefaultTenant(t, tc.opts) })
+		for _, tc := range []struct {
+			name string
+			opts []StreamWorkerOption
+		}{
+			{name: "no tenant option"},
+			{name: "empty WithStreamTenantIDs()", opts: []StreamWorkerOption{WithStreamTenantIDs()}},
+			{name: "empty slice", opts: []StreamWorkerOption{WithStreamTenantIDs([]string{}...)}},
+		} {
+			t.Run(cfg.name+"/"+tc.name, func(t *testing.T) {
+				testStreamWorkerDefaultTenant(t, cfg.configured, cfg.want, tc.opts)
+			})
+		}
 	}
 }
 
-func testStreamWorkerDefaultTenant(t *testing.T, extra []StreamWorkerOption) {
+func testStreamWorkerDefaultTenant(t *testing.T, configured, want string, extra []StreamWorkerOption) {
+	t.Setenv("CAMUNDA_DEFAULT_TENANT_ID", "")
+	t.Setenv("CAMUNDA_TENANT_ID", "")
+
+	bodies := make(chan []string, 1)
+	rest := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasSuffix(r.URL.Path, "/jobs/activation") {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		var body struct {
+			TenantIDs []string `json:"tenantIds"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		select {
+		case bodies <- body.TenantIDs:
+		default:
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"jobs":[]}`)
+	}))
+	defer rest.Close()
+
 	lis := bufconn.Listen(1024 * 1024)
 	fake := &fakeGateway{
 		streamReqs: make(chan *pb.StreamActivatedJobsRequest, 1),
@@ -523,14 +558,18 @@ func testStreamWorkerDefaultTenant(t *testing.T, extra []StreamWorkerOption) {
 	go func() { _ = srv.Serve(lis) }()
 	defer srv.Stop()
 
-	client, err := New(WithNoAuth(), WithLogLevel(LogOff), WithDefaultTenantID("acme"))
+	opts := []Option{WithRestAddress(rest.URL), WithNoAuth(), WithLogLevel(LogOff)}
+	if configured != "" {
+		opts = append(opts, WithDefaultTenantID(configured))
+	}
+	client, err := New(opts...)
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
 
 	w := client.NewStreamJobWorker("greet",
 		func(context.Context, *Job) (map[string]any, error) { return nil, nil },
-		append([]StreamWorkerOption{WithStreamPollInterval(-1)}, extra...)...)
+		append([]StreamWorkerOption{WithStreamPollInterval(10 * time.Millisecond)}, extra...)...)
 	w.dial = bufDial(lis)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -538,8 +577,16 @@ func testStreamWorkerDefaultTenant(t *testing.T, extra []StreamWorkerOption) {
 	go func() { _ = w.Run(ctx) }()
 
 	req := waitFor(t, fake.streamReqs)
-	if len(req.TenantIds) != 1 || req.TenantIds[0] != "acme" {
-		t.Errorf("stream TenantIds = %v, want [acme]", req.TenantIds)
+	if len(req.TenantIds) != 1 || req.TenantIds[0] != want {
+		t.Errorf("stream TenantIds = %v, want [%s]", req.TenantIds, want)
+	}
+	select {
+	case got := <-bodies:
+		if len(got) != 1 || got[0] != want {
+			t.Errorf("sidecar activation tenantIds = %v, want [%s]", got, want)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("sidecar poll did not activate jobs")
 	}
 }
 
