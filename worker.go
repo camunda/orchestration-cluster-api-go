@@ -72,7 +72,7 @@ func WithFetchVariables(vars ...string) WorkerOption {
 }
 
 // WithWorkerTenantIDs restricts job activation to the given tenant ids,
-// overriding the client's default tenant.
+// overriding the client's default tenant. An empty list keeps the default.
 func WithWorkerTenantIDs(ids ...string) WorkerOption {
 	return func(w *JobWorker) { w.tenantIDs = ids }
 }
@@ -115,6 +115,10 @@ func (c *CamundaClient) NewJobWorker(jobType string, handler JobHandler, opts ..
 		o(w)
 	}
 	c.registerWorkerCapacity(w.maxConcurrent)
+	if len(w.tenantIDs) == 0 {
+		// An empty tenant option must not erase the default-tenant rule.
+		w.tenantIDs = defaultTenantIDs(c.cfg.DefaultTenantID)
+	}
 	w.startupDelay = startupJitter(c.random, wd.StartupJitterMaxSeconds)
 	return w
 }
@@ -153,6 +157,13 @@ func (w *JobWorker) Run(ctx context.Context) error {
 	if err := waitStartup(ctx, w.client.clock, w.startupDelay); err != nil {
 		return err
 	}
+	if !falconServesTenants(w.tenantIDs) {
+		// The FALCON subscribe frame carries no gateway-enforced tenant filter, so
+		// a worker restricted to anything other than the default tenant must poll
+		// over REST, which honours tenantIds. Fail closed rather than receive jobs
+		// from tenants the caller excluded.
+		return w.runRESTPoll(ctx)
+	}
 	if caps := w.client.falconCaps(ctx); caps != nil {
 		if err := w.runFalcon(ctx, caps); err != nil {
 			if ctx.Err() != nil {
@@ -177,6 +188,7 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 		FetchVariables: w.fetchVariables,
 		TimeoutMs:      w.timeout.Milliseconds(),
 		Worker:         w.name,
+		TenantIDs:      w.tenantIDs,
 	})
 	if err != nil {
 		return err
@@ -435,11 +447,20 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 	}
 }
 
-// defaultTenantIDs returns a single-element tenant slice for a non-empty default
-// tenant id, or nil.
+// falconServesTenants reports whether the FALCON command stream can honour the
+// worker's effective tenant set. The gateway does not enforce a tenant filter on
+// subscriptions, so only the implicit default tenant is safe.
+func falconServesTenants(ids []string) bool {
+	return len(ids) == 1 && ids[0] == DefaultTenantIdentifier
+}
+
+// defaultTenantIDs returns the single-element tenant slice a job worker
+// activates for: the configured default tenant id, or DefaultTenantIdentifier
+// when none is configured — matching the Camunda Java client, whose
+// defaultJobWorkerTenantIds defaults to ["<default>"].
 func defaultTenantIDs(id string) []string {
 	if id == "" {
-		return nil
+		return []string{DefaultTenantIdentifier}
 	}
 	return []string{id}
 }

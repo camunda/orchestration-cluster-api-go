@@ -17,6 +17,9 @@ type SubscribeArgs struct {
 	FetchVariables []string
 	TimeoutMs      int64
 	Worker         string
+	// TenantIDs scopes the subscription to these tenants (the worker's
+	// effective tenant filter). Empty omits the field.
+	TenantIDs []string
 }
 
 // StreamWorker is a push-based job worker over a single (failover-capable)
@@ -75,6 +78,9 @@ func Subscribe(endpoints []string, d *Dialer, args SubscribeArgs) (*StreamWorker
 	}
 	if args.Worker != "" {
 		sub["worker"] = args.Worker
+	}
+	if len(args.TenantIDs) > 0 {
+		sub["tenantIds"] = args.TenantIDs
 	}
 	subFrame, _ := json.Marshal(sub)
 

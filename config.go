@@ -209,6 +209,11 @@ type Config struct {
 	BasicAuthUsername string
 	BasicAuthPassword string
 
+	// DefaultTenantID is the tenant id tenant-scoped commands (deploy, create
+	// process instance, publish/correlate message, broadcast signal, evaluate
+	// decision/expression/conditionals, activate jobs) address when the caller
+	// does not pass one explicitly. When empty, the effective default tenant is
+	// DefaultTenantIdentifier ("<default>"), matching the Camunda Java client.
 	DefaultTenantID string
 
 	// UserAgent is an application identifier (e.g. "my-app/1.2",

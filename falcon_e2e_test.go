@@ -194,16 +194,15 @@ func captureCreateFrame(t *testing.T, clientOpts []camunda.Option, instr camunda
 	}
 }
 
-// TestCreateProcessInstanceFalconOmitsTenantWhenUnset: with neither an
-// instruction tenant nor a configured default, the create frame must leave
-// tenantId absent so the gateway applies its own default — sending the
-// "<default>" marker would pin a literal tenant.
-func TestCreateProcessInstanceFalconOmitsTenantWhenUnset(t *testing.T) {
+// TestCreateProcessInstanceFalconSendsDefaultTenantWhenUnset: with neither an
+// instruction tenant nor a configured default, the create frame carries
+// "<default>", matching the REST path.
+func TestCreateProcessInstanceFalconSendsDefaultTenantWhenUnset(t *testing.T) {
 	instr := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(
 		camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.ProcessDefinitionId("order-process")))
 	frame := captureCreateFrame(t, nil, instr)
-	if _, present := frame["tenantId"]; present {
-		t.Errorf("tenantId present in create frame (%v), want absent so the gateway defaults it", frame["tenantId"])
+	if got := frame["tenantId"]; got != camunda.DefaultTenantIdentifier {
+		t.Errorf("tenantId = %v, want %q", got, camunda.DefaultTenantIdentifier)
 	}
 }
 
@@ -300,5 +299,57 @@ func TestJobWorkerReceivesPushedJobOverFalcon(t *testing.T) {
 	}
 	if !handled.Load() {
 		t.Error("handler was not invoked")
+	}
+}
+
+// A worker restricted to a non-default tenant must not use FALCON, whose
+// subscription carries no gateway-enforced tenant filter.
+func TestJobWorkerWithNonDefaultTenantBypassesFalcon(t *testing.T) {
+	for name, opts := range map[string]struct {
+		client []camunda.Option
+		worker []camunda.WorkerOption
+	}{
+		"explicit worker tenants":  {worker: []camunda.WorkerOption{camunda.WithWorkerTenantIDs("tenant-a")}},
+		"multiple tenants":         {worker: []camunda.WorkerOption{camunda.WithWorkerTenantIDs("<default>", "tenant-a")}},
+		"configured client tenant": {client: []camunda.Option{camunda.WithDefaultTenantID("tenant-a")}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			var subscribed atomic.Bool
+			polled := make(chan struct{}, 1)
+			srv := falconGateway(t, nil, func(ctx context.Context, c *websocket.Conn) {
+				subscribed.Store(true)
+			})
+			mux := http.NewServeMux()
+			mux.Handle("/", srv.Config.Handler)
+			mux.HandleFunc("/v2/jobs/activation", func(w http.ResponseWriter, _ *http.Request) {
+				select {
+				case polled <- struct{}{}:
+				default:
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"jobs":[]}`))
+			})
+			srv.Config.Handler = mux
+
+			copts := append([]camunda.Option{camunda.WithRestAddress(srv.URL + "/v2"), camunda.WithFalcon(true)}, opts.client...)
+			c, err := camunda.New(copts...)
+			if err != nil {
+				t.Fatalf("New: %v", err)
+			}
+			worker := c.NewJobWorker("email", func(context.Context, *camunda.Job) (map[string]any, error) {
+				return nil, nil
+			}, opts.worker...)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			go func() { _ = worker.Run(ctx) }()
+			select {
+			case <-polled:
+			case <-time.After(5 * time.Second):
+				t.Fatal("worker did not poll over REST")
+			}
+			if subscribed.Load() {
+				t.Error("worker subscribed over FALCON despite a non-default tenant restriction")
+			}
+		})
 	}
 }

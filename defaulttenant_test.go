@@ -237,16 +237,177 @@ func TestDefaultTenantDoesNotOverrideExplicitTenant(t *testing.T) {
 	})
 }
 
-// TestNoDefaultTenantLeavesTenantUnset: with no configured default the request
-// goes out without a tenantId, preserving the server-side default.
-func TestNoDefaultTenantLeavesTenantUnset(t *testing.T) {
+// TestNoDefaultTenantSendsDefaultTenantIdentifier: with no configured default
+// the effective default tenant is "<default>", so tenant-scoped commands send
+// tenantId: "<default>" — matching the Camunda Java client and working on
+// multi-tenant clusters, where omitting the tenant is rejected.
+func TestNoDefaultTenantSendsDefaultTenantIdentifier(t *testing.T) {
 	bc := newBodyCapture(t)
 	client := bc.client(t)
 	body := camundaapi.NewMessagePublicationRequest("msg")
 	_, _ = client.PublishMessage(context.Background(), *body)
-	if _, present := bc.body["tenantId"]; present {
-		t.Errorf("tenantId present (%v), want absent", bc.body["tenantId"])
+	if got := bc.tenantOf(); got != camunda.DefaultTenantIdentifier {
+		t.Errorf("tenantId = %q, want %q", got, camunda.DefaultTenantIdentifier)
 	}
+}
+
+// TestDefaultTenantIdentifierFallbackAcrossOperations pins rule 1 of the
+// cross-SDK default-tenant contract: with nothing configured, every
+// tenant-scoped command sends "<default>".
+func TestDefaultTenantIdentifierFallbackAcrossOperations(t *testing.T) {
+	t.Run("CreateDeployment", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t)
+		_, _ = client.CreateDeployment(context.Background(),
+			func(r camundaapi.ApiCreateDeploymentRequest) camundaapi.ApiCreateDeploymentRequest {
+				return r.Resources([]*os.File{bpmnFile(t)})
+			})
+		if got := bc.formTenant; got != camunda.DefaultTenantIdentifier {
+			t.Errorf("tenantId form field = %q, want %q", got, camunda.DefaultTenantIdentifier)
+		}
+	})
+
+	t.Run("CreateProcessInstance", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithFalcon(false))
+		byID := camundaapi.NewProcessInstanceCreationInstructionById(camundaapi.MustProcessDefinitionId("proc"))
+		instruction := camundaapi.ProcessInstanceCreationInstructionByIdAsProcessInstanceCreationInstruction(byID)
+		_, _ = client.CreateProcessInstance(context.Background(), instruction)
+		if got := bc.tenantOf(); got != camunda.DefaultTenantIdentifier {
+			t.Errorf("tenantId = %q, want %q", got, camunda.DefaultTenantIdentifier)
+		}
+	})
+
+	t.Run("EvaluateDecision", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t)
+		byID := camundaapi.NewDecisionEvaluationById(camundaapi.MustDecisionDefinitionId("dec"))
+		instruction := camundaapi.DecisionEvaluationByIdAsDecisionEvaluationInstruction(byID)
+		_, _ = client.EvaluateDecision(context.Background(), instruction)
+		if got := bc.tenantOf(); got != camunda.DefaultTenantIdentifier {
+			t.Errorf("tenantId = %q, want %q", got, camunda.DefaultTenantIdentifier)
+		}
+	})
+
+	t.Run("EvaluateExpression", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t)
+		body := camundaapi.NewExpressionEvaluationRequest("=1+1")
+		_, _ = client.EvaluateExpression(context.Background(), *body)
+		if got := bc.tenantOf(); got != camunda.DefaultTenantIdentifier {
+			t.Errorf("tenantId = %q, want %q", got, camunda.DefaultTenantIdentifier)
+		}
+	})
+
+	t.Run("EvaluateConditionals", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t)
+		body := camundaapi.NewConditionalEvaluationInstruction(map[string]interface{}{"x": 1})
+		_, _ = client.EvaluateConditionals(context.Background(), *body)
+		if got := bc.tenantOf(); got != camunda.DefaultTenantIdentifier {
+			t.Errorf("tenantId = %q, want %q", got, camunda.DefaultTenantIdentifier)
+		}
+	})
+}
+
+// tenantIDsOf extracts the tenantIds list the request body carried (nil when
+// absent).
+func (bc *bodyCapture) tenantIDsOf() []string {
+	if bc.body == nil {
+		return nil
+	}
+	raw, ok := bc.body["tenantIds"].([]any)
+	if !ok {
+		return nil
+	}
+	out := make([]string, 0, len(raw))
+	for _, v := range raw {
+		if s, ok := v.(string); ok {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// TestActivateJobsDefaultTenant pins rule 2 of the cross-SDK default-tenant
+// contract: with tenantFilter PROVIDED or unset and no tenant ids passed
+// (absent or empty), activateJobs sends tenantIds: [<effective default
+// tenant>]; with ASSIGNED the list is left alone; explicit ids always win.
+func TestActivateJobsDefaultTenant(t *testing.T) {
+	newActivation := func() *camundaapi.JobActivationRequest {
+		return camundaapi.NewJobActivationRequest("demo-task", 60_000, 10)
+	}
+
+	t.Run("NoConfiguredDefaultSendsDefaultIdentifier", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t)
+		req := newActivation()
+		// NewJobActivationRequest pre-sets PROVIDED; clear it to cover the
+		// nil-filter branch (PROVIDED is covered by ProvidedFilterInjectsDefault).
+		req.TenantFilter = nil
+		_, _ = client.ActivateJobs(context.Background(), *req)
+		got := bc.tenantIDsOf()
+		if len(got) != 1 || got[0] != camunda.DefaultTenantIdentifier {
+			t.Errorf("tenantIds = %v, want [%q]", got, camunda.DefaultTenantIdentifier)
+		}
+	})
+
+	t.Run("EmptyListTreatedAsAbsent", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t)
+		req := newActivation()
+		req.SetTenantIds([]camundaapi.TenantId{})
+		_, _ = client.ActivateJobs(context.Background(), *req)
+		got := bc.tenantIDsOf()
+		if len(got) != 1 || got[0] != camunda.DefaultTenantIdentifier {
+			t.Errorf("tenantIds = %v, want [%q]", got, camunda.DefaultTenantIdentifier)
+		}
+	})
+
+	t.Run("ConfiguredDefaultSent", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"))
+		_, _ = client.ActivateJobs(context.Background(), *newActivation())
+		got := bc.tenantIDsOf()
+		if len(got) != 1 || got[0] != "acme" {
+			t.Errorf("tenantIds = %v, want [acme]", got)
+		}
+	})
+
+	t.Run("ExplicitTenantIdsWin", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"))
+		req := newActivation()
+		req.SetTenantIds([]camundaapi.TenantId{camundaapi.MustTenantId("explicit")})
+		_, _ = client.ActivateJobs(context.Background(), *req)
+		got := bc.tenantIDsOf()
+		if len(got) != 1 || got[0] != "explicit" {
+			t.Errorf("tenantIds = %v, want [explicit]", got)
+		}
+	})
+
+	t.Run("AssignedFilterLeavesTenantIdsAlone", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t, camunda.WithDefaultTenantID("acme"))
+		req := newActivation()
+		req.SetTenantFilter(camundaapi.TENANTFILTERENUM_ASSIGNED)
+		_, _ = client.ActivateJobs(context.Background(), *req)
+		if _, present := bc.body["tenantIds"]; present {
+			t.Errorf("tenantIds present (%v), want absent with tenantFilter ASSIGNED", bc.body["tenantIds"])
+		}
+	})
+
+	t.Run("ProvidedFilterInjectsDefault", func(t *testing.T) {
+		bc := newBodyCapture(t)
+		client := bc.client(t)
+		req := newActivation()
+		req.SetTenantFilter(camundaapi.TENANTFILTERENUM_PROVIDED)
+		_, _ = client.ActivateJobs(context.Background(), *req)
+		got := bc.tenantIDsOf()
+		if len(got) != 1 || got[0] != camunda.DefaultTenantIdentifier {
+			t.Errorf("tenantIds = %v, want [%q]", got, camunda.DefaultTenantIdentifier)
+		}
+	})
 }
 
 // TestDefaultTenantSurvivesBodyReplacingOpt: a body-builder opt that REPLACES
