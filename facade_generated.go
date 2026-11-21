@@ -2342,6 +2342,9 @@ func (c *CamundaClient) ActivateJobs(ctx context.Context, body JobActivationRequ
 	for _, opt := range opts {
 		req = opt(req)
 	}
+	if b := req.GetJobActivationRequest(); b != nil {
+		req = req.JobActivationRequest(c.withDefaultTenantJobActivation(*b))
+	}
 	value, resp, err := req.Execute()
 	return value, c.wrapError(resp, err)
 }

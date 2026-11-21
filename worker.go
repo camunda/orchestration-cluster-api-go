@@ -72,7 +72,7 @@ func WithFetchVariables(vars ...string) WorkerOption {
 }
 
 // WithWorkerTenantIDs restricts job activation to the given tenant ids,
-// overriding the client's default tenant.
+// overriding the client's default tenant. An empty list keeps the default.
 func WithWorkerTenantIDs(ids ...string) WorkerOption {
 	return func(w *JobWorker) { w.tenantIDs = ids }
 }
@@ -115,6 +115,10 @@ func (c *CamundaClient) NewJobWorker(jobType string, handler JobHandler, opts ..
 		o(w)
 	}
 	c.registerWorkerCapacity(w.maxConcurrent)
+	if len(w.tenantIDs) == 0 {
+		// An empty tenant option must not erase the default-tenant rule.
+		w.tenantIDs = defaultTenantIDs(c.cfg.DefaultTenantID)
+	}
 	w.startupDelay = startupJitter(c.random, wd.StartupJitterMaxSeconds)
 	return w
 }
@@ -177,6 +181,7 @@ func (w *JobWorker) runFalcon(ctx context.Context, caps *falcon.Caps) error {
 		FetchVariables: w.fetchVariables,
 		TimeoutMs:      w.timeout.Milliseconds(),
 		Worker:         w.name,
+		TenantIDs:      w.tenantIDs,
 	})
 	if err != nil {
 		return err
@@ -435,11 +440,13 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 	}
 }
 
-// defaultTenantIDs returns a single-element tenant slice for a non-empty default
-// tenant id, or nil.
+// defaultTenantIDs returns the single-element tenant slice a job worker
+// activates for: the configured default tenant id, or DefaultTenantIdentifier
+// when none is configured — matching the Camunda Java client, whose
+// defaultJobWorkerTenantIds defaults to ["<default>"].
 func defaultTenantIDs(id string) []string {
 	if id == "" {
-		return nil
+		return []string{DefaultTenantIdentifier}
 	}
 	return []string{id}
 }

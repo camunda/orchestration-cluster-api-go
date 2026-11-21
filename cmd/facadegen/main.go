@@ -86,10 +86,14 @@ var handwrittenOps = map[string]bool{
 }
 
 // defaultTenantBodyOps are operations whose JSON body carries an optional
-// tenantId field. The facade injects the configured default tenant
-// (WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID) when the caller left the
-// field unset, matching the other Camunda SDKs; the withDefaultTenant* helpers
-// are hand-written in defaulttenant.go.
+// tenantId field. The facade injects the effective default tenant (the
+// configured WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or "<default>"
+// when nothing is configured) when the caller left the field unset, matching
+// the other Camunda SDKs; the withDefaultTenant* helpers are hand-written in
+// defaulttenant.go. ActivateJobs carries tenantIds (a list) plus a
+// tenantFilter instead of a single tenantId; its helper injects the effective
+// default tenant only when the list is unset/empty and the filter is PROVIDED
+// or unset.
 var defaultTenantBodyOps = map[string]string{
 	"CorrelateMessage":     "withDefaultTenantMessageCorrelation",
 	"PublishMessage":       "withDefaultTenantMessagePublication",
@@ -97,6 +101,7 @@ var defaultTenantBodyOps = map[string]string{
 	"EvaluateConditionals": "withDefaultTenantConditionalEvaluation",
 	"EvaluateExpression":   "withDefaultTenantExpressionEvaluation",
 	"EvaluateDecision":     "withDefaultTenantDecisionEvaluation",
+	"ActivateJobs":         "withDefaultTenantJobActivation",
 }
 
 // defaultTenantReqOps are operations whose tenant id is an optional request
