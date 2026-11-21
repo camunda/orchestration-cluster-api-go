@@ -2,6 +2,8 @@ package main
 
 import (
 	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"strings"
@@ -52,7 +54,8 @@ func TestGenerateFacade(t *testing.T) {
 func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 	ops := []operation{
 		{field: "MessageAPI", name: "PublishMessage", reqType: "ApiPublishMessageRequest",
-			bodyType: "MessagePublicationRequest", bodyBuilder: "MessagePublicationRequest"},
+			bodyType: "MessagePublicationRequest", bodyBuilder: "MessagePublicationRequest",
+			tenant: &tenantShape{bodyType: "MessagePublicationRequest", direct: true}},
 		{field: "ResourceAPI", name: "CreateDeployment", reqType: "ApiCreateDeploymentRequest"},
 		{field: "MessageAPI", name: "GetMessage", reqType: "ApiGetMessageRequest"},
 	}
@@ -62,7 +65,7 @@ func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 	// re-attached — so the default survives a body-replacing opt.
 	builderIdx := strings.Index(src, "req = req.MessagePublicationRequest(body)")
 	optIdx := strings.Index(src, "req = opt(req)")
-	defaultIdx := strings.Index(src, "req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublication(*b))")
+	defaultIdx := strings.Index(src, "req = req.MessagePublicationRequest(c.withDefaultTenantMessagePublicationRequest(*b))")
 	getIdx := strings.Index(src, "req.GetMessagePublicationRequest()")
 	if builderIdx == -1 || optIdx == -1 || defaultIdx == -1 || getIdx == -1 ||
 		builderIdx >= optIdx || optIdx >= defaultIdx {
@@ -71,6 +74,9 @@ func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 	reqHookIdx := strings.Index(src, "req = c.withDefaultTenantCreateDeployment(req)")
 	if reqHookIdx == -1 || optIdx == -1 || reqHookIdx < optIdx {
 		t.Errorf("CreateDeployment must default the tenant after the opts\n%s", src)
+	}
+	if !strings.Contains(src, "func (c *CamundaClient) withDefaultTenantMessagePublicationRequest(body MessagePublicationRequest) MessagePublicationRequest {") {
+		t.Errorf("derived helper not emitted\n%s", src)
 	}
 	if strings.Contains(src, "withDefaultTenantGetMessage") || strings.Contains(src, "withDefaultTenantMessageCorrelation") {
 		t.Errorf("operations outside the default-tenant set must not be hooked\n%s", src)
@@ -82,11 +88,12 @@ func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 // entirely: emitting req.Get()/req.() would overwrite the facade with invalid Go.
 func TestEmitSkipsTenantBodyHookWhenBodyBuilderMissing(t *testing.T) {
 	ops := []operation{
-		{field: "MessageAPI", name: "PublishMessage", reqType: "ApiPublishMessageRequest"},
+		{field: "MessageAPI", name: "PublishMessage", reqType: "ApiPublishMessageRequest",
+			tenant: &tenantShape{bodyType: "MessagePublicationRequest", direct: true}},
 	}
 	src := emit(ops, nil, false)
 
-	for _, bad := range []string{"req.Get()", "req.(c.withDefaultTenantMessagePublication", "c.withDefaultTenantMessagePublication"} {
+	for _, bad := range []string{"req.Get()", "req.(c.withDefaultTenant", "c.withDefaultTenant"} {
 		if strings.Contains(src, bad) {
 			t.Errorf("tenant-body hook must be skipped when bodyBuilder is empty, found %q\n%s", bad, src)
 		}
@@ -184,5 +191,37 @@ func TestFacadegenHelpers(t *testing.T) {
 	}
 	if absOrDot("file.go") != "file.go" || absOrDot("") != "" || absOrDot("dir/file.go") != "dir/file.go" {
 		t.Error("absOrDot returned an unexpected value")
+	}
+}
+
+// TestTenantShapeDerivedFromBodyShape pins #217: default-tenant injection is
+// derived from the body struct, per union variant — not from an operation list.
+func TestTenantShapeDerivedFromBodyShape(t *testing.T) {
+	src := `package x
+type TenantId string
+type Direct struct { TenantId *TenantId ` + "`json:\"tenantId,omitempty\"`" + ` }
+type Required struct { TenantId TenantId ` + "`json:\"tenantId\"`" + ` }
+type ById struct { TenantId *TenantId ` + "`json:\"tenantId,omitempty\"`" + ` }
+type ByKey struct { Key string ` + "`json:\"key\"`" + ` }
+type Union struct { ById *ById; ByKey *ByKey }
+type KeyOnly struct { ByKey *ByKey }
+`
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, "x.go", src, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	structs := collectStructs([]*ast.File{f})
+	r := &renderer{clientTypes: map[string]bool{}, short: map[string]bool{}, usedPkgs: map[string]bool{}}
+	if s := tenantShapeOf("Direct", structs, r); s == nil || !s.direct {
+		t.Errorf("Direct: %+v", s)
+	}
+	if s := tenantShapeOf("Union", structs, r); s == nil || s.direct || len(s.variants) != 1 || s.variants[0] != "ById" {
+		t.Errorf("Union: %+v", s)
+	}
+	for _, n := range []string{"Required", "ByKey", "KeyOnly", "Missing"} {
+		if s := tenantShapeOf(n, structs, r); s != nil {
+			t.Errorf("%s must not be injected: %+v", n, s)
+		}
 	}
 }

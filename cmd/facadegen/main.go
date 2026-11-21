@@ -85,23 +85,20 @@ var handwrittenOps = map[string]bool{
 	"CreateProcessInstance": true,
 }
 
-// defaultTenantBodyOps are operations whose JSON body carries an optional
-// tenantId field. The facade injects the effective default tenant (the
-// configured WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or "<default>"
-// when nothing is configured) when the caller left the field unset, matching
-// the other Camunda SDKs; the withDefaultTenant* helpers are hand-written in
-// defaulttenant.go. ActivateJobs carries tenantIds (a list) plus a
-// tenantFilter instead of a single tenantId; its helper injects the effective
-// default tenant only when the list is unset/empty and the filter is PROVIDED
-// or unset.
-var defaultTenantBodyOps = map[string]string{
-	"CorrelateMessage":     "withDefaultTenantMessageCorrelation",
-	"PublishMessage":       "withDefaultTenantMessagePublication",
-	"BroadcastSignal":      "withDefaultTenantSignalBroadcast",
-	"EvaluateConditionals": "withDefaultTenantConditionalEvaluation",
-	"EvaluateExpression":   "withDefaultTenantExpressionEvaluation",
-	"EvaluateDecision":     "withDefaultTenantDecisionEvaluation",
-	"ActivateJobs":         "withDefaultTenantJobActivation",
+// defaultTenantBodyOverrides are hand-written default-tenant helpers (in
+// defaulttenant.go) for bodies the structural rule below cannot express.
+// ActivateJobs carries tenantIds (a list) plus a tenantFilter instead of a
+// single tenantId; its helper injects the effective default tenant only when the
+// list is unset/empty and the filter is PROVIDED or unset.
+//
+// Every other operation is covered by the derived rule (see tenantShapeOf): when
+// the JSON request body — or, for a oneOf union, any of its variants — has an
+// optional top-level tenantId, the facade injects the effective default tenant
+// (the configured WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or
+// "<default>") when the caller left it unset, matching the Camunda Java client.
+// No operation list is maintained: a new tenant-scoped body is covered on regen.
+var defaultTenantBodyOverrides = map[string]string{
+	"ActivateJobs": "withDefaultTenantJobActivation",
 }
 
 // defaultTenantReqOps are operations whose tenant id is an optional request
@@ -121,11 +118,13 @@ type operation struct {
 	field       string // APIClient field, e.g. "TopologyAPI"
 	name        string // operation, e.g. "GetTopology"
 	params      []param
-	retType     string // qualified value return type, or "" when the op returns no value
-	reqType     string // qualified request-builder type, e.g. "camundaapi.ApiGetTopologyRequest"
-	bodyType    string // qualified request-body type (e.g. "camundaapi.JobActivationRequest"), or ""
-	bodyBuilder string // request-body builder method on the ApiXxxRequest, or ""
-	example     string // dedented usage snippet from examples/, injected into the doc comment
+	retType     string       // qualified value return type, or "" when the op returns no value
+	reqType     string       // qualified request-builder type, e.g. "camundaapi.ApiGetTopologyRequest"
+	bodyType    string       // qualified request-body type (e.g. "camundaapi.JobActivationRequest"), or ""
+	bodyBuilder string       // request-body builder method on the ApiXxxRequest, or ""
+	tenant      *tenantShape // derived default-tenant injection for the body, or nil
+	tenantHook  string       // hand-written body helper overriding the derived one, or ""
+	example     string       // dedented usage snippet from examples/, injected into the doc comment
 }
 
 // bodyInfo describes an operation's JSON request body, derived from spec metadata.
@@ -199,6 +198,7 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 	constructors, executes := collectServiceMethods(files)
 	bodyByOp := loadBodyInfo(metadataPath, r.clientTypes)
 	exampleByOp := loadExamples(examplesDir)
+	structs := collectStructs(files)
 
 	var ops []operation
 	for key, ctor := range constructors {
@@ -223,6 +223,11 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 		if bi, ok := bodyByOp[op.name]; ok {
 			op.bodyType = r.typeString(ast.NewIdent(bi.builder))
 			op.bodyBuilder = bi.builder
+			if h, ok := defaultTenantBodyOverrides[op.name]; ok {
+				op.tenantHook = h
+			} else {
+				op.tenant = tenantShapeOf(bi.builder, structs, r)
+			}
 		}
 		if ex, ok := exampleByOp[lowerFirst(op.name)]; ok {
 			op.example = ex
@@ -611,7 +616,7 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 		if hasOpts {
 			b.WriteString("\tfor _, opt := range opts {\n\t\treq = opt(req)\n\t}\n")
 		}
-		if helper, ok := defaultTenantBodyOps[op.name]; ok && op.bodyBuilder != "" {
+		if helper := op.tenantHelper(); helper != "" && op.bodyBuilder != "" {
 			// Runs after the opts so a body-replacing opt (e.g. r.Body(replacement))
 			// cannot discard the injected tenant: default the final body, then
 			// re-attach it. An explicit tenant on that final body still wins.
@@ -632,6 +637,7 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 			b.WriteString("\treturn c.wrapError(resp, err)\n}\n\n")
 		}
 	}
+	emitTenantHelpers(&b, ops)
 	return b.String()
 }
 
