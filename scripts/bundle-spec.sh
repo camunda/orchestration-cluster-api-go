@@ -18,7 +18,7 @@ OUT_META="external-spec/bundled/spec-metadata.json"
 mkdir -p external-spec/bundled
 
 echo "==> Bundling upstream OpenAPI spec (ref: ${SPEC_REF}) via camunda-schema-bundler..."
-npx --yes camunda-schema-bundler@^2.5.0 --ref "$SPEC_REF" \
+npx --yes camunda-schema-bundler@^2.5.1 --ref "$SPEC_REF" \
   --deref-path-local \
   --output-spec "$OUT_SPEC" \
   --output-metadata "$OUT_META"

@@ -684,7 +684,7 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]
 			sawNewFields = true
 		}
 		if o.LegacyOptionalTenantIDInBody && o.OptionalTenantIDInBodyVariants == nil {
-			return nil, fmt.Errorf("spec metadata: operation %q has legacy optionalTenantIdInBody but no optionalTenantIdInBodyVariants; re-bundle with camunda-schema-bundler >= 2.5.0", o.OperationID)
+			return nil, fmt.Errorf("spec metadata: operation %q has legacy optionalTenantIdInBody but no optionalTenantIdInBodyVariants; re-bundle with camunda-schema-bundler >= 2.5.1", o.OperationID)
 		}
 		if !o.HasRequestBody || o.RequestBodySchemaRef == "" || !hasJSONContent(o.RequestBodyContentTypes) {
 			continue
@@ -700,7 +700,7 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]
 		}
 	}
 	if len(meta.Operations) > 0 && !sawNewFields {
-		return nil, fmt.Errorf("spec metadata carries no camunda-schema-bundler >= 2.5.0 tenant fields (optionalTenantIdInBodyVariants / optionalTenantIdsInBody); re-bundle")
+		return nil, fmt.Errorf("spec metadata carries no camunda-schema-bundler >= 2.5 tenant fields (optionalTenantIdInBodyVariants / optionalTenantIdsInBody); re-bundle with camunda-schema-bundler >= 2.5.1")
 	}
 	return out, nil
 }
