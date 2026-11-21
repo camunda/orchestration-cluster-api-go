@@ -196,7 +196,10 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 	}
 	fieldByService := collectAPIClientFields(files) // serviceType -> field name
 	constructors, executes := collectServiceMethods(files)
-	bodyByOp := loadBodyInfo(metadataPath, r.clientTypes)
+	bodyByOp, err := loadBodyInfo(metadataPath, r.clientTypes)
+	if err != nil {
+		return "", 0, err
+	}
 	exampleByOp := loadExamples(examplesDir)
 	structs := collectStructs(files)
 
@@ -644,13 +647,19 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 // loadBodyInfo reads the spec metadata and returns, keyed by generated method
 // name (PascalCase operationId), the JSON request body to surface on the facade.
 // Multipart bodies and bodies whose model is not a client type are skipped.
-func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]bodyInfo {
+//
+// It fails closed: unreadable or malformed metadata, or metadata produced by a
+// camunda-schema-bundler older than 2.5.0 (legacy boolean
+// optionalTenantIdInBody without optionalTenantIdInBodyVariants /
+// optionalTenantIdsInBody), is an error rather than a facade that silently
+// drops default-tenant injection.
+func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]bodyInfo, error) {
 	if metadataPath == "" {
-		return nil
+		return nil, nil
 	}
 	data, err := os.ReadFile(metadataPath)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("read spec metadata: %w", err)
 	}
 	var meta struct {
 		Operations []struct {
@@ -660,14 +669,23 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]b
 			RequestBodyContentTypes []string `json:"requestBodyContentTypes"`
 			// camunda-schema-bundler >= 2.5.0 default-tenant metadata.
 			OptionalTenantIDInBodyVariants []string `json:"optionalTenantIdInBodyVariants"`
-			OptionalTenantIDsInBody        bool     `json:"optionalTenantIdsInBody"`
+			OptionalTenantIDsInBody        *bool    `json:"optionalTenantIdsInBody"`
+			// Legacy (< 2.5.0) boolean; only used to detect stale metadata.
+			LegacyOptionalTenantIDInBody bool `json:"optionalTenantIdInBody"`
 		} `json:"operations"`
 	}
-	if json.Unmarshal(data, &meta) != nil {
-		return nil
+	if err := json.Unmarshal(data, &meta); err != nil {
+		return nil, fmt.Errorf("parse spec metadata: %w", err)
 	}
 	out := map[string]bodyInfo{}
+	sawNewFields := false
 	for _, o := range meta.Operations {
+		if o.OptionalTenantIDInBodyVariants != nil || o.OptionalTenantIDsInBody != nil {
+			sawNewFields = true
+		}
+		if o.LegacyOptionalTenantIDInBody && o.OptionalTenantIDInBodyVariants == nil {
+			return nil, fmt.Errorf("spec metadata: operation %q has legacy optionalTenantIdInBody but no optionalTenantIdInBodyVariants; re-bundle with camunda-schema-bundler >= 2.5.0", o.OperationID)
+		}
 		if !o.HasRequestBody || o.RequestBodySchemaRef == "" || !hasJSONContent(o.RequestBodyContentTypes) {
 			continue
 		}
@@ -678,10 +696,13 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]b
 		out[upperFirst(o.OperationID)] = bodyInfo{
 			builder:         model,
 			tenantVariants:  o.OptionalTenantIDInBodyVariants,
-			tenantIDsInBody: o.OptionalTenantIDsInBody,
+			tenantIDsInBody: o.OptionalTenantIDsInBody != nil && *o.OptionalTenantIDsInBody,
 		}
 	}
-	return out
+	if len(meta.Operations) > 0 && !sawNewFields {
+		return nil, fmt.Errorf("spec metadata carries no camunda-schema-bundler >= 2.5.0 tenant fields (optionalTenantIdInBodyVariants / optionalTenantIdsInBody); re-bundle")
+	}
+	return out, nil
 }
 
 func hasJSONContent(cts []string) bool {

@@ -158,7 +158,7 @@ func TestLoadBodyInfoIncludesOnlyJSONClientModels(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "metadata.json")
 	metadata := `{"operations":[
-			{"operationId":"createWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["application/json"]},
+			{"operationId":"createWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["application/json"],"optionalTenantIdsInBody":false},
 			{"operationId":"uploadWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["multipart/form-data"]},
 			{"operationId":"inlineBody","hasRequestBody":true,"requestBodySchemaRef":"Inline","requestBodyContentTypes":["application/json"]}
 		]}`
@@ -166,7 +166,10 @@ func TestLoadBodyInfoIncludesOnlyJSONClientModels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := loadBodyInfo(path, map[string]bool{"WidgetRequest": true})
+	got, err := loadBodyInfo(path, map[string]bool{"WidgetRequest": true})
+	if err != nil {
+		t.Fatal(err)
+	}
 	info, ok := got["CreateWidget"]
 	if !ok || info.builder != "WidgetRequest" {
 		t.Fatalf("CreateWidget body info = %+v, present=%v", info, ok)
@@ -235,11 +238,40 @@ func TestLoadBodyInfoReadsTenantMetadata(t *testing.T) {
 	if err := os.WriteFile(path, []byte(meta), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	got := loadBodyInfo(path, map[string]bool{"Union": true, "Jobs": true})
+	got, err := loadBodyInfo(path, map[string]bool{"Union": true, "Jobs": true})
+	if err != nil {
+		t.Fatal(err)
+	}
 	if bi := got["Suspend"]; len(bi.tenantVariants) != 1 || bi.tenantVariants[0] != "ById" || bi.tenantIDsInBody {
 		t.Errorf("Suspend: %+v", bi)
 	}
 	if bi := got["ActivateJobs"]; !bi.tenantIDsInBody || len(bi.tenantVariants) != 0 {
 		t.Errorf("ActivateJobs: %+v", bi)
+	}
+}
+
+// loadBodyInfo must fail closed on metadata that cannot drive default-tenant
+// injection, instead of silently emitting a facade without it.
+func TestLoadBodyInfoFailsClosedOnStaleOrBrokenMetadata(t *testing.T) {
+	cases := map[string]string{
+		"legacy boolean without variants": `{"operations":[
+			{"operationId":"publish","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdInBody":true,"optionalTenantIdsInBody":false}]}`,
+		"no 2.5.0 fields at all": `{"operations":[
+			{"operationId":"publish","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"]}]}`,
+		"malformed json": `{"operations":`,
+	}
+	for name, metadata := range cases {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "metadata.json")
+			if err := os.WriteFile(path, []byte(metadata), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := loadBodyInfo(path, map[string]bool{"Msg": true}); err == nil {
+				t.Fatal("expected an error, got nil")
+			}
+		})
+	}
+	if _, err := loadBodyInfo(filepath.Join(t.TempDir(), "missing.json"), nil); err == nil {
+		t.Fatal("missing metadata file: expected an error, got nil")
 	}
 }
