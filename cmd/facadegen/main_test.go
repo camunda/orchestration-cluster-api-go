@@ -158,9 +158,9 @@ func TestLoadBodyInfoIncludesOnlyJSONClientModels(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "metadata.json")
 	metadata := `{"operations":[
-			{"operationId":"createWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["application/json"],"optionalTenantIdsInBody":false},
-			{"operationId":"uploadWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["multipart/form-data"]},
-			{"operationId":"inlineBody","hasRequestBody":true,"requestBodySchemaRef":"Inline","requestBodyContentTypes":["application/json"]}
+			{"operationId":"createWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
+			{"operationId":"uploadWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["multipart/form-data"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
+			{"operationId":"inlineBody","hasRequestBody":true,"requestBodySchemaRef":"Inline","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false}
 		]}`
 	if err := os.WriteFile(path, []byte(metadata), 0o600); err != nil {
 		t.Fatal(err)
@@ -233,8 +233,8 @@ type Union struct { ById *ById; ByKey *ByKey }
 func TestLoadBodyInfoReadsTenantMetadata(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "meta.json")
 	meta := `{"operations":[
- {"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Union","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":["ById"]},
- {"operationId":"activateJobs","hasRequestBody":true,"requestBodySchemaRef":"Jobs","requestBodyContentTypes":["application/json"],"optionalTenantIdsInBody":true}]}`
+ {"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Union","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":["ById"],"optionalTenantIdsInBody":false},
+ {"operationId":"activateJobs","hasRequestBody":true,"requestBodySchemaRef":"Jobs","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":true}]}`
 	if err := os.WriteFile(path, []byte(meta), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -259,6 +259,15 @@ func TestLoadBodyInfoFailsClosedOnStaleOrBrokenMetadata(t *testing.T) {
 		"no 2.5.0 fields at all": `{"operations":[
 			{"operationId":"publish","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"]}]}`,
 		"malformed json": `{"operations":`,
+		"empty object":   `{}`,
+		"null":           `null`,
+		"no operations":  `{"operations":[]}`,
+		"missing optionalTenantIdsInBody": `{"operations":[
+			{"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":["ById"]}]}`,
+		"missing optionalTenantIdInBodyVariants": `{"operations":[
+			{"operationId":"activateJobs","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdsInBody":true}]}`,
+		"missing on a non-JSON-body operation": `{"operations":[
+			{"operationId":"getThing","hasRequestBody":false}]}`,
 	}
 	for name, metadata := range cases {
 		t.Run(name, func(t *testing.T) {

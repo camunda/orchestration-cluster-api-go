@@ -649,9 +649,9 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 // Multipart bodies and bodies whose model is not a client type are skipped.
 //
 // It fails closed: unreadable or malformed metadata, or metadata produced by a
-// camunda-schema-bundler older than 2.5.0 (legacy boolean
-// optionalTenantIdInBody without optionalTenantIdInBodyVariants /
-// optionalTenantIdsInBody), is an error rather than a facade that silently
+// metadata listing no operations, or any operation lacking either
+// optionalTenantIdInBodyVariants or optionalTenantIdsInBody (bundler < 2.5.1),
+// is an error rather than a facade that silently
 // drops default-tenant injection.
 func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]bodyInfo, error) {
 	if metadataPath == "" {
@@ -670,21 +670,20 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]
 			// camunda-schema-bundler >= 2.5.0 default-tenant metadata.
 			OptionalTenantIDInBodyVariants []string `json:"optionalTenantIdInBodyVariants"`
 			OptionalTenantIDsInBody        *bool    `json:"optionalTenantIdsInBody"`
-			// Legacy (< 2.5.0) boolean; only used to detect stale metadata.
-			LegacyOptionalTenantIDInBody bool `json:"optionalTenantIdInBody"`
 		} `json:"operations"`
 	}
 	if err := json.Unmarshal(data, &meta); err != nil {
 		return nil, fmt.Errorf("parse spec metadata: %w", err)
 	}
+	if len(meta.Operations) == 0 {
+		return nil, fmt.Errorf("spec metadata lists no operations; re-bundle with camunda-schema-bundler >= 2.5.1")
+	}
 	out := map[string]bodyInfo{}
-	sawNewFields := false
 	for _, o := range meta.Operations {
-		if o.OptionalTenantIDInBodyVariants != nil || o.OptionalTenantIDsInBody != nil {
-			sawNewFields = true
-		}
-		if o.LegacyOptionalTenantIDInBody && o.OptionalTenantIDInBodyVariants == nil {
-			return nil, fmt.Errorf("spec metadata: operation %q has legacy optionalTenantIdInBody but no optionalTenantIdInBodyVariants; re-bundle with camunda-schema-bundler >= 2.5.1", o.OperationID)
+		// Both tenant fields are required on every operation: a missing one
+		// would silently drop default-tenant injection for that operation.
+		if o.OptionalTenantIDInBodyVariants == nil || o.OptionalTenantIDsInBody == nil {
+			return nil, fmt.Errorf("spec metadata: operation %q lacks optionalTenantIdInBodyVariants or optionalTenantIdsInBody; re-bundle with camunda-schema-bundler >= 2.5.1", o.OperationID)
 		}
 		if !o.HasRequestBody || o.RequestBodySchemaRef == "" || !hasJSONContent(o.RequestBodyContentTypes) {
 			continue
@@ -698,9 +697,6 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]
 			tenantVariants:  o.OptionalTenantIDInBodyVariants,
 			tenantIDsInBody: o.OptionalTenantIDsInBody != nil && *o.OptionalTenantIDsInBody,
 		}
-	}
-	if len(meta.Operations) > 0 && !sawNewFields {
-		return nil, fmt.Errorf("spec metadata carries no camunda-schema-bundler >= 2.5 tenant fields (optionalTenantIdInBodyVariants / optionalTenantIdsInBody); re-bundle with camunda-schema-bundler >= 2.5.1")
 	}
 	return out, nil
 }
