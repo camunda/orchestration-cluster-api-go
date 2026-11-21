@@ -157,6 +157,13 @@ func (w *JobWorker) Run(ctx context.Context) error {
 	if err := waitStartup(ctx, w.client.clock, w.startupDelay); err != nil {
 		return err
 	}
+	if !falconServesTenants(w.tenantIDs) {
+		// The FALCON subscribe frame carries no gateway-enforced tenant filter, so
+		// a worker restricted to anything other than the default tenant must poll
+		// over REST, which honours tenantIds. Fail closed rather than receive jobs
+		// from tenants the caller excluded.
+		return w.runRESTPoll(ctx)
+	}
 	if caps := w.client.falconCaps(ctx); caps != nil {
 		if err := w.runFalcon(ctx, caps); err != nil {
 			if ctx.Err() != nil {
@@ -438,6 +445,13 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 	if err != nil {
 		c.logger.Error("throw job error failed", "job", job.Key(), "error", err)
 	}
+}
+
+// falconServesTenants reports whether the FALCON command stream can honour the
+// worker's effective tenant set. The gateway does not enforce a tenant filter on
+// subscriptions, so only the implicit default tenant is safe.
+func falconServesTenants(ids []string) bool {
+	return len(ids) == 1 && ids[0] == DefaultTenantIdentifier
 }
 
 // defaultTenantIDs returns the single-element tenant slice a job worker
