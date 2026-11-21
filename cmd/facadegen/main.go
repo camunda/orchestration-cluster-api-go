@@ -648,11 +648,10 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 // name (PascalCase operationId), the JSON request body to surface on the facade.
 // Multipart bodies and bodies whose model is not a client type are skipped.
 //
-// It fails closed: unreadable or malformed metadata, or metadata produced by a
-// metadata listing no operations, or any operation lacking either
-// optionalTenantIdInBodyVariants or optionalTenantIdsInBody (bundler < 2.5.1),
-// is an error rather than a facade that silently
-// drops default-tenant injection.
+// It fails closed: unreadable or malformed metadata, metadata with no
+// operations, or any operation lacking either optionalTenantIdInBodyVariants
+// or optionalTenantIdsInBody (bundler < 2.5.1) is an error rather than a
+// facade that silently drops default-tenant injection.
 func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]bodyInfo, error) {
 	if metadataPath == "" {
 		return nil, nil
