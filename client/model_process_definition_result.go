@@ -37,7 +37,7 @@ type ProcessDefinitionResult struct {
 	ProcessDefinitionKey ProcessDefinitionKey `json:"processDefinitionKey"`
 	// Indicates whether the start event of the process has an associated Form Key.
 	HasStartForm bool `json:"hasStartForm"`
-	// The state of this process definition. `DRAINING` indicates the definition is being deleted but still has active process instances draining before it is removed. `SUSPENDED` indicates no new process instances can be created from the definition.
+	// The state of this process definition. `DRAINING` indicates the definition is being deleted but still has active process instances draining before it is removed. `SUSPENDED` indicates no new process instances can be created from this definition; it returns to `ACTIVE` when resumed.
 	State string `json:"state"`
 }
 
