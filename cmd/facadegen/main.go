@@ -85,21 +85,19 @@ var handwrittenOps = map[string]bool{
 	"CreateProcessInstance": true,
 }
 
-// defaultTenantBodyOverrides are hand-written default-tenant helpers (in
-// defaulttenant.go) for bodies the structural rule below cannot express.
-// ActivateJobs carries tenantIds (a list) plus a tenantFilter instead of a
-// single tenantId; its helper injects the effective default tenant only when the
-// list is unset/empty and the filter is PROVIDED or unset.
+// tenantIDsBodyHook is the hand-written default-tenant helper (in
+// defaulttenant.go) for bodies the spec metadata flags with
+// optionalTenantIdsInBody: an optional tenantIds list (plus a tenantFilter)
+// instead of a single tenantId (activateJobs). It injects the effective default
+// tenant only when the list is unset/empty and the filter is PROVIDED or unset.
 //
-// Every other operation is covered by the derived rule (see tenantShapeOf): when
-// the JSON request body — or, for a oneOf union, any of its variants — has an
-// optional top-level tenantId, the facade injects the effective default tenant
-// (the configured WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or
+// Every other JSON body is covered by optionalTenantIdInBodyVariants (see
+// tenantShapeOf): when the body — or, for a oneOf union, any of its variants —
+// has an optional top-level tenantId, the facade injects the effective default
+// tenant (the configured WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or
 // "<default>") when the caller left it unset, matching the Camunda Java client.
 // No operation list is maintained: a new tenant-scoped body is covered on regen.
-var defaultTenantBodyOverrides = map[string]string{
-	"ActivateJobs": "withDefaultTenantJobActivation",
-}
+const tenantIDsBodyHook = "withDefaultTenantJobActivation"
 
 // defaultTenantReqOps are operations whose tenant id is an optional request
 // parameter rather than a JSON body field (CreateDeployment sends it as a
@@ -129,7 +127,9 @@ type operation struct {
 
 // bodyInfo describes an operation's JSON request body, derived from spec metadata.
 type bodyInfo struct {
-	builder string // builder method name on ApiXxxRequest (== the body model name)
+	builder         string   // builder method name on ApiXxxRequest (== the body model name)
+	tenantVariants  []string // optionalTenantIdInBodyVariants from the spec metadata
+	tenantIDsInBody bool     // optionalTenantIdsInBody from the spec metadata
 }
 
 func main() {
@@ -223,10 +223,10 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 		if bi, ok := bodyByOp[op.name]; ok {
 			op.bodyType = r.typeString(ast.NewIdent(bi.builder))
 			op.bodyBuilder = bi.builder
-			if h, ok := defaultTenantBodyOverrides[op.name]; ok {
-				op.tenantHook = h
-			} else {
-				op.tenant = tenantShapeOf(bi.builder, structs, r)
+			if bi.tenantIDsInBody {
+				op.tenantHook = tenantIDsBodyHook
+			} else if op.tenant, err = tenantShapeOf(bi.builder, bi.tenantVariants, structs, r); err != nil {
+				return "", 0, fmt.Errorf("%s: %w", op.name, err)
 			}
 		}
 		if ex, ok := exampleByOp[lowerFirst(op.name)]; ok {
@@ -658,6 +658,9 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]b
 			HasRequestBody          bool     `json:"hasRequestBody"`
 			RequestBodySchemaRef    string   `json:"requestBodySchemaRef"`
 			RequestBodyContentTypes []string `json:"requestBodyContentTypes"`
+			// camunda-schema-bundler >= 2.5.0 default-tenant metadata.
+			OptionalTenantIDInBodyVariants []string `json:"optionalTenantIdInBodyVariants"`
+			OptionalTenantIDsInBody        bool     `json:"optionalTenantIdsInBody"`
 		} `json:"operations"`
 	}
 	if json.Unmarshal(data, &meta) != nil {
@@ -672,7 +675,11 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]b
 		if !clientTypes[model] {
 			continue // e.g. multipart deploy, or a primitive/inline body
 		}
-		out[upperFirst(o.OperationID)] = bodyInfo{builder: model}
+		out[upperFirst(o.OperationID)] = bodyInfo{
+			builder:         model,
+			tenantVariants:  o.OptionalTenantIDInBodyVariants,
+			tenantIDsInBody: o.OptionalTenantIDsInBody,
+		}
 	}
 	return out
 }
