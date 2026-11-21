@@ -655,6 +655,7 @@ VAR_BUCKETS = {
     "ErrConfig": "runtime",
     "SeedEnvVar": "runtime",
     "DefaultStreamPollBackoff": "job-workers",
+    "DefaultStreamMaxLifetime": "job-workers",
 }
 
 BUCKETS: dict[str, list[str]] = {
