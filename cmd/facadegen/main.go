@@ -99,13 +99,14 @@ var handwrittenOps = map[string]bool{
 // No operation list is maintained: a new tenant-scoped body is covered on regen.
 const tenantIDsBodyHook = "withDefaultTenantJobActivation"
 
-// defaultTenantReqOps are operations whose tenant id is an optional request
-// parameter rather than a JSON body field (CreateDeployment sends it as a
-// multipart form field). The facade injects the configured default tenant when
-// neither the caller nor an opt set one.
-var defaultTenantReqOps = map[string]string{
-	"CreateDeployment": "withDefaultTenantCreateDeployment",
-}
+// reqTenantHookPrefix names the hand-written default-tenant helper (in
+// defaulttenant.go) for an operation whose body the spec metadata flags with
+// optionalTenantIdInBody but that has no JSON body model to default (e.g.
+// CreateDeployment sends tenantId as a multipart form field): the facade calls
+// c.withDefaultTenant<Op>(req) after the opts, so an explicit tenant wins. The
+// helper is derived from the metadata, never from an operation list; a missing
+// helper fails the build rather than silently dropping injection.
+const reqTenantHookPrefix = "withDefaultTenant"
 
 type param struct {
 	name string
@@ -122,6 +123,7 @@ type operation struct {
 	bodyBuilder string       // request-body builder method on the ApiXxxRequest, or ""
 	tenant      *tenantShape // derived default-tenant injection for the body, or nil
 	tenantHook  string       // hand-written body helper overriding the derived one, or ""
+	reqHook     string       // hand-written request-level default-tenant helper (non-JSON body), or ""
 	example     string       // dedented usage snippet from examples/, injected into the doc comment
 }
 
@@ -130,6 +132,7 @@ type bodyInfo struct {
 	builder         string   // builder method name on ApiXxxRequest (== the body model name)
 	tenantVariants  []string // optionalTenantIdInBodyVariants from the spec metadata
 	tenantIDsInBody bool     // optionalTenantIdsInBody from the spec metadata
+	tenantIDInBody  bool     // optionalTenantIdInBody from the spec metadata
 }
 
 func main() {
@@ -223,12 +226,17 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 			retType: r.valueReturn(exec.decl),
 			reqType: r.resultType(ctor.decl),
 		}
-		if bi, ok := bodyByOp[op.name]; ok {
+		if bi, ok := bodyByOp[op.name]; ok && bi.builder == "" {
+			// Non-JSON body (multipart) with an optional tenantId.
+			if bi.tenantIDInBody {
+				op.reqHook = reqTenantHookPrefix + op.name
+			}
+		} else if ok {
 			op.bodyType = r.typeString(ast.NewIdent(bi.builder))
 			op.bodyBuilder = bi.builder
 			if bi.tenantIDsInBody {
 				op.tenantHook = tenantIDsBodyHook
-			} else if op.tenant, err = tenantShapeOf(bi.builder, bi.tenantVariants, structs, r); err != nil {
+			} else if op.tenant, err = tenantShapeOf(bi.builder, tenantVariantsOf(bi), structs, r); err != nil {
 				return "", 0, fmt.Errorf("%s: %w", op.name, err)
 			}
 		}
@@ -628,9 +636,9 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 			// here would overwrite the facade with invalid Go.
 			fmt.Fprintf(&b, "\tif b := req.Get%s(); b != nil {\n\t\treq = req.%s(c.%s(*b))\n\t}\n", op.bodyBuilder, op.bodyBuilder, helper)
 		}
-		if helper, ok := defaultTenantReqOps[op.name]; ok {
+		if op.reqHook != "" {
 			// Runs after the opts so an explicit tenant (direct or via an opt) wins.
-			fmt.Fprintf(&b, "\treq = c.%s(req)\n", helper)
+			fmt.Fprintf(&b, "\treq = c.%s(req)\n", op.reqHook)
 		}
 		if op.retType != "" {
 			b.WriteString("\tvalue, resp, err := req.Execute()\n")
@@ -649,8 +657,8 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 // Multipart bodies and bodies whose model is not a client type are skipped.
 //
 // It fails closed: unreadable or malformed metadata, metadata with no
-// operations, or any operation lacking either optionalTenantIdInBodyVariants
-// or optionalTenantIdsInBody (bundler < 2.5.1) is an error rather than a
+// operations, or any operation lacking optionalTenantIdInBody,
+// optionalTenantIdInBodyVariants or optionalTenantIdsInBody (bundler < 2.5.1) is an error rather than a
 // facade that silently drops default-tenant injection.
 func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]bodyInfo, error) {
 	if metadataPath == "" {
@@ -666,7 +674,8 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]
 			HasRequestBody          bool     `json:"hasRequestBody"`
 			RequestBodySchemaRef    string   `json:"requestBodySchemaRef"`
 			RequestBodyContentTypes []string `json:"requestBodyContentTypes"`
-			// camunda-schema-bundler >= 2.5.0 default-tenant metadata.
+			// camunda-schema-bundler >= 2.5.1 default-tenant metadata.
+			OptionalTenantIDInBody         *bool    `json:"optionalTenantIdInBody"`
 			OptionalTenantIDInBodyVariants []string `json:"optionalTenantIdInBodyVariants"`
 			OptionalTenantIDsInBody        *bool    `json:"optionalTenantIdsInBody"`
 		} `json:"operations"`
@@ -681,8 +690,13 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]
 	for _, o := range meta.Operations {
 		// Both tenant fields are required on every operation: a missing one
 		// would silently drop default-tenant injection for that operation.
-		if o.OptionalTenantIDInBodyVariants == nil || o.OptionalTenantIDsInBody == nil {
-			return nil, fmt.Errorf("spec metadata: operation %q lacks optionalTenantIdInBodyVariants or optionalTenantIdsInBody; re-bundle with camunda-schema-bundler >= 2.5.1", o.OperationID)
+		if o.OptionalTenantIDInBody == nil || o.OptionalTenantIDInBodyVariants == nil || o.OptionalTenantIDsInBody == nil {
+			return nil, fmt.Errorf("spec metadata: operation %q lacks optionalTenantIdInBody, optionalTenantIdInBodyVariants or optionalTenantIdsInBody; re-bundle with camunda-schema-bundler >= 2.5.1", o.OperationID)
+		}
+		if o.HasRequestBody && *o.OptionalTenantIDInBody && !hasJSONContent(o.RequestBodyContentTypes) {
+			// e.g. createDeployment: tenantId is a multipart form field.
+			out[upperFirst(o.OperationID)] = bodyInfo{tenantIDInBody: true}
+			continue
 		}
 		if !o.HasRequestBody || o.RequestBodySchemaRef == "" || !hasJSONContent(o.RequestBodyContentTypes) {
 			continue
@@ -694,7 +708,8 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]
 		out[upperFirst(o.OperationID)] = bodyInfo{
 			builder:         model,
 			tenantVariants:  o.OptionalTenantIDInBodyVariants,
-			tenantIDsInBody: o.OptionalTenantIDsInBody != nil && *o.OptionalTenantIDsInBody,
+			tenantIDsInBody: *o.OptionalTenantIDsInBody,
+			tenantIDInBody:  *o.OptionalTenantIDInBody,
 		}
 	}
 	return out, nil
@@ -726,4 +741,14 @@ func absOrDot(p string) string {
 func fatalf(format string, args ...any) {
 	fmt.Fprintf(os.Stderr, "facadegen: "+format+"\n", args...)
 	os.Exit(1)
+}
+
+// tenantVariantsOf applies the injection rule: default the tenant when the body
+// sent is one of optionalTenantIdInBodyVariants, or when optionalTenantIdInBody
+// is true. A body flagged true with no listed variants is defaulted directly.
+func tenantVariantsOf(bi bodyInfo) []string {
+	if len(bi.tenantVariants) == 0 && bi.tenantIDInBody {
+		return []string{bi.builder}
+	}
+	return bi.tenantVariants
 }
