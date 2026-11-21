@@ -1,3 +1,10 @@
+# [11.0.0-alpha.19](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.18...v11.0.0-alpha.19) (2026-11-21)
+
+
+### Bug Fixes
+
+* inject default tenant on suspend/resumeProcessDefinitions by id, derived from body shape ([#218](https://github.com/camunda/orchestration-cluster-api-go/issues/218)) ([12fb485](https://github.com/camunda/orchestration-cluster-api-go/commit/12fb4850d7adb376c9b62e92bbfafeb82a42ac02)), closes [#217](https://github.com/camunda/orchestration-cluster-api-go/issues/217) [#217](https://github.com/camunda/orchestration-cluster-api-go/issues/217)
+
 # [11.0.0-alpha.18](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.17...v11.0.0-alpha.18) (2026-11-20)
 
 
