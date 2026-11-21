@@ -158,15 +158,18 @@ func TestLoadBodyInfoIncludesOnlyJSONClientModels(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "metadata.json")
 	metadata := `{"operations":[
-			{"operationId":"createWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["application/json"]},
-			{"operationId":"uploadWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["multipart/form-data"]},
-			{"operationId":"inlineBody","hasRequestBody":true,"requestBodySchemaRef":"Inline","requestBodyContentTypes":["application/json"]}
+			{"operationId":"createWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
+			{"operationId":"uploadWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["multipart/form-data"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
+			{"operationId":"inlineBody","hasRequestBody":true,"requestBodySchemaRef":"Inline","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false}
 		]}`
 	if err := os.WriteFile(path, []byte(metadata), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	got := loadBodyInfo(path, map[string]bool{"WidgetRequest": true})
+	got, err := loadBodyInfo(path, map[string]bool{"WidgetRequest": true})
+	if err != nil {
+		t.Fatal(err)
+	}
 	info, ok := got["CreateWidget"]
 	if !ok || info.builder != "WidgetRequest" {
 		t.Fatalf("CreateWidget body info = %+v, present=%v", info, ok)
@@ -194,17 +197,15 @@ func TestFacadegenHelpers(t *testing.T) {
 	}
 }
 
-// TestTenantShapeDerivedFromBodyShape pins #217: default-tenant injection is
-// derived from the body struct, per union variant — not from an operation list.
-func TestTenantShapeDerivedFromBodyShape(t *testing.T) {
+// TestTenantShapeFromMetadata pins #217/#223: default-tenant injection comes
+// from the spec metadata (optionalTenantIdInBodyVariants), per union variant —
+// not from an operation list or the SDK's own spec walk.
+func TestTenantShapeFromMetadata(t *testing.T) {
 	src := `package x
-type TenantId string
-type Direct struct { TenantId *TenantId ` + "`json:\"tenantId,omitempty\"`" + ` }
-type Required struct { TenantId TenantId ` + "`json:\"tenantId\"`" + ` }
-type ById struct { TenantId *TenantId ` + "`json:\"tenantId,omitempty\"`" + ` }
+type ById struct { TenantId *string }
 type ByKey struct { Key string ` + "`json:\"key\"`" + ` }
+type Direct struct { TenantId *string }
 type Union struct { ById *ById; ByKey *ByKey }
-type KeyOnly struct { ByKey *ByKey }
 `
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "x.go", src, 0)
@@ -213,15 +214,73 @@ type KeyOnly struct { ByKey *ByKey }
 	}
 	structs := collectStructs([]*ast.File{f})
 	r := &renderer{clientTypes: map[string]bool{}, short: map[string]bool{}, usedPkgs: map[string]bool{}}
-	if s := tenantShapeOf("Direct", structs, r); s == nil || !s.direct {
-		t.Errorf("Direct: %+v", s)
+	if s, err := tenantShapeOf("Direct", []string{"Direct"}, structs, r); err != nil || s == nil || !s.direct {
+		t.Errorf("Direct: %+v %v", s, err)
 	}
-	if s := tenantShapeOf("Union", structs, r); s == nil || s.direct || len(s.variants) != 1 || s.variants[0] != "ById" {
-		t.Errorf("Union: %+v", s)
+	if s, err := tenantShapeOf("Union", []string{"ById"}, structs, r); err != nil || s == nil || s.direct || len(s.variants) != 1 || s.variants[0] != "ById" {
+		t.Errorf("Union: %+v %v", s, err)
 	}
-	for _, n := range []string{"Required", "ByKey", "KeyOnly", "Missing"} {
-		if s := tenantShapeOf(n, structs, r); s != nil {
-			t.Errorf("%s must not be injected: %+v", n, s)
-		}
+	if s, err := tenantShapeOf("Union", nil, structs, r); err != nil || s != nil {
+		t.Errorf("unlisted body must not be injected: %+v %v", s, err)
+	}
+	if _, err := tenantShapeOf("Union", []string{"Missing"}, structs, r); err == nil {
+		t.Error("a metadata variant absent from the union must fail, not be guessed")
+	}
+}
+
+// TestLoadBodyInfoReadsTenantMetadata checks the spec-metadata fields of
+// camunda-schema-bundler >= 2.5.0 reach the facade.
+func TestLoadBodyInfoReadsTenantMetadata(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "meta.json")
+	meta := `{"operations":[
+ {"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Union","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":["ById"],"optionalTenantIdsInBody":false},
+ {"operationId":"activateJobs","hasRequestBody":true,"requestBodySchemaRef":"Jobs","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":true}]}`
+	if err := os.WriteFile(path, []byte(meta), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadBodyInfo(path, map[string]bool{"Union": true, "Jobs": true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bi := got["Suspend"]; len(bi.tenantVariants) != 1 || bi.tenantVariants[0] != "ById" || bi.tenantIDsInBody {
+		t.Errorf("Suspend: %+v", bi)
+	}
+	if bi := got["ActivateJobs"]; !bi.tenantIDsInBody || len(bi.tenantVariants) != 0 {
+		t.Errorf("ActivateJobs: %+v", bi)
+	}
+}
+
+// loadBodyInfo must fail closed on metadata that cannot drive default-tenant
+// injection, instead of silently emitting a facade without it.
+func TestLoadBodyInfoFailsClosedOnStaleOrBrokenMetadata(t *testing.T) {
+	cases := map[string]string{
+		"legacy boolean without variants": `{"operations":[
+			{"operationId":"publish","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdInBody":true,"optionalTenantIdsInBody":false}]}`,
+		"no 2.5.0 fields at all": `{"operations":[
+			{"operationId":"publish","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"]}]}`,
+		"malformed json": `{"operations":`,
+		"empty object":   `{}`,
+		"null":           `null`,
+		"no operations":  `{"operations":[]}`,
+		"missing optionalTenantIdsInBody": `{"operations":[
+			{"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":["ById"]}]}`,
+		"missing optionalTenantIdInBodyVariants": `{"operations":[
+			{"operationId":"activateJobs","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdsInBody":true}]}`,
+		"missing on a non-JSON-body operation": `{"operations":[
+			{"operationId":"getThing","hasRequestBody":false}]}`,
+	}
+	for name, metadata := range cases {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "metadata.json")
+			if err := os.WriteFile(path, []byte(metadata), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := loadBodyInfo(path, map[string]bool{"Msg": true}); err == nil {
+				t.Fatal("expected an error, got nil")
+			}
+		})
+	}
+	if _, err := loadBodyInfo(filepath.Join(t.TempDir(), "missing.json"), nil); err == nil {
+		t.Fatal("missing metadata file: expected an error, got nil")
 	}
 }

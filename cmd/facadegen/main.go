@@ -85,21 +85,19 @@ var handwrittenOps = map[string]bool{
 	"CreateProcessInstance": true,
 }
 
-// defaultTenantBodyOverrides are hand-written default-tenant helpers (in
-// defaulttenant.go) for bodies the structural rule below cannot express.
-// ActivateJobs carries tenantIds (a list) plus a tenantFilter instead of a
-// single tenantId; its helper injects the effective default tenant only when the
-// list is unset/empty and the filter is PROVIDED or unset.
+// tenantIDsBodyHook is the hand-written default-tenant helper (in
+// defaulttenant.go) for bodies the spec metadata flags with
+// optionalTenantIdsInBody: an optional tenantIds list (plus a tenantFilter)
+// instead of a single tenantId (activateJobs). It injects the effective default
+// tenant only when the list is unset/empty and the filter is PROVIDED or unset.
 //
-// Every other operation is covered by the derived rule (see tenantShapeOf): when
-// the JSON request body — or, for a oneOf union, any of its variants — has an
-// optional top-level tenantId, the facade injects the effective default tenant
-// (the configured WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or
+// Every other JSON body is covered by optionalTenantIdInBodyVariants (see
+// tenantShapeOf): when the body — or, for a oneOf union, any of its variants —
+// has an optional top-level tenantId, the facade injects the effective default
+// tenant (the configured WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or
 // "<default>") when the caller left it unset, matching the Camunda Java client.
 // No operation list is maintained: a new tenant-scoped body is covered on regen.
-var defaultTenantBodyOverrides = map[string]string{
-	"ActivateJobs": "withDefaultTenantJobActivation",
-}
+const tenantIDsBodyHook = "withDefaultTenantJobActivation"
 
 // defaultTenantReqOps are operations whose tenant id is an optional request
 // parameter rather than a JSON body field (CreateDeployment sends it as a
@@ -129,7 +127,9 @@ type operation struct {
 
 // bodyInfo describes an operation's JSON request body, derived from spec metadata.
 type bodyInfo struct {
-	builder string // builder method name on ApiXxxRequest (== the body model name)
+	builder         string   // builder method name on ApiXxxRequest (== the body model name)
+	tenantVariants  []string // optionalTenantIdInBodyVariants from the spec metadata
+	tenantIDsInBody bool     // optionalTenantIdsInBody from the spec metadata
 }
 
 func main() {
@@ -196,7 +196,10 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 	}
 	fieldByService := collectAPIClientFields(files) // serviceType -> field name
 	constructors, executes := collectServiceMethods(files)
-	bodyByOp := loadBodyInfo(metadataPath, r.clientTypes)
+	bodyByOp, err := loadBodyInfo(metadataPath, r.clientTypes)
+	if err != nil {
+		return "", 0, err
+	}
 	exampleByOp := loadExamples(examplesDir)
 	structs := collectStructs(files)
 
@@ -223,10 +226,10 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 		if bi, ok := bodyByOp[op.name]; ok {
 			op.bodyType = r.typeString(ast.NewIdent(bi.builder))
 			op.bodyBuilder = bi.builder
-			if h, ok := defaultTenantBodyOverrides[op.name]; ok {
-				op.tenantHook = h
-			} else {
-				op.tenant = tenantShapeOf(bi.builder, structs, r)
+			if bi.tenantIDsInBody {
+				op.tenantHook = tenantIDsBodyHook
+			} else if op.tenant, err = tenantShapeOf(bi.builder, bi.tenantVariants, structs, r); err != nil {
+				return "", 0, fmt.Errorf("%s: %w", op.name, err)
 			}
 		}
 		if ex, ok := exampleByOp[lowerFirst(op.name)]; ok {
@@ -644,13 +647,18 @@ func emit(ops []operation, extraStd []string, importClient bool) string {
 // loadBodyInfo reads the spec metadata and returns, keyed by generated method
 // name (PascalCase operationId), the JSON request body to surface on the facade.
 // Multipart bodies and bodies whose model is not a client type are skipped.
-func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]bodyInfo {
+//
+// It fails closed: unreadable or malformed metadata, metadata with no
+// operations, or any operation lacking either optionalTenantIdInBodyVariants
+// or optionalTenantIdsInBody (bundler < 2.5.1) is an error rather than a
+// facade that silently drops default-tenant injection.
+func loadBodyInfo(metadataPath string, clientTypes map[string]bool) (map[string]bodyInfo, error) {
 	if metadataPath == "" {
-		return nil
+		return nil, nil
 	}
 	data, err := os.ReadFile(metadataPath)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("read spec metadata: %w", err)
 	}
 	var meta struct {
 		Operations []struct {
@@ -658,13 +666,24 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]b
 			HasRequestBody          bool     `json:"hasRequestBody"`
 			RequestBodySchemaRef    string   `json:"requestBodySchemaRef"`
 			RequestBodyContentTypes []string `json:"requestBodyContentTypes"`
+			// camunda-schema-bundler >= 2.5.0 default-tenant metadata.
+			OptionalTenantIDInBodyVariants []string `json:"optionalTenantIdInBodyVariants"`
+			OptionalTenantIDsInBody        *bool    `json:"optionalTenantIdsInBody"`
 		} `json:"operations"`
 	}
-	if json.Unmarshal(data, &meta) != nil {
-		return nil
+	if err := json.Unmarshal(data, &meta); err != nil {
+		return nil, fmt.Errorf("parse spec metadata: %w", err)
+	}
+	if len(meta.Operations) == 0 {
+		return nil, fmt.Errorf("spec metadata lists no operations; re-bundle with camunda-schema-bundler >= 2.5.1")
 	}
 	out := map[string]bodyInfo{}
 	for _, o := range meta.Operations {
+		// Both tenant fields are required on every operation: a missing one
+		// would silently drop default-tenant injection for that operation.
+		if o.OptionalTenantIDInBodyVariants == nil || o.OptionalTenantIDsInBody == nil {
+			return nil, fmt.Errorf("spec metadata: operation %q lacks optionalTenantIdInBodyVariants or optionalTenantIdsInBody; re-bundle with camunda-schema-bundler >= 2.5.1", o.OperationID)
+		}
 		if !o.HasRequestBody || o.RequestBodySchemaRef == "" || !hasJSONContent(o.RequestBodyContentTypes) {
 			continue
 		}
@@ -672,9 +691,13 @@ func loadBodyInfo(metadataPath string, clientTypes map[string]bool) map[string]b
 		if !clientTypes[model] {
 			continue // e.g. multipart deploy, or a primitive/inline body
 		}
-		out[upperFirst(o.OperationID)] = bodyInfo{builder: model}
+		out[upperFirst(o.OperationID)] = bodyInfo{
+			builder:         model,
+			tenantVariants:  o.OptionalTenantIDInBodyVariants,
+			tenantIDsInBody: o.OptionalTenantIDsInBody != nil && *o.OptionalTenantIDsInBody,
+		}
 	}
-	return out
+	return out, nil
 }
 
 func hasJSONContent(cts []string) bool {

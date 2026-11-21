@@ -8,12 +8,12 @@ import (
 )
 
 // tenantShape describes how the facade injects the default tenant into an
-// operation's JSON request body. It is derived from the body's shape in the
-// generated client (which mirrors the spec schema), never from an operation
-// list: a body struct with an optional top-level `TenantId *TenantId` field is
-// defaulted directly; a oneOf union is defaulted in each variant that has one
-// (e.g. suspendProcessDefinitions: the by-id variant has tenantId, the by-key
-// variant does not and is left alone).
+// operation's JSON request body. It comes from the spec metadata
+// (optionalTenantIdInBodyVariants), never from an operation list: a body
+// schema with an optional top-level tenantId is defaulted directly; a oneOf
+// union is defaulted in each listed variant (e.g. suspendProcessDefinitions:
+// the by-id variant has tenantId, the by-key variant does not and is left
+// alone).
 type tenantShape struct {
 	bodyType string   // rendered body type
 	direct   bool     // the body itself has an optional TenantId
@@ -43,74 +43,51 @@ func collectStructs(files []*ast.File) map[string]*ast.StructType {
 	return out
 }
 
-// hasOptionalTenantID reports whether st has an optional (pointer, omitempty)
-// top-level `tenantId` JSON field. A required tenantId is the caller's to set.
-func hasOptionalTenantID(st *ast.StructType) bool {
+// tenantShapeOf builds the default-tenant injection for body from the spec
+// metadata's optionalTenantIdInBodyVariants (camunda-schema-bundler >= 2.5.0):
+// the request-body schema names with an optional top-level tenantId. When the
+// body schema itself is listed, the body is defaulted directly; otherwise each
+// listed name is a oneOf variant, which openapi-generator emits as a
+// same-named pointer field on the union wrapper. Returns nil when nothing is
+// listed, and an error when a listed variant is not a field of the body (the
+// metadata and the generated client disagree — never guess).
+func tenantShapeOf(body string, variants []string, structs map[string]*ast.StructType, r *renderer) (*tenantShape, error) {
+	if len(variants) == 0 {
+		return nil, nil
+	}
+	shape := &tenantShape{bodyType: r.typeString(ast.NewIdent(body))}
+	for _, v := range variants {
+		if v == body {
+			return &tenantShape{bodyType: shape.bodyType, direct: true}, nil
+		}
+	}
+	st := structs[body]
+	if st == nil {
+		return nil, fmt.Errorf("tenant body %s: no such struct in the client", body)
+	}
+	for _, v := range variants {
+		if !hasUnionField(st, v) {
+			return nil, fmt.Errorf("tenant body %s: metadata variant %s is not a union field", body, v)
+		}
+		shape.variants = append(shape.variants, v)
+	}
+	return shape, nil
+}
+
+// hasUnionField reports whether st has an untagged *name field named name
+// (the openapi-generator oneOf wrapper shape).
+func hasUnionField(st *ast.StructType, name string) bool {
 	for _, fld := range st.Fields.List {
-		if fld.Tag == nil || len(fld.Names) != 1 {
+		if fld.Tag != nil || len(fld.Names) != 1 || fld.Names[0].Name != name {
 			continue
 		}
-		if !strings.Contains(fld.Tag.Value, `json:"tenantId,omitempty"`) {
-			continue
-		}
-		star, ok := fld.Type.(*ast.StarExpr)
-		if !ok {
-			continue
-		}
-		if id, ok := star.X.(*ast.Ident); ok && (id.Name == "TenantId") {
-			return fld.Names[0].Name == "TenantId"
+		if star, ok := fld.Type.(*ast.StarExpr); ok {
+			if id, ok := star.X.(*ast.Ident); ok && id.Name == name {
+				return true
+			}
 		}
 	}
 	return false
-}
-
-// unionVariants returns the pointer-to-struct fields of an openapi-generator
-// oneOf wrapper (a struct of only untagged *Variant fields), or nil.
-func unionVariants(st *ast.StructType, structs map[string]*ast.StructType) []string {
-	var out []string
-	for _, fld := range st.Fields.List {
-		if fld.Tag != nil || len(fld.Names) != 1 {
-			return nil
-		}
-		star, ok := fld.Type.(*ast.StarExpr)
-		if !ok {
-			return nil
-		}
-		id, ok := star.X.(*ast.Ident)
-		if !ok || structs[id.Name] == nil {
-			return nil
-		}
-		out = append(out, fld.Names[0].Name)
-	}
-	return out
-}
-
-// tenantShapeOf derives the default-tenant injection for body, or nil when the
-// body carries no optional tenantId in any variant.
-func tenantShapeOf(body string, structs map[string]*ast.StructType, r *renderer) *tenantShape {
-	st := structs[body]
-	if st == nil {
-		return nil
-	}
-	if hasOptionalTenantID(st) {
-		return &tenantShape{bodyType: r.typeString(ast.NewIdent(body)), direct: true}
-	}
-	var variants []string
-	for _, fld := range unionVariants(st, structs) {
-		for _, f := range st.Fields.List {
-			if f.Names[0].Name != fld {
-				continue
-			}
-			vt := f.Type.(*ast.StarExpr).X.(*ast.Ident).Name
-			if hasOptionalTenantID(structs[vt]) {
-				variants = append(variants, fld)
-			}
-		}
-	}
-	if len(variants) == 0 {
-		return nil
-	}
-	return &tenantShape{bodyType: r.typeString(ast.NewIdent(body)), variants: variants}
 }
 
 // tenantHelper names the CamundaClient method that defaults the tenant of this

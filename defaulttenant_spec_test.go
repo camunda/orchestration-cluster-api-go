@@ -14,82 +14,36 @@ import (
 	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
 )
 
-// specTenantOps walks the bundled OpenAPI spec and returns the operationIds
-// whose JSON request body — or any oneOf/anyOf variant of it — has an optional
-// top-level tenantId property. The list comes from the spec, never from code.
+// specTenantOps reads the checked-in camunda-schema-bundler metadata
+// (spec-metadata.json, bundler >= 2.5) and returns the operationIds whose
+// request body — or any union variant of it — has an optional top-level
+// tenantId (optionalTenantIdInBody / optionalTenantIdInBodyVariants) or an
+// optional tenantIds list (optionalTenantIdsInBody). The list comes from the
+// spec metadata, never from code (#223).
 func specTenantOps(t *testing.T) map[string]bool {
 	t.Helper()
-	raw, err := os.ReadFile("external-spec/bundled/rest-api.bundle.json")
+	raw, err := os.ReadFile("external-spec/bundled/spec-metadata.json")
 	if err != nil {
-		t.Fatalf("reading bundled spec: %v", err)
+		t.Fatalf("reading spec metadata: %v", err)
 	}
-	var spec map[string]any
-	if err := json.Unmarshal(raw, &spec); err != nil {
+	var meta struct {
+		Operations []struct {
+			OperationID                    string    `json:"operationId"`
+			OptionalTenantIDInBody         *bool     `json:"optionalTenantIdInBody"`
+			OptionalTenantIDInBodyVariants *[]string `json:"optionalTenantIdInBodyVariants"`
+			OptionalTenantIDsInBody        *bool     `json:"optionalTenantIdsInBody"`
+		} `json:"operations"`
+	}
+	if err := json.Unmarshal(raw, &meta); err != nil {
 		t.Fatal(err)
 	}
-	schemas := spec["components"].(map[string]any)["schemas"].(map[string]any)
-	resolve := func(s map[string]any) map[string]any {
-		for i := 0; i < 16; i++ {
-			ref, ok := s["$ref"].(string)
-			if !ok {
-				return s
-			}
-			s, _ = schemas[strings.TrimPrefix(ref, "#/components/schemas/")].(map[string]any)
-			if s == nil {
-				return nil
-			}
-		}
-		return s
-	}
-	var hasOptionalTenant func(s map[string]any, depth int) bool
-	hasOptionalTenant = func(s map[string]any, depth int) bool {
-		s = resolve(s)
-		if s == nil || depth > 8 {
-			return false
-		}
-		if props, ok := s["properties"].(map[string]any); ok {
-			if _, ok := props["tenantId"]; ok {
-				required := false
-				if req, ok := s["required"].([]any); ok {
-					for _, r := range req {
-						required = required || r == "tenantId"
-					}
-				}
-				if !required {
-					return true
-				}
-			}
-		}
-		for _, k := range []string{"oneOf", "anyOf", "allOf"} {
-			if vs, ok := s[k].([]any); ok {
-				for _, v := range vs {
-					if m, ok := v.(map[string]any); ok && hasOptionalTenant(m, depth+1) {
-						return true
-					}
-				}
-			}
-		}
-		return false
-	}
 	out := map[string]bool{}
-	for _, item := range spec["paths"].(map[string]any) {
-		for _, opAny := range item.(map[string]any) {
-			op, ok := opAny.(map[string]any)
-			if !ok {
-				continue
-			}
-			rb, ok := op["requestBody"].(map[string]any)
-			if !ok {
-				continue
-			}
-			content, _ := rb["content"].(map[string]any)
-			js, ok := content["application/json"].(map[string]any)
-			if !ok {
-				continue
-			}
-			if s, ok := js["schema"].(map[string]any); ok && hasOptionalTenant(s, 0) {
-				out[op["operationId"].(string)] = true
-			}
+	for _, op := range meta.Operations {
+		if op.OptionalTenantIDInBody == nil || op.OptionalTenantIDInBodyVariants == nil || op.OptionalTenantIDsInBody == nil {
+			t.Fatalf("%s: spec metadata lacks tenant fields; re-bundle with camunda-schema-bundler >= 2.5.1", op.OperationID)
+		}
+		if *op.OptionalTenantIDInBody || len(*op.OptionalTenantIDInBodyVariants) > 0 || *op.OptionalTenantIDsInBody {
+			out[op.OperationID] = true
 		}
 	}
 	return out
@@ -101,7 +55,7 @@ func specTenantOps(t *testing.T) map[string]bool {
 func TestEveryOptionalBodyTenantOperationIsInjected(t *testing.T) {
 	ops := specTenantOps(t)
 	if len(ops) == 0 {
-		t.Fatal("found no tenant-scoped operations in the spec; the walker is broken")
+		t.Fatal("found no tenant-scoped operations in the spec metadata")
 	}
 	bodies := map[string]string{} // Go method name -> source of its body
 	for _, file := range []string{"facade_generated.go", "falcon.go"} {
@@ -129,9 +83,9 @@ func TestEveryOptionalBodyTenantOperationIsInjected(t *testing.T) {
 			t.Errorf("%s: request body has an optional tenantId but the default tenant is not injected", name)
 		}
 	}
-	for _, want := range []string{"suspendProcessDefinitions", "resumeProcessDefinitions", "publishMessage", "evaluateDecision"} {
+	for _, want := range []string{"suspendProcessDefinitions", "resumeProcessDefinitions", "publishMessage", "evaluateDecision", "activateJobs", "createDeployment"} {
 		if !ops[want] {
-			t.Errorf("spec walker missed %s", want)
+			t.Errorf("spec metadata missed %s", want)
 		}
 	}
 }
