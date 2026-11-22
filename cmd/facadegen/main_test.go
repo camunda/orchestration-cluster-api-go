@@ -56,7 +56,8 @@ func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 		{field: "MessageAPI", name: "PublishMessage", reqType: "ApiPublishMessageRequest",
 			bodyType: "MessagePublicationRequest", bodyBuilder: "MessagePublicationRequest",
 			tenant: &tenantShape{bodyType: "MessagePublicationRequest", direct: true}},
-		{field: "ResourceAPI", name: "CreateDeployment", reqType: "ApiCreateDeploymentRequest"},
+		{field: "ResourceAPI", name: "CreateDeployment", reqType: "ApiCreateDeploymentRequest",
+			reqHook: "withDefaultTenantCreateDeployment"},
 		{field: "MessageAPI", name: "GetMessage", reqType: "ApiGetMessageRequest"},
 	}
 	src := emit(ops, nil, false)
@@ -158,9 +159,9 @@ func TestLoadBodyInfoIncludesOnlyJSONClientModels(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "metadata.json")
 	metadata := `{"operations":[
-			{"operationId":"createWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
-			{"operationId":"uploadWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["multipart/form-data"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
-			{"operationId":"inlineBody","hasRequestBody":true,"requestBodySchemaRef":"Inline","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false}
+			{"operationId":"createWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["application/json"],"optionalTenantIdInBody":false,"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
+			{"operationId":"uploadWidget","hasRequestBody":true,"requestBodySchemaRef":"WidgetRequest","requestBodyContentTypes":["multipart/form-data"],"optionalTenantIdInBody":false,"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
+			{"operationId":"inlineBody","hasRequestBody":true,"requestBodySchemaRef":"Inline","requestBodyContentTypes":["application/json"],"optionalTenantIdInBody":false,"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false}
 		]}`
 	if err := os.WriteFile(path, []byte(metadata), 0o600); err != nil {
 		t.Fatal(err)
@@ -233,8 +234,8 @@ type Union struct { ById *ById; ByKey *ByKey }
 func TestLoadBodyInfoReadsTenantMetadata(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "meta.json")
 	meta := `{"operations":[
- {"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Union","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":["ById"],"optionalTenantIdsInBody":false},
- {"operationId":"activateJobs","hasRequestBody":true,"requestBodySchemaRef":"Jobs","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":true}]}`
+ {"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Union","requestBodyContentTypes":["application/json"],"optionalTenantIdInBody":false,"optionalTenantIdInBodyVariants":["ById"],"optionalTenantIdsInBody":false},
+ {"operationId":"activateJobs","hasRequestBody":true,"requestBodySchemaRef":"Jobs","requestBodyContentTypes":["application/json"],"optionalTenantIdInBody":false,"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":true}]}`
 	if err := os.WriteFile(path, []byte(meta), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -263,9 +264,11 @@ func TestLoadBodyInfoFailsClosedOnStaleOrBrokenMetadata(t *testing.T) {
 		"null":           `null`,
 		"no operations":  `{"operations":[]}`,
 		"missing optionalTenantIdsInBody": `{"operations":[
-			{"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":["ById"]}]}`,
+			{"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdInBody":false,"optionalTenantIdInBodyVariants":["ById"]}]}`,
 		"missing optionalTenantIdInBodyVariants": `{"operations":[
 			{"operationId":"activateJobs","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdsInBody":true}]}`,
+		"missing optionalTenantIdInBody": `{"operations":[
+			{"operationId":"suspend","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdInBodyVariants":["ById"],"optionalTenantIdsInBody":false}]}`,
 		"missing on a non-JSON-body operation": `{"operations":[
 			{"operationId":"getThing","hasRequestBody":false}]}`,
 	}
@@ -282,5 +285,33 @@ func TestLoadBodyInfoFailsClosedOnStaleOrBrokenMetadata(t *testing.T) {
 	}
 	if _, err := loadBodyInfo(filepath.Join(t.TempDir(), "missing.json"), nil); err == nil {
 		t.Fatal("missing metadata file: expected an error, got nil")
+	}
+}
+
+// The injection rule: optionalTenantIdInBody true OR the body is a listed
+// variant. An inline multipart body (createDeployment) is not listed in the
+// variants and is covered by optionalTenantIdInBody via a request-level hook.
+func TestLoadBodyInfoOptionalTenantIdInBody(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "meta.json")
+	meta := `{"operations":[
+ {"operationId":"createDeployment","hasRequestBody":true,"requestBodyContentTypes":["multipart/form-data"],"optionalTenantIdInBody":true,"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
+ {"operationId":"upload","hasRequestBody":true,"requestBodyContentTypes":["multipart/form-data"],"optionalTenantIdInBody":false,"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false},
+ {"operationId":"publish","hasRequestBody":true,"requestBodySchemaRef":"Msg","requestBodyContentTypes":["application/json"],"optionalTenantIdInBody":true,"optionalTenantIdInBodyVariants":[],"optionalTenantIdsInBody":false}]}`
+	if err := os.WriteFile(path, []byte(meta), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err := loadBodyInfo(path, map[string]bool{"Msg": true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bi, ok := got["CreateDeployment"]; !ok || bi.builder != "" || !bi.tenantIDInBody {
+		t.Errorf("CreateDeployment: %+v (ok=%v)", bi, ok)
+	}
+	if _, ok := got["Upload"]; ok {
+		t.Error("Upload: multipart body without a tenant must be skipped")
+	}
+	bi := got["Publish"]
+	if v := tenantVariantsOf(bi); len(v) != 1 || v[0] != "Msg" {
+		t.Errorf("Publish variants: %v", v)
 	}
 }
