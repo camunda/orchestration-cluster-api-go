@@ -135,6 +135,16 @@ type bodyInfo struct {
 	tenantIDInBody  bool     // optionalTenantIdInBody from the spec metadata
 }
 
+// requireMetadataPath rejects a CLI invocation without spec metadata. Request
+// hooks (e.g. default-tenant injection for createDeployment) derive only from the
+// metadata, so generating without it would silently drop them.
+func requireMetadataPath(metadataPath string) error {
+	if metadataPath == "" {
+		return fmt.Errorf("spec metadata path is required (usage: facadegen <clientDir> <outPath> <metadata.json> [examplesDir] [reexportPath]); without it default-tenant request hooks would be silently omitted")
+	}
+	return nil
+}
+
 func main() {
 	clientDir := "client"
 	outPath := "facade_generated.go"
@@ -157,6 +167,9 @@ func main() {
 		reexportPath = os.Args[5]
 	}
 
+	if err := requireMetadataPath(metadataPath); err != nil {
+		fatalf("%v", err)
+	}
 	src, count, err := generateFacade(clientDir, metadataPath, examplesDir)
 	if err != nil {
 		fatalf("%v", err)
