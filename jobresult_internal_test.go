@@ -44,13 +44,13 @@ func TestStreamJobWorkerSendsJobResultOverGRPC(t *testing.T) {
 	corrections := NewJobResultCorrections()
 	corrections.SetAssignee("corrected-user")
 	corrections.SetPriority(80)
-	corrections.SetDueDate(DateTime(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)))
+	corrections.SetDueDate(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC))
 	corrections.SetCandidateUsers([]string{})
 	corrections.SetCandidateGroups([]string{"reviewers"})
 
 	clearing := NewJobResultCorrections()
-	clearing.SetDueDate(ClearedDateTime())
-	clearing.SetFollowUpDate(DateTime(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)))
+	clearing.ClearDueDate()
+	clearing.SetFollowUpDate(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC))
 
 	adHoc := NewJobResultAdHocSubProcess()
 	adHoc.SetActivateElements([]JobResultActivateElement{
@@ -186,7 +186,7 @@ func TestStreamJobWorkerFailsJobOnUnencodableResult(t *testing.T) {
 		ActivateAdHocElement("task_a", map[string]any{"score": math.NaN()}),
 	})
 	corrections := NewJobResultCorrections()
-	corrections.SetDueDate(DateTime(time.Date(10000, 1, 1, 0, 0, 0, 0, time.UTC)))
+	corrections.SetDueDate(time.Date(10000, 1, 1, 0, 0, 0, 0, time.UTC))
 	completions := map[string]JobCompletion{
 		"adhoc":     {Result: AdHocSubProcessJobResult(*adHoc)},
 		"corrected": {Result: CorrectUserTask(*corrections)},

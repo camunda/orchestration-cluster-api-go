@@ -4,11 +4,12 @@
 #
 # Pipeline:
 #   1. (if missing) bundle the OpenAPI spec and fetch gateway.proto
-#   2. openapi-generator  → client/  (REST client)
-#   3. buf generate       → pb/       (gRPC stubs)
-#   4. postprocess.py     → Domain Type System, semantic fields, generator fixes,
+#   2. normalize-spec.py  → generator input (x-clearable dates kept as date-time)
+#   3. openapi-generator  → client/  (REST client)
+#   4. buf generate       → pb/       (gRPC stubs)
+#   5. postprocess.py     → Domain Type System, semantic fields, generator fixes,
 #                            and the ergonomic facade (facade_generated.go)
-#   5. gofmt + go build   → verify the generated code compiles
+#   6. gofmt + go build   → verify the generated code compiles
 #
 # Usage:
 #   ./scripts/generate.sh            # generate from existing inputs (fetch if absent)
@@ -22,6 +23,8 @@ cd "$ROOT"
 BUNDLED_SPEC="external-spec/bundled/rest-api.bundle.json"
 BUNDLED_META="external-spec/bundled/spec-metadata.json"
 PROTO="external-spec/proto/gateway.proto"
+# The bundled spec as openapi-generator and the hooks consume it (gitignored).
+GENERATOR_SPEC="external-spec/generator/rest-api.json"
 
 for arg in "$@"; do
   case "$arg" in
@@ -33,6 +36,9 @@ done
 
 [[ -f "$BUNDLED_SPEC" ]] || ./scripts/bundle-spec.sh
 [[ -f "$PROTO" ]] || ./scripts/fetch-proto.sh
+
+echo "==> Normalizing the spec for the generator (x-clearable dates)..."
+python3 scripts/normalize-spec.py "$BUNDLED_SPEC" "$GENERATOR_SPEC"
 
 echo "==> Generating REST client with openapi-generator..."
 npx --yes @openapitools/openapi-generator-cli generate -c openapi-generator-config.yaml
@@ -69,7 +75,7 @@ npx --yes @bufbuild/buf@1.72.0 generate
 echo "==> Post-processing: Domain Type System + semantic fields + facade..."
 python3 scripts/postprocess.py \
   --client-dir client \
-  --spec "$BUNDLED_SPEC" \
+  --spec "$GENERATOR_SPEC" \
   --metadata "$BUNDLED_META"
 
 echo "==> Formatting generated code..."

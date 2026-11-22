@@ -158,8 +158,8 @@ func testUserTaskListenerCorrections(t *testing.T, stream bool) {
 		corrections := camunda.NewJobResultCorrections()
 		corrections.SetAssignee(assignee)
 		corrections.SetPriority(80)
-		corrections.SetDueDate(camunda.ClearedDateTime())
-		corrections.SetFollowUpDate(camunda.ClearedDateTime())
+		corrections.ClearDueDate()
+		corrections.ClearFollowUpDate()
 		return camunda.JobCompletion{Result: camunda.CorrectUserTask(*corrections)}, nil
 	})
 	if stream {

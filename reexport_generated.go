@@ -5232,18 +5232,6 @@ func NewNullableCheckpointType(val *CheckpointType) *NullableCheckpointType {
 	return camundaapi.NewNullableCheckpointType(val)
 }
 
-// ClearableDateTime A date-time in RFC 3339 format, or an empty string to clear the persisted value. A `null` value or omitting the property preserves the persisted value.
-//
-// Fields and methods are documented on [camundaapi.ClearableDateTime].
-type ClearableDateTime = camundaapi.ClearableDateTime
-
-// Fields and methods are documented on [camundaapi.NullableClearableDateTime].
-type NullableClearableDateTime = camundaapi.NullableClearableDateTime
-
-func NewNullableClearableDateTime(val *ClearableDateTime) *NullableClearableDateTime {
-	return camundaapi.NewNullableClearableDateTime(val)
-}
-
 // ClockAddRequest struct for ClockAddRequest
 //
 // Fields and methods are documented on [camundaapi.ClockAddRequest].

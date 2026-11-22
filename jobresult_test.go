@@ -3,6 +3,7 @@ package camunda_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math"
 	"net/http"
@@ -93,7 +94,7 @@ func TestJobWorkerCompletionRequestBody(t *testing.T) {
 	corrections := camunda.NewJobResultCorrections()
 	corrections.SetAssignee("corrected-user")
 	corrections.SetPriority(80)
-	corrections.SetDueDate(camunda.DateTime(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)))
+	corrections.SetDueDate(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC))
 	corrections.SetCandidateGroups([]string{"reviewers"})
 	corrections.SetCandidateUsers([]string{}) // non-nil empty slice clears the list
 
@@ -203,19 +204,19 @@ func TestJobWorkerCorrectionDatesWireBody(t *testing.T) {
 	}{
 		{
 			name:  "cleared dueDate",
-			build: func(c *camunda.JobResultCorrections) { c.SetDueDate(camunda.ClearedDateTime()) },
+			build: func(c *camunda.JobResultCorrections) { c.ClearDueDate() },
 			want:  `{"dueDate":""}`,
 		},
 		{
 			name:  "cleared followUpDate",
-			build: func(c *camunda.JobResultCorrections) { c.SetFollowUpDate(camunda.ClearedDateTime()) },
+			build: func(c *camunda.JobResultCorrections) { c.ClearFollowUpDate() },
 			want:  `{"followUpDate":""}`,
 		},
 		{
 			name: "set dates keep the ISO-8601 form",
 			build: func(c *camunda.JobResultCorrections) {
-				c.SetDueDate(camunda.DateTime(due))
-				c.SetFollowUpDate(camunda.DateTime(due.Add(90 * time.Minute)))
+				c.SetDueDate(due)
+				c.SetFollowUpDate(due.Add(90 * time.Minute))
 			},
 			want: `{"dueDate":"2026-01-02T03:04:05Z","followUpDate":"2026-01-02T04:34:05Z"}`,
 		},
@@ -228,8 +229,8 @@ func TestJobWorkerCorrectionDatesWireBody(t *testing.T) {
 			name: "clear alongside other corrections",
 			build: func(c *camunda.JobResultCorrections) {
 				c.SetAssignee("corrected-user")
-				c.SetDueDate(camunda.ClearedDateTime())
-				c.SetFollowUpDate(camunda.DateTime(due))
+				c.ClearDueDate()
+				c.SetFollowUpDate(due)
 				c.SetCandidateGroups([]string{"reviewers"})
 				c.SetPriority(80)
 			},
@@ -239,31 +240,26 @@ func TestJobWorkerCorrectionDatesWireBody(t *testing.T) {
 		{
 			name: "set after clear wins",
 			build: func(c *camunda.JobResultCorrections) {
-				c.SetDueDate(camunda.ClearedDateTime())
-				c.SetDueDate(camunda.DateTime(due))
+				c.ClearDueDate()
+				c.SetDueDate(due)
 			},
 			want: `{"dueDate":"2026-01-02T03:04:05Z"}`,
 		},
 		{
 			name: "clear after set wins",
 			build: func(c *camunda.JobResultCorrections) {
-				c.SetDueDate(camunda.DateTime(due))
-				c.SetDueDate(camunda.ClearedDateTime())
+				c.SetDueDate(due)
+				c.ClearDueDate()
 			},
 			want: `{"dueDate":""}`,
 		},
 		{
 			name: "unset after clear omits",
 			build: func(c *camunda.JobResultCorrections) {
-				c.SetFollowUpDate(camunda.ClearedDateTime())
+				c.ClearFollowUpDate()
 				c.UnsetFollowUpDate()
 			},
 			want: `{}`,
-		},
-		{
-			name:  "null preserves",
-			build: func(c *camunda.JobResultCorrections) { c.SetDueDateNil() },
-			want:  `{"dueDate":null}`,
 		},
 	}
 	for _, tc := range tests {
@@ -287,8 +283,8 @@ func TestJobWorkerCorrectionDatesWireBody(t *testing.T) {
 // a JobCompletionRequest themselves: the clear lives on the model, not the worker.
 func TestJobResultCorrectionsClearMarshalsDirectly(t *testing.T) {
 	c := camunda.NewJobResultCorrections()
-	c.SetDueDate(camunda.ClearedDateTime())
-	c.SetFollowUpDate(camunda.ClearedDateTime())
+	c.ClearDueDate()
+	c.ClearFollowUpDate()
 	ut := camunda.NewJobResultUserTask()
 	ut.SetType("userTask")
 	ut.SetCorrections(*c)
@@ -304,6 +300,9 @@ func TestJobResultCorrectionsClearMarshalsDirectly(t *testing.T) {
 	want := mustJSON(t, `{"result":{"type":"userTask","corrections":{"dueDate":"","followUpDate":""}}}`)
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("JobCompletionRequest = %s, want %v", b, want)
+	}
+	if !c.IsDueDateCleared() || !c.IsFollowUpDateCleared() || c.HasDueDate() || c.HasFollowUpDate() {
+		t.Error("cleared dates must report cleared and not set")
 	}
 }
 
@@ -489,7 +488,7 @@ func unencodableCompletions() map[string]camunda.JobCompletion {
 		camunda.ActivateAdHocElement("task_a", map[string]any{"score": math.NaN()}),
 	})
 	corrections := camunda.NewJobResultCorrections()
-	corrections.SetDueDate(camunda.DateTime(time.Date(10000, 1, 1, 0, 0, 0, 0, time.UTC))) // outside RFC 3339
+	corrections.SetDueDate(time.Date(10000, 1, 1, 0, 0, 0, 0, time.UTC)) // outside RFC 3339
 	return map[string]camunda.JobCompletion{
 		"ad-hoc element variables": {Result: camunda.AdHocSubProcessJobResult(*adHoc)},
 		"user task corrections":    {Result: camunda.CorrectUserTask(*corrections)},
@@ -514,26 +513,105 @@ func TestJobWorkerFailsJobOnUnencodableResult(t *testing.T) {
 	}
 }
 
-// TestJobResultCorrectionsDateRoundTrip: a cleared ("") and a set correction
-// date survive marshal -> unmarshal -> marshal unchanged.
+// TestJobResultCorrectionsDateRoundTrip: every state of a correction date survives
+// marshal -> unmarshal: cleared ("" on the wire), set (ISO-8601), null, absent.
 func TestJobResultCorrectionsDateRoundTrip(t *testing.T) {
+	due := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
+	type dateAPI struct {
+		name    string
+		prop    string
+		set     func(*camunda.JobResultCorrections, time.Time)
+		setNil  func(*camunda.JobResultCorrections)
+		clear   func(*camunda.JobResultCorrections)
+		cleared func(*camunda.JobResultCorrections) bool
+		get     func(*camunda.JobResultCorrections) (*time.Time, bool)
+	}
+	dates := []dateAPI{
+		{"dueDate", "dueDate",
+			(*camunda.JobResultCorrections).SetDueDate, (*camunda.JobResultCorrections).SetDueDateNil,
+			(*camunda.JobResultCorrections).ClearDueDate, (*camunda.JobResultCorrections).IsDueDateCleared,
+			(*camunda.JobResultCorrections).GetDueDateOk},
+		{"followUpDate", "followUpDate",
+			(*camunda.JobResultCorrections).SetFollowUpDate, (*camunda.JobResultCorrections).SetFollowUpDateNil,
+			(*camunda.JobResultCorrections).ClearFollowUpDate, (*camunda.JobResultCorrections).IsFollowUpDateCleared,
+			(*camunda.JobResultCorrections).GetFollowUpDateOk},
+	}
+	for _, d := range dates {
+		states := []struct {
+			name  string
+			build func(*camunda.JobResultCorrections)
+			wire  string
+			check func(t *testing.T, c *camunda.JobResultCorrections)
+		}{
+			{"cleared", d.clear, `{"` + d.prop + `":""}`, func(t *testing.T, c *camunda.JobResultCorrections) {
+				if v, ok := d.get(c); !d.cleared(c) || ok || v != nil {
+					t.Errorf("decoded: cleared=%v value=%v set=%v; want cleared and unset", d.cleared(c), v, ok)
+				}
+			}},
+			{"set", func(c *camunda.JobResultCorrections) { d.set(c, due) }, `{"` + d.prop + `":"2026-01-02T03:04:05Z"}`,
+				func(t *testing.T, c *camunda.JobResultCorrections) {
+					if v, ok := d.get(c); d.cleared(c) || !ok || v == nil || !v.Equal(due) {
+						t.Errorf("decoded: cleared=%v value=%v; want %v", d.cleared(c), v, due)
+					}
+				}},
+			{"null", d.setNil, `{"` + d.prop + `":null}`, func(t *testing.T, c *camunda.JobResultCorrections) {
+				if v, ok := d.get(c); d.cleared(c) || !ok || v != nil {
+					t.Errorf("decoded: cleared=%v value=%v set=%v; want an explicit null", d.cleared(c), v, ok)
+				}
+			}},
+			{"absent", func(*camunda.JobResultCorrections) {}, `{}`, func(t *testing.T, c *camunda.JobResultCorrections) {
+				if v, ok := d.get(c); d.cleared(c) || ok || v != nil {
+					t.Errorf("decoded: cleared=%v value=%v set=%v; want absent", d.cleared(c), v, ok)
+				}
+			}},
+		}
+		for _, st := range states {
+			t.Run(d.name+"/"+st.name, func(t *testing.T) {
+				src := camunda.NewJobResultCorrections()
+				src.SetAssignee("someone")
+				st.build(src)
+				b, err := json.Marshal(src)
+				if err != nil {
+					t.Fatalf("Marshal: %v", err)
+				}
+				want := mustJSON(t, st.wire)
+				want["assignee"] = "someone"
+				var got map[string]any
+				_ = json.Unmarshal(b, &got)
+				if !reflect.DeepEqual(got, want) {
+					t.Errorf("wire = %s, want %v", b, want)
+				}
+				var back camunda.JobResultCorrections
+				if err := json.Unmarshal(b, &back); err != nil {
+					t.Fatalf("Unmarshal %s: %v", b, err)
+				}
+				if back.GetAssignee() != "someone" {
+					t.Errorf("assignee = %q, want someone", back.GetAssignee())
+				}
+				st.check(t, &back)
+				again, _ := json.Marshal(&back)
+				if string(again) != string(b) {
+					t.Errorf("re-marshal = %s, want %s", again, b)
+				}
+			})
+		}
+	}
+}
+
+// TestJobCompletionRequestRoundTripsDateClears restores a serialized completion
+// request carrying date clears, e.g. one persisted for a later retry.
+func TestJobCompletionRequestRoundTripsDateClears(t *testing.T) {
 	c := camunda.NewJobResultCorrections()
-	c.SetDueDate(camunda.ClearedDateTime())
-	c.SetFollowUpDate(camunda.DateTime(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)))
+	c.ClearDueDate()
+	c.SetFollowUpDate(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC))
 	c.SetPriority(80)
 	req := camunda.NewJobCompletionRequest()
+	req.SetVariables(map[string]any{"approved": false})
 	req.SetResult(*camunda.CorrectUserTask(*c))
 
 	b, err := json.Marshal(req)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
-	}
-	want := `{"result":{"corrections":{"dueDate":"","followUpDate":"2026-01-02T03:04:05Z","priority":80},"type":"userTask"}}`
-	var got, wantMap map[string]any
-	_ = json.Unmarshal(b, &got)
-	_ = json.Unmarshal([]byte(want), &wantMap)
-	if !reflect.DeepEqual(got, wantMap) {
-		t.Fatalf("wire = %s, want %s", b, want)
 	}
 	var back camunda.JobCompletionRequest
 	if err := json.Unmarshal(b, &back); err != nil {
@@ -544,8 +622,9 @@ func TestJobResultCorrectionsDateRoundTrip(t *testing.T) {
 		t.Fatalf("decoded result is not a user task result: %s", b)
 	}
 	corr := ut.GetCorrections()
-	if v, ok := corr.GetDueDateOk(); !ok || v == nil || v.String == nil || *v.String != "" {
-		t.Errorf("decoded dueDate = %+v, want a clear", v)
+	if !corr.IsDueDateCleared() || corr.IsFollowUpDateCleared() || corr.GetPriority() != 80 {
+		t.Errorf("decoded corrections: dueCleared=%v followUpCleared=%v priority=%d",
+			corr.IsDueDateCleared(), corr.IsFollowUpDateCleared(), corr.GetPriority())
 	}
 	again, err := json.Marshal(&back)
 	if err != nil {
@@ -553,5 +632,221 @@ func TestJobResultCorrectionsDateRoundTrip(t *testing.T) {
 	}
 	if string(again) != string(b) {
 		t.Errorf("round trip changed the request:\n got %s\nwant %s", again, b)
+	}
+}
+
+func TestJobResultCorrectionsDecodesPaddedClear(t *testing.T) {
+	var c camunda.JobResultCorrections
+	if err := json.Unmarshal([]byte("{ \"dueDate\" :\n \"\" , \"followUpDate\" : null }"), &c); err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	if !c.IsDueDateCleared() || c.IsFollowUpDateCleared() || !c.HasFollowUpDate() {
+		t.Errorf("dueCleared=%v followUpCleared=%v followUpSet=%v; want a due-date clear and a follow-up null",
+			c.IsDueDateCleared(), c.IsFollowUpDateCleared(), c.HasFollowUpDate())
+	}
+}
+
+// plainCorrections has JobResultCorrections' fields but none of its methods, so
+// it decodes with encoding/json's default semantics: the oracle for the generated
+// decoder on inputs that do not clear a date.
+type plainCorrections camunda.JobResultCorrections
+
+func populatedCorrections() *camunda.JobResultCorrections {
+	c := camunda.NewJobResultCorrections()
+	c.SetAssignee("someone")
+	c.SetDueDate(time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC))
+	c.ClearFollowUpDate()
+	c.SetCandidateGroups([]string{"reviewers"})
+	c.SetCandidateUsers([]string{"alice"})
+	c.SetPriority(40)
+	return c
+}
+
+// TestJobResultCorrectionsDecodeMergesLikeEncodingJSON: decoding into a populated
+// receiver leaves absent properties (clear markers included) untouched and
+// otherwise behaves exactly like encoding/json's default decoding of the model.
+func TestJobResultCorrectionsDecodeMergesLikeEncodingJSON(t *testing.T) {
+	for _, in := range []string{
+		`{}`,
+		`null`,
+		`{"priority":80}`,
+		`{"assignee":"other"}`,
+		`{"assignee":null}`,
+		`{"candidateGroups":["x"]}`,
+		`{"candidateUsers":[]}`,
+		`{"priority":null,"candidateGroups":null}`,
+		`{"dueDate":"2027-05-06T07:08:09Z"}`,
+		`{"dueDate":null}`,
+		`{"unknown":1,"priority":80}`,
+	} {
+		t.Run(in, func(t *testing.T) {
+			got := populatedCorrections()
+			if err := json.Unmarshal([]byte(in), got); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			oracle := plainCorrections(*populatedCorrections())
+			if err := json.Unmarshal([]byte(in), &oracle); err != nil {
+				t.Fatalf("oracle Unmarshal: %v", err)
+			}
+			if want := camunda.JobResultCorrections(oracle); !reflect.DeepEqual(*got, want) {
+				gotJSON, _ := json.Marshal(got)
+				wantJSON, _ := json.Marshal(&want)
+				t.Errorf("decoded into a populated receiver:\n got %s\nwant %s", gotJSON, wantJSON)
+			}
+			if !got.IsFollowUpDateCleared() {
+				t.Error("the follow-up date clear, absent from the input, was lost")
+			}
+		})
+	}
+}
+
+// TestJobResultCorrectionsDecodeClearTransitions: on decode, "" clears a date
+// (unsetting its value) and a timestamp or null replaces a clear, matching the
+// last-call-wins rule of Set/SetNil/Clear; other properties do not touch it.
+func TestJobResultCorrectionsDecodeClearTransitions(t *testing.T) {
+	ts := time.Date(2027, 5, 6, 7, 8, 9, 0, time.UTC)
+	type date struct {
+		prop    string
+		set     func(*camunda.JobResultCorrections, time.Time)
+		clear   func(*camunda.JobResultCorrections)
+		cleared func(*camunda.JobResultCorrections) bool
+		get     func(*camunda.JobResultCorrections) (*time.Time, bool)
+	}
+	for _, d := range []date{
+		{"dueDate", (*camunda.JobResultCorrections).SetDueDate, (*camunda.JobResultCorrections).ClearDueDate,
+			(*camunda.JobResultCorrections).IsDueDateCleared, (*camunda.JobResultCorrections).GetDueDateOk},
+		{"followUpDate", (*camunda.JobResultCorrections).SetFollowUpDate, (*camunda.JobResultCorrections).ClearFollowUpDate,
+			(*camunda.JobResultCorrections).IsFollowUpDateCleared, (*camunda.JobResultCorrections).GetFollowUpDateOk},
+	} {
+		cases := []struct {
+			name        string
+			start       func(*camunda.JobResultCorrections)
+			in          string
+			wantCleared bool
+			wantSet     bool
+			wantValue   *time.Time
+		}{
+			{"set then decoded clear", func(c *camunda.JobResultCorrections) { d.set(c, ts) }, `{"` + d.prop + `":""}`, true, false, nil},
+			{"clear kept when absent", d.clear, `{"priority":80}`, true, false, nil},
+			{"clear replaced by timestamp", d.clear, `{"` + d.prop + `":"2027-05-06T07:08:09Z"}`, false, true, &ts},
+			{"clear replaced by null", d.clear, `{"` + d.prop + `":null}`, false, true, nil},
+			{"set kept when absent", func(c *camunda.JobResultCorrections) { d.set(c, ts) }, `{"priority":80}`, false, true, &ts},
+		}
+		for _, tc := range cases {
+			t.Run(d.prop+"/"+tc.name, func(t *testing.T) {
+				c := camunda.NewJobResultCorrections()
+				c.SetAssignee("someone")
+				tc.start(c)
+				if err := json.Unmarshal([]byte(tc.in), c); err != nil {
+					t.Fatalf("Unmarshal: %v", err)
+				}
+				v, set := d.get(c)
+				if d.cleared(c) != tc.wantCleared || set != tc.wantSet ||
+					(v == nil) != (tc.wantValue == nil) || (v != nil && !v.Equal(*tc.wantValue)) {
+					t.Errorf("cleared=%v set=%v value=%v; want cleared=%v set=%v value=%v",
+						d.cleared(c), set, v, tc.wantCleared, tc.wantSet, tc.wantValue)
+				}
+				if c.GetAssignee() != "someone" {
+					t.Errorf("assignee = %q, want it left untouched", c.GetAssignee())
+				}
+			})
+		}
+	}
+}
+
+// TestJobResultCorrectionsClearKeepsMemberOrder: apart from the clear, decoding must
+// match encoding/json's default decoding of the model (with null for the date).
+// encoding/json matches names case-insensitively and the last member wins, so
+// filtering the clear out through a map (which reorders) changes the result.
+func TestJobResultCorrectionsClearKeepsMemberOrder(t *testing.T) {
+	for _, others := range []string{
+		`"priority":80,"Priority":10`,
+		`"Priority":10,"priority":80`,
+		`"assignee":"a","Assignee":"b"`,
+		`"Assignee":"b","assignee":"a"`,
+		`"followUpDate":"2026-01-02T03:04:05Z","FollowUpDate":null`,
+	} {
+		for _, in := range []string{`{` + others + `,"dueDate":%s}`, `{"dueDate":%s,` + others + `}`} {
+			t.Run(in, func(t *testing.T) {
+				var cleared camunda.JobResultCorrections
+				var oracle plainCorrections
+				if err := json.Unmarshal([]byte(fmt.Sprintf(in, `""`)), &cleared); err != nil {
+					t.Fatalf("Unmarshal clear: %v", err)
+				}
+				if err := json.Unmarshal([]byte(fmt.Sprintf(in, `null`)), &oracle); err != nil {
+					t.Fatalf("Unmarshal null: %v", err)
+				}
+				if !cleared.IsDueDateCleared() {
+					t.Error("dueDate \"\" did not decode as a clear")
+				}
+				nulled := camunda.JobResultCorrections(oracle)
+				cleared.UnsetDueDate()
+				nulled.UnsetDueDate()
+				if !reflect.DeepEqual(cleared, nulled) {
+					a, _ := json.Marshal(&cleared)
+					b, _ := json.Marshal(&nulled)
+					t.Errorf("other members decode differently with a clear:\n clear %s\n  null %s", a, b)
+				}
+			})
+		}
+	}
+}
+
+// TestJobResultCorrectionsRepeatedDateLastWins: as with any member, the last of
+// several members naming a date (in any letter case) decides whether it is cleared.
+func TestJobResultCorrectionsRepeatedDateLastWins(t *testing.T) {
+	ts := time.Date(2027, 5, 6, 7, 8, 9, 0, time.UTC)
+	for _, tc := range []struct {
+		in      string
+		cleared bool
+	}{
+		{`{"dueDate":"","DueDate":"2027-05-06T07:08:09Z"}`, false},
+		{`{"dueDate":"2027-05-06T07:08:09Z","DueDate":""}`, true},
+		{`{"DUEDATE":""}`, true},
+	} {
+		t.Run(tc.in, func(t *testing.T) {
+			var c camunda.JobResultCorrections
+			if err := json.Unmarshal([]byte(tc.in), &c); err != nil {
+				t.Fatalf("Unmarshal: %v", err)
+			}
+			v, ok := c.GetDueDateOk()
+			if c.IsDueDateCleared() != tc.cleared || ok == tc.cleared || (!tc.cleared && !v.Equal(ts)) {
+				t.Errorf("cleared=%v set=%v value=%v; want cleared=%v", c.IsDueDateCleared(), ok, v, tc.cleared)
+			}
+		})
+	}
+}
+
+// TestJobResultCorrectionsCaseVariantClearRoundTrips: encoding/json matches a date's
+// name in any letter case, so `{"duedate":""}` is a clear, and it must survive
+// re-encoding and decoding again.
+func TestJobResultCorrectionsCaseVariantClearRoundTrips(t *testing.T) {
+	type date struct {
+		prop    string
+		cleared func(*camunda.JobResultCorrections) bool
+	}
+	for _, d := range []date{
+		{"dueDate", (*camunda.JobResultCorrections).IsDueDateCleared},
+		{"followUpDate", (*camunda.JobResultCorrections).IsFollowUpDateCleared},
+	} {
+		for _, key := range []string{strings.ToLower(d.prop), strings.ToUpper(d.prop), d.prop, `\u00` + fmt.Sprintf("%x", d.prop[0]) + d.prop[1:]} {
+			in := `{"` + key + `":"","priority":5}`
+			t.Run(in, func(t *testing.T) {
+				var c camunda.JobResultCorrections
+				for round := 0; round < 3; round++ {
+					if err := json.Unmarshal([]byte(in), &c); err != nil {
+						t.Fatalf("round %d: Unmarshal %s: %v", round, in, err)
+					}
+					if !d.cleared(&c) || c.GetPriority() != 5 {
+						t.Errorf("round %d: %s: cleared=%v priority=%d", round, in, d.cleared(&c), c.GetPriority())
+					}
+					b, err := json.Marshal(&c)
+					if err != nil {
+						t.Fatalf("round %d: Marshal: %v", round, err)
+					}
+					in = string(b)
+				}
+			})
+		}
 	}
 }

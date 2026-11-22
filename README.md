@@ -453,7 +453,7 @@ worker := client.NewJobWorker("io.camunda:userTaskListener",
 		corrections := camunda.NewJobResultCorrections()
 		corrections.SetAssignee("corrected-user")
 		corrections.SetPriority(80)
-		corrections.SetFollowUpDate(camunda.ClearedDateTime()) // sent as "": removes the follow-up date
+		corrections.ClearFollowUpDate() // sent as "": removes the follow-up date
 		return camunda.JobCompletion{Result: camunda.CorrectUserTask(*corrections)}, nil
 	}),
 	camunda.WithMaxConcurrentJobs(5),
@@ -472,17 +472,17 @@ return camunda.JobCompletion{
 | Correctable attribute | Setter on `JobResultCorrections` | Clear value |
 |---|---|---|
 | `assignee` | `SetAssignee(string)` | Empty string `""` |
-| `dueDate` | `SetDueDate(camunda.DateTime(t))` | `SetDueDate(camunda.ClearedDateTime())` (sent as `""`) |
-| `followUpDate` | `SetFollowUpDate(camunda.DateTime(t))` | `SetFollowUpDate(camunda.ClearedDateTime())` (sent as `""`) |
+| `dueDate` | `SetDueDate(time.Time)` | `ClearDueDate()` (sent as `""`) |
+| `followUpDate` | `SetFollowUpDate(time.Time)` | `ClearFollowUpDate()` (sent as `""`) |
 | `candidateUsers` | `SetCandidateUsers([]string)` | Empty slice `[]string{}` |
 | `candidateGroups` | `SetCandidateGroups([]string)` | Empty slice `[]string{}` |
 | `priority` | `SetPriority(int32)` (0–100) | — |
 
 Leaving an attribute unset (or setting it to `nil` with its `Set…Nil` method)
-preserves the persisted value. The two dates are `ClearableDateTime` values:
-`camunda.DateTime(t)` sets a date and `camunda.ClearedDateTime()` clears it (sent
-as `""`). The clear lives on the `JobResultCorrections` model, so it also applies
-when you build a `JobCompletionRequest` for `client.CompleteJob` yourself.
+preserves the persisted value. For the two dates, the last of `Set…`, `Set…Nil`,
+`Unset…` and `Clear…` wins. The clear lives on the `JobResultCorrections` model, so
+it also applies when you build a `JobCompletionRequest` for `client.CompleteJob`
+yourself.
 
 ### Ad-hoc sub-process results
 

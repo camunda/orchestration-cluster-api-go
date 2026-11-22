@@ -57,31 +57,6 @@ func CompletionHandler(h JobCompletionHandler) JobHandler {
 	}
 }
 
-// DateTime returns a ClearableDateTime holding t, for setting a clearable
-// date-time field such as JobResultCorrections.DueDate.
-func DateTime(t time.Time) ClearableDateTime {
-	return ClearableDateTime{TimeTime: &t}
-}
-
-// ClearedDateTime returns a ClearableDateTime that clears the persisted value:
-// it is sent as an empty string. Leaving the field unset (or null) preserves
-// the value instead.
-func ClearedDateTime() ClearableDateTime {
-	return ClearableDateTime{String: ptrTo("")}
-}
-
-// clearableDateTimeWire renders v in its wire form: "" to clear, otherwise an
-// RFC 3339 timestamp. ok is false when v holds neither, meaning "preserve".
-func clearableDateTimeWire(v *ClearableDateTime) (string, bool) {
-	switch {
-	case v.String != nil:
-		return *v.String, true
-	case v.TimeTime != nil:
-		return v.TimeTime.Format(time.RFC3339Nano), true
-	}
-	return "", false
-}
-
 // UserTaskJobResult wraps a user task listener result as a JobResult with the
 // "userTask" discriminator set.
 func UserTaskJobResult(r JobResultUserTask) *JobResult {
@@ -92,7 +67,7 @@ func UserTaskJobResult(r JobResultUserTask) *JobResult {
 // CorrectUserTask returns a user task listener result that corrects the task's
 // attributes. Only the attributes set on c are corrected; the rest keep their
 // persisted value. Clear the assignee with an empty string, the due or follow-up
-// date by setting it to ClearedDateTime(), and the candidate users or groups
+// date with ClearDueDate or ClearFollowUpDate, and the candidate users or groups
 // with an empty, non-nil slice.
 func CorrectUserTask(c JobResultCorrections) *JobResult {
 	r := camundaapi.NewJobResultUserTask()
@@ -232,17 +207,16 @@ func grpcCorrections(c *JobResultCorrections) *pb.JobResultCorrections {
 	if v, ok := c.GetAssigneeOk(); ok && v != nil {
 		out.Assignee = ptrTo(*v)
 	}
-	// An empty string clears a date, matching the REST wire form; null or
-	// absent preserves it.
-	if v, ok := c.GetDueDateOk(); ok && v != nil {
-		if s, ok := clearableDateTimeWire(v); ok {
-			out.DueDate = ptrTo(s)
-		}
+	// An empty string clears a date, matching the REST wire form.
+	if c.IsDueDateCleared() {
+		out.DueDate = ptrTo("")
+	} else if v, ok := c.GetDueDateOk(); ok && v != nil {
+		out.DueDate = ptrTo(v.Format(time.RFC3339Nano))
 	}
-	if v, ok := c.GetFollowUpDateOk(); ok && v != nil {
-		if s, ok := clearableDateTimeWire(v); ok {
-			out.FollowUpDate = ptrTo(s)
-		}
+	if c.IsFollowUpDateCleared() {
+		out.FollowUpDate = ptrTo("")
+	} else if v, ok := c.GetFollowUpDateOk(); ok && v != nil {
+		out.FollowUpDate = ptrTo(v.Format(time.RFC3339Nano))
 	}
 	// A non-nil empty slice clears the list, so only nil means "not corrected".
 	if c.CandidateUsers != nil {

@@ -12,6 +12,7 @@ package camundaapi
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // checks if the Changeset type satisfies the MappedNullable interface at compile time
@@ -20,9 +21,9 @@ var _ MappedNullable = &Changeset{}
 // Changeset JSON object with changed task attribute values.  The following attributes can be adjusted with this endpoint, additional attributes will be ignored:  * `candidateGroups` - reset by providing an empty list * `candidateUsers` - reset by providing an empty list * `dueDate` - reset by providing an empty String * `followUpDate` - reset by providing an empty String * `priority` - minimum 0, maximum 100, default 50  Providing any of those attributes with a `null` value or omitting it preserves the persisted attribute's value.  The assignee cannot be adjusted with this endpoint, use the Assign task endpoint. This ensures correct event emission for assignee changes.
 type Changeset struct {
 	// The due date of the task. Reset by providing an empty String.
-	DueDate NullableClearableDateTime `json:"dueDate,omitempty"`
+	DueDate NullableTime `json:"dueDate,omitempty"`
 	// The follow-up date of the task. Reset by providing an empty String.
-	FollowUpDate NullableClearableDateTime `json:"followUpDate,omitempty"`
+	FollowUpDate NullableTime `json:"followUpDate,omitempty"`
 	// The list of candidate users of the task. Reset by providing an empty list.
 	CandidateUsers []string `json:"candidateUsers,omitempty"`
 	// The list of candidate groups of the task. Reset by providing an empty list.
@@ -30,6 +31,10 @@ type Changeset struct {
 	// The priority of the task.
 	Priority             NullableInt32 `json:"priority,omitempty"`
 	AdditionalProperties map[string]interface{}
+	// dueDateCleared is set by ClearDueDate: DueDate is then sent as "", which clears it.
+	dueDateCleared bool
+	// followUpDateCleared is set by ClearFollowUpDate: FollowUpDate is then sent as "", which clears it.
+	followUpDateCleared bool
 }
 
 type _Changeset Changeset
@@ -56,9 +61,9 @@ func NewChangesetWithDefaults() *Changeset {
 }
 
 // GetDueDate returns the DueDate field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *Changeset) GetDueDate() ClearableDateTime {
+func (o *Changeset) GetDueDate() time.Time {
 	if o == nil || IsNil(o.DueDate.Get()) {
-		var ret ClearableDateTime
+		var ret time.Time
 		return ret
 	}
 	return *o.DueDate.Get()
@@ -67,7 +72,7 @@ func (o *Changeset) GetDueDate() ClearableDateTime {
 // GetDueDateOk returns a tuple with the DueDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Changeset) GetDueDateOk() (*ClearableDateTime, bool) {
+func (o *Changeset) GetDueDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -83,25 +88,28 @@ func (o *Changeset) HasDueDate() bool {
 	return false
 }
 
-// SetDueDate gets a reference to the given NullableClearableDateTime and assigns it to the DueDate field.
-func (o *Changeset) SetDueDate(v ClearableDateTime) {
+// SetDueDate gets a reference to the given NullableTime and assigns it to the DueDate field.
+func (o *Changeset) SetDueDate(v time.Time) {
 	o.DueDate.Set(&v)
+	o.dueDateCleared = false
 }
 
 // SetDueDateNil sets the value for DueDate to be an explicit nil
 func (o *Changeset) SetDueDateNil() {
 	o.DueDate.Set(nil)
+	o.dueDateCleared = false
 }
 
 // UnsetDueDate ensures that no value is present for DueDate, not even an explicit nil
 func (o *Changeset) UnsetDueDate() {
 	o.DueDate.Unset()
+	o.dueDateCleared = false
 }
 
 // GetFollowUpDate returns the FollowUpDate field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *Changeset) GetFollowUpDate() ClearableDateTime {
+func (o *Changeset) GetFollowUpDate() time.Time {
 	if o == nil || IsNil(o.FollowUpDate.Get()) {
-		var ret ClearableDateTime
+		var ret time.Time
 		return ret
 	}
 	return *o.FollowUpDate.Get()
@@ -110,7 +118,7 @@ func (o *Changeset) GetFollowUpDate() ClearableDateTime {
 // GetFollowUpDateOk returns a tuple with the FollowUpDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *Changeset) GetFollowUpDateOk() (*ClearableDateTime, bool) {
+func (o *Changeset) GetFollowUpDateOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -126,19 +134,22 @@ func (o *Changeset) HasFollowUpDate() bool {
 	return false
 }
 
-// SetFollowUpDate gets a reference to the given NullableClearableDateTime and assigns it to the FollowUpDate field.
-func (o *Changeset) SetFollowUpDate(v ClearableDateTime) {
+// SetFollowUpDate gets a reference to the given NullableTime and assigns it to the FollowUpDate field.
+func (o *Changeset) SetFollowUpDate(v time.Time) {
 	o.FollowUpDate.Set(&v)
+	o.followUpDateCleared = false
 }
 
 // SetFollowUpDateNil sets the value for FollowUpDate to be an explicit nil
 func (o *Changeset) SetFollowUpDateNil() {
 	o.FollowUpDate.Set(nil)
+	o.followUpDateCleared = false
 }
 
 // UnsetFollowUpDate ensures that no value is present for FollowUpDate, not even an explicit nil
 func (o *Changeset) UnsetFollowUpDate() {
 	o.FollowUpDate.Unset()
+	o.followUpDateCleared = false
 }
 
 // GetCandidateUsers returns the CandidateUsers field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -260,10 +271,14 @@ func (o Changeset) MarshalJSON() ([]byte, error) {
 
 func (o Changeset) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.DueDate.IsSet() {
+	if o.dueDateCleared && !o.DueDate.IsSet() {
+		toSerialize["dueDate"] = ""
+	} else if o.DueDate.IsSet() {
 		toSerialize["dueDate"] = o.DueDate.Get()
 	}
-	if o.FollowUpDate.IsSet() {
+	if o.followUpDateCleared && !o.FollowUpDate.IsSet() {
+		toSerialize["followUpDate"] = ""
+	} else if o.FollowUpDate.IsSet() {
 		toSerialize["followUpDate"] = o.FollowUpDate.Get()
 	}
 	if o.CandidateUsers != nil {
@@ -283,7 +298,9 @@ func (o Changeset) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *Changeset) UnmarshalJSON(data []byte) (err error) {
+// unmarshalGeneratedJSON is the generator's decoder; UnmarshalJSON wraps it.
+// data feeds the typed fields, original the additional properties.
+func (o *Changeset) unmarshalGeneratedJSON(data, original []byte) (err error) {
 	varChangeset := _Changeset{}
 
 	err = json.Unmarshal(data, &varChangeset)
@@ -296,7 +313,7 @@ func (o *Changeset) UnmarshalJSON(data []byte) (err error) {
 
 	additionalProperties := make(map[string]interface{})
 
-	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+	if err = json.Unmarshal(original, &additionalProperties); err == nil {
 		delete(additionalProperties, "dueDate")
 		delete(additionalProperties, "followUpDate")
 		delete(additionalProperties, "candidateUsers")
@@ -342,4 +359,50 @@ func (v NullableChangeset) MarshalJSON() ([]byte, error) {
 func (v *NullableChangeset) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
+}
+
+// ClearDueDate clears DueDate: it is sent as an empty string, which the API
+// treats as "remove the value" (null or omission instead preserves it).
+// SetDueDate, SetDueDateNil or UnsetDueDate afterwards replaces the clear.
+func (o *Changeset) ClearDueDate() {
+	o.DueDate.Unset()
+	o.dueDateCleared = true
+}
+
+// IsDueDateCleared reports whether DueDate is to be cleared (see ClearDueDate).
+func (o *Changeset) IsDueDateCleared() bool {
+	return o != nil && o.dueDateCleared && !o.DueDate.IsSet()
+}
+
+// ClearFollowUpDate clears FollowUpDate: it is sent as an empty string, which the API
+// treats as "remove the value" (null or omission instead preserves it).
+// SetFollowUpDate, SetFollowUpDateNil or UnsetFollowUpDate afterwards replaces the clear.
+func (o *Changeset) ClearFollowUpDate() {
+	o.FollowUpDate.Unset()
+	o.followUpDateCleared = true
+}
+
+// IsFollowUpDateCleared reports whether FollowUpDate is to be cleared (see ClearFollowUpDate).
+func (o *Changeset) IsFollowUpDateCleared() bool {
+	return o != nil && o.followUpDateCleared && !o.FollowUpDate.IsSet()
+}
+
+// UnmarshalJSON decodes a Changeset with the generated decoder, taking
+// an empty string for a clearable date (DueDate, FollowUpDate) as a clear: the inverse
+// of ToMap. Like the generated decoder, it replaces the whole value, so a clear
+// absent from data is reset; a timestamp or null for a date is decoded as usual.
+func (o *Changeset) UnmarshalJSON(data []byte) error {
+	typed, cleared, _ := nullEmptyDates(data, "dueDate", "followUpDate")
+	if err := o.unmarshalGeneratedJSON(typed, data); err != nil {
+		return err
+	}
+	if cleared[0] {
+		o.DueDate.Unset()
+		o.dueDateCleared = true
+	}
+	if cleared[1] {
+		o.FollowUpDate.Unset()
+		o.followUpDateCleared = true
+	}
+	return nil
 }
