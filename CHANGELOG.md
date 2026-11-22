@@ -1,3 +1,10 @@
+# [11.0.0-alpha.20](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.19...v11.0.0-alpha.20) (2026-11-22)
+
+
+### Bug Fixes
+
+* keep x-clearable dates as time.Time and detect them in hook 09 ([#129](https://github.com/camunda/orchestration-cluster-api-go/issues/129)) ([d321976](https://github.com/camunda/orchestration-cluster-api-go/commit/d321976ced156c52923565ff246739563441d7ea)), closes [camunda/camunda#68710](https://github.com/camunda/camunda/issues/68710)
+
 # [11.0.0-alpha.19](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.18...v11.0.0-alpha.19) (2026-11-21)
 
 
