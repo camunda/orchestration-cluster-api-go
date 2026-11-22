@@ -33,6 +33,10 @@ type CamundaClient struct {
 	clock  Clock
 	random Random
 
+	// pool is the SDK-owned base transport, sized from job-worker capacity;
+	// nil when the user supplied WithTransport / WithHTTPClient.
+	pool *sizedTransport
+
 	// FALCON (nanobpmn command-stream) state, lazily resolved and shared for the
 	// client's lifetime. falconMu guards a probe that caches a definitive result
 	// (nano detected, or confirmed stock) but retries after a transient failure;
@@ -73,9 +77,14 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	base, err := buildBaseTransport(cfg.TLS)
+	base, err := buildBaseTransport(cfg)
 	if err != nil {
 		return nil, err
+	}
+	var pool *sizedTransport
+	if tr, ok := base.(*http.Transport); ok && cfg.Transport == nil {
+		pool = newSizedTransport(tr, cfg.MaxIdleConnsPinned, cfg.MaxIdleConnsPerHostPinned)
+		base = pool
 	}
 	bp := backpressure.New(backpressureProfile(cfg.BackpressureProfile), clk)
 
@@ -88,7 +97,14 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	}, clk, rnd)
 
 	oc := camundaapi.NewConfiguration()
-	oc.HTTPClient = &http.Client{Transport: rt}
+	oc.UserAgent = userAgent(cfg)
+	if cfg.HTTPClient != nil {
+		// A user-supplied HTTP client is used as-is: the SDK's retry,
+		// backpressure, auth, and TLS layers are bypassed (see WithHTTPClient).
+		oc.HTTPClient = cfg.HTTPClient
+	} else {
+		oc.HTTPClient = &http.Client{Transport: rt}
+	}
 	oc.Servers = camundaapi.ServerConfigurations{{URL: v2BaseURL(cfg.RestAddress, cfg.ExactRestAddress)}}
 	if err := rebaseOperationServers(oc, cfg); err != nil {
 		return nil, err
@@ -101,6 +117,7 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 		bp:     bp,
 		clock:  clk,
 		random: rnd,
+		pool:   pool,
 	}, nil
 }
 
@@ -149,6 +166,7 @@ func buildAuthTransport(cfg *Config, clk auth.Clock) (*auth.Transport, error) {
 			Audience:     cfg.TokenAudience,
 			Scope:        cfg.OAuthScope,
 			CacheDir:     cfg.OAuthCacheDir,
+			UserAgent:    userAgent(cfg),
 		}, clk)
 		return &auth.Transport{Strategy: auth.OAuth, TokenSource: ts}, nil
 	case AuthBasic:
@@ -204,22 +222,39 @@ func buildTLSConfig(t TLSConfig) (*tls.Config, error) {
 	return tlsConf, nil
 }
 
-// buildBaseTransport returns a TLS-configured base RoundTripper, or nil (meaning
-// the default transport) when no TLS material is configured.
-func buildBaseTransport(t TLSConfig) (http.RoundTripper, error) {
-	tlsConf, err := buildTLSConfig(t)
+// buildBaseTransport returns the base RoundTripper at the bottom of the SDK's
+// transport chain. A user-supplied Config.Transport (WithTransport) wins and is
+// used as-is. Otherwise the SDK builds its own *http.Transport by cloning
+// http.DefaultTransport — never using the global default directly — and sizing
+// its idle-connection pool from the resolved config (default 256/256 per host,
+// replacing Go's 2-per-host behaviour that stalls job workers under
+// concurrency; camunda/orchestration-cluster-api-go#162). Configured TLS
+// material is applied on top.
+//
+// When Config.HTTPClient (WithHTTPClient) is set the SDK chain is never used,
+// so no base transport is built: SDK TLS material is not loaded and
+// http.DefaultTransport's concrete type is irrelevant (nil, nil is returned).
+func buildBaseTransport(cfg *Config) (http.RoundTripper, error) {
+	if cfg.HTTPClient != nil {
+		return nil, nil
+	}
+	if cfg.Transport != nil {
+		return cfg.Transport, nil
+	}
+	tlsConf, err := buildTLSConfig(cfg.TLS)
 	if err != nil {
 		return nil, err
-	}
-	if tlsConf == nil {
-		return nil, nil
 	}
 	tr, ok := http.DefaultTransport.(*http.Transport)
 	if !ok {
 		return nil, configErrorf("unexpected default transport type")
 	}
 	clone := tr.Clone()
-	clone.TLSClientConfig = tlsConf
+	clone.MaxIdleConns = cfg.MaxIdleConns
+	clone.MaxIdleConnsPerHost = cfg.MaxIdleConnsPerHost
+	if tlsConf != nil {
+		clone.TLSClientConfig = tlsConf
+	}
 	return clone, nil
 }
 

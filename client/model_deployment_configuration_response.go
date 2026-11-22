@@ -25,6 +25,8 @@ type DeploymentConfigurationResponse struct {
 	IsMultiTenancyEnabled bool `json:"isMultiTenancyEnabled"`
 	// Whether the tenants management API and UI are enabled.
 	IsTenantsApiEnabled bool `json:"isTenantsApiEnabled"`
+	// Whether wait-state tracking is enabled.
+	IsWaitStatesEnabled bool `json:"isWaitStatesEnabled"`
 	// The maximum HTTP request size in bytes.
 	MaxRequestSize int64 `json:"maxRequestSize"`
 }
@@ -35,10 +37,11 @@ type _DeploymentConfigurationResponse DeploymentConfigurationResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDeploymentConfigurationResponse(isMultiTenancyEnabled bool, isTenantsApiEnabled bool, maxRequestSize int64) *DeploymentConfigurationResponse {
+func NewDeploymentConfigurationResponse(isMultiTenancyEnabled bool, isTenantsApiEnabled bool, isWaitStatesEnabled bool, maxRequestSize int64) *DeploymentConfigurationResponse {
 	this := DeploymentConfigurationResponse{}
 	this.IsMultiTenancyEnabled = isMultiTenancyEnabled
 	this.IsTenantsApiEnabled = isTenantsApiEnabled
+	this.IsWaitStatesEnabled = isWaitStatesEnabled
 	this.MaxRequestSize = maxRequestSize
 	return &this
 }
@@ -99,6 +102,30 @@ func (o *DeploymentConfigurationResponse) SetIsTenantsApiEnabled(v bool) {
 	o.IsTenantsApiEnabled = v
 }
 
+// GetIsWaitStatesEnabled returns the IsWaitStatesEnabled field value
+func (o *DeploymentConfigurationResponse) GetIsWaitStatesEnabled() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.IsWaitStatesEnabled
+}
+
+// GetIsWaitStatesEnabledOk returns a tuple with the IsWaitStatesEnabled field value
+// and a boolean to check if the value has been set.
+func (o *DeploymentConfigurationResponse) GetIsWaitStatesEnabledOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.IsWaitStatesEnabled, true
+}
+
+// SetIsWaitStatesEnabled sets field value
+func (o *DeploymentConfigurationResponse) SetIsWaitStatesEnabled(v bool) {
+	o.IsWaitStatesEnabled = v
+}
+
 // GetMaxRequestSize returns the MaxRequestSize field value
 func (o *DeploymentConfigurationResponse) GetMaxRequestSize() int64 {
 	if o == nil {
@@ -135,6 +162,7 @@ func (o DeploymentConfigurationResponse) ToMap() (map[string]interface{}, error)
 	toSerialize := map[string]interface{}{}
 	toSerialize["isMultiTenancyEnabled"] = o.IsMultiTenancyEnabled
 	toSerialize["isTenantsApiEnabled"] = o.IsTenantsApiEnabled
+	toSerialize["isWaitStatesEnabled"] = o.IsWaitStatesEnabled
 	toSerialize["maxRequestSize"] = o.MaxRequestSize
 	return toSerialize, nil
 }
@@ -146,6 +174,7 @@ func (o *DeploymentConfigurationResponse) UnmarshalJSON(data []byte) (err error)
 	requiredProperties := []string{
 		"isMultiTenancyEnabled",
 		"isTenantsApiEnabled",
+		"isWaitStatesEnabled",
 		"maxRequestSize",
 	}
 

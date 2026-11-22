@@ -82,6 +82,11 @@ MODEL_SCOPED_OPTIONAL = {
     # TEMPORARY: variable `metadata` (protection mode, camunda/camunda@1755d626)
     # is required on main but not emitted by 8.10.0-alpha3. Scoped because
     # `metadata` is genuinely required on cluster-variable and document models.
+    # TEMPORARY: `isAnonymous` added in 8.11 and required on the authentication
+    # responses; servers predating it omit it. Absent means false: older servers
+    # only ever returned authenticated users. Scoped to the user-result models.
+    "model_camunda_user_result.go": ["isAnonymous"],
+    "model_authenticated_camunda_user_result.go": ["isAnonymous"],
     "model_variable_result.go": ["metadata"],
     "model_variable_result_base.go": ["metadata"],
     "model_variable_search_result.go": ["metadata"],

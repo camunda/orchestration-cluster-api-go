@@ -5,9 +5,11 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	camundaapi "github.com/camunda/orchestration-cluster-api-go/v11/client"
@@ -55,7 +57,7 @@ func (c *CamundaClient) grpcConn() (*grpc.ClientConn, error) {
 		creds = insecure.NewCredentials()
 	}
 
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(creds)}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(creds), grpc.WithUserAgent(userAgent(c.cfg))}
 	if c.cfg.AuthStrategy == AuthOAuth {
 		ts := auth.NewTokenSource(auth.OAuthConfig{
 			TokenURL:     c.cfg.OAuthURL,
@@ -64,6 +66,7 @@ func (c *CamundaClient) grpcConn() (*grpc.ClientConn, error) {
 			Audience:     c.cfg.TokenAudience,
 			Scope:        c.cfg.OAuthScope,
 			CacheDir:     c.cfg.OAuthCacheDir,
+			UserAgent:    userAgent(c.cfg),
 		}, c.clock)
 		opts = append(opts, grpc.WithPerRPCCredentials(&oauthPerRPC{ts: ts, secure: secure}))
 	}
@@ -85,8 +88,21 @@ type StreamJobWorker struct {
 	reconnectBackoff time.Duration
 	pollInterval     time.Duration
 	pollMaxJobs      int
+	pollBackoff      StreamPollBackoff
 	tenantIDs        []string
 	withLease        bool
+	// streamUp reports whether a gRPC stream is currently open. The sidecar poll
+	// only backs off while it is: during a stream outage the poll is the only
+	// delivery channel and must run at the base interval.
+	streamUp atomic.Bool
+	// streamChanged is signalled (non-blocking, capacity 1) whenever streamUp
+	// flips, so a sidecar sleeping out a backed-off delay wakes immediately and
+	// polls again from the base interval.
+	streamChanged chan struct{}
+	// maxLifetime and inactivityTimeout bound each stream; <= 0 disables. See
+	// WithStreamMaxLifetime and WithStreamInactivityTimeout.
+	maxLifetime       time.Duration
+	inactivityTimeout time.Duration
 	// startupDelay is drawn once, when the worker is built; see startupJitter.
 	startupDelay time.Duration
 
@@ -134,6 +150,68 @@ func WithStreamPollInterval(d time.Duration) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.pollInterval = d }
 }
 
+// StreamPollBackoff configures how the REST sidecar poll backs off while it
+// keeps coming back empty (Camunda Java client parity). After a poll that
+// activates no jobs, the next delay is the current delay × Multiplier, capped at
+// Max, then jittered by ±Jitter (a fraction of the delay) and clamped to Max
+// again. Backoff applies only while the gRPC stream is open; while it is
+// disconnected the poll runs at the poll interval. A poll that activates
+// at least one job resets the delay to the poll interval (WithStreamPollInterval).
+// A failed poll keeps the current delay.
+//
+// A Multiplier <= 1 disables the backoff: the poll then runs at the fixed poll
+// interval regardless of the result.
+type StreamPollBackoff struct {
+	Multiplier float64
+	Jitter     float64
+	Max        time.Duration
+}
+
+// DefaultStreamPollBackoff is the sidecar-poll empty-result backoff the Camunda
+// Java client uses: ×1.6, ±10% jitter, capped at 60 s.
+var DefaultStreamPollBackoff = StreamPollBackoff{Multiplier: 1.6, Jitter: 0.1, Max: time.Minute}
+
+// WithStreamPollBackoff sets the empty-poll backoff of the REST sidecar poll.
+// Defaults to DefaultStreamPollBackoff; pass StreamPollBackoff{} to disable it
+// and poll at the fixed WithStreamPollInterval.
+func WithStreamPollBackoff(b StreamPollBackoff) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.pollBackoff = b }
+}
+
+// nextDelay returns the delay before the next sidecar poll, given the delay
+// that preceded the poll just made and how many jobs it activated. base is the
+// configured poll interval; the result is never below it.
+func (b StreamPollBackoff) nextDelay(current, base time.Duration, activated int, r Random) time.Duration {
+	if activated > 0 || b.Multiplier <= 1 {
+		return base
+	}
+	next := float64(current) * b.Multiplier
+	if b.Max > 0 && next > float64(b.Max) {
+		next = float64(b.Max)
+	}
+	if b.Jitter > 0 && r != nil {
+		next += next * b.Jitter * (r.Float64()*2 - 1)
+	}
+	if b.Max > 0 && next > float64(b.Max) {
+		next = float64(b.Max)
+	}
+	d := time.Duration(next)
+	if d < base {
+		d = base
+	}
+	return d
+}
+
+// sidecarDelay returns the next sidecar-poll delay. While the gRPC stream is
+// down the poll is the only delivery channel, so it runs at the base interval
+// instead of backing off.
+func (w *StreamJobWorker) sidecarDelay(current time.Duration, activated int, streamUp bool) time.Duration {
+	if !streamUp {
+		return w.pollInterval
+	}
+	return w.pollBackoff.nextDelay(current, w.pollInterval, activated, w.client.random)
+}
+
 // WithStreamPollMaxJobs caps the number of jobs activated per REST sidecar-poll cycle.
 func WithStreamPollMaxJobs(n int) StreamWorkerOption {
 	return func(w *StreamJobWorker) {
@@ -144,7 +222,7 @@ func WithStreamPollMaxJobs(n int) StreamWorkerOption {
 }
 
 // WithStreamTenantIDs restricts job activation to the given tenant ids,
-// overriding the client's default tenant.
+// overriding the client's default tenant. An empty list keeps the default.
 func WithStreamTenantIDs(ids ...string) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.tenantIDs = ids }
 }
@@ -165,6 +243,56 @@ func WithStreamJobLease(enabled bool) StreamWorkerOption {
 	return func(w *StreamJobWorker) { w.withLease = enabled }
 }
 
+// Defaults for the stream-lifecycle safeguards, matching the Camunda Java client.
+const (
+	DefaultStreamMaxLifetime       = 8 * time.Hour
+	DefaultStreamInactivityTimeout = 10 * time.Minute
+)
+
+// streamDeadlineJitter is the fraction by which each stream's lifetime and
+// inactivity deadlines are shortened at random: a deadline is drawn uniformly
+// from [(1-streamDeadlineJitter)*d, d], so a fleet started together does not
+// recycle all its streams in the same instant.
+const streamDeadlineJitter = 0.1
+
+// errStreamRecycled is the cancellation cause for a stream the worker recycles
+// itself (max lifetime or inactivity). Run reopens such a stream immediately.
+var errStreamRecycled = errors.New("job stream recycled")
+
+// WithStreamMaxLifetime sets the maximum lifetime of one job stream (default
+// DefaultStreamMaxLifetime, 8h). When it is reached the stream is closed and a
+// new one opened at once, so streams rebalance across gateways after a scale-out
+// or restart. Jobs already received keep running and are acknowledged normally.
+// Each stream's deadline is jittered down by up to 10% to spread recycling
+// across a fleet. A value <= 0 disables it.
+//
+// Rebalancing only helps when a new stream can reach a different gateway: true
+// behind a request-level (L7) gRPC load balancer, but not behind a plain L4 load
+// balancer, because the worker reuses its HTTP/2 connection. L4 deployments need
+// DNS or client-side balancing to benefit.
+func WithStreamMaxLifetime(d time.Duration) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.maxLifetime = d }
+}
+
+// WithStreamInactivityTimeout sets how long a stream may go without delivering a
+// job before it is canceled and reopened (default
+// DefaultStreamInactivityTimeout, 10m). The timer resets on every received job,
+// and is jittered down by up to 10%. It catches streams whose transport stays
+// healthy but which no longer deliver jobs. A value <= 0 disables it. When both
+// are enabled it must be less than the max lifetime, or Run returns an ErrConfig
+// error.
+func WithStreamInactivityTimeout(d time.Duration) StreamWorkerOption {
+	return func(w *StreamJobWorker) { w.inactivityTimeout = d }
+}
+
+// jitterDeadline draws a deadline uniformly from [(1-streamDeadlineJitter)*d, d].
+func jitterDeadline(r Random, d time.Duration) time.Duration {
+	if d <= 0 {
+		return 0
+	}
+	return d - time.Duration(r.Float64()*streamDeadlineJitter*float64(d))
+}
+
 // NewStreamJobWorker creates a gRPC streaming worker for jobType. Defaults are
 // seeded from the client's CAMUNDA_WORKER_* configuration and can be overridden
 // with options.
@@ -178,15 +306,25 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 		maxConcurrent:    wd.MaxConcurrentJobs,
 		timeout:          time.Duration(wd.TimeoutMs) * time.Millisecond,
 		reconnectBackoff: time.Second,
+		streamChanged:    make(chan struct{}, 1),
 		pollInterval:     30 * time.Second,
 		pollMaxJobs:      32,
+		pollBackoff:      DefaultStreamPollBackoff,
 		tenantIDs:        defaultTenantIDs(c.cfg.DefaultTenantID),
+
+		maxLifetime:       DefaultStreamMaxLifetime,
+		inactivityTimeout: DefaultStreamInactivityTimeout,
 	}
 	if w.maxConcurrent <= 0 {
 		w.maxConcurrent = 1
 	}
 	for _, o := range opts {
 		o(w)
+	}
+	c.registerWorkerCapacity(w.maxConcurrent)
+	if len(w.tenantIDs) == 0 {
+		// An empty tenant option must not erase the default-tenant rule.
+		w.tenantIDs = defaultTenantIDs(c.cfg.DefaultTenantID)
 	}
 	w.startupDelay = startupJitter(c.random, wd.StartupJitterMaxSeconds)
 	return w
@@ -201,6 +339,10 @@ func (c *CamundaClient) NewStreamJobWorker(jobType string, handler JobHandler, o
 // A worker configured with a startup jitter (CAMUNDA_WORKER_STARTUP_JITTER_MAX_SECONDS)
 // first waits out its delay on the client's clock.
 func (w *StreamJobWorker) Run(ctx context.Context) error {
+	if w.maxLifetime > 0 && w.inactivityTimeout > 0 && w.inactivityTimeout >= w.maxLifetime {
+		return configErrorf("stream inactivity timeout (%s) must be less than the max stream lifetime (%s)",
+			w.inactivityTimeout, w.maxLifetime)
+	}
 	if err := waitStartup(ctx, w.client.clock, w.startupDelay); err != nil {
 		return err
 	}
@@ -235,6 +377,10 @@ func (w *StreamJobWorker) Run(ctx context.Context) error {
 		if ctx.Err() != nil {
 			break
 		}
+		if errors.Is(streamErr, errStreamRecycled) {
+			// A deliberate recycle: reopen at once, with no backoff.
+			continue
+		}
 		if streamErr != nil {
 			w.client.logger.Warn("job stream ended; reconnecting", "type", w.jobType, "error", streamErr)
 		}
@@ -268,18 +414,47 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	// stream is still healthy (a rejected lease) would leave the gateway holding it
 	// open and delivering onto it while Run reconnects. Handlers keep the worker's
 	// ctx, so canceling this one does not disturb jobs already dispatched.
-	streamCtx, cancelStream := context.WithCancel(ctx)
-	defer cancelStream()
+	streamCtx, cancelStream := context.WithCancelCause(ctx)
+	defer cancelStream(nil)
 
 	stream, err := gw.StreamActivatedJobs(streamCtx, req)
 	if err != nil {
 		return err
 	}
+	// A deliberate recycle (max lifetime / inactivity) is not an outage: the
+	// sidecar-visible stream state stays up across it, so a healthy recycle
+	// neither wakes a backed-off poll nor resets its delay. Only a real
+	// disconnect -- a failed open or a stream that ends for any other reason --
+	// flips it down (and back up once a new stream actually opens).
+	if !w.streamUp.Load() {
+		w.setStreamUp(true)
+	}
+	defer func() {
+		if !errors.Is(context.Cause(streamCtx), errStreamRecycled) {
+			w.setStreamUp(false)
+		}
+	}()
+
+	activity := make(chan struct{}, 1)
+	watchDone := make(chan struct{})
+	// Cancel before waiting: the watcher only returns once the stream ends.
+	defer func() { cancelStream(nil); <-watchDone }()
+	go func() {
+		defer close(watchDone)
+		w.watchStream(streamCtx, cancelStream, activity)
+	}()
 
 	for {
 		aj, err := stream.Recv()
 		if err != nil {
+			if cause := context.Cause(streamCtx); errors.Is(cause, errStreamRecycled) && ctx.Err() == nil {
+				return cause
+			}
 			return err
+		}
+		select {
+		case activity <- struct{}{}:
+		default:
 		}
 		// Ending the stream rather than skipping the job: the reconnect loop logs and
 		// backs off, where skipping would spin silently on every job the server sends.
@@ -287,8 +462,22 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 			return err
 		}
 		job := newGRPCJob(aj, w.client.clock)
+		// A deliberately recycled stream must not wait on a free handler slot to
+		// reopen: with every slot busy, parking here only on the worker context
+		// would miss the recycle -- the watchdog cancels streamCtx and returns,
+		// so nothing wakes this select until a handler finishes, and with a
+		// permanently parked handler the stream would never be recycled nor
+		// reopened. Select on streamCtx too, so the recycle interrupts the wait
+		// and Run reopens the stream at once; the received job is not lost,
+		// because the gateway requeues an activated job that is never
+		// acknowledged once its lock expires.
 		select {
 		case sem <- struct{}{}:
+		case <-streamCtx.Done():
+			if cause := context.Cause(streamCtx); errors.Is(cause, errStreamRecycled) && ctx.Err() == nil {
+				return cause
+			}
+			return streamCtx.Err()
 		case <-ctx.Done():
 			return ctx.Err()
 		}
@@ -301,11 +490,57 @@ func (w *StreamJobWorker) streamOnce(ctx context.Context, gw pb.GatewayClient, s
 	}
 }
 
-// runSidecarPoll runs an immediate backfill poll and then a recurring poll every
-// pollInterval until ctx is canceled. Poll errors are swallowed (the stream is
+// watchStream enforces the stream's max lifetime and inactivity timeout,
+// canceling the stream with errStreamRecycled when either expires. It returns
+// when the stream context ends. Each received job is signaled on activity.
+//
+// The deadlines are real time, not the injected clock: they bound a transport,
+// so they must pass in wall time even for a client running on an EngineClock,
+// whose After would advance engine time instead of waiting.
+func (w *StreamJobWorker) watchStream(ctx context.Context, cancel context.CancelCauseFunc, activity <-chan struct{}) {
+	rnd := w.client.random
+	var lifetimeC <-chan time.Time
+	if d := jitterDeadline(rnd, w.maxLifetime); d > 0 {
+		lifetimeC = time.After(d) //nolint:forbidigo // a transport bound, not cadence: engine time would misfire it
+	}
+	// One inactivity timer per stream, reset on activity: the receive path is
+	// hot, so it must not allocate a fresh timer per job.
+	var idle *time.Timer
+	var idleC <-chan time.Time
+	if d := jitterDeadline(rnd, w.inactivityTimeout); d > 0 {
+		idle = time.NewTimer(d) //nolint:forbidigo // a transport bound, not cadence: engine time would misfire it
+		defer idle.Stop()
+		idleC = idle.C
+	}
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-activity:
+			// A job arrived: restart the inactivity timer. Since Go 1.23 Reset
+			// on an unstopped timer discards any stale pending value.
+			if idle != nil {
+				idle.Reset(jitterDeadline(rnd, w.inactivityTimeout))
+			}
+		case <-lifetimeC:
+			w.client.logger.Debug("job stream reached max lifetime; recycling", "type", w.jobType)
+			cancel(fmt.Errorf("%w: max lifetime reached", errStreamRecycled))
+			return
+		case <-idleC:
+			w.client.logger.Debug("job stream inactive; recycling", "type", w.jobType)
+			cancel(fmt.Errorf("%w: inactivity timeout", errStreamRecycled))
+			return
+		}
+	}
+}
+
+// runSidecarPoll runs an immediate backfill poll and then a recurring poll until
+// ctx is canceled. The delay starts at pollInterval, grows by pollBackoff while
+// polls come back empty while the stream is open, and resets to pollInterval when a poll activates jobs or the stream is down. Poll errors are swallowed (the stream is
 // the primary channel); the next cycle retries. Poll-activated jobs are
 // acknowledged over REST.
 func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{}, wg *sync.WaitGroup) {
+	delay := w.pollInterval
 	for ctx.Err() == nil {
 		jobs, err := w.pollOnce(ctx)
 		if err != nil && ctx.Err() == nil {
@@ -331,16 +566,74 @@ func (w *StreamJobWorker) runSidecarPoll(ctx context.Context, sem chan struct{},
 			go func() {
 				defer wg.Done()
 				defer func() { <-sem }()
-				vars, herr := w.handler(ctx, job)
+				vars, herr := w.client.invokeHandler(ctx, w.handler, job)
 				ackCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
 				defer cancel()
 				w.client.restAck(ackCtx, job, vars, herr)
 			}()
 		}
-		if err := sleepCtx(ctx, w.client.clock, w.pollInterval); err != nil {
+		if err == nil {
+			delay = w.sidecarDelay(delay, len(jobs), w.streamUp.Load())
+		} else if !w.streamUp.Load() {
+			delay = w.pollInterval
+		}
+		start := w.client.clock.Now()
+		woke, err := w.sidecarSleep(ctx, delay)
+		if err != nil {
 			return
 		}
+		if woke {
+			// Stream state changed mid-sleep: a disconnect makes the poll the only
+			// channel, a reconnect starts a fresh backoff. Either way, restart from
+			// the base interval — but never poll sooner than pollInterval after the
+			// previous poll, so a flapping stream cannot drive REST polls at the
+			// reconnect cadence.
+			delay = w.pollInterval
+			if rest := w.pollInterval - w.client.clock.Now().Sub(start); rest > 0 {
+				if sleepCtx(ctx, w.client.clock, rest) != nil {
+					return
+				}
+			}
+		}
 	}
+}
+
+// setStreamUp records the stream state and wakes the sidecar poll if it changed.
+func (w *StreamJobWorker) setStreamUp(up bool) {
+	if w.streamUp.Swap(up) == up {
+		return
+	}
+	select {
+	case w.streamChanged <- struct{}{}:
+	default:
+	}
+}
+
+// sidecarSleep sleeps for d, returning early with woke=true when the stream
+// state changes. It returns ctx's error if ctx is done.
+func (w *StreamJobWorker) sidecarSleep(ctx context.Context, d time.Duration) (woke bool, err error) {
+	sleepCtx2, cancel := context.WithCancel(ctx)
+	defer cancel()
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		select {
+		case <-w.streamChanged:
+			woke = true
+			cancel()
+		case <-sleepCtx2.Done():
+		}
+	}()
+	serr := sleepCtx(sleepCtx2, w.client.clock, d)
+	cancel()
+	<-done
+	if ctx.Err() != nil {
+		return false, ctx.Err()
+	}
+	if woke {
+		return true, nil
+	}
+	return false, serr
 }
 
 // pollOnce activates up to pollMaxJobs jobs over REST.
@@ -372,7 +665,7 @@ func (w *StreamJobWorker) pollOnce(ctx context.Context) ([]camundaapi.ActivatedJ
 }
 
 func (w *StreamJobWorker) handle(ctx context.Context, gw pb.GatewayClient, job *Job) {
-	vars, err := w.handler(ctx, job)
+	vars, err := w.client.invokeHandler(ctx, w.handler, job)
 
 	// Acknowledge even while shutting down so a completed handler's result is not
 	// dropped because Run's ctx was canceled. Bound the ack with its own timeout.

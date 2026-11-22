@@ -476,6 +476,74 @@ func TestJobWorkerAppliesDefaultTenant(t *testing.T) {
 	}
 }
 
+// TestJobWorkerDefaultsToDefaultTenantIdentifier: with no configured default
+// tenant the worker activates for ["<default>"] — the Java client's
+// defaultJobWorkerTenantIds fallback — so a zero-config worker is accepted on
+// multi-tenant clusters.
+func TestJobWorkerDefaultsToDefaultTenantIdentifier(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		opts []camunda.WorkerOption
+	}{
+		{name: "no tenant option"},
+		{name: "empty WithWorkerTenantIDs()", opts: []camunda.WorkerOption{camunda.WithWorkerTenantIDs()}},
+		{name: "empty slice", opts: []camunda.WorkerOption{camunda.WithWorkerTenantIDs([]string{}...)}},
+	} {
+		t.Run(tc.name, func(t *testing.T) { testJobWorkerDefaultTenant(t, tc.opts) })
+	}
+}
+
+func testJobWorkerDefaultTenant(t *testing.T, extra []camunda.WorkerOption) {
+	tenants := make(chan []string, 1)
+	var activateCount atomic.Int32
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasSuffix(r.URL.Path, "/jobs/activation") {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		var body struct {
+			TenantIds []string `json:"tenantIds"`
+		}
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		if activateCount.Add(1) == 1 {
+			select {
+			case tenants <- body.TenantIds:
+			default:
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"jobs":[]}`)
+	}))
+	defer srv.Close()
+
+	client, err := camunda.New(camunda.WithRestAddress(srv.URL), camunda.WithLogLevel(camunda.LogOff))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	worker := client.NewJobWorker("demo-task",
+		func(context.Context, *camunda.Job) (map[string]any, error) { return nil, nil },
+		append([]camunda.WorkerOption{
+			camunda.WithRequestTimeout(50 * time.Millisecond),
+			camunda.WithPollInterval(10 * time.Millisecond),
+		}, extra...)...,
+	)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() { _ = worker.Run(ctx) }()
+
+	select {
+	case ids := <-tenants:
+		if len(ids) != 1 || ids[0] != camunda.DefaultTenantIdentifier {
+			t.Errorf("activation tenantIds = %v, want [%q]", ids, camunda.DefaultTenantIdentifier)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("worker did not activate jobs")
+	}
+}
+
 // TestJobWorkerRequestsLease verifies the activation request opts into leased
 // jobs only when WithJobLease is set.
 func TestJobWorkerRequestsLease(t *testing.T) {

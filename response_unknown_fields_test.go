@@ -110,6 +110,7 @@ func TestResponseModelsDecodeWithUnknownField(t *testing.T) {
 		"ProcessInstanceSearchQueryResult": &ProcessInstanceSearchQueryResult{},
 		"DeploymentResult":                 &DeploymentResult{},
 		"TopologyResponse":                 &TopologyResponse{},
+		"AuthenticatedCamundaUserResult":   &AuthenticatedCamundaUserResult{},
 	}
 	for name, zero := range cases {
 		t.Run(name, func(t *testing.T) {

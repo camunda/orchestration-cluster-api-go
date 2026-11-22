@@ -66,7 +66,6 @@ func TestExactMatchFiltersRoundTripTheirScalar(t *testing.T) {
 	}{
 		{"key-backed", `"2251799813685249"`, &camundaapi.ProcessInstanceKeyFilterProperty{}},
 		{"enum-backed", `"ACTIVE"`, &camundaapi.ProcessInstanceStateFilterProperty{}},
-		{"protection mode", `"REDACT"`, &camundaapi.ProtectionModeFilterProperty{}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

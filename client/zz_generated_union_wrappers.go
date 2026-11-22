@@ -49,7 +49,6 @@ type ProcessDefinitionIdExactMatch = ProcessDefinitionId
 type ProcessDefinitionKeyExactMatch = ProcessDefinitionKey
 type ProcessInstanceKeyExactMatch = ProcessInstanceKey
 type ProcessInstanceStateExactMatch = ProcessInstanceStateEnum
-type ProtectionModeExactMatch = ProtectionModeEnum
 type ResourceKeyExactMatch = ResourceKey
 type ScopeKeyExactMatch = ScopeKey
 type UserTaskStateExactMatch = UserTaskStateEnum

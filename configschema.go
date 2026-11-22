@@ -1,5 +1,11 @@
 package camunda
 
+import (
+	"strings"
+
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/diag"
+)
+
 // ConfigField documents a single environment variable the SDK reads while
 // resolving configuration. It carries the variable's alias precedence, default,
 // and whether it holds credential material.
@@ -44,6 +50,8 @@ var ConfigSchema = []ConfigField{
 
 	{Keys: []string{"CAMUNDA_DEFAULT_TENANT_ID", "CAMUNDA_TENANT_ID"}, Description: "Default tenant id applied to operations that accept one."},
 
+	{Keys: []string{"CAMUNDA_USER_AGENT"}, Description: "Application identifier appended after the SDK's camunda-orchestration-sdk-go/<version> User-Agent token (never replaces it)."},
+
 	{Keys: []string{"CAMUNDA_FALCON"}, Default: "true", Description: "Enable the FALCON (nanobpmn command-stream) transport upgrade when the gateway advertises it."},
 	{Keys: []string{"CAMUNDA_FORCE_REST"}, Description: "Force the pure-REST path even when the gateway advertises FALCON (e.g. where WebSockets are blocked)."},
 
@@ -63,9 +71,39 @@ var ConfigSchema = []ConfigField{
 	{Keys: []string{"CAMUNDA_SDK_HTTP_RETRY_BASE_DELAY_MS"}, Description: "Base backoff delay for retries, in milliseconds."},
 	{Keys: []string{"CAMUNDA_SDK_HTTP_RETRY_MAX_DELAY_MS"}, Description: "Max backoff delay for retries, in milliseconds."},
 
+	{Keys: []string{"CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS"}, Default: "256", Description: "Max idle (keep-alive) HTTP connections across all hosts."},
+	{Keys: []string{"CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST"}, Default: "256", Description: "Max idle (keep-alive) HTTP connections per host. Size to at least the sum of the workers' max concurrent jobs plus pollers; raise CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS too (or set it to 0), since it caps the idle pool across all hosts."},
+
 	{Keys: []string{"CAMUNDA_WORKER_TIMEOUT"}, Description: "Default job activation timeout, in milliseconds."},
 	{Keys: []string{"CAMUNDA_WORKER_MAX_CONCURRENT_JOBS", "CAMUNDA_WORKER_MAX_JOBS_ACTIVE"}, Description: "Default max concurrently-activated jobs per worker."},
 	{Keys: []string{"CAMUNDA_WORKER_REQUEST_TIMEOUT"}, Description: "Default activate-jobs request timeout, in milliseconds."},
 	{Keys: []string{"CAMUNDA_WORKER_NAME"}, Default: defaultWorkerName, Description: "Default worker name."},
 	{Keys: []string{"CAMUNDA_WORKER_STARTUP_JITTER_MAX_SECONDS"}, Description: "Max random startup delay for workers, in seconds."},
+}
+
+// envKeySecrecy maps every environment variable name ConfigSchema declares,
+// aliases included and upper-cased (the way the diagnostics snapshot compares
+// them), to whether it is Secret.
+var envKeySecrecy = func() map[string]bool {
+	m := make(map[string]bool)
+	for _, f := range ConfigSchema {
+		for _, k := range f.Keys {
+			m[strings.ToUpper(k)] = f.Secret
+		}
+	}
+	return m
+}()
+
+// classifyEnvKey reports whether ConfigSchema declares key as credential material
+// and whether it knows the key at all.
+func classifyEnvKey(key string) (secret, known bool) {
+	secret, known = envKeySecrecy[strings.ToUpper(key)]
+	return secret, known
+}
+
+// environmentSnapshot collects the CAMUNDA_*/ZEEBE_* environment for support
+// diagnostics. Redaction is driven by the ConfigSchema Secret declarations for the
+// variables it knows; the diag package's name heuristic only covers the rest.
+func environmentSnapshot(environ []string) map[string]string {
+	return diag.EnvironmentSnapshotWithSecrets(environ, classifyEnvKey)
 }

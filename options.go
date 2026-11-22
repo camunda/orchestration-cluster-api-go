@@ -1,5 +1,7 @@
 package camunda
 
+import "net/http"
+
 // Option configures a Config. Options are applied after environment resolution
 // and therefore take precedence over environment variables.
 type Option func(*Config)
@@ -46,6 +48,13 @@ func WithOAuthScope(scope string) Option {
 }
 
 // WithOAuthCacheDir enables the on-disk OAuth token cache at dir.
+//
+// The cache holds a bearer token. dir is created mode 0700, entries are written
+// mode 0600 via an atomic rename, an expired entry is removed, and the cache is
+// disabled entirely when dir is writable by group or other. On Windows none of
+// that is enforced by the operating system — permission bits are largely ignored
+// there and a file inherits its directory's ACL — so do not enable the cache on
+// a shared Windows host. See the internal/auth package documentation for detail.
 func WithOAuthCacheDir(dir string) Option {
 	return func(c *Config) { c.OAuthCacheDir = dir }
 }
@@ -64,6 +73,13 @@ func WithNoAuth() Option {
 	return func(c *Config) { c.AuthStrategy = AuthNone }
 }
 
+// WithUserAgent names the calling application (e.g. "my-app/1.2"). The value is
+// appended after the SDK's camunda-orchestration-sdk-go/<version> token in the
+// User-Agent of every REST, OAuth and gRPC request; it never replaces it.
+func WithUserAgent(ua string) Option {
+	return func(c *Config) { c.UserAgent = ua }
+}
+
 // WithBackpressureProfile sets the adaptive backpressure profile.
 func WithBackpressureProfile(p BackpressureProfile) Option {
 	return func(c *Config) { c.BackpressureProfile = p }
@@ -79,8 +95,12 @@ func WithRetry(rc RetryConfig) Option {
 	return func(c *Config) { c.Retry = rc }
 }
 
-// WithDefaultTenantID sets the default tenant id applied to operations that
-// accept one.
+// WithDefaultTenantID sets the default tenant id applied to tenant-scoped
+// commands (deploy, create process instance, publish/correlate message,
+// broadcast signal, evaluate decision/expression/conditionals, activate jobs)
+// when the caller does not pass one explicitly. When unset, the effective
+// default tenant is "<default>" (camunda.DefaultTenantIdentifier), matching
+// the Camunda Java client.
 func WithDefaultTenantID(id string) Option {
 	return func(c *Config) { c.DefaultTenantID = id }
 }
@@ -122,4 +142,52 @@ func WithRandom(r Random) Option {
 // support (useful where WebSockets are blocked by a proxy).
 func WithForceREST(force bool) Option {
 	return func(c *Config) { c.ForceREST = force }
+}
+
+// WithMaxIdleConns sets the maximum number of idle (keep-alive) connections the
+// SDK's HTTP transport keeps open across all hosts. It maps to the
+// CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS environment variable and applies only when the
+// SDK builds the base transport itself (not with [WithHTTPClient] or
+// [WithTransport]).
+//
+// The SDK default (256) deliberately replaces Go's http.DefaultTransport pool,
+// whose 2 idle connections per host force a job worker with many jobs in flight
+// to open and close a TCP connection per call — churning sockets into TIME_WAIT
+// and exhausting ephemeral ports (camunda/orchestration-cluster-api-go#162).
+// Without this option the pool also grows to cover the job workers created on
+// the client; setting it pins the value.
+func WithMaxIdleConns(n int) Option {
+	return func(c *Config) { c.MaxIdleConns, c.MaxIdleConnsPinned = n, true }
+}
+
+// WithMaxIdleConnsPerHost sets the maximum number of idle (keep-alive)
+// connections the SDK's HTTP transport keeps open per host. It maps to the
+// CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST environment variable and applies only
+// when the SDK builds the base transport itself (not with [WithHTTPClient] or
+// [WithTransport]). Without this option the SDK grows the pool automatically to
+// the sum of the client's workers' MaxConcurrentJobs plus one poller each;
+// setting it pins the value. When pinning, the global [WithMaxIdleConns] limit
+// still caps the whole idle pool, so raise it as well (to at least this value,
+// or 0 for no global limit).
+func WithMaxIdleConnsPerHost(n int) Option {
+	return func(c *Config) { c.MaxIdleConnsPerHost, c.MaxIdleConnsPerHostPinned = n, true }
+}
+
+// WithHTTPClient supplies the *http.Client used for all REST calls. The client
+// is used as-is: the SDK's retry, backpressure, auth, and TLS layers are
+// bypassed, so the supplied client must carry everything the deployment needs.
+// Mutually exclusive with [WithTransport]; setting both fails [New] with a
+// configuration error.
+func WithHTTPClient(client *http.Client) Option {
+	return func(c *Config) { c.HTTPClient = client }
+}
+
+// WithTransport replaces the base http.RoundTripper at the bottom of the SDK's
+// transport chain (backpressure -> retry -> auth -> Transport), so the SDK's
+// resilience layers still apply on top of it. TLS material is not applied to a
+// user-supplied transport — configure it on the transport itself. Mutually
+// exclusive with [WithHTTPClient]; setting both fails [New] with a
+// configuration error.
+func WithTransport(rt http.RoundTripper) Option {
+	return func(c *Config) { c.Transport = rt }
 }

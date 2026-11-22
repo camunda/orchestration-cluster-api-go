@@ -1,0 +1,81 @@
+name: API compatibility
+
+# Blocks PRs to stable branches that change the public Go API in a way that stops customer
+# code from compiling (see tools/apicompat). A PR is compared with its base branch, so it
+# answers only for its own changes: an approved break already merged does not fail every
+# later PR. When a break is intended (e.g. a bug fix that must change the API), apply the
+# `api-break-approved` label: the check still runs and lists the breaks, but passes. The
+# release workflow compares the code it is about to tag with the last release.
+
+on:
+  pull_request:
+    branches:
+      - "stable/**"
+    # labeled/unlabeled: re-evaluate when api-break-approved is added or removed. edited:
+    # re-evaluate when the PR is retargeted to another stable branch. The job must run for
+    # every such event: a skipped run would replace a failed one and the required check
+    # would count as passing.
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-compat-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  api-compat:
+    name: API compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check out the base branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .api-compat-base
+          persist-credentials: false
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: tools/apicompat/go.mod
+          cache-dependency-path: |
+            go.sum
+            tools/apicompat/go.sum
+
+      - name: Build checker
+        run: go -C tools/apicompat build -o "$RUNNER_TEMP/apicompat" .
+
+      - name: Check API compatibility
+        env:
+          # stable/<N> with no N.x release yet (just cut from main) has no published API
+          # to protect and passes.
+          BASE_REF: ${{ github.base_ref }}
+          APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'api-break-approved') }}
+        run: |
+          set -uo pipefail
+          released=$("$RUNNER_TEMP/apicompat" --print-baseline-major "${BASE_REF#stable/}" --repo .api-compat-base) || exit 2
+          if [ -z "$released" ]; then
+            echo "::notice::No ${BASE_REF#stable/}.x release published yet; nothing to protect."
+            exit 0
+          fi
+          pipeline_status=(0 0)
+          "$RUNNER_TEMP/apicompat" --baseline-dir .api-compat-base | tee "$RUNNER_TEMP/apicompat.txt" || pipeline_status=("${PIPESTATUS[@]}")
+          [ "${pipeline_status[1]}" -eq 0 ] || exit 2
+          rc="${pipeline_status[0]}"
+          {
+            echo '## API compatibility'
+            echo '```'
+            cat "$RUNNER_TEMP/apicompat.txt" || exit 2
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY" || exit 2
+          if [ "$rc" -eq 1 ] && [ "$APPROVED" = "true" ]; then
+            echo "::warning::Breaking API changes approved with the api-break-approved label."
+            echo "Approved with the \`api-break-approved\` label." >> "$GITHUB_STEP_SUMMARY" || exit 2
+            exit 0
+          fi
+          if [ "$rc" -eq 1 ]; then
+            echo "::error::If this break is intended (e.g. a bug fix that must change the API), apply the api-break-approved label. Otherwise make the change backward compatible."
+          fi
+          exit "$rc"

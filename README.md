@@ -87,7 +87,11 @@ generated code stays pure and regenerable.
   (decrementing its retries). The streaming worker also runs a low-frequency REST
   sidecar poll (a safety net for jobs re-queued after a timeout or a brief
   reconnect); poll-activated jobs are acknowledged over REST, streamed jobs over
-  gRPC. Set `WithStreamPollInterval` to tune or disable it.
+  gRPC. Set `WithStreamPollInterval` to tune or disable it. While polls come
+  back empty the interval backs off (×1.6, ±10% jitter, up to 60 s, as in the
+  Camunda Java client) while the stream is open, and resets when a poll
+  activates jobs or the stream disconnects; tune or disable
+  this with `WithStreamPollBackoff`.
 
 ## Configuration
 
@@ -144,6 +148,28 @@ The OAuth token cache is two-tier: an in-memory cache backed by an on-disk cache
 valid token instead of re-authenticating on every start. Concurrent refreshes are
 collapsed into a single in-flight request.
 
+The on-disk tier is opt-in and holds a bearer token, so it is treated as
+credential storage. The directory is created mode `0700` and each entry is
+written mode `0600` through a temp file renamed into place — so the mode is
+reapplied on every rewrite and a concurrent reader never sees a partially written
+entry. An entry found expired is deleted rather than left behind, after a
+re-read confirms another process has not just published a fresh one.
+
+Entries are also checked before they are trusted. If the cache directory is
+writable by group or other, the cache is disabled rather than used: the entry
+path is derived from the token URL, client id and audience, so write access to
+that directory would be enough to substitute the token the SDK presents to the
+cluster. An individual entry whose own mode is wider than `0600` is ignored for
+the same reason — a restrictive directory does not stop someone rewriting a file
+their own permissions already allow — and the refetch that follows republishes it
+at `0600`.
+
+> **Windows:** none of the above is enforced by the operating system. Go's
+> permission bits are largely ignored on Windows — a file inherits the ACL of its
+> parent directory, and `0700` on the directory does not restrict that ACL — so
+> the group/other-writable check is skipped and the cache has no OS-enforced
+> protection. Leave the on-disk cache disabled on a shared Windows host.
+
 ## Configuration reference
 
 `CAMUNDA_*` variables are canonical; the `ZEEBE_*` names are accepted as
@@ -158,6 +184,7 @@ precedence over both.
 | `CAMUNDA_REST_ADDRESS_EXACT` | — | Use `CAMUNDA_REST_ADDRESS` exactly as provided, without appending the `/v2` suffix (for gateway/reverse-proxy fronted deployments). |
 | `CAMUNDA_GRPC_ADDRESS` / `ZEEBE_GRPC_ADDRESS` | `localhost:26500` | Zeebe gRPC gateway address (`host:port`) for the streaming job worker. |
 | `CAMUNDA_DEFAULT_TENANT_ID` / `CAMUNDA_TENANT_ID` | — | Default tenant id applied to operations that accept one. |
+| `CAMUNDA_USER_AGENT` | — | Application identifier (e.g. `my-app/1.2`) appended after the SDK's `camunda-orchestration-sdk-go/<version>` User-Agent token on REST, OAuth and gRPC requests. Never replaces it. Also `WithUserAgent`. |
 
 ### Authentication
 
@@ -200,6 +227,55 @@ precedence over both.
 | --- | --- | --- |
 | `CAMUNDA_FALCON` | `true` | Enable the FALCON command-stream transport upgrade when the gateway advertises it. |
 | `CAMUNDA_FORCE_REST` | — | Force the pure-REST path even when the gateway advertises FALCON. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` | `256`, grown to fit workers | Max idle (keep-alive) HTTP connections across all hosts. Setting it pins the value. |
+| `CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST` | `256`, grown to fit workers | Max idle (keep-alive) HTTP connections per host. Setting it pins the value. |
+
+The SDK never uses `http.DefaultTransport` directly: it clones it and sizes the
+idle-connection pool for job-worker workloads. Go's default pool keeps only 2
+idle connections per host, so a worker with many jobs in flight otherwise opens
+and closes a TCP connection per call — churning sockets into `TIME_WAIT`,
+exhausting ephemeral ports, and roughly halving throughput at moderate
+concurrency.
+
+The 256 default is a floor: each time you create a job worker (`NewJobWorker`
+or `NewStreamJobWorker`) the SDK grows the pool so it covers the sum of all the
+client's workers' `MaxConcurrentJobs` plus one activation poll per worker. For
+example, 50 workers × 32 concurrent jobs raises both limits to 1,650. The pool
+is resized by swapping in a resized clone of the SDK's own transport, so
+in-flight requests are never disturbed. The pool never shrinks.
+
+Explicit settings always win: a value set through
+`CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS(_PER_HOST)` or `WithMaxIdleConns(PerHost)` pins
+that limit and turns off automatic growth for it. A transport supplied with
+`WithTransport` / `WithHTTPClient` is never touched. When pinning
+`CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS_PER_HOST`, remember that
+`CAMUNDA_SDK_HTTP_MAX_IDLE_CONNS` caps the idle pool across all hosts, so raise
+it too (or set `0` for no global limit).
+
+For full control, supply your own HTTP plumbing:
+
+<!-- snippet-source: examples/readme.go | regions: CustomTransport -->
+```go
+// WithTransport replaces the base RoundTripper; the SDK's retry, backpressure
+// and auth layers still apply on top of it.
+client, err := camunda.New(camunda.WithTransport(&http.Transport{
+	MaxIdleConns:        1024,
+	MaxIdleConnsPerHost: 1024,
+}))
+```
+
+<!-- snippet-source: examples/readme.go | regions: CustomHTTPClient -->
+```go
+// WithHTTPClient replaces the whole HTTP client; it is used as-is, so the
+// SDK's retry, backpressure, auth and TLS layers are bypassed.
+client, err := camunda.New(camunda.WithHTTPClient(&http.Client{
+	Transport: &http.Transport{MaxIdleConnsPerHost: 1024},
+	Timeout:   30 * time.Second,
+}))
+```
+
+The two options are mutually exclusive — setting both fails `New` with a
+configuration error.
 
 Invalid values are rejected at construction with a configuration error rather
 than being silently coerced, so a typo in a deployment manifest fails the process
@@ -292,6 +368,74 @@ engine) and need an engine that supports them: rather than degrade to unfenced
 commands, a worker that asked for a lease and is handed a job without a token
 rejects the activation with `camunda.ErrLeaseNotHonored`.
 
+Each job stream is recycled proactively, matching the Camunda Java client.
+`camunda.WithStreamMaxLifetime` (default 8 h) closes a stream and opens a new one
+at once, so streams rebalance across gateways after a scale-out or restart.
+`camunda.WithStreamInactivityTimeout` (default 10 min, must be less than the max
+lifetime) recycles a stream that has delivered no job for that long, catching
+streams that stay connected but stop delivering. Both deadlines are jittered
+down by up to 10% per stream, so a fleet started together does not recycle in
+lockstep; pass `0` to disable either. Jobs already received keep running and are
+acknowledged normally, and each recycle is logged at debug level. Rebalancing
+needs a request-level (L7) gRPC load balancer (Envoy, nginx gRPC, the SaaS
+ingress): behind a plain L4 load balancer the worker reuses its HTTP/2
+connection, so the new stream lands on the same gateway; use DNS or client-side
+balancing there.
+
+### Job variables are untrusted input
+
+Job variables reach your handler through the cluster, but their **content** is
+set by whoever started the process instance — a REST caller, a message
+publisher, an upstream service, or an earlier task. Treat them the way you would
+treat the body of an HTTP request from the internet.
+
+What the SDK does:
+
+- **Decodes into JSON-shaped values only.** REST-activated jobs carry the
+  variables as a `map[string]any`; gRPC-streamed jobs arrive as JSON strings and
+  are decoded with `encoding/json` into a `map[string]any`. No mechanism here can
+  instantiate a type chosen by the payload — there is no equivalent of
+  unpickling or polymorphic deserialization.
+- **Fills only the type you named.** `job.Variables(&v)` re-marshals the decoded
+  map and unmarshals it into the type *you* supplied. The payload selects values,
+  never a type.
+- **Bounds nesting.** `encoding/json` rejects input nested deeper than 10000, so a
+  deeply nested payload cannot exhaust the stack. Note what that means per
+  transport: on a gRPC-streamed job the decode error is swallowed and the handler
+  simply sees **no variables** (an empty map), so `job.Variables(&v)` succeeds
+  against nothing — check for the keys you need rather than assuming a decode
+  failure will surface as an error.
+- **Keeps variable *values* out of its own log records.** The worker logs job keys
+  and types, never the variable map, and an undecodable frame is reported without
+  its payload. One caveat: a decoding error is logged, and a Go JSON error can
+  quote the offending literal — `json: cannot unmarshal number 1e100000 into Go
+  value of type float64` — so a malformed value can reach the log by that route.
+- **Does not share variables between jobs.** Each job gets its own `*Job` with its
+  own maps before its handler goroutine starts, so concurrent handlers never
+  share or mutate the same values. Reading from the map `RawVariables()` returns
+  is always safe; copy it before writing rather than mutating what is returned.
+
+What the SDK does **not** do:
+
+- **No variable-specific size limit.** Nothing inspects how large a variable
+  payload is: whatever arrives is decoded. Two unrelated limits sit nearby and
+  should not be mistaken for one — the FALCON command stream caps a single
+  *frame* at 16 MiB (a transport limit, and it does not apply to REST or gRPC),
+  and `WithMaxConcurrentJobs` / `WithStreamMaxConcurrentJobs` cap how many
+  *handlers* run at once, which bounds neither the bytes in one payload nor the
+  jobs buffered before dispatch. The engine applies its own limits; the SDK adds
+  none of its own. Whether it should — and what the limit would be — is an open
+  question tracked in
+  [#140](https://github.com/camunda/orchestration-cluster-api-go/issues/140);
+  no limit is being introduced quietly.
+- **No validation or sanitisation.** The SDK does not check types, ranges,
+  lengths or encodings beyond what JSON decoding requires. Validate in your
+  handler.
+- **No interpretation.** A variable that happens to contain a path, a URL, a SQL
+  fragment or a shell string is just a string to the SDK. If your handler passes
+  one to a filesystem, a query, a template or a subprocess, that is your trust
+  boundary to enforce.
+
 ### Job Corrections (User Task Listeners)
 
 When a job worker handles a [user task listener](https://docs.camunda.io/docs/components/concepts/user-task-listeners/),
@@ -381,6 +525,37 @@ saying so, rather than completing it without the result — which would, for
 example, approve a task the listener denied. To use job results against such a
 gateway, set `CAMUNDA_FORCE_REST=true` (or `camunda.WithForceREST(true)`) so the
 worker polls over REST.
+
+### Panicking handlers
+
+A handler runs on its own goroutine, and in Go an unrecovered panic on *any*
+goroutine terminates the whole process. The workers therefore recover a panicking
+handler and **fail the job** with it, on every transport (REST polling, the
+FALCON command stream, the gRPC stream, and the gRPC worker's REST sidecar poll):
+
+- The job is failed exactly as it would be for a returned error, so its retries
+  decrement and the engine schedules a retry instead of leaving the job to sit
+  until its activation timeout expires.
+- The recovered panic is observable through the SDK log and through the failed
+  job (and its incident) on the cluster. It is **not** returned to your code:
+  the worker consumes the resulting `camunda.ErrHandlerPanic` internally and
+  `Run` does not return per-job handler errors, so `errors.Is` cannot be used
+  to detect it from application code.
+- The panic value and a stack trace are written to the SDK log at **error**
+  level — the same detail the runtime would have printed to stderr as the process
+  died.
+- The panic value is **not** sent to the cluster. The failure message the engine
+  stores on the incident says only that the handler panicked, because that
+  message is durable and widely visible, and a panic value can carry job-variable
+  content.
+
+This is a deliberate choice rather than a silent one: a panic is a bug in the
+handler, but losing the host application (and every other job it was running) is
+a disproportionate consequence. If your handler must not be recovered — if a
+panic indicates corrupted process state that should stop the program — detect
+that in the handler and terminate the process explicitly rather than relying on
+the panic to propagate. There is deliberately no option to turn recovery off;
+adding one would be a design decision for the SDK team.
 
 ## Deploying and starting processes
 

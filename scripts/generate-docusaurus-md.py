@@ -620,6 +620,7 @@ WORKER_TYPES = [
     "StreamJobWorker",
     "WorkerOption",
     "StreamWorkerOption",
+    "StreamPollBackoff",
     "Job",
     "JobHandler",
     "JobCompletion",
@@ -653,8 +654,11 @@ NON_KEY_TYPES = {"ModelString", "JobLeaseToken"}
 # Package-level var and const groups, keyed by their first declared name.
 VAR_BUCKETS = {
     "ConfigSchema": "configuration",
+    "DefaultTenantIdentifier": "configuration",
     "ErrConfig": "runtime",
     "SeedEnvVar": "runtime",
+    "DefaultStreamPollBackoff": "job-workers",
+    "DefaultStreamMaxLifetime": "job-workers",
 }
 
 # Package-level functions not filed under a type are published on the Runtime

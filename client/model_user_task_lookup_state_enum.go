@@ -15,7 +15,7 @@ import (
 	"fmt"
 )
 
-// UserTaskLookupStateEnum The lifecycle state of an active user task. A state ending in `-ING` means a change to the task is in progress, for example waiting for task listeners; the task fields still hold the values from before the change.
+// UserTaskLookupStateEnum The lifecycle state of an active user task. A state ending in `-ING` means a change to the task is in progress, for example waiting for task listeners; the task fields still hold the values from before the change. A claim in progress is reported as `ASSIGNING`, as in the user task search.
 type UserTaskLookupStateEnum string
 
 // List of UserTaskLookupStateEnum
@@ -23,7 +23,6 @@ const (
 	USERTASKLOOKUPSTATEENUM_CREATING   UserTaskLookupStateEnum = "CREATING"
 	USERTASKLOOKUPSTATEENUM_CREATED    UserTaskLookupStateEnum = "CREATED"
 	USERTASKLOOKUPSTATEENUM_ASSIGNING  UserTaskLookupStateEnum = "ASSIGNING"
-	USERTASKLOOKUPSTATEENUM_CLAIMING   UserTaskLookupStateEnum = "CLAIMING"
 	USERTASKLOOKUPSTATEENUM_UPDATING   UserTaskLookupStateEnum = "UPDATING"
 	USERTASKLOOKUPSTATEENUM_COMPLETING UserTaskLookupStateEnum = "COMPLETING"
 	USERTASKLOOKUPSTATEENUM_CANCELING  UserTaskLookupStateEnum = "CANCELING"
@@ -34,7 +33,6 @@ var AllowedUserTaskLookupStateEnumEnumValues = []UserTaskLookupStateEnum{
 	"CREATING",
 	"CREATED",
 	"ASSIGNING",
-	"CLAIMING",
 	"UPDATING",
 	"COMPLETING",
 	"CANCELING",

@@ -34,3 +34,6 @@ __pycache__/
 
 # Planning artifacts (not part of the SDK)
 Seizing the Polyglot Moment*
+
+# Locally built generator binaries
+/cmd/*/facadegen

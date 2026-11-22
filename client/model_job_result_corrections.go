@@ -22,9 +22,9 @@ var _ MappedNullable = &JobResultCorrections{}
 type JobResultCorrections struct {
 	// Assignee of the task.
 	Assignee NullableString `json:"assignee,omitempty"`
-	// The due date of the task.
+	// The due date of the task. Clear by providing an empty String.
 	DueDate NullableTime `json:"dueDate,omitempty"`
-	// The follow-up date of the task.
+	// The follow-up date of the task. Clear by providing an empty String.
 	FollowUpDate NullableTime `json:"followUpDate,omitempty"`
 	// The list of candidate users of the task.
 	CandidateUsers []string `json:"candidateUsers,omitempty"`

@@ -21,6 +21,7 @@ type PermissionTypeEnum string
 // List of PermissionTypeEnum
 const (
 	PERMISSIONTYPEENUM_ACCESS                                            PermissionTypeEnum = "ACCESS"
+	PERMISSIONTYPEENUM_ANSWER                                            PermissionTypeEnum = "ANSWER"
 	PERMISSIONTYPEENUM_CANCEL_PROCESS_INSTANCE                           PermissionTypeEnum = "CANCEL_PROCESS_INSTANCE"
 	PERMISSIONTYPEENUM_CLAIM                                             PermissionTypeEnum = "CLAIM"
 	PERMISSIONTYPEENUM_CLAIM_USER_TASK                                   PermissionTypeEnum = "CLAIM_USER_TASK"
@@ -62,6 +63,7 @@ const (
 	PERMISSIONTYPEENUM_READ_TASK_LISTENER                                PermissionTypeEnum = "READ_TASK_LISTENER"
 	PERMISSIONTYPEENUM_RESTORE                                           PermissionTypeEnum = "RESTORE"
 	PERMISSIONTYPEENUM_REVEAL                                            PermissionTypeEnum = "REVEAL"
+	PERMISSIONTYPEENUM_SUSPEND_PROCESS_DEFINITION                        PermissionTypeEnum = "SUSPEND_PROCESS_DEFINITION"
 	PERMISSIONTYPEENUM_SUSPEND_PROCESS_INSTANCE                          PermissionTypeEnum = "SUSPEND_PROCESS_INSTANCE"
 	PERMISSIONTYPEENUM_UPDATE                                            PermissionTypeEnum = "UPDATE"
 	PERMISSIONTYPEENUM_UPDATE_PROCESS_INSTANCE                           PermissionTypeEnum = "UPDATE_PROCESS_INSTANCE"
@@ -72,6 +74,7 @@ const (
 // All allowed values of PermissionTypeEnum enum
 var AllowedPermissionTypeEnumEnumValues = []PermissionTypeEnum{
 	"ACCESS",
+	"ANSWER",
 	"CANCEL_PROCESS_INSTANCE",
 	"CLAIM",
 	"CLAIM_USER_TASK",
@@ -113,6 +116,7 @@ var AllowedPermissionTypeEnumEnumValues = []PermissionTypeEnum{
 	"READ_TASK_LISTENER",
 	"RESTORE",
 	"REVEAL",
+	"SUSPEND_PROCESS_DEFINITION",
 	"SUSPEND_PROCESS_INSTANCE",
 	"UPDATE",
 	"UPDATE_PROCESS_INSTANCE",

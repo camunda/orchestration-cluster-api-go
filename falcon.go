@@ -89,7 +89,32 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 // buildFalconDialer constructs a WebSocket dialer whose HTTP client carries the
 // SDK's TLS material (for wss://) and injects the configured authentication on
 // both the topology probe and the WebSocket upgrade handshake.
+//
+// Caller-supplied plumbing is honoured so a required proxy, dialer, CA or
+// custom auth is never bypassed: WithHTTPClient is honoured (the caller owns
+// auth and TLS, exactly as for REST; only the User-Agent is added), and WithTransport replaces the SDK-built
+// base transport underneath the SDK auth layer.
 func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
+	if c.cfg.HTTPClient != nil {
+		// Keep the caller's client (auth, TLS, proxy, timeouts) but layer
+		// the SDK User-Agent on top, on a shallow copy so the caller-owned
+		// client is never mutated.
+		hc := *c.cfg.HTTPClient
+		base := hc.Transport
+		if base == nil {
+			base = http.DefaultTransport
+		}
+		hc.Transport = &falconAuthTransport{base: base, userAgent: userAgent(c.cfg)}
+		return &falcon.Dialer{HTTPClient: &hc, Random: c.random}, nil
+	}
+	if c.cfg.Transport != nil {
+		header, err := c.falconAuthHeader()
+		if err != nil {
+			return nil, err
+		}
+		httpClient := &http.Client{Transport: &falconAuthTransport{base: c.cfg.Transport, header: header, userAgent: userAgent(c.cfg)}}
+		return &falcon.Dialer{HTTPClient: httpClient, Random: c.random}, nil
+	}
 	tlsConf, err := buildTLSConfig(c.cfg.TLS)
 	if err != nil {
 		return nil, err
@@ -107,7 +132,7 @@ func (c *CamundaClient) buildFalconDialer() (*falcon.Dialer, error) {
 	if err != nil {
 		return nil, err
 	}
-	httpClient := &http.Client{Transport: &falconAuthTransport{base: base, header: header}}
+	httpClient := &http.Client{Transport: &falconAuthTransport{base: base, header: header, userAgent: userAgent(c.cfg)}}
 	return &falcon.Dialer{HTTPClient: httpClient, Random: c.random}, nil
 }
 
@@ -123,6 +148,7 @@ func (c *CamundaClient) falconAuthHeader() (func(context.Context) (http.Header, 
 			Audience:     c.cfg.TokenAudience,
 			Scope:        c.cfg.OAuthScope,
 			CacheDir:     c.cfg.OAuthCacheDir,
+			UserAgent:    userAgent(c.cfg),
 		}, c.clock)
 		return func(ctx context.Context) (http.Header, error) {
 			tok, err := ts.Token(ctx)
@@ -147,6 +173,8 @@ func (c *CamundaClient) falconAuthHeader() (func(context.Context) (http.Header, 
 type falconAuthTransport struct {
 	base   http.RoundTripper
 	header func(context.Context) (http.Header, error)
+	// userAgent, when non-empty, is set as the User-Agent of every request.
+	userAgent string
 }
 
 func (t *falconAuthTransport) RoundTrip(r *http.Request) (*http.Response, error) {
@@ -162,6 +190,10 @@ func (t *falconAuthTransport) RoundTrip(r *http.Request) (*http.Response, error)
 				r.Header.Add(k, v)
 			}
 		}
+	}
+	if t.userAgent != "" {
+		r = r.Clone(r.Context())
+		r.Header.Set("User-Agent", t.userAgent)
 	}
 	return t.base.RoundTrip(r)
 }
@@ -386,8 +418,8 @@ func (c *CamundaClient) createProcessInstanceFalcon(ctx context.Context, body ca
 // resolveTenant resolves the tenant shown on a synthesized create result: the
 // tenant the instruction carried (already defaulted by tenantIDOrDefault), then
 // the configured default, then the server-side default marker. It is only a
-// display fallback for the result — the create frame itself omits tenantId when
-// no tenant is set so the gateway applies its own default.
+// display fallback for the result; the create frame always carries the
+// effective default tenant.
 func (c *CamundaClient) resolveTenant(provided *string) string {
 	if provided != nil && *provided != "" {
 		return *provided
