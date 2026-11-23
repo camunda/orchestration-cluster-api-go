@@ -12818,6 +12818,7 @@ const (
 	PERMISSIONTYPEENUM_READ_TASK_LISTENER                                PermissionTypeEnum = "READ_TASK_LISTENER"
 	PERMISSIONTYPEENUM_RESTORE                                           PermissionTypeEnum = "RESTORE"
 	PERMISSIONTYPEENUM_REVEAL                                            PermissionTypeEnum = "REVEAL"
+	PERMISSIONTYPEENUM_SUSPEND_PROCESS_DEFINITION                        PermissionTypeEnum = "SUSPEND_PROCESS_DEFINITION"
 	PERMISSIONTYPEENUM_SUSPEND_PROCESS_INSTANCE                          PermissionTypeEnum = "SUSPEND_PROCESS_INSTANCE"
 	PERMISSIONTYPEENUM_UPDATE                                            PermissionTypeEnum = "UPDATE"
 	PERMISSIONTYPEENUM_UPDATE_PROCESS_INSTANCE                           PermissionTypeEnum = "UPDATE_PROCESS_INSTANCE"
