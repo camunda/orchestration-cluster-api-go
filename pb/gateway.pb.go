@@ -1545,7 +1545,8 @@ type CreateProcessInstanceRequest struct {
 	ProcessDefinitionKey int64 `protobuf:"varint,1,opt,name=processDefinitionKey,proto3" json:"processDefinitionKey,omitempty"`
 	// the BPMN process ID of the process definition
 	BpmnProcessId string `protobuf:"bytes,2,opt,name=bpmnProcessId,proto3" json:"bpmnProcessId,omitempty"`
-	// the version of the process; set to -1 to use the latest version
+	// the version of the process; set to -1 to use the latest version. When versionTag is set,
+	// 0 is treated as unset.
 	Version int32 `protobuf:"varint,3,opt,name=version,proto3" json:"version,omitempty"`
 	// JSON document that will instantiate the variables for the root variable scope of the
 	// process instance; it must be a JSON object, as variables will be mapped in a
@@ -1572,7 +1573,11 @@ type CreateProcessInstanceRequest struct {
 	// enforcement is enabled, the engine will reject creation if another root process instance
 	// with the same business id is already active for the same process definition.
 	// Note that any active child process instances with the same business id are not taken into account.
-	BusinessId    *string `protobuf:"bytes,10,opt,name=businessId,proto3,oneof" json:"businessId,omitempty"`
+	BusinessId *string `protobuf:"bytes,10,opt,name=businessId,proto3,oneof" json:"businessId,omitempty"`
+	// creates an instance of the latest deployed version of the process (identified by bpmnProcessId)
+	// that carries this version tag. Cannot be combined with version or processDefinitionKey.
+	// Requires 8.11 or later; not supported by older gateways or brokers.
+	VersionTag    *string `protobuf:"bytes,11,opt,name=versionTag,proto3,oneof" json:"versionTag,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1673,6 +1678,13 @@ func (x *CreateProcessInstanceRequest) GetTags() []string {
 func (x *CreateProcessInstanceRequest) GetBusinessId() string {
 	if x != nil && x.BusinessId != nil {
 		return *x.BusinessId
+	}
+	return ""
+}
+
+func (x *CreateProcessInstanceRequest) GetVersionTag() string {
+	if x != nil && x.VersionTag != nil {
+		return *x.VersionTag
 	}
 	return ""
 }
@@ -6071,7 +6083,7 @@ const file_gateway_proto_rawDesc = "" +
 	"\n" +
 	"StringList\x12\x16\n" +
 	"\x06values\x18\x01 \x03(\tR\x06values\"\x15\n" +
-	"\x13CompleteJobResponse\"\xb8\x04\n" +
+	"\x13CompleteJobResponse\"\xec\x04\n" +
 	"\x1cCreateProcessInstanceRequest\x122\n" +
 	"\x14processDefinitionKey\x18\x01 \x01(\x03R\x14processDefinitionKey\x12$\n" +
 	"\rbpmnProcessId\x18\x02 \x01(\tR\rbpmnProcessId\x12\x18\n" +
@@ -6085,9 +6097,13 @@ const file_gateway_proto_rawDesc = "" +
 	"\n" +
 	"businessId\x18\n" +
 	" \x01(\tH\x01R\n" +
-	"businessId\x88\x01\x01B\x15\n" +
+	"businessId\x88\x01\x01\x12#\n" +
+	"\n" +
+	"versionTag\x18\v \x01(\tH\x02R\n" +
+	"versionTag\x88\x01\x01B\x15\n" +
 	"\x13_operationReferenceB\r\n" +
-	"\v_businessId\"G\n" +
+	"\v_businessIdB\r\n" +
+	"\v_versionTag\"G\n" +
 	"'ProcessInstanceCreationStartInstruction\x12\x1c\n" +
 	"\telementId\x18\x01 \x01(\tR\telementId\"\x91\x01\n" +
 	")ProcessInstanceCreationRuntimeInstruction\x12U\n" +
