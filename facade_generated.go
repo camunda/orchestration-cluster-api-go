@@ -4797,22 +4797,7 @@ func (c *CamundaClient) GetVariable(ctx context.Context, variableKey VariableKey
 //	page.SetLimit(20)
 //	query.SetPage(camunda.LimitPaginationAsSearchQueryPageRequest(page))
 //
-//	// Variable history is eventually consistent, so poll until the indexed
-//	// history contains a matching item.
-//	errNotIndexed := errors.New("variable history not indexed")
-//	result, err := camunda.Poll(ctx, func(ctx context.Context) (*camunda.VariableHistoryItemSearchQueryResult, error) {
-//		result, err := client.SearchVariableHistory(ctx, *query)
-//		if err != nil {
-//			return nil, err
-//		}
-//		if len(result.GetItems()) == 0 {
-//			return nil, errNotIndexed
-//		}
-//		return result, nil
-//	},
-//		camunda.WithRetryOn(func(err error) bool { return errors.Is(err, errNotIndexed) }),
-//		camunda.WithPollTimeout(10*time.Second),
-//	)
+//	result, err := client.SearchVariableHistory(ctx, *query)
 //	if err != nil {
 //		return err
 //	}
