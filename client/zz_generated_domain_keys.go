@@ -1329,6 +1329,37 @@ func (k Username) String() string { return string(k) }
 // Validate reports whether k satisfies the Username constraints.
 func (k Username) Validate() error { return specUsername.validate(string(k)) }
 
+// VariableHistoryItemKey is a Camunda semantic key. Construct it with NewVariableHistoryItemKey (validated) or
+// MustVariableHistoryItemKey (panics on invalid input).
+type VariableHistoryItemKey string
+
+var specVariableHistoryItemKey = keySpec{name: "VariableHistoryItemKey", pattern: regexp.MustCompile(`^-?[0-9]+$`), min: 1, max: 25}
+
+// NewVariableHistoryItemKey validates s against the VariableHistoryItemKey constraints and returns a VariableHistoryItemKey.
+func NewVariableHistoryItemKey(s string) (VariableHistoryItemKey, error) {
+	if err := specVariableHistoryItemKey.validate(s); err != nil {
+		return "", err
+	}
+	return VariableHistoryItemKey(s), nil
+}
+
+// MustVariableHistoryItemKey is like NewVariableHistoryItemKey but panics if s is invalid.
+func MustVariableHistoryItemKey(s string) VariableHistoryItemKey {
+	k, err := NewVariableHistoryItemKey(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k VariableHistoryItemKey) String() string { return string(k) }
+
+// Validate reports whether k satisfies the VariableHistoryItemKey constraints.
+func (k VariableHistoryItemKey) Validate() error {
+	return specVariableHistoryItemKey.validate(string(k))
+}
+
 // VariableKey is a Camunda semantic key. Construct it with NewVariableKey (validated) or
 // MustVariableKey (panics on invalid input).
 type VariableKey string
