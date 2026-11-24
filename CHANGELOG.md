@@ -1,3 +1,10 @@
+# [11.0.0-alpha.21](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.20...v11.0.0-alpha.21) (2026-11-24)
+
+
+### Features
+
+* add example coverage for searchVariableHistory ([#231](https://github.com/camunda/orchestration-cluster-api-go/issues/231)) ([e5a2a35](https://github.com/camunda/orchestration-cluster-api-go/commit/e5a2a35994a3a76e1609c9bf865200e88bb71185))
+
 # [11.0.0-alpha.20](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.19...v11.0.0-alpha.20) (2026-11-22)
 
 
