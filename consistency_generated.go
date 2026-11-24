@@ -99,5 +99,6 @@ var eventuallyConsistentOps = map[string]bool{
 	"searchUsersForGroup":                               true,
 	"searchUsersForRole":                                true,
 	"searchUsersForTenant":                              true,
+	"searchVariableHistory":                             true,
 	"searchVariables":                                   true,
 }

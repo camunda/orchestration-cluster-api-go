@@ -3999,15 +3999,22 @@ func (c *CamundaClient) UpdateRole(ctx context.Context, roleId string, body Role
 // Example:
 //
 //	// Returns only the references the caller is authorized to see — never values.
-//	result, err := client.ListSecrets(ctx)
+//	filter := camunda.NewSecretListFilter()
+//	status := camunda.SecretStatusExactMatch(camunda.SECRETSTATUSENUM_ACTIVE)
+//	filter.SetStatus(camunda.SecretStatusExactMatchAsSecretStatusFilterProperty(&status))
+//	req := camunda.NewSecretListRequest()
+//	req.SetFilter(*filter)
+//
+//	result, err := client.ListSecrets(ctx, *req)
 //	if err != nil {
 //		return err
 //	}
 //	for _, reference := range result.GetReferences() {
 //		fmt.Printf("%v\n", reference)
 //	}
-func (c *CamundaClient) ListSecrets(ctx context.Context, opts ...func(ApiListSecretsRequest) ApiListSecretsRequest) (*SecretListResult, error) {
+func (c *CamundaClient) ListSecrets(ctx context.Context, body SecretListRequest, opts ...func(ApiListSecretsRequest) ApiListSecretsRequest) (*SecretListResult, error) {
 	req := c.raw.SecretAPI.ListSecrets(ctx)
+	req = req.SecretListRequest(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}
@@ -4768,6 +4775,38 @@ func (c *CamundaClient) UpdateUserTask(ctx context.Context, userTaskKey UserTask
 //	fmt.Printf("%v\n", variable)
 func (c *CamundaClient) GetVariable(ctx context.Context, variableKey VariableKey, opts ...func(ApiGetVariableRequest) ApiGetVariableRequest) (*VariableResult, error) {
 	req := c.raw.VariableAPI.GetVariable(ctx, variableKey)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// SearchVariableHistory calls the SearchVariableHistory operation.
+//
+// Example:
+//
+//	query := camunda.NewVariableHistoryItemSearchQuery()
+//
+//	filter := camunda.NewVariableHistoryItemFilter()
+//	variableName := "orderTotal"
+//	filter.SetName(camunda.StringAsStringFilterProperty(&variableName))
+//	query.SetFilter(*filter)
+//
+//	page := camunda.NewLimitPagination()
+//	page.SetLimit(20)
+//	query.SetPage(camunda.LimitPaginationAsSearchQueryPageRequest(page))
+//
+//	result, err := client.SearchVariableHistory(ctx, *query)
+//	if err != nil {
+//		return err
+//	}
+//	for _, item := range result.GetItems() {
+//		fmt.Printf("%s changed to %s at %s\n", item.GetName(), item.GetValue(), item.GetTimestamp())
+//	}
+func (c *CamundaClient) SearchVariableHistory(ctx context.Context, body VariableHistoryItemSearchQuery, opts ...func(ApiSearchVariableHistoryRequest) ApiSearchVariableHistoryRequest) (*VariableHistoryItemSearchQueryResult, error) {
+	req := c.raw.VariableAPI.SearchVariableHistory(ctx)
+	req = req.VariableHistoryItemSearchQuery(body)
 	for _, opt := range opts {
 		req = opt(req)
 	}

@@ -22,13 +22,13 @@ import (
 type SecretAPIService service
 
 type ApiListSecretsRequest struct {
-	ctx        context.Context
-	ApiService *SecretAPIService
-	body       *map[string]interface{}
+	ctx               context.Context
+	ApiService        *SecretAPIService
+	secretListRequest *SecretListRequest
 }
 
-func (r ApiListSecretsRequest) Body(body map[string]interface{}) ApiListSecretsRequest {
-	r.body = &body
+func (r ApiListSecretsRequest) SecretListRequest(secretListRequest SecretListRequest) ApiListSecretsRequest {
+	r.secretListRequest = &secretListRequest
 	return r
 }
 
@@ -49,10 +49,17 @@ A store may hold names outside the reference name charset (for example one conta
 dot); those are omitted, since `/secrets/resolve` would reject them and no permission can
 be granted on them.
 
-A returned reference is usable verbatim with `/secrets/resolve`. In a FEEL expression,
+A returned reference is usable verbatim with `/secrets/resolve`, although a secret that its
+store does not report as `ACTIVE` may fail to resolve there. In a FEEL expression,
 however, a name that is not a bare identifier has to be backtick-escaped, since FEEL reads
 a bare dash as the minus operator: a listed `camunda.secrets.db-password` is written
 “ =camunda.secrets.`db-password` “ in a BPMN input mapping.
+
+Pass `filter.status` to list only the secrets in the matching states, either as a single
+status or with the advanced operators (`$in`, `$neq`, ...). A store that does not report
+states reports every secret as `ACTIVE`, so a filter that excludes `ACTIVE` returns
+nothing from it. The status filter does not widen access: a reference the caller may not read is
+never returned, with or without a filter.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiListSecretsRequest
@@ -104,7 +111,7 @@ func (a *SecretAPIService) ListSecretsExecute(r ApiListSecretsRequest) (*SecretL
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.body
+	localVarPostBody = r.secretListRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -350,6 +357,9 @@ func (a *SecretAPIService) ResolveSecretsExecute(r ApiResolveSecretsRequest) (*S
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
+// GetSecretListRequest returns the secretListRequest field value, or nil when unset.
+func (r ApiListSecretsRequest) GetSecretListRequest() *SecretListRequest { return r.secretListRequest }
 
 // GetSecretResolveRequest returns the secretResolveRequest field value, or nil when unset.
 func (r ApiResolveSecretsRequest) GetSecretResolveRequest() *SecretResolveRequest {

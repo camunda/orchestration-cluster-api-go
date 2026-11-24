@@ -957,6 +957,9 @@ type VariableAPIService = camundaapi.VariableAPIService
 // Fields and methods are documented on [camundaapi.ApiGetVariableRequest].
 type ApiGetVariableRequest = camundaapi.ApiGetVariableRequest
 
+// Fields and methods are documented on [camundaapi.ApiSearchVariableHistoryRequest].
+type ApiSearchVariableHistoryRequest = camundaapi.ApiSearchVariableHistoryRequest
+
 // Fields and methods are documented on [camundaapi.ApiSearchVariablesRequest].
 type ApiSearchVariablesRequest = camundaapi.ApiSearchVariablesRequest
 
@@ -2364,6 +2367,33 @@ func NewNullableAdvancedScopeKeyFilter(val *AdvancedScopeKeyFilter) *NullableAdv
 	return camundaapi.NewNullableAdvancedScopeKeyFilter(val)
 }
 
+// AdvancedSecretStatusFilter Advanced SecretStatusEnum filter.
+//
+// Fields and methods are documented on [camundaapi.AdvancedSecretStatusFilter].
+type AdvancedSecretStatusFilter = camundaapi.AdvancedSecretStatusFilter
+
+// NewAdvancedSecretStatusFilter instantiates a new AdvancedSecretStatusFilter object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewAdvancedSecretStatusFilter() *AdvancedSecretStatusFilter {
+	return camundaapi.NewAdvancedSecretStatusFilter()
+}
+
+// NewAdvancedSecretStatusFilterWithDefaults instantiates a new AdvancedSecretStatusFilter object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewAdvancedSecretStatusFilterWithDefaults() *AdvancedSecretStatusFilter {
+	return camundaapi.NewAdvancedSecretStatusFilterWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableAdvancedSecretStatusFilter].
+type NullableAdvancedSecretStatusFilter = camundaapi.NullableAdvancedSecretStatusFilter
+
+func NewNullableAdvancedSecretStatusFilter(val *AdvancedSecretStatusFilter) *NullableAdvancedSecretStatusFilter {
+	return camundaapi.NewNullableAdvancedSecretStatusFilter(val)
+}
+
 // AdvancedStringFilter Advanced string filter.
 //
 // Fields and methods are documented on [camundaapi.AdvancedStringFilter].
@@ -2416,6 +2446,114 @@ type NullableAdvancedUserTaskStateFilter = camundaapi.NullableAdvancedUserTaskSt
 
 func NewNullableAdvancedUserTaskStateFilter(val *AdvancedUserTaskStateFilter) *NullableAdvancedUserTaskStateFilter {
 	return camundaapi.NewNullableAdvancedUserTaskStateFilter(val)
+}
+
+// AdvancedVariableHistoryItemActorTypeFilter Advanced VariableHistoryItemActorTypeEnum filter.
+//
+// Fields and methods are documented on [camundaapi.AdvancedVariableHistoryItemActorTypeFilter].
+type AdvancedVariableHistoryItemActorTypeFilter = camundaapi.AdvancedVariableHistoryItemActorTypeFilter
+
+// NewAdvancedVariableHistoryItemActorTypeFilter instantiates a new AdvancedVariableHistoryItemActorTypeFilter object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewAdvancedVariableHistoryItemActorTypeFilter() *AdvancedVariableHistoryItemActorTypeFilter {
+	return camundaapi.NewAdvancedVariableHistoryItemActorTypeFilter()
+}
+
+// NewAdvancedVariableHistoryItemActorTypeFilterWithDefaults instantiates a new AdvancedVariableHistoryItemActorTypeFilter object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewAdvancedVariableHistoryItemActorTypeFilterWithDefaults() *AdvancedVariableHistoryItemActorTypeFilter {
+	return camundaapi.NewAdvancedVariableHistoryItemActorTypeFilterWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableAdvancedVariableHistoryItemActorTypeFilter].
+type NullableAdvancedVariableHistoryItemActorTypeFilter = camundaapi.NullableAdvancedVariableHistoryItemActorTypeFilter
+
+func NewNullableAdvancedVariableHistoryItemActorTypeFilter(val *AdvancedVariableHistoryItemActorTypeFilter) *NullableAdvancedVariableHistoryItemActorTypeFilter {
+	return camundaapi.NewNullableAdvancedVariableHistoryItemActorTypeFilter(val)
+}
+
+// AdvancedVariableHistoryItemKeyFilter Advanced VariableHistoryItemKey filter.
+//
+// Fields and methods are documented on [camundaapi.AdvancedVariableHistoryItemKeyFilter].
+type AdvancedVariableHistoryItemKeyFilter = camundaapi.AdvancedVariableHistoryItemKeyFilter
+
+// NewAdvancedVariableHistoryItemKeyFilter instantiates a new AdvancedVariableHistoryItemKeyFilter object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewAdvancedVariableHistoryItemKeyFilter() *AdvancedVariableHistoryItemKeyFilter {
+	return camundaapi.NewAdvancedVariableHistoryItemKeyFilter()
+}
+
+// NewAdvancedVariableHistoryItemKeyFilterWithDefaults instantiates a new AdvancedVariableHistoryItemKeyFilter object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewAdvancedVariableHistoryItemKeyFilterWithDefaults() *AdvancedVariableHistoryItemKeyFilter {
+	return camundaapi.NewAdvancedVariableHistoryItemKeyFilterWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableAdvancedVariableHistoryItemKeyFilter].
+type NullableAdvancedVariableHistoryItemKeyFilter = camundaapi.NullableAdvancedVariableHistoryItemKeyFilter
+
+func NewNullableAdvancedVariableHistoryItemKeyFilter(val *AdvancedVariableHistoryItemKeyFilter) *NullableAdvancedVariableHistoryItemKeyFilter {
+	return camundaapi.NewNullableAdvancedVariableHistoryItemKeyFilter(val)
+}
+
+// AdvancedVariableHistoryItemOperationTypeFilter Advanced VariableHistoryItemOperationTypeEnum filter.
+//
+// Fields and methods are documented on [camundaapi.AdvancedVariableHistoryItemOperationTypeFilter].
+type AdvancedVariableHistoryItemOperationTypeFilter = camundaapi.AdvancedVariableHistoryItemOperationTypeFilter
+
+// NewAdvancedVariableHistoryItemOperationTypeFilter instantiates a new AdvancedVariableHistoryItemOperationTypeFilter object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewAdvancedVariableHistoryItemOperationTypeFilter() *AdvancedVariableHistoryItemOperationTypeFilter {
+	return camundaapi.NewAdvancedVariableHistoryItemOperationTypeFilter()
+}
+
+// NewAdvancedVariableHistoryItemOperationTypeFilterWithDefaults instantiates a new AdvancedVariableHistoryItemOperationTypeFilter object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewAdvancedVariableHistoryItemOperationTypeFilterWithDefaults() *AdvancedVariableHistoryItemOperationTypeFilter {
+	return camundaapi.NewAdvancedVariableHistoryItemOperationTypeFilterWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableAdvancedVariableHistoryItemOperationTypeFilter].
+type NullableAdvancedVariableHistoryItemOperationTypeFilter = camundaapi.NullableAdvancedVariableHistoryItemOperationTypeFilter
+
+func NewNullableAdvancedVariableHistoryItemOperationTypeFilter(val *AdvancedVariableHistoryItemOperationTypeFilter) *NullableAdvancedVariableHistoryItemOperationTypeFilter {
+	return camundaapi.NewNullableAdvancedVariableHistoryItemOperationTypeFilter(val)
+}
+
+// AdvancedVariableHistoryItemVariableOperationTypeFilter Advanced VariableHistoryItemVariableOperationTypeEnum filter.
+//
+// Fields and methods are documented on [camundaapi.AdvancedVariableHistoryItemVariableOperationTypeFilter].
+type AdvancedVariableHistoryItemVariableOperationTypeFilter = camundaapi.AdvancedVariableHistoryItemVariableOperationTypeFilter
+
+// NewAdvancedVariableHistoryItemVariableOperationTypeFilter instantiates a new AdvancedVariableHistoryItemVariableOperationTypeFilter object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewAdvancedVariableHistoryItemVariableOperationTypeFilter() *AdvancedVariableHistoryItemVariableOperationTypeFilter {
+	return camundaapi.NewAdvancedVariableHistoryItemVariableOperationTypeFilter()
+}
+
+// NewAdvancedVariableHistoryItemVariableOperationTypeFilterWithDefaults instantiates a new AdvancedVariableHistoryItemVariableOperationTypeFilter object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewAdvancedVariableHistoryItemVariableOperationTypeFilterWithDefaults() *AdvancedVariableHistoryItemVariableOperationTypeFilter {
+	return camundaapi.NewAdvancedVariableHistoryItemVariableOperationTypeFilterWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableAdvancedVariableHistoryItemVariableOperationTypeFilter].
+type NullableAdvancedVariableHistoryItemVariableOperationTypeFilter = camundaapi.NullableAdvancedVariableHistoryItemVariableOperationTypeFilter
+
+func NewNullableAdvancedVariableHistoryItemVariableOperationTypeFilter(val *AdvancedVariableHistoryItemVariableOperationTypeFilter) *NullableAdvancedVariableHistoryItemVariableOperationTypeFilter {
+	return camundaapi.NewNullableAdvancedVariableHistoryItemVariableOperationTypeFilter(val)
 }
 
 // AdvancedVariableKeyFilter Advanced VariableKey filter.
@@ -16307,6 +16445,60 @@ func NewNullableSecretErrorCode(val *SecretErrorCode) *NullableSecretErrorCode {
 	return camundaapi.NewNullableSecretErrorCode(val)
 }
 
+// SecretListFilter Secret list filter.
+//
+// Fields and methods are documented on [camundaapi.SecretListFilter].
+type SecretListFilter = camundaapi.SecretListFilter
+
+// NewSecretListFilter instantiates a new SecretListFilter object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewSecretListFilter() *SecretListFilter {
+	return camundaapi.NewSecretListFilter()
+}
+
+// NewSecretListFilterWithDefaults instantiates a new SecretListFilter object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewSecretListFilterWithDefaults() *SecretListFilter {
+	return camundaapi.NewSecretListFilterWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableSecretListFilter].
+type NullableSecretListFilter = camundaapi.NullableSecretListFilter
+
+func NewNullableSecretListFilter(val *SecretListFilter) *NullableSecretListFilter {
+	return camundaapi.NewNullableSecretListFilter(val)
+}
+
+// SecretListRequest Options for listing secrets. The request body is optional: omitting it, or sending an empty object, lists every secret the caller may read.
+//
+// Fields and methods are documented on [camundaapi.SecretListRequest].
+type SecretListRequest = camundaapi.SecretListRequest
+
+// NewSecretListRequest instantiates a new SecretListRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewSecretListRequest() *SecretListRequest {
+	return camundaapi.NewSecretListRequest()
+}
+
+// NewSecretListRequestWithDefaults instantiates a new SecretListRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewSecretListRequestWithDefaults() *SecretListRequest {
+	return camundaapi.NewSecretListRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableSecretListRequest].
+type NullableSecretListRequest = camundaapi.NullableSecretListRequest
+
+func NewNullableSecretListRequest(val *SecretListRequest) *NullableSecretListRequest {
+	return camundaapi.NewNullableSecretListRequest(val)
+}
+
 // SecretListResult The secret references the caller is authorized to see.  Unbounded: the response carries the configured stores' full enumeration for the physical tenant.
 //
 // Fields and methods are documented on [camundaapi.SecretListResult].
@@ -16413,6 +16605,59 @@ type NullableSecretResolveResult = camundaapi.NullableSecretResolveResult
 
 func NewNullableSecretResolveResult(val *SecretResolveResult) *NullableSecretResolveResult {
 	return camundaapi.NewNullableSecretResolveResult(val)
+}
+
+// SecretStatusEnum The state a secret store reports for a secret.  - `ACTIVE`: the store reports the secret as usable. - `DISABLED`: the secret was disabled in its store. - `EXPIRED`: the secret's expiry date has passed. - `NOT_YET_ACTIVE`: the secret's activation date is in the future.  A secret has exactly one status. When several apply, `DISABLED` wins over `EXPIRED`, and `EXPIRED` over `NOT_YET_ACTIVE`: a secret that is both disabled and expired is listed only as `DISABLED`, so an `EXPIRED` filter skips it.  A store that cannot report states reports every secret as `ACTIVE`.
+//
+// Fields and methods are documented on [camundaapi.SecretStatusEnum].
+type SecretStatusEnum = camundaapi.SecretStatusEnum
+
+// List of SecretStatusEnum
+const (
+	SECRETSTATUSENUM_ACTIVE         SecretStatusEnum = "ACTIVE"
+	SECRETSTATUSENUM_DISABLED       SecretStatusEnum = "DISABLED"
+	SECRETSTATUSENUM_EXPIRED        SecretStatusEnum = "EXPIRED"
+	SECRETSTATUSENUM_NOT_YET_ACTIVE SecretStatusEnum = "NOT_YET_ACTIVE"
+)
+
+// All allowed values of SecretStatusEnum enum
+var (
+	AllowedSecretStatusEnumEnumValues = camundaapi.AllowedSecretStatusEnumEnumValues
+)
+
+// NewSecretStatusEnumFromValue returns a pointer to a valid SecretStatusEnum
+// for the value passed as argument, or an error if the value passed is not allowed by the enum
+func NewSecretStatusEnumFromValue(v string) (*SecretStatusEnum, error) {
+	return camundaapi.NewSecretStatusEnumFromValue(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableSecretStatusEnum].
+type NullableSecretStatusEnum = camundaapi.NullableSecretStatusEnum
+
+func NewNullableSecretStatusEnum(val *SecretStatusEnum) *NullableSecretStatusEnum {
+	return camundaapi.NewNullableSecretStatusEnum(val)
+}
+
+// SecretStatusFilterProperty - SecretStatusEnum property with full advanced search capabilities.
+//
+// Fields and methods are documented on [camundaapi.SecretStatusFilterProperty].
+type SecretStatusFilterProperty = camundaapi.SecretStatusFilterProperty
+
+// AdvancedSecretStatusFilterAsSecretStatusFilterProperty is a convenience function that returns AdvancedSecretStatusFilter wrapped in SecretStatusFilterProperty
+func AdvancedSecretStatusFilterAsSecretStatusFilterProperty(v *AdvancedSecretStatusFilter) SecretStatusFilterProperty {
+	return camundaapi.AdvancedSecretStatusFilterAsSecretStatusFilterProperty(v)
+}
+
+// SecretStatusExactMatchAsSecretStatusFilterProperty is a convenience function that returns SecretStatusExactMatch wrapped in SecretStatusFilterProperty
+func SecretStatusExactMatchAsSecretStatusFilterProperty(v *SecretStatusExactMatch) SecretStatusFilterProperty {
+	return camundaapi.SecretStatusExactMatchAsSecretStatusFilterProperty(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableSecretStatusFilterProperty].
+type NullableSecretStatusFilterProperty = camundaapi.NullableSecretStatusFilterProperty
+
+func NewNullableSecretStatusFilterProperty(val *SecretStatusFilterProperty) *NullableSecretStatusFilterProperty {
+	return camundaapi.NewNullableSecretStatusFilterProperty(val)
 }
 
 // SetVariableRequest struct for SetVariableRequest
@@ -18612,6 +18857,369 @@ func NewNullableVariableFilter(val *VariableFilter) *NullableVariableFilter {
 	return camundaapi.NewNullableVariableFilter(val)
 }
 
+// VariableHistoryItemActorTypeEnum The type of the actor who performed the operation. Camunda can add values in later versions; clients must handle unknown values gracefully.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemActorTypeEnum].
+type VariableHistoryItemActorTypeEnum = camundaapi.VariableHistoryItemActorTypeEnum
+
+// List of VariableHistoryItemActorTypeEnum
+const (
+	VARIABLEHISTORYITEMACTORTYPEENUM_USER    VariableHistoryItemActorTypeEnum = "USER"
+	VARIABLEHISTORYITEMACTORTYPEENUM_CLIENT  VariableHistoryItemActorTypeEnum = "CLIENT"
+	VARIABLEHISTORYITEMACTORTYPEENUM_ENGINE  VariableHistoryItemActorTypeEnum = "ENGINE"
+	VARIABLEHISTORYITEMACTORTYPEENUM_UNKNOWN VariableHistoryItemActorTypeEnum = "UNKNOWN"
+)
+
+// All allowed values of VariableHistoryItemActorTypeEnum enum
+var (
+	AllowedVariableHistoryItemActorTypeEnumEnumValues = camundaapi.AllowedVariableHistoryItemActorTypeEnumEnumValues
+)
+
+// NewVariableHistoryItemActorTypeEnumFromValue returns a pointer to a valid VariableHistoryItemActorTypeEnum
+// for the value passed as argument, or an error if the value passed is not allowed by the enum
+func NewVariableHistoryItemActorTypeEnumFromValue(v string) (*VariableHistoryItemActorTypeEnum, error) {
+	return camundaapi.NewVariableHistoryItemActorTypeEnumFromValue(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemActorTypeEnum].
+type NullableVariableHistoryItemActorTypeEnum = camundaapi.NullableVariableHistoryItemActorTypeEnum
+
+func NewNullableVariableHistoryItemActorTypeEnum(val *VariableHistoryItemActorTypeEnum) *NullableVariableHistoryItemActorTypeEnum {
+	return camundaapi.NewNullableVariableHistoryItemActorTypeEnum(val)
+}
+
+// VariableHistoryItemActorTypeFilterProperty - VariableHistoryItemActorTypeEnum property with full advanced search capabilities.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemActorTypeFilterProperty].
+type VariableHistoryItemActorTypeFilterProperty = camundaapi.VariableHistoryItemActorTypeFilterProperty
+
+// AdvancedVariableHistoryItemActorTypeFilterAsVariableHistoryItemActorTypeFilterProperty is a convenience function that returns AdvancedVariableHistoryItemActorTypeFilter wrapped in VariableHistoryItemActorTypeFilterProperty
+func AdvancedVariableHistoryItemActorTypeFilterAsVariableHistoryItemActorTypeFilterProperty(v *AdvancedVariableHistoryItemActorTypeFilter) VariableHistoryItemActorTypeFilterProperty {
+	return camundaapi.AdvancedVariableHistoryItemActorTypeFilterAsVariableHistoryItemActorTypeFilterProperty(v)
+}
+
+// VariableHistoryItemActorTypeExactMatchAsVariableHistoryItemActorTypeFilterProperty is a convenience function that returns VariableHistoryItemActorTypeExactMatch wrapped in VariableHistoryItemActorTypeFilterProperty
+func VariableHistoryItemActorTypeExactMatchAsVariableHistoryItemActorTypeFilterProperty(v *VariableHistoryItemActorTypeExactMatch) VariableHistoryItemActorTypeFilterProperty {
+	return camundaapi.VariableHistoryItemActorTypeExactMatchAsVariableHistoryItemActorTypeFilterProperty(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemActorTypeFilterProperty].
+type NullableVariableHistoryItemActorTypeFilterProperty = camundaapi.NullableVariableHistoryItemActorTypeFilterProperty
+
+func NewNullableVariableHistoryItemActorTypeFilterProperty(val *VariableHistoryItemActorTypeFilterProperty) *NullableVariableHistoryItemActorTypeFilterProperty {
+	return camundaapi.NewNullableVariableHistoryItemActorTypeFilterProperty(val)
+}
+
+// VariableHistoryItemFilter Variable history item filter request.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemFilter].
+type VariableHistoryItemFilter = camundaapi.VariableHistoryItemFilter
+
+// NewVariableHistoryItemFilter instantiates a new VariableHistoryItemFilter object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewVariableHistoryItemFilter() *VariableHistoryItemFilter {
+	return camundaapi.NewVariableHistoryItemFilter()
+}
+
+// NewVariableHistoryItemFilterWithDefaults instantiates a new VariableHistoryItemFilter object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewVariableHistoryItemFilterWithDefaults() *VariableHistoryItemFilter {
+	return camundaapi.NewVariableHistoryItemFilterWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemFilter].
+type NullableVariableHistoryItemFilter = camundaapi.NullableVariableHistoryItemFilter
+
+func NewNullableVariableHistoryItemFilter(val *VariableHistoryItemFilter) *NullableVariableHistoryItemFilter {
+	return camundaapi.NewNullableVariableHistoryItemFilter(val)
+}
+
+// VariableHistoryItemKeyFilterProperty - VariableHistoryItemKey property with full advanced search capabilities.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemKeyFilterProperty].
+type VariableHistoryItemKeyFilterProperty = camundaapi.VariableHistoryItemKeyFilterProperty
+
+// AdvancedVariableHistoryItemKeyFilterAsVariableHistoryItemKeyFilterProperty is a convenience function that returns AdvancedVariableHistoryItemKeyFilter wrapped in VariableHistoryItemKeyFilterProperty
+func AdvancedVariableHistoryItemKeyFilterAsVariableHistoryItemKeyFilterProperty(v *AdvancedVariableHistoryItemKeyFilter) VariableHistoryItemKeyFilterProperty {
+	return camundaapi.AdvancedVariableHistoryItemKeyFilterAsVariableHistoryItemKeyFilterProperty(v)
+}
+
+// VariableHistoryItemKeyExactMatchAsVariableHistoryItemKeyFilterProperty is a convenience function that returns VariableHistoryItemKeyExactMatch wrapped in VariableHistoryItemKeyFilterProperty
+func VariableHistoryItemKeyExactMatchAsVariableHistoryItemKeyFilterProperty(v *VariableHistoryItemKeyExactMatch) VariableHistoryItemKeyFilterProperty {
+	return camundaapi.VariableHistoryItemKeyExactMatchAsVariableHistoryItemKeyFilterProperty(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemKeyFilterProperty].
+type NullableVariableHistoryItemKeyFilterProperty = camundaapi.NullableVariableHistoryItemKeyFilterProperty
+
+func NewNullableVariableHistoryItemKeyFilterProperty(val *VariableHistoryItemKeyFilterProperty) *NullableVariableHistoryItemKeyFilterProperty {
+	return camundaapi.NewNullableVariableHistoryItemKeyFilterProperty(val)
+}
+
+// VariableHistoryItemOperationTypeEnum The type of operation that produced this variable change. Camunda can add values in later versions; clients must handle unknown values gracefully.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemOperationTypeEnum].
+type VariableHistoryItemOperationTypeEnum = camundaapi.VariableHistoryItemOperationTypeEnum
+
+// List of VariableHistoryItemOperationTypeEnum
+const (
+	VARIABLEHISTORYITEMOPERATIONTYPEENUM_CREATE VariableHistoryItemOperationTypeEnum = "CREATE"
+	VARIABLEHISTORYITEMOPERATIONTYPEENUM_UPDATE VariableHistoryItemOperationTypeEnum = "UPDATE"
+)
+
+// All allowed values of VariableHistoryItemOperationTypeEnum enum
+var (
+	AllowedVariableHistoryItemOperationTypeEnumEnumValues = camundaapi.AllowedVariableHistoryItemOperationTypeEnumEnumValues
+)
+
+// NewVariableHistoryItemOperationTypeEnumFromValue returns a pointer to a valid VariableHistoryItemOperationTypeEnum
+// for the value passed as argument, or an error if the value passed is not allowed by the enum
+func NewVariableHistoryItemOperationTypeEnumFromValue(v string) (*VariableHistoryItemOperationTypeEnum, error) {
+	return camundaapi.NewVariableHistoryItemOperationTypeEnumFromValue(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemOperationTypeEnum].
+type NullableVariableHistoryItemOperationTypeEnum = camundaapi.NullableVariableHistoryItemOperationTypeEnum
+
+func NewNullableVariableHistoryItemOperationTypeEnum(val *VariableHistoryItemOperationTypeEnum) *NullableVariableHistoryItemOperationTypeEnum {
+	return camundaapi.NewNullableVariableHistoryItemOperationTypeEnum(val)
+}
+
+// VariableHistoryItemOperationTypeFilterProperty - VariableHistoryItemOperationTypeEnum property with full advanced search capabilities.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemOperationTypeFilterProperty].
+type VariableHistoryItemOperationTypeFilterProperty = camundaapi.VariableHistoryItemOperationTypeFilterProperty
+
+// AdvancedVariableHistoryItemOperationTypeFilterAsVariableHistoryItemOperationTypeFilterProperty is a convenience function that returns AdvancedVariableHistoryItemOperationTypeFilter wrapped in VariableHistoryItemOperationTypeFilterProperty
+func AdvancedVariableHistoryItemOperationTypeFilterAsVariableHistoryItemOperationTypeFilterProperty(v *AdvancedVariableHistoryItemOperationTypeFilter) VariableHistoryItemOperationTypeFilterProperty {
+	return camundaapi.AdvancedVariableHistoryItemOperationTypeFilterAsVariableHistoryItemOperationTypeFilterProperty(v)
+}
+
+// VariableHistoryItemOperationTypeExactMatchAsVariableHistoryItemOperationTypeFilterProperty is a convenience function that returns VariableHistoryItemOperationTypeExactMatch wrapped in VariableHistoryItemOperationTypeFilterProperty
+func VariableHistoryItemOperationTypeExactMatchAsVariableHistoryItemOperationTypeFilterProperty(v *VariableHistoryItemOperationTypeExactMatch) VariableHistoryItemOperationTypeFilterProperty {
+	return camundaapi.VariableHistoryItemOperationTypeExactMatchAsVariableHistoryItemOperationTypeFilterProperty(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemOperationTypeFilterProperty].
+type NullableVariableHistoryItemOperationTypeFilterProperty = camundaapi.NullableVariableHistoryItemOperationTypeFilterProperty
+
+func NewNullableVariableHistoryItemOperationTypeFilterProperty(val *VariableHistoryItemOperationTypeFilterProperty) *NullableVariableHistoryItemOperationTypeFilterProperty {
+	return camundaapi.NewNullableVariableHistoryItemOperationTypeFilterProperty(val)
+}
+
+// VariableHistoryItemResultBase Variable history item response base.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemResultBase].
+type VariableHistoryItemResultBase = camundaapi.VariableHistoryItemResultBase
+
+// NewVariableHistoryItemResultBase instantiates a new VariableHistoryItemResultBase object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewVariableHistoryItemResultBase(variableHistoryItemKey VariableHistoryItemKey, variableKey VariableKey, name string, scopeKey ScopeKey, elementInstanceKey NullableElementInstanceKey, elementId NullableElementId, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, processDefinitionId ProcessDefinitionId, tenantId TenantId, timestamp time.Time, operationType VariableHistoryItemOperationTypeEnum, variableOperationType VariableHistoryItemVariableOperationTypeEnum, actorType VariableHistoryItemActorTypeEnum, actorId NullableString, agentElementId NullableElementId) *VariableHistoryItemResultBase {
+	return camundaapi.NewVariableHistoryItemResultBase(variableHistoryItemKey, variableKey, name, scopeKey, elementInstanceKey, elementId, processInstanceKey, rootProcessInstanceKey, processDefinitionKey, processDefinitionId, tenantId, timestamp, operationType, variableOperationType, actorType, actorId, agentElementId)
+}
+
+// NewVariableHistoryItemResultBaseWithDefaults instantiates a new VariableHistoryItemResultBase object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewVariableHistoryItemResultBaseWithDefaults() *VariableHistoryItemResultBase {
+	return camundaapi.NewVariableHistoryItemResultBaseWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemResultBase].
+type NullableVariableHistoryItemResultBase = camundaapi.NullableVariableHistoryItemResultBase
+
+func NewNullableVariableHistoryItemResultBase(val *VariableHistoryItemResultBase) *NullableVariableHistoryItemResultBase {
+	return camundaapi.NewNullableVariableHistoryItemResultBase(val)
+}
+
+// VariableHistoryItemSearchQuery struct for VariableHistoryItemSearchQuery
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemSearchQuery].
+type VariableHistoryItemSearchQuery = camundaapi.VariableHistoryItemSearchQuery
+
+// NewVariableHistoryItemSearchQuery instantiates a new VariableHistoryItemSearchQuery object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewVariableHistoryItemSearchQuery() *VariableHistoryItemSearchQuery {
+	return camundaapi.NewVariableHistoryItemSearchQuery()
+}
+
+// NewVariableHistoryItemSearchQueryWithDefaults instantiates a new VariableHistoryItemSearchQuery object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewVariableHistoryItemSearchQueryWithDefaults() *VariableHistoryItemSearchQuery {
+	return camundaapi.NewVariableHistoryItemSearchQueryWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemSearchQuery].
+type NullableVariableHistoryItemSearchQuery = camundaapi.NullableVariableHistoryItemSearchQuery
+
+func NewNullableVariableHistoryItemSearchQuery(val *VariableHistoryItemSearchQuery) *NullableVariableHistoryItemSearchQuery {
+	return camundaapi.NewNullableVariableHistoryItemSearchQuery(val)
+}
+
+// VariableHistoryItemSearchQueryResult struct for VariableHistoryItemSearchQueryResult
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemSearchQueryResult].
+type VariableHistoryItemSearchQueryResult = camundaapi.VariableHistoryItemSearchQueryResult
+
+// NewVariableHistoryItemSearchQueryResult instantiates a new VariableHistoryItemSearchQueryResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewVariableHistoryItemSearchQueryResult(page SearchQueryPageResponse, items []VariableHistoryItemSearchResult) *VariableHistoryItemSearchQueryResult {
+	return camundaapi.NewVariableHistoryItemSearchQueryResult(page, items)
+}
+
+// NewVariableHistoryItemSearchQueryResultWithDefaults instantiates a new VariableHistoryItemSearchQueryResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewVariableHistoryItemSearchQueryResultWithDefaults() *VariableHistoryItemSearchQueryResult {
+	return camundaapi.NewVariableHistoryItemSearchQueryResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemSearchQueryResult].
+type NullableVariableHistoryItemSearchQueryResult = camundaapi.NullableVariableHistoryItemSearchQueryResult
+
+func NewNullableVariableHistoryItemSearchQueryResult(val *VariableHistoryItemSearchQueryResult) *NullableVariableHistoryItemSearchQueryResult {
+	return camundaapi.NewNullableVariableHistoryItemSearchQueryResult(val)
+}
+
+// VariableHistoryItemSearchQuerySortRequest struct for VariableHistoryItemSearchQuerySortRequest
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemSearchQuerySortRequest].
+type VariableHistoryItemSearchQuerySortRequest = camundaapi.VariableHistoryItemSearchQuerySortRequest
+
+// NewVariableHistoryItemSearchQuerySortRequest instantiates a new VariableHistoryItemSearchQuerySortRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewVariableHistoryItemSearchQuerySortRequest(field string) *VariableHistoryItemSearchQuerySortRequest {
+	return camundaapi.NewVariableHistoryItemSearchQuerySortRequest(field)
+}
+
+// NewVariableHistoryItemSearchQuerySortRequestWithDefaults instantiates a new VariableHistoryItemSearchQuerySortRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewVariableHistoryItemSearchQuerySortRequestWithDefaults() *VariableHistoryItemSearchQuerySortRequest {
+	return camundaapi.NewVariableHistoryItemSearchQuerySortRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemSearchQuerySortRequest].
+type NullableVariableHistoryItemSearchQuerySortRequest = camundaapi.NullableVariableHistoryItemSearchQuerySortRequest
+
+func NewNullableVariableHistoryItemSearchQuerySortRequest(val *VariableHistoryItemSearchQuerySortRequest) *NullableVariableHistoryItemSearchQuerySortRequest {
+	return camundaapi.NewNullableVariableHistoryItemSearchQuerySortRequest(val)
+}
+
+// VariableHistoryItemSearchResult struct for VariableHistoryItemSearchResult
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemSearchResult].
+type VariableHistoryItemSearchResult = camundaapi.VariableHistoryItemSearchResult
+
+// NewVariableHistoryItemSearchResult instantiates a new VariableHistoryItemSearchResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewVariableHistoryItemSearchResult(variableHistoryItemKey VariableHistoryItemKey, variableKey VariableKey, name string, scopeKey ScopeKey, elementInstanceKey NullableElementInstanceKey, elementId NullableElementId, processInstanceKey ProcessInstanceKey, rootProcessInstanceKey NullableProcessInstanceKey, processDefinitionKey ProcessDefinitionKey, processDefinitionId ProcessDefinitionId, tenantId TenantId, timestamp time.Time, operationType VariableHistoryItemOperationTypeEnum, variableOperationType VariableHistoryItemVariableOperationTypeEnum, actorType VariableHistoryItemActorTypeEnum, actorId NullableString, agentElementId NullableElementId, value string, isTruncated bool) *VariableHistoryItemSearchResult {
+	return camundaapi.NewVariableHistoryItemSearchResult(variableHistoryItemKey, variableKey, name, scopeKey, elementInstanceKey, elementId, processInstanceKey, rootProcessInstanceKey, processDefinitionKey, processDefinitionId, tenantId, timestamp, operationType, variableOperationType, actorType, actorId, agentElementId, value, isTruncated)
+}
+
+// NewVariableHistoryItemSearchResultWithDefaults instantiates a new VariableHistoryItemSearchResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewVariableHistoryItemSearchResultWithDefaults() *VariableHistoryItemSearchResult {
+	return camundaapi.NewVariableHistoryItemSearchResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemSearchResult].
+type NullableVariableHistoryItemSearchResult = camundaapi.NullableVariableHistoryItemSearchResult
+
+func NewNullableVariableHistoryItemSearchResult(val *VariableHistoryItemSearchResult) *NullableVariableHistoryItemSearchResult {
+	return camundaapi.NewNullableVariableHistoryItemSearchResult(val)
+}
+
+// VariableHistoryItemVariableOperationTypeEnum What wrote this variable value, for example a job completion, a script result, or a multi-instance output collection. Camunda can add values in later versions; clients must handle unknown values gracefully.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemVariableOperationTypeEnum].
+type VariableHistoryItemVariableOperationTypeEnum = camundaapi.VariableHistoryItemVariableOperationTypeEnum
+
+// List of VariableHistoryItemVariableOperationTypeEnum
+const (
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_API                                  VariableHistoryItemVariableOperationTypeEnum = "API"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_USER_TASK_COMPLETION                 VariableHistoryItemVariableOperationTypeEnum = "USER_TASK_COMPLETION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_PROCESS_INSTANCE_CREATION            VariableHistoryItemVariableOperationTypeEnum = "PROCESS_INSTANCE_CREATION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_PROCESS_INSTANCE_MODIFICATION        VariableHistoryItemVariableOperationTypeEnum = "PROCESS_INSTANCE_MODIFICATION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_JOB_COMPLETION                       VariableHistoryItemVariableOperationTypeEnum = "JOB_COMPLETION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_JOB_FAILURE                          VariableHistoryItemVariableOperationTypeEnum = "JOB_FAILURE"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_JOB_ERROR                            VariableHistoryItemVariableOperationTypeEnum = "JOB_ERROR"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_EXECUTION_LISTENER_COMPLETION        VariableHistoryItemVariableOperationTypeEnum = "EXECUTION_LISTENER_COMPLETION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_MESSAGE_CORRELATION                  VariableHistoryItemVariableOperationTypeEnum = "MESSAGE_CORRELATION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_SIGNAL_BROADCAST                     VariableHistoryItemVariableOperationTypeEnum = "SIGNAL_BROADCAST"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_CONDITIONAL_EVALUATION               VariableHistoryItemVariableOperationTypeEnum = "CONDITIONAL_EVALUATION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_AD_HOC_SUB_PROCESS_ACTIVATION        VariableHistoryItemVariableOperationTypeEnum = "AD_HOC_SUB_PROCESS_ACTIVATION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_INPUT_MAPPING                        VariableHistoryItemVariableOperationTypeEnum = "INPUT_MAPPING"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_OUTPUT_MAPPING                       VariableHistoryItemVariableOperationTypeEnum = "OUTPUT_MAPPING"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_SCRIPT_RESULT                        VariableHistoryItemVariableOperationTypeEnum = "SCRIPT_RESULT"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_DECISION_RESULT                      VariableHistoryItemVariableOperationTypeEnum = "DECISION_RESULT"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_CALL_ACTIVITY_INPUT                  VariableHistoryItemVariableOperationTypeEnum = "CALL_ACTIVITY_INPUT"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_CALL_ACTIVITY_OUTPUT                 VariableHistoryItemVariableOperationTypeEnum = "CALL_ACTIVITY_OUTPUT"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_MULTI_INSTANCE_INPUT_ELEMENT         VariableHistoryItemVariableOperationTypeEnum = "MULTI_INSTANCE_INPUT_ELEMENT"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_MULTI_INSTANCE_LOOP_COUNTER          VariableHistoryItemVariableOperationTypeEnum = "MULTI_INSTANCE_LOOP_COUNTER"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_MULTI_INSTANCE_OUTPUT_ELEMENT        VariableHistoryItemVariableOperationTypeEnum = "MULTI_INSTANCE_OUTPUT_ELEMENT"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_MULTI_INSTANCE_OUTPUT_COLLECTION     VariableHistoryItemVariableOperationTypeEnum = "MULTI_INSTANCE_OUTPUT_COLLECTION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_AD_HOC_SUB_PROCESS_METADATA          VariableHistoryItemVariableOperationTypeEnum = "AD_HOC_SUB_PROCESS_METADATA"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_AD_HOC_SUB_PROCESS_OUTPUT_ELEMENT    VariableHistoryItemVariableOperationTypeEnum = "AD_HOC_SUB_PROCESS_OUTPUT_ELEMENT"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_AD_HOC_SUB_PROCESS_OUTPUT_COLLECTION VariableHistoryItemVariableOperationTypeEnum = "AD_HOC_SUB_PROCESS_OUTPUT_COLLECTION"
+	VARIABLEHISTORYITEMVARIABLEOPERATIONTYPEENUM_UNKNOWN                              VariableHistoryItemVariableOperationTypeEnum = "UNKNOWN"
+)
+
+// All allowed values of VariableHistoryItemVariableOperationTypeEnum enum
+var (
+	AllowedVariableHistoryItemVariableOperationTypeEnumEnumValues = camundaapi.AllowedVariableHistoryItemVariableOperationTypeEnumEnumValues
+)
+
+// NewVariableHistoryItemVariableOperationTypeEnumFromValue returns a pointer to a valid VariableHistoryItemVariableOperationTypeEnum
+// for the value passed as argument, or an error if the value passed is not allowed by the enum
+func NewVariableHistoryItemVariableOperationTypeEnumFromValue(v string) (*VariableHistoryItemVariableOperationTypeEnum, error) {
+	return camundaapi.NewVariableHistoryItemVariableOperationTypeEnumFromValue(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemVariableOperationTypeEnum].
+type NullableVariableHistoryItemVariableOperationTypeEnum = camundaapi.NullableVariableHistoryItemVariableOperationTypeEnum
+
+func NewNullableVariableHistoryItemVariableOperationTypeEnum(val *VariableHistoryItemVariableOperationTypeEnum) *NullableVariableHistoryItemVariableOperationTypeEnum {
+	return camundaapi.NewNullableVariableHistoryItemVariableOperationTypeEnum(val)
+}
+
+// VariableHistoryItemVariableOperationTypeFilterProperty - VariableHistoryItemVariableOperationTypeEnum property with full advanced search capabilities.
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemVariableOperationTypeFilterProperty].
+type VariableHistoryItemVariableOperationTypeFilterProperty = camundaapi.VariableHistoryItemVariableOperationTypeFilterProperty
+
+// AdvancedVariableHistoryItemVariableOperationTypeFilterAsVariableHistoryItemVariableOperationTypeFilterProperty is a convenience function that returns AdvancedVariableHistoryItemVariableOperationTypeFilter wrapped in VariableHistoryItemVariableOperationTypeFilterProperty
+func AdvancedVariableHistoryItemVariableOperationTypeFilterAsVariableHistoryItemVariableOperationTypeFilterProperty(v *AdvancedVariableHistoryItemVariableOperationTypeFilter) VariableHistoryItemVariableOperationTypeFilterProperty {
+	return camundaapi.AdvancedVariableHistoryItemVariableOperationTypeFilterAsVariableHistoryItemVariableOperationTypeFilterProperty(v)
+}
+
+// VariableHistoryItemVariableOperationTypeExactMatchAsVariableHistoryItemVariableOperationTypeFilterProperty is a convenience function that returns VariableHistoryItemVariableOperationTypeExactMatch wrapped in VariableHistoryItemVariableOperationTypeFilterProperty
+func VariableHistoryItemVariableOperationTypeExactMatchAsVariableHistoryItemVariableOperationTypeFilterProperty(v *VariableHistoryItemVariableOperationTypeExactMatch) VariableHistoryItemVariableOperationTypeFilterProperty {
+	return camundaapi.VariableHistoryItemVariableOperationTypeExactMatchAsVariableHistoryItemVariableOperationTypeFilterProperty(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableVariableHistoryItemVariableOperationTypeFilterProperty].
+type NullableVariableHistoryItemVariableOperationTypeFilterProperty = camundaapi.NullableVariableHistoryItemVariableOperationTypeFilterProperty
+
+func NewNullableVariableHistoryItemVariableOperationTypeFilterProperty(val *VariableHistoryItemVariableOperationTypeFilterProperty) *NullableVariableHistoryItemVariableOperationTypeFilterProperty {
+	return camundaapi.NewNullableVariableHistoryItemVariableOperationTypeFilterProperty(val)
+}
+
 // VariableKeyFilterProperty - VariableKey property with full advanced search capabilities.
 //
 // Fields and methods are documented on [camundaapi.VariableKeyFilterProperty].
@@ -19786,6 +20394,22 @@ func MustUsername(s string) Username {
 	return camundaapi.MustUsername(s)
 }
 
+// VariableHistoryItemKey is a Camunda semantic key. Construct it with NewVariableHistoryItemKey (validated) or
+// MustVariableHistoryItemKey (panics on invalid input).
+//
+// Fields and methods are documented on [camundaapi.VariableHistoryItemKey].
+type VariableHistoryItemKey = camundaapi.VariableHistoryItemKey
+
+// NewVariableHistoryItemKey validates s against the VariableHistoryItemKey constraints and returns a VariableHistoryItemKey.
+func NewVariableHistoryItemKey(s string) (VariableHistoryItemKey, error) {
+	return camundaapi.NewVariableHistoryItemKey(s)
+}
+
+// MustVariableHistoryItemKey is like NewVariableHistoryItemKey but panics if s is invalid.
+func MustVariableHistoryItemKey(s string) VariableHistoryItemKey {
+	return camundaapi.MustVariableHistoryItemKey(s)
+}
+
 // VariableKey is a Camunda semantic key. Construct it with NewVariableKey (validated) or
 // MustVariableKey (panics on invalid input).
 //
@@ -20245,8 +20869,23 @@ type ResourceKeyExactMatch = camundaapi.ResourceKeyExactMatch
 // Fields and methods are documented on [camundaapi.ScopeKeyExactMatch].
 type ScopeKeyExactMatch = camundaapi.ScopeKeyExactMatch
 
+// Fields and methods are documented on [camundaapi.SecretStatusExactMatch].
+type SecretStatusExactMatch = camundaapi.SecretStatusExactMatch
+
 // Fields and methods are documented on [camundaapi.UserTaskStateExactMatch].
 type UserTaskStateExactMatch = camundaapi.UserTaskStateExactMatch
+
+// Fields and methods are documented on [camundaapi.VariableHistoryItemActorTypeExactMatch].
+type VariableHistoryItemActorTypeExactMatch = camundaapi.VariableHistoryItemActorTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.VariableHistoryItemKeyExactMatch].
+type VariableHistoryItemKeyExactMatch = camundaapi.VariableHistoryItemKeyExactMatch
+
+// Fields and methods are documented on [camundaapi.VariableHistoryItemOperationTypeExactMatch].
+type VariableHistoryItemOperationTypeExactMatch = camundaapi.VariableHistoryItemOperationTypeExactMatch
+
+// Fields and methods are documented on [camundaapi.VariableHistoryItemVariableOperationTypeExactMatch].
+type VariableHistoryItemVariableOperationTypeExactMatch = camundaapi.VariableHistoryItemVariableOperationTypeExactMatch
 
 // Fields and methods are documented on [camundaapi.VariableKeyExactMatch].
 type VariableKeyExactMatch = camundaapi.VariableKeyExactMatch

@@ -184,6 +184,183 @@ func (a *VariableAPIService) GetVariableExecute(r ApiGetVariableRequest) (*Varia
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiSearchVariableHistoryRequest struct {
+	ctx                            context.Context
+	ApiService                     *VariableAPIService
+	truncateValues                 *bool
+	variableHistoryItemSearchQuery *VariableHistoryItemSearchQuery
+}
+
+// When true (default), long variable values in the response are truncated. When false, full variable values are returned where available.
+func (r ApiSearchVariableHistoryRequest) TruncateValues(truncateValues bool) ApiSearchVariableHistoryRequest {
+	r.truncateValues = &truncateValues
+	return r
+}
+
+func (r ApiSearchVariableHistoryRequest) VariableHistoryItemSearchQuery(variableHistoryItemSearchQuery VariableHistoryItemSearchQuery) ApiSearchVariableHistoryRequest {
+	r.variableHistoryItemSearchQuery = &variableHistoryItemSearchQuery
+	return r
+}
+
+func (r ApiSearchVariableHistoryRequest) Execute() (*VariableHistoryItemSearchQueryResult, *http.Response, error) {
+	return r.ApiService.SearchVariableHistoryExecute(r)
+}
+
+/*
+SearchVariableHistory Search variable history
+
+Search for variable history items, which record the changes made to a variable's
+value over time. The audit log configuration decides which changes are recorded;
+by default, only changes made by users are.
+
+Results are sorted by `variableHistoryItemKey` ascending by default, which lists the
+changes of one variable from oldest to newest. Across partitions, the key says nothing
+about time: a search that spans partitions, for example by process definition, lists the
+changes of one partition after the other.
+
+By default, the endpoint truncates long variable values in the response. For the output
+collection of a multi-instance element or an ad-hoc sub-process, the endpoint cuts the
+value at the size limit regardless of the `truncateValues` parameter. The truncation
+size limit is configurable.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSearchVariableHistoryRequest
+*/
+func (a *VariableAPIService) SearchVariableHistory(ctx context.Context) ApiSearchVariableHistoryRequest {
+	return ApiSearchVariableHistoryRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return VariableHistoryItemSearchQueryResult
+func (a *VariableAPIService) SearchVariableHistoryExecute(r ApiSearchVariableHistoryRequest) (*VariableHistoryItemSearchQueryResult, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *VariableHistoryItemSearchQueryResult
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VariableAPIService.SearchVariableHistory")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/variables/history/search"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.truncateValues != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "truncateValues", r.truncateValues, "form", "")
+	} else {
+		var defaultValue bool = true
+		parameterAddToHeaderOrQuery(localVarQueryParams, "truncateValues", defaultValue, "form", "")
+		r.truncateValues = &defaultValue
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json", "application/problem+json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.variableHistoryItemSearchQuery
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v ProblemDetail
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiSearchVariablesRequest struct {
 	ctx                 context.Context
 	ApiService          *VariableAPIService
@@ -351,6 +528,14 @@ func (a *VariableAPIService) SearchVariablesExecute(r ApiSearchVariablesRequest)
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+// GetTruncateValues returns the truncateValues field value, or nil when unset.
+func (r ApiSearchVariableHistoryRequest) GetTruncateValues() *bool { return r.truncateValues }
+
+// GetVariableHistoryItemSearchQuery returns the variableHistoryItemSearchQuery field value, or nil when unset.
+func (r ApiSearchVariableHistoryRequest) GetVariableHistoryItemSearchQuery() *VariableHistoryItemSearchQuery {
+	return r.variableHistoryItemSearchQuery
 }
 
 // GetTruncateValues returns the truncateValues field value, or nil when unset.
