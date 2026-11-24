@@ -1490,6 +1490,13 @@
       "label": "Search user task variables"
     }
   ],
+  "searchVariableHistory": [
+    {
+      "file": "variable.go",
+      "region": "SearchVariableHistory",
+      "label": "Search variable history"
+    }
+  ],
   "searchVariables": [
     {
       "file": "variable.go",
