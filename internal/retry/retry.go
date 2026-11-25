@@ -85,13 +85,20 @@ const maxProblemPeek = 64 << 10
 
 // isTerminalGatewayTimeout reports whether resp is a 504 whose problem title says the
 // operation ended. It reads the body and puts an equivalent reader back, so the caller
-// still receives the problem detail. A body that is missing, unreadable or not a problem
-// document is not terminal.
+// still receives the problem detail. A body that is missing, not a problem document, or
+// that fails while being read is not terminal: a read failure has not shown what the
+// title was, and the error is kept on the replayed body so the final response still
+// reports it.
 func isTerminalGatewayTimeout(resp *http.Response) bool {
 	if resp.StatusCode != http.StatusGatewayTimeout || resp.Body == nil {
 		return false
 	}
-	data, _ := io.ReadAll(io.LimitReader(resp.Body, maxProblemPeek))
+	data, err := io.ReadAll(io.LimitReader(resp.Body, maxProblemPeek))
+	if err != nil {
+		_ = resp.Body.Close()
+		resp.Body = io.NopCloser(io.MultiReader(bytes.NewReader(data), errReader{err}))
+		return false
+	}
 	rest := resp.Body
 	resp.Body = struct {
 		io.Reader
@@ -105,6 +112,11 @@ func isTerminalGatewayTimeout(resp *http.Response) bool {
 	}
 	return terminalGatewayTimeouts[problem.Title]
 }
+
+// errReader yields err on every read, after the buffered bytes of a failed peek.
+type errReader struct{ err error }
+
+func (e errReader) Read([]byte) (int, error) { return 0, e.err }
 
 // IsRetryableStatus reports whether an HTTP status code is a transient failure.
 func IsRetryableStatus(status int) bool {

@@ -122,6 +122,37 @@ func TestOtherGatewayTimeoutsAreStillRetried(t *testing.T) {
 	}
 }
 
+// brokenBodyRT answers 504 with a body that yields complete terminal-title JSON and then
+// fails, as a connection cut short after the last byte of the document would.
+type brokenBodyRT struct{ calls int }
+
+func (b *brokenBodyRT) RoundTrip(req *http.Request) (*http.Response, error) {
+	b.calls++
+	body := io.MultiReader(strings.NewReader(problem("WORKER_DID_NOT_ANSWER")), errReader{io.ErrUnexpectedEOF})
+	return &http.Response{StatusCode: 504, Body: io.NopCloser(body), Header: make(http.Header), Request: req}, nil
+}
+
+// A body that fails while it is read has not been shown to be terminal, so the 504 is
+// treated as transient, and the read error is not swallowed: the caller of the final
+// response still sees it after the buffered bytes.
+func TestUnreadableGatewayTimeoutBodyIsRetriedAndKeepsItsError(t *testing.T) {
+	base := &brokenBodyRT{}
+	resp, err := newTransport(base).RoundTrip(req(t))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if base.calls != 4 {
+		t.Errorf("expected 4 attempts for an unreadable 504 body, got %d", base.calls)
+	}
+	got, readErr := io.ReadAll(resp.Body)
+	if !errors.Is(readErr, io.ErrUnexpectedEOF) {
+		t.Errorf("read error lost: got %v", readErr)
+	}
+	if string(got) != problem("WORKER_DID_NOT_ANSWER") {
+		t.Errorf("buffered bytes not replayed before the error: %q", got)
+	}
+}
+
 // The terminal titles only mean "over" on a 504; on any other retryable status the
 // body is not consulted.
 func TestTerminalTitlesDoNotChangeOtherStatuses(t *testing.T) {
