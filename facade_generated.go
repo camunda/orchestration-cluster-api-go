@@ -2815,6 +2815,45 @@ func (c *CamundaClient) SearchMessageSubscriptions(ctx context.Context, body Mes
 	return value, c.wrapError(resp, err)
 }
 
+// ActivateProbes calls the ActivateProbes operation.
+func (c *CamundaClient) ActivateProbes(ctx context.Context, body ProbeActivationRequest, opts ...func(ApiActivateProbesRequest) ApiActivateProbesRequest) (*ProbeActivationResult, error) {
+	req := c.raw.ProbeAPI.ActivateProbes(ctx)
+	req = req.ProbeActivationRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	if b := req.GetProbeActivationRequest(); b != nil {
+		req = req.ProbeActivationRequest(c.withDefaultTenantProbeActivation(*b))
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
+// AnswerProbe calls the AnswerProbe operation.
+func (c *CamundaClient) AnswerProbe(ctx context.Context, probeKey ProbeKey, body ProbeAnswerRequest, opts ...func(ApiAnswerProbeRequest) ApiAnswerProbeRequest) error {
+	req := c.raw.ProbeAPI.AnswerProbe(ctx, probeKey)
+	req = req.ProbeAnswerRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	resp, err := req.Execute()
+	return c.wrapError(resp, err)
+}
+
+// CreateProbe calls the CreateProbe operation.
+func (c *CamundaClient) CreateProbe(ctx context.Context, body ProbeCreationRequest, opts ...func(ApiCreateProbeRequest) ApiCreateProbeRequest) (*ProbeResult, error) {
+	req := c.raw.ProbeAPI.CreateProbe(ctx)
+	req = req.ProbeCreationRequest(body)
+	for _, opt := range opts {
+		req = opt(req)
+	}
+	if b := req.GetProbeCreationRequest(); b != nil {
+		req = req.ProbeCreationRequest(c.withDefaultTenantProbeCreationRequest(*b))
+	}
+	value, resp, err := req.Execute()
+	return value, c.wrapError(resp, err)
+}
+
 // GetProcessDefinition calls the GetProcessDefinition operation.
 //
 // Example:
@@ -4891,6 +4930,17 @@ func (c *CamundaClient) withDefaultTenantMessageCorrelationRequest(body MessageC
 // effectiveDefaultTenant) when the caller left tenantId unset. An explicit
 // tenant wins. Derived from the request-body shape.
 func (c *CamundaClient) withDefaultTenantMessagePublicationRequest(body MessagePublicationRequest) MessagePublicationRequest {
+	if body.TenantId == nil {
+		t := TenantId(c.effectiveDefaultTenant())
+		body.TenantId = &t
+	}
+	return body
+}
+
+// withDefaultTenantProbeCreationRequest injects the effective default tenant (see
+// effectiveDefaultTenant) when the caller left tenantId unset. An explicit
+// tenant wins. Derived from the request-body shape.
+func (c *CamundaClient) withDefaultTenantProbeCreationRequest(body ProbeCreationRequest) ProbeCreationRequest {
 	if body.TenantId == nil {
 		t := TenantId(c.effectiveDefaultTenant())
 		body.TenantId = &t

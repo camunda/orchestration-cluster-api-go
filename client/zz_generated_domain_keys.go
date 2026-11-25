@@ -1039,6 +1039,64 @@ func (k MessageSubscriptionKey) Validate() error {
 	return specMessageSubscriptionKey.validate(string(k))
 }
 
+// ProbeId is a Camunda semantic key. Construct it with NewProbeId (validated) or
+// MustProbeId (panics on invalid input).
+type ProbeId string
+
+var specProbeId = keySpec{name: "ProbeId", pattern: regexp.MustCompile(`^\S+$`), min: 1, max: 256}
+
+// NewProbeId validates s against the ProbeId constraints and returns a ProbeId.
+func NewProbeId(s string) (ProbeId, error) {
+	if err := specProbeId.validate(s); err != nil {
+		return "", err
+	}
+	return ProbeId(s), nil
+}
+
+// MustProbeId is like NewProbeId but panics if s is invalid.
+func MustProbeId(s string) ProbeId {
+	k, err := NewProbeId(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k ProbeId) String() string { return string(k) }
+
+// Validate reports whether k satisfies the ProbeId constraints.
+func (k ProbeId) Validate() error { return specProbeId.validate(string(k)) }
+
+// ProbeKey is a Camunda semantic key. Construct it with NewProbeKey (validated) or
+// MustProbeKey (panics on invalid input).
+type ProbeKey string
+
+var specProbeKey = keySpec{name: "ProbeKey", pattern: regexp.MustCompile(`^-?[0-9]+$`), min: 1, max: 25}
+
+// NewProbeKey validates s against the ProbeKey constraints and returns a ProbeKey.
+func NewProbeKey(s string) (ProbeKey, error) {
+	if err := specProbeKey.validate(s); err != nil {
+		return "", err
+	}
+	return ProbeKey(s), nil
+}
+
+// MustProbeKey is like NewProbeKey but panics if s is invalid.
+func MustProbeKey(s string) ProbeKey {
+	k, err := NewProbeKey(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k ProbeKey) String() string { return string(k) }
+
+// Validate reports whether k satisfies the ProbeKey constraints.
+func (k ProbeKey) Validate() error { return specProbeKey.validate(string(k)) }
+
 // ProcessDefinitionId is a Camunda semantic key. Construct it with NewProcessDefinitionId (validated) or
 // MustProcessDefinitionId (panics on invalid input).
 type ProcessDefinitionId string

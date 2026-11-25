@@ -104,6 +104,8 @@ type APIClient struct {
 
 	MessageSubscriptionAPI *MessageSubscriptionAPIService
 
+	ProbeAPI *ProbeAPIService
+
 	ProcessDefinitionAPI *ProcessDefinitionAPIService
 
 	ProcessInstanceAPI *ProcessInstanceAPIService
@@ -175,6 +177,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.MappingRuleAPI = (*MappingRuleAPIService)(&c.common)
 	c.MessageAPI = (*MessageAPIService)(&c.common)
 	c.MessageSubscriptionAPI = (*MessageSubscriptionAPIService)(&c.common)
+	c.ProbeAPI = (*ProbeAPIService)(&c.common)
 	c.ProcessDefinitionAPI = (*ProcessDefinitionAPIService)(&c.common)
 	c.ProcessInstanceAPI = (*ProcessInstanceAPIService)(&c.common)
 	c.RecoveryAPI = (*RecoveryAPIService)(&c.common)
