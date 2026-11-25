@@ -319,17 +319,22 @@ func benchAck(b *testing.B, generated bool) {
 	if err != nil {
 		b.Fatal(err)
 	}
-	if generated {
-		prev := log.Writer()
-		log.SetOutput(io.Discard)
-		c.raw.GetConfig().Debug = true
-		b.Cleanup(func() { log.SetOutput(prev) })
-	}
 	job := &Job{key: "2251799813685423", retries: 3}
 	ctx := context.Background()
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		if generated {
+			// Pre-change path: the generated client, called directly with Debug
+			// off, so the comparison excludes request/response dump overhead.
+			req := NewJobCompletionRequest()
+			resp, err := c.raw.JobAPI.CompleteJob(ctx, JobKey(job.key)).
+				JobCompletionRequest(*req).Execute()
+			if err = c.wrapError(resp, err); err != nil {
+				b.Fatal(err)
+			}
+			continue
+		}
 		c.restAck(ctx, job, nil, nil)
 	}
 }
@@ -338,7 +343,7 @@ func benchAck(b *testing.B, generated bool) {
 func BenchmarkRESTCompleteLight(b *testing.B) { benchAck(b, false) }
 
 // BenchmarkRESTCompleteGenerated measures the generated-client completion path
-// for comparison. Debug dumping is what selects it, so it also pays the dump.
+// (called directly, Debug off) as the pre-change baseline.
 func BenchmarkRESTCompleteGenerated(b *testing.B) { benchAck(b, true) }
 
 // BenchmarkJobWorkerThroughput runs a REST worker against an in-process engine
