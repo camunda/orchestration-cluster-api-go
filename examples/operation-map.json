@@ -923,6 +923,27 @@
       "label": "List secret references"
     }
   ],
+  "createProbe": [
+    {
+      "file": "probe.go",
+      "region": "CreateProbe",
+      "label": "Create a probe"
+    }
+  ],
+  "activateProbes": [
+    {
+      "file": "probe.go",
+      "region": "ActivateProbes",
+      "label": "Activate probes"
+    }
+  ],
+  "answerProbe": [
+    {
+      "file": "probe.go",
+      "region": "AnswerProbe",
+      "label": "Answer a probe"
+    }
+  ],
   "searchProcessInstances": [
     {
       "file": "process_instance.go",

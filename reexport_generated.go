@@ -577,6 +577,20 @@ type ApiSearchCorrelatedMessageSubscriptionsRequest = camundaapi.ApiSearchCorrel
 // Fields and methods are documented on [camundaapi.ApiSearchMessageSubscriptionsRequest].
 type ApiSearchMessageSubscriptionsRequest = camundaapi.ApiSearchMessageSubscriptionsRequest
 
+// ProbeAPIService ProbeAPI service
+//
+// Fields and methods are documented on [camundaapi.ProbeAPIService].
+type ProbeAPIService = camundaapi.ProbeAPIService
+
+// Fields and methods are documented on [camundaapi.ApiActivateProbesRequest].
+type ApiActivateProbesRequest = camundaapi.ApiActivateProbesRequest
+
+// Fields and methods are documented on [camundaapi.ApiAnswerProbeRequest].
+type ApiAnswerProbeRequest = camundaapi.ApiAnswerProbeRequest
+
+// Fields and methods are documented on [camundaapi.ApiCreateProbeRequest].
+type ApiCreateProbeRequest = camundaapi.ApiCreateProbeRequest
+
 // ProcessDefinitionAPIService ProcessDefinitionAPI service
 //
 // Fields and methods are documented on [camundaapi.ProcessDefinitionAPIService].
@@ -988,6 +1002,33 @@ type NullableActivatedJobResult = camundaapi.NullableActivatedJobResult
 
 func NewNullableActivatedJobResult(val *ActivatedJobResult) *NullableActivatedJobResult {
 	return camundaapi.NewNullableActivatedJobResult(val)
+}
+
+// ActivatedProbeResult struct for ActivatedProbeResult
+//
+// Fields and methods are documented on [camundaapi.ActivatedProbeResult].
+type ActivatedProbeResult = camundaapi.ActivatedProbeResult
+
+// NewActivatedProbeResult instantiates a new ActivatedProbeResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewActivatedProbeResult(probeKey ProbeKey, probeId ProbeId, worker string, deadline int64, tenantId TenantId, physicalTenantId string, input map[string]interface{}, secretPointers []string) *ActivatedProbeResult {
+	return camundaapi.NewActivatedProbeResult(probeKey, probeId, worker, deadline, tenantId, physicalTenantId, input, secretPointers)
+}
+
+// NewActivatedProbeResultWithDefaults instantiates a new ActivatedProbeResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewActivatedProbeResultWithDefaults() *ActivatedProbeResult {
+	return camundaapi.NewActivatedProbeResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableActivatedProbeResult].
+type NullableActivatedProbeResult = camundaapi.NullableActivatedProbeResult
+
+func NewNullableActivatedProbeResult(val *ActivatedProbeResult) *NullableActivatedProbeResult {
+	return camundaapi.NewNullableActivatedProbeResult(val)
 }
 
 // AdHocSubProcessActivateActivitiesInstruction struct for AdHocSubProcessActivateActivitiesInstruction
@@ -13132,6 +13173,303 @@ func NewNullablePhysicalTenantTopology(val *PhysicalTenantTopology) *NullablePhy
 	return camundaapi.NewNullablePhysicalTenantTopology(val)
 }
 
+// ProbeActivationRequest struct for ProbeActivationRequest
+//
+// Fields and methods are documented on [camundaapi.ProbeActivationRequest].
+type ProbeActivationRequest = camundaapi.ProbeActivationRequest
+
+// NewProbeActivationRequest instantiates a new ProbeActivationRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeActivationRequest(probeIds []ProbeId, maxProbesToActivate int32) *ProbeActivationRequest {
+	return camundaapi.NewProbeActivationRequest(probeIds, maxProbesToActivate)
+}
+
+// NewProbeActivationRequestWithDefaults instantiates a new ProbeActivationRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeActivationRequestWithDefaults() *ProbeActivationRequest {
+	return camundaapi.NewProbeActivationRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeActivationRequest].
+type NullableProbeActivationRequest = camundaapi.NullableProbeActivationRequest
+
+func NewNullableProbeActivationRequest(val *ProbeActivationRequest) *NullableProbeActivationRequest {
+	return camundaapi.NewNullableProbeActivationRequest(val)
+}
+
+// ProbeActivationResult The collected probes.
+//
+// Fields and methods are documented on [camundaapi.ProbeActivationResult].
+type ProbeActivationResult = camundaapi.ProbeActivationResult
+
+// NewProbeActivationResult instantiates a new ProbeActivationResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeActivationResult(probes []ActivatedProbeResult) *ProbeActivationResult {
+	return camundaapi.NewProbeActivationResult(probes)
+}
+
+// NewProbeActivationResultWithDefaults instantiates a new ProbeActivationResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeActivationResultWithDefaults() *ProbeActivationResult {
+	return camundaapi.NewProbeActivationResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeActivationResult].
+type NullableProbeActivationResult = camundaapi.NullableProbeActivationResult
+
+func NewNullableProbeActivationResult(val *ProbeActivationResult) *NullableProbeActivationResult {
+	return camundaapi.NewNullableProbeActivationResult(val)
+}
+
+// ProbeAnswerRequest - The answer of the worker, one of three shapes chosen by `outcome`.
+//
+// Fields and methods are documented on [camundaapi.ProbeAnswerRequest].
+type ProbeAnswerRequest = camundaapi.ProbeAnswerRequest
+
+// ProbeErrorAnswerRequestAsProbeAnswerRequest is a convenience function that returns ProbeErrorAnswerRequest wrapped in ProbeAnswerRequest
+func ProbeErrorAnswerRequestAsProbeAnswerRequest(v *ProbeErrorAnswerRequest) ProbeAnswerRequest {
+	return camundaapi.ProbeErrorAnswerRequestAsProbeAnswerRequest(v)
+}
+
+// ProbeOkAnswerRequestAsProbeAnswerRequest is a convenience function that returns ProbeOkAnswerRequest wrapped in ProbeAnswerRequest
+func ProbeOkAnswerRequestAsProbeAnswerRequest(v *ProbeOkAnswerRequest) ProbeAnswerRequest {
+	return camundaapi.ProbeOkAnswerRequestAsProbeAnswerRequest(v)
+}
+
+// ProbeUnsupportedAnswerRequestAsProbeAnswerRequest is a convenience function that returns ProbeUnsupportedAnswerRequest wrapped in ProbeAnswerRequest
+func ProbeUnsupportedAnswerRequestAsProbeAnswerRequest(v *ProbeUnsupportedAnswerRequest) ProbeAnswerRequest {
+	return camundaapi.ProbeUnsupportedAnswerRequestAsProbeAnswerRequest(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeAnswerRequest].
+type NullableProbeAnswerRequest = camundaapi.NullableProbeAnswerRequest
+
+func NewNullableProbeAnswerRequest(val *ProbeAnswerRequest) *NullableProbeAnswerRequest {
+	return camundaapi.NewNullableProbeAnswerRequest(val)
+}
+
+// ProbeCreationRequest struct for ProbeCreationRequest
+//
+// Fields and methods are documented on [camundaapi.ProbeCreationRequest].
+type ProbeCreationRequest = camundaapi.ProbeCreationRequest
+
+// NewProbeCreationRequest instantiates a new ProbeCreationRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeCreationRequest(probeId ProbeId, input string) *ProbeCreationRequest {
+	return camundaapi.NewProbeCreationRequest(probeId, input)
+}
+
+// NewProbeCreationRequestWithDefaults instantiates a new ProbeCreationRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeCreationRequestWithDefaults() *ProbeCreationRequest {
+	return camundaapi.NewProbeCreationRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeCreationRequest].
+type NullableProbeCreationRequest = camundaapi.NullableProbeCreationRequest
+
+func NewNullableProbeCreationRequest(val *ProbeCreationRequest) *NullableProbeCreationRequest {
+	return camundaapi.NewNullableProbeCreationRequest(val)
+}
+
+// ProbeErrorAnswerRequest The worker failed to produce an answer.
+//
+// Fields and methods are documented on [camundaapi.ProbeErrorAnswerRequest].
+type ProbeErrorAnswerRequest = camundaapi.ProbeErrorAnswerRequest
+
+// NewProbeErrorAnswerRequest instantiates a new ProbeErrorAnswerRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeErrorAnswerRequest(outcome string, message string) *ProbeErrorAnswerRequest {
+	return camundaapi.NewProbeErrorAnswerRequest(outcome, message)
+}
+
+// NewProbeErrorAnswerRequestWithDefaults instantiates a new ProbeErrorAnswerRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeErrorAnswerRequestWithDefaults() *ProbeErrorAnswerRequest {
+	return camundaapi.NewProbeErrorAnswerRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeErrorAnswerRequest].
+type NullableProbeErrorAnswerRequest = camundaapi.NullableProbeErrorAnswerRequest
+
+func NewNullableProbeErrorAnswerRequest(val *ProbeErrorAnswerRequest) *NullableProbeErrorAnswerRequest {
+	return camundaapi.NewNullableProbeErrorAnswerRequest(val)
+}
+
+// ProbeErrorResult The worker failed to produce an answer.
+//
+// Fields and methods are documented on [camundaapi.ProbeErrorResult].
+type ProbeErrorResult = camundaapi.ProbeErrorResult
+
+// NewProbeErrorResult instantiates a new ProbeErrorResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeErrorResult(outcome string, worker string, message string) *ProbeErrorResult {
+	return camundaapi.NewProbeErrorResult(outcome, worker, message)
+}
+
+// NewProbeErrorResultWithDefaults instantiates a new ProbeErrorResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeErrorResultWithDefaults() *ProbeErrorResult {
+	return camundaapi.NewProbeErrorResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeErrorResult].
+type NullableProbeErrorResult = camundaapi.NullableProbeErrorResult
+
+func NewNullableProbeErrorResult(val *ProbeErrorResult) *NullableProbeErrorResult {
+	return camundaapi.NewNullableProbeErrorResult(val)
+}
+
+// ProbeOkAnswerRequest The worker produced an answer.
+//
+// Fields and methods are documented on [camundaapi.ProbeOkAnswerRequest].
+type ProbeOkAnswerRequest = camundaapi.ProbeOkAnswerRequest
+
+// NewProbeOkAnswerRequest instantiates a new ProbeOkAnswerRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeOkAnswerRequest(outcome string, data map[string]interface{}) *ProbeOkAnswerRequest {
+	return camundaapi.NewProbeOkAnswerRequest(outcome, data)
+}
+
+// NewProbeOkAnswerRequestWithDefaults instantiates a new ProbeOkAnswerRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeOkAnswerRequestWithDefaults() *ProbeOkAnswerRequest {
+	return camundaapi.NewProbeOkAnswerRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeOkAnswerRequest].
+type NullableProbeOkAnswerRequest = camundaapi.NullableProbeOkAnswerRequest
+
+func NewNullableProbeOkAnswerRequest(val *ProbeOkAnswerRequest) *NullableProbeOkAnswerRequest {
+	return camundaapi.NewNullableProbeOkAnswerRequest(val)
+}
+
+// ProbeOkResult The worker produced an answer.
+//
+// Fields and methods are documented on [camundaapi.ProbeOkResult].
+type ProbeOkResult = camundaapi.ProbeOkResult
+
+// NewProbeOkResult instantiates a new ProbeOkResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeOkResult(outcome string, worker string, data map[string]interface{}) *ProbeOkResult {
+	return camundaapi.NewProbeOkResult(outcome, worker, data)
+}
+
+// NewProbeOkResultWithDefaults instantiates a new ProbeOkResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeOkResultWithDefaults() *ProbeOkResult {
+	return camundaapi.NewProbeOkResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeOkResult].
+type NullableProbeOkResult = camundaapi.NullableProbeOkResult
+
+func NewNullableProbeOkResult(val *ProbeOkResult) *NullableProbeOkResult {
+	return camundaapi.NewNullableProbeOkResult(val)
+}
+
+// ProbeResult - The answer of the worker, one of three shapes chosen by `outcome`.
+//
+// Fields and methods are documented on [camundaapi.ProbeResult].
+type ProbeResult = camundaapi.ProbeResult
+
+// ProbeErrorResultAsProbeResult is a convenience function that returns ProbeErrorResult wrapped in ProbeResult
+func ProbeErrorResultAsProbeResult(v *ProbeErrorResult) ProbeResult {
+	return camundaapi.ProbeErrorResultAsProbeResult(v)
+}
+
+// ProbeOkResultAsProbeResult is a convenience function that returns ProbeOkResult wrapped in ProbeResult
+func ProbeOkResultAsProbeResult(v *ProbeOkResult) ProbeResult {
+	return camundaapi.ProbeOkResultAsProbeResult(v)
+}
+
+// ProbeUnsupportedResultAsProbeResult is a convenience function that returns ProbeUnsupportedResult wrapped in ProbeResult
+func ProbeUnsupportedResultAsProbeResult(v *ProbeUnsupportedResult) ProbeResult {
+	return camundaapi.ProbeUnsupportedResultAsProbeResult(v)
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeResult].
+type NullableProbeResult = camundaapi.NullableProbeResult
+
+func NewNullableProbeResult(val *ProbeResult) *NullableProbeResult {
+	return camundaapi.NewNullableProbeResult(val)
+}
+
+// ProbeUnsupportedAnswerRequest The worker does not support this probe.
+//
+// Fields and methods are documented on [camundaapi.ProbeUnsupportedAnswerRequest].
+type ProbeUnsupportedAnswerRequest = camundaapi.ProbeUnsupportedAnswerRequest
+
+// NewProbeUnsupportedAnswerRequest instantiates a new ProbeUnsupportedAnswerRequest object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeUnsupportedAnswerRequest(outcome string) *ProbeUnsupportedAnswerRequest {
+	return camundaapi.NewProbeUnsupportedAnswerRequest(outcome)
+}
+
+// NewProbeUnsupportedAnswerRequestWithDefaults instantiates a new ProbeUnsupportedAnswerRequest object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeUnsupportedAnswerRequestWithDefaults() *ProbeUnsupportedAnswerRequest {
+	return camundaapi.NewProbeUnsupportedAnswerRequestWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeUnsupportedAnswerRequest].
+type NullableProbeUnsupportedAnswerRequest = camundaapi.NullableProbeUnsupportedAnswerRequest
+
+func NewNullableProbeUnsupportedAnswerRequest(val *ProbeUnsupportedAnswerRequest) *NullableProbeUnsupportedAnswerRequest {
+	return camundaapi.NewNullableProbeUnsupportedAnswerRequest(val)
+}
+
+// ProbeUnsupportedResult The worker does not support this probe.
+//
+// Fields and methods are documented on [camundaapi.ProbeUnsupportedResult].
+type ProbeUnsupportedResult = camundaapi.ProbeUnsupportedResult
+
+// NewProbeUnsupportedResult instantiates a new ProbeUnsupportedResult object
+// This constructor will assign default values to properties that have it defined,
+// and makes sure properties required by API are set, but the set of arguments
+// will change when the set of required properties is changed
+func NewProbeUnsupportedResult(outcome string, worker string) *ProbeUnsupportedResult {
+	return camundaapi.NewProbeUnsupportedResult(outcome, worker)
+}
+
+// NewProbeUnsupportedResultWithDefaults instantiates a new ProbeUnsupportedResult object
+// This constructor will only assign default values to properties that have it defined,
+// but it doesn't guarantee that properties required by API are set
+func NewProbeUnsupportedResultWithDefaults() *ProbeUnsupportedResult {
+	return camundaapi.NewProbeUnsupportedResultWithDefaults()
+}
+
+// Fields and methods are documented on [camundaapi.NullableProbeUnsupportedResult].
+type NullableProbeUnsupportedResult = camundaapi.NullableProbeUnsupportedResult
+
+func NewNullableProbeUnsupportedResult(val *ProbeUnsupportedResult) *NullableProbeUnsupportedResult {
+	return camundaapi.NewNullableProbeUnsupportedResult(val)
+}
+
 // ProblemDetail A Problem detail object as described in [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457). There may be additional properties specific to the problem type.
 //
 // Fields and methods are documented on [camundaapi.ProblemDetail].
@@ -20232,6 +20570,38 @@ func NewMessageSubscriptionKey(s string) (MessageSubscriptionKey, error) {
 // MustMessageSubscriptionKey is like NewMessageSubscriptionKey but panics if s is invalid.
 func MustMessageSubscriptionKey(s string) MessageSubscriptionKey {
 	return camundaapi.MustMessageSubscriptionKey(s)
+}
+
+// ProbeId is a Camunda semantic key. Construct it with NewProbeId (validated) or
+// MustProbeId (panics on invalid input).
+//
+// Fields and methods are documented on [camundaapi.ProbeId].
+type ProbeId = camundaapi.ProbeId
+
+// NewProbeId validates s against the ProbeId constraints and returns a ProbeId.
+func NewProbeId(s string) (ProbeId, error) {
+	return camundaapi.NewProbeId(s)
+}
+
+// MustProbeId is like NewProbeId but panics if s is invalid.
+func MustProbeId(s string) ProbeId {
+	return camundaapi.MustProbeId(s)
+}
+
+// ProbeKey is a Camunda semantic key. Construct it with NewProbeKey (validated) or
+// MustProbeKey (panics on invalid input).
+//
+// Fields and methods are documented on [camundaapi.ProbeKey].
+type ProbeKey = camundaapi.ProbeKey
+
+// NewProbeKey validates s against the ProbeKey constraints and returns a ProbeKey.
+func NewProbeKey(s string) (ProbeKey, error) {
+	return camundaapi.NewProbeKey(s)
+}
+
+// MustProbeKey is like NewProbeKey but panics if s is invalid.
+func MustProbeKey(s string) ProbeKey {
+	return camundaapi.MustProbeKey(s)
 }
 
 // ProcessDefinitionId is a Camunda semantic key. Construct it with NewProcessDefinitionId (validated) or

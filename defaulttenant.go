@@ -72,20 +72,41 @@ func (c *CamundaClient) withDefaultTenantProcessInstanceCreation(body ProcessIns
 	return body
 }
 
-// withDefaultTenantJobActivation injects the effective default tenant into a
-// job-activation request when the caller left tenantIds unset (absent or
-// empty) and the tenant filter is PROVIDED or unset. With tenantFilter
+// defaultTenantIDs applies the default-tenant rule shared by every activation
+// request whose body carries an optional tenantIds list: when the caller left
+// tenantIds unset (absent or empty) and the tenant filter is PROVIDED or unset,
+// it returns the effective default tenant as the list to send. With tenantFilter
 // ASSIGNED the server activates against the authenticated principal's assigned
-// tenants and ignores tenantIds, so the request is left alone. An explicit
-// tenantIds list always wins.
+// tenants and ignores tenantIds, so the list is left alone. An explicit
+// tenantIds list always wins. The second result reports whether to replace the
+// list.
+func (c *CamundaClient) defaultTenantIDs(ids []camundaapi.TenantId, filter *camundaapi.TenantFilterEnum) ([]camundaapi.TenantId, bool) {
+	if len(ids) > 0 {
+		return nil, false
+	}
+	if filter != nil && *filter == camundaapi.TENANTFILTERENUM_ASSIGNED {
+		return nil, false
+	}
+	return []camundaapi.TenantId{camundaapi.MustTenantId(c.effectiveDefaultTenant())}, true
+}
+
+// withDefaultTenantJobActivation injects the effective default tenant into a
+// job-activation request (see defaultTenantIDs for the rule).
 func (c *CamundaClient) withDefaultTenantJobActivation(body JobActivationRequest) JobActivationRequest {
-	if len(body.TenantIds) > 0 {
-		return body
+	if ids, ok := c.defaultTenantIDs(body.TenantIds, body.TenantFilter); ok {
+		body.SetTenantIds(ids)
 	}
-	if f := body.TenantFilter; f != nil && *f == camundaapi.TENANTFILTERENUM_ASSIGNED {
-		return body
+	return body
+}
+
+// withDefaultTenantProbeActivation injects the effective default tenant into a
+// probe-activation request (see defaultTenantIDs for the rule). The facade
+// calls it for ActivateProbes because the spec metadata flags that operation
+// optionalTenantIdsInBody.
+func (c *CamundaClient) withDefaultTenantProbeActivation(body ProbeActivationRequest) ProbeActivationRequest {
+	if ids, ok := c.defaultTenantIDs(body.TenantIds, body.TenantFilter); ok {
+		body.SetTenantIds(ids)
 	}
-	body.SetTenantIds([]camundaapi.TenantId{camundaapi.MustTenantId(c.effectiveDefaultTenant())})
 	return body
 }
 

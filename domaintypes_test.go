@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
 )
 
 // TestEverySemanticKeyHasAGeneratedType is a class-scoped guard for the Domain
@@ -223,5 +225,67 @@ func goTypeString(e ast.Expr) string {
 		return goTypeString(x.X) + "." + x.Sel.Name
 	default:
 		return ""
+	}
+}
+
+// Length constraints in the spec count characters, not bytes. ProbeId allows 1 to 256
+// non-whitespace characters, so 256 multibyte characters are valid (768 bytes) and 257 are not.
+func TestKeyLengthIsMeasuredInCharacters(t *testing.T) {
+	valid := strings.Repeat("界", 256)
+	if _, err := camunda.NewProbeId(valid); err != nil {
+		t.Errorf("256 multibyte characters rejected: %v", err)
+	}
+	if _, err := camunda.NewProbeId(valid + "界"); err == nil {
+		t.Error("257 multibyte characters accepted, want a maximum length error")
+	}
+	if _, err := camunda.NewProbeId(""); err == nil {
+		t.Error("empty probe id accepted, want a minimum length error")
+	}
+}
+
+// ProbeId's pattern is ^\S+$, written for ECMA-262 (the JSON Schema dialect), where \s covers
+// vertical tab and the Unicode space separators. Go's \S is ASCII-only, so the hook that emits
+// key patterns must translate it, or the SDK accepts IDs the engine rejects after validation
+// has already passed.
+func TestKeyPatternWhitespaceFollowsTheSchemaDialect(t *testing.T) {
+	for name, id := range map[string]string{
+		"space":               "a b",
+		"tab":                 "a\tb",
+		"vertical tab":        "a\vb",
+		"form feed":           "a\fb",
+		"line separator":      "a\u2028b",
+		"em space":            "a\u2003b",
+		"no-break space":      "a\u00a0b",
+		"ideographic space":   "a\u3000b",
+		"byte order mark":     "a\ufeffb",
+		"leading whitespace":  " ab",
+		"trailing whitespace": "ab\u2003",
+		"only whitespace":     "\u2003",
+	} {
+		if _, err := camunda.NewProbeId(id); err == nil {
+			t.Errorf("%s: %q accepted, want it rejected as whitespace", name, id)
+		}
+	}
+	for _, id := range []string{"validate-configuration/io.camunda:aws-credential:1", "界", "a\u200bb", "x"} {
+		if _, err := camunda.NewProbeId(id); err != nil {
+			t.Errorf("%q rejected: %v", id, err)
+		}
+	}
+}
+
+// The class of defect: no generated key pattern may keep a bare \s or \S, which Go reads as
+// ASCII-only whatever the schema meant.
+func TestNoGeneratedKeyPatternKeepsAnASCIIOnlyWhitespaceClass(t *testing.T) {
+	raw, err := os.ReadFile("client/zz_generated_domain_keys.go")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range strings.Split(string(raw), "\n") {
+		if !strings.Contains(line, "regexp.MustCompile(") {
+			continue
+		}
+		if strings.Contains(line, `\s`) || strings.Contains(line, `\S`) {
+			t.Errorf("pattern keeps an ASCII-only whitespace class: %s", strings.TrimSpace(line))
+		}
 	}
 }

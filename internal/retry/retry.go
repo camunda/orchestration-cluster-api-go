@@ -1,12 +1,15 @@
 // Package retry provides a transient-error HTTP retry layer implemented as an
 // http.RoundTripper. Requests that fail with a retryable signal (HTTP
-// 429/502/503/504, or a network-level error) are retried up to Config.MaxAttempts
+// 429/502/503/504, or a network-level error; a 504 that reports a probe as over is
+// not) are retried up to Config.MaxAttempts
 // times with exponentially increasing, fully-jittered delays. Non-retryable
 // responses and errors are returned immediately.
 package retry
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -65,6 +68,55 @@ func (t *Transport) base() http.RoundTripper {
 func (t *Transport) doSleep(ctx context.Context, d time.Duration) error {
 	return t.Clock.Sleep(ctx, d)
 }
+
+// terminalGatewayTimeouts are the titles of a 504 that report the end of a probe rather
+// than a transient failure: a worker collected it and did not answer by its deadline, or
+// it still waited for the values of its secrets then. Retrying would create the probe
+// again, and run the worker again, only to fail the same way after another full timeout.
+// A 504 titled DEADLINE_EXCEEDED (the gateway timed out, for example after a leader
+// change) stays retryable.
+var terminalGatewayTimeouts = map[string]bool{
+	"WORKER_DID_NOT_ANSWER":     true,
+	"SECRET_RESOLUTION_TIMEOUT": true,
+}
+
+// maxProblemPeek bounds how much of a 504 body is read to find its problem title.
+const maxProblemPeek = 64 << 10
+
+// isTerminalGatewayTimeout reports whether resp is a 504 whose problem title says the
+// operation ended. It reads the body and puts an equivalent reader back, so the caller
+// still receives the problem detail. A body that is missing, not a problem document, or
+// that fails while being read is not terminal: a read failure has not shown what the
+// title was, and the error is kept on the replayed body so the final response still
+// reports it.
+func isTerminalGatewayTimeout(resp *http.Response) bool {
+	if resp.StatusCode != http.StatusGatewayTimeout || resp.Body == nil {
+		return false
+	}
+	data, err := io.ReadAll(io.LimitReader(resp.Body, maxProblemPeek))
+	if err != nil {
+		_ = resp.Body.Close()
+		resp.Body = io.NopCloser(io.MultiReader(bytes.NewReader(data), errReader{err}))
+		return false
+	}
+	rest := resp.Body
+	resp.Body = struct {
+		io.Reader
+		io.Closer
+	}{io.MultiReader(bytes.NewReader(data), rest), rest}
+	var problem struct {
+		Title string `json:"title"`
+	}
+	if json.Unmarshal(data, &problem) != nil {
+		return false
+	}
+	return terminalGatewayTimeouts[problem.Title]
+}
+
+// errReader yields err on every read, after the buffered bytes of a failed peek.
+type errReader struct{ err error }
+
+func (e errReader) Read([]byte) (int, error) { return 0, e.err }
 
 // IsRetryableStatus reports whether an HTTP status code is a transient failure.
 func IsRetryableStatus(status int) bool {
@@ -143,7 +195,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 			continue
 		}
 
-		if !IsRetryableStatus(resp.StatusCode) || attempt == max-1 {
+		if !IsRetryableStatus(resp.StatusCode) || isTerminalGatewayTimeout(resp) || attempt == max-1 {
 			return resp, nil
 		}
 

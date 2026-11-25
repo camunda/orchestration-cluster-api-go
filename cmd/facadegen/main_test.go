@@ -84,6 +84,33 @@ func TestEmitInjectsDefaultTenantHooks(t *testing.T) {
 	}
 }
 
+// An optional tenantIds list (optionalTenantIdsInBody) is defaulted by a hand-written helper
+// named after the body type, so each such operation reaches its own helper: ActivateProbes
+// was emitted with the job-activation helper, which does not compile against its body.
+func TestTenantIDsHookIsDerivedFromTheBodyType(t *testing.T) {
+	for builder, want := range map[string]string{
+		"JobActivationRequest":   "withDefaultTenantJobActivation",
+		"ProbeActivationRequest": "withDefaultTenantProbeActivation",
+	} {
+		if got := tenantIDsHook(builder); got != want {
+			t.Errorf("tenantIDsHook(%q) = %q, want %q", builder, got, want)
+		}
+		src := emit([]operation{{
+			field: "ProbeAPI", name: "Activate", reqType: "ApiActivateRequest",
+			bodyType: builder, bodyBuilder: builder, tenantHook: tenantIDsHook(builder),
+		}}, nil, false)
+		call := "req = req." + builder + "(c." + want + "(*b))"
+		if !strings.Contains(src, call) {
+			t.Errorf("%s: facade does not call %s\n%s", builder, want, src)
+		}
+		for other := range map[string]bool{"withDefaultTenantJobActivation": true, "withDefaultTenantProbeActivation": true} {
+			if other != want && strings.Contains(src, other) {
+				t.Errorf("%s: facade calls %s", builder, other)
+			}
+		}
+	}
+}
+
 // Without the optional metadata argument loadBodyInfo yields no body builder, so
 // a tenant-body op has bodyBuilder == "". The tenant hook must then be skipped
 // entirely: emitting req.Get()/req.() would overwrite the facade with invalid Go.

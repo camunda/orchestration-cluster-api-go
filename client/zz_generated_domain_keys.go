@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"unicode/utf8"
 )
 
 // ModelString is the base type the OpenAPI generator uses for Camunda semantic
@@ -43,10 +44,11 @@ type keySpec struct {
 }
 
 func (s keySpec) validate(v string) error {
-	if s.min > 0 && len(v) < s.min {
+	// minLength/maxLength count characters, not bytes.
+	if n := utf8.RuneCountInString(v); s.min > 0 && n < s.min {
 		return fmt.Errorf("%s: value %q is shorter than the minimum length %d", s.name, v, s.min)
 	}
-	if s.max > 0 && len(v) > s.max {
+	if n := utf8.RuneCountInString(v); s.max > 0 && n > s.max {
 		return fmt.Errorf("%s: value %q is longer than the maximum length %d", s.name, v, s.max)
 	}
 	if s.pattern != nil && !s.pattern.MatchString(v) {
@@ -1038,6 +1040,64 @@ func (k MessageSubscriptionKey) String() string { return string(k) }
 func (k MessageSubscriptionKey) Validate() error {
 	return specMessageSubscriptionKey.validate(string(k))
 }
+
+// ProbeId is a Camunda semantic key. Construct it with NewProbeId (validated) or
+// MustProbeId (panics on invalid input).
+type ProbeId string
+
+var specProbeId = keySpec{name: "ProbeId", pattern: regexp.MustCompile(`^[^\t\n\v\f\r \x{00A0}\x{1680}\x{2000}-\x{200A}\x{2028}\x{2029}\x{202F}\x{205F}\x{3000}\x{FEFF}]+$`), min: 1, max: 256}
+
+// NewProbeId validates s against the ProbeId constraints and returns a ProbeId.
+func NewProbeId(s string) (ProbeId, error) {
+	if err := specProbeId.validate(s); err != nil {
+		return "", err
+	}
+	return ProbeId(s), nil
+}
+
+// MustProbeId is like NewProbeId but panics if s is invalid.
+func MustProbeId(s string) ProbeId {
+	k, err := NewProbeId(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k ProbeId) String() string { return string(k) }
+
+// Validate reports whether k satisfies the ProbeId constraints.
+func (k ProbeId) Validate() error { return specProbeId.validate(string(k)) }
+
+// ProbeKey is a Camunda semantic key. Construct it with NewProbeKey (validated) or
+// MustProbeKey (panics on invalid input).
+type ProbeKey string
+
+var specProbeKey = keySpec{name: "ProbeKey", pattern: regexp.MustCompile(`^-?[0-9]+$`), min: 1, max: 25}
+
+// NewProbeKey validates s against the ProbeKey constraints and returns a ProbeKey.
+func NewProbeKey(s string) (ProbeKey, error) {
+	if err := specProbeKey.validate(s); err != nil {
+		return "", err
+	}
+	return ProbeKey(s), nil
+}
+
+// MustProbeKey is like NewProbeKey but panics if s is invalid.
+func MustProbeKey(s string) ProbeKey {
+	k, err := NewProbeKey(s)
+	if err != nil {
+		panic(err)
+	}
+	return k
+}
+
+// String returns the underlying string value.
+func (k ProbeKey) String() string { return string(k) }
+
+// Validate reports whether k satisfies the ProbeKey constraints.
+func (k ProbeKey) Validate() error { return specProbeKey.validate(string(k)) }
 
 // ProcessDefinitionId is a Camunda semantic key. Construct it with NewProcessDefinitionId (validated) or
 // MustProcessDefinitionId (panics on invalid input).

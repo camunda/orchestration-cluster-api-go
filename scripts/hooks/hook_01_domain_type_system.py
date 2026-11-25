@@ -102,6 +102,52 @@ def _existing_types(client_dir: Path) -> set[str]:
     return found
 
 
+# ECMA-262 whitespace (the JSON Schema regex dialect): the set `\\s` matches there. Go's `\\s`
+# and `\\S` are ASCII-only (no vertical tab, no Unicode space separators), so a schema pattern
+# such as `^\\S+$` would accept IDs the engine rejects as containing whitespace.
+_ECMA_WHITESPACE = (
+    "\\t\\n\\v\\f\\r \\x{00A0}\\x{1680}\\x{2000}-\\x{200A}\\x{2028}\\x{2029}"
+    "\\x{202F}\\x{205F}\\x{3000}\\x{FEFF}"
+)
+
+
+def _go_pattern(pattern: str) -> str:
+    """Translate a schema regex into the equivalent Go (RE2) expression.
+
+    Only the whitespace classes differ for the patterns the spec uses: a bare ``\\s`` or ``\\S``
+    is rewritten to the ECMA-262 set. Inside a character class ``\\s`` expands in place, but
+    ``\\S`` there cannot be written as a set, so it fails the run instead of being left
+    ASCII-only.
+    """
+    out: list[str] = []
+    in_class = False
+    i = 0
+    while i < len(pattern):
+        c = pattern[i]
+        if c == "\\" and i + 1 < len(pattern):
+            e = pattern[i + 1]
+            if e == "s":
+                out.append(_ECMA_WHITESPACE if in_class else f"[{_ECMA_WHITESPACE}]")
+            elif e == "S":
+                if in_class:
+                    raise SystemExit(
+                        f"hook 01: pattern {pattern!r} uses \\S inside a character class; "
+                        "translate it by hand"
+                    )
+                out.append(f"[^{_ECMA_WHITESPACE}]")
+            else:
+                out.append(c + e)
+            i += 2
+            continue
+        if c == "[" and not in_class:
+            in_class = True
+        elif c == "]" and in_class:
+            in_class = False
+        out.append(c)
+        i += 1
+    return "".join(out)
+
+
 def _go_raw_string(pattern: str) -> str:
     # Go raw string literals cannot contain a backtick; fall back to a quoted
     # literal with minimal escaping in that (rare) case.
@@ -115,7 +161,7 @@ def _key_block(name: str, constraints: dict, noun: str = "semantic key") -> str:
     min_len = int(constraints.get("minLength", 0) or 0)
     max_len = int(constraints.get("maxLength", 0) or 0)
     if pattern:
-        pat_expr = f"regexp.MustCompile({_go_raw_string(pattern)})"
+        pat_expr = f"regexp.MustCompile({_go_raw_string(_go_pattern(pattern))})"
     else:
         pat_expr = "nil"
     return f"""
@@ -226,6 +272,7 @@ import (
 \t"encoding/json"
 \t"fmt"
 \t"regexp"
+\t"unicode/utf8"
 )
 
 // {_BASE_TYPE} is the base type the OpenAPI generator uses for Camunda semantic
@@ -263,10 +310,11 @@ type keySpec struct {{
 }}
 
 func (s keySpec) validate(v string) error {{
-\tif s.min > 0 && len(v) < s.min {{
+\t// minLength/maxLength count characters, not bytes.
+\tif n := utf8.RuneCountInString(v); s.min > 0 && n < s.min {{
 \t\treturn fmt.Errorf("%s: value %q is shorter than the minimum length %d", s.name, v, s.min)
 \t}}
-\tif s.max > 0 && len(v) > s.max {{
+\tif n := utf8.RuneCountInString(v); s.max > 0 && n > s.max {{
 \t\treturn fmt.Errorf("%s: value %q is longer than the maximum length %d", s.name, v, s.max)
 \t}}
 \tif s.pattern != nil && !s.pattern.MatchString(v) {{
