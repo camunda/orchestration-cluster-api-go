@@ -125,12 +125,18 @@ type gateClock struct{}
 func (gateClock) Now() time.Time                                   { return time.Unix(1_000_000, 0) }
 func (gateClock) Sleep(ctx context.Context, d time.Duration) error { return ctx.Err() }
 
-// routedRT answers each request from the channel registered for its path, so a test can
-// hold one operation open while it exercises another.
-type routedRT struct{ hold map[string]chan struct{} }
+// routedRT answers each request immediately, except those to a path in hold: those wait on
+// the path's channel, and signal on entered once they have reached this transport. Reaching
+// it means the backpressure gate in front of it has already granted the request its permit,
+// so a test can wait on entered instead of guessing how long that takes.
+type routedRT struct {
+	hold    map[string]chan struct{}
+	entered chan string
+}
 
 func (r routedRT) RoundTrip(req *http.Request) (*http.Response, error) {
 	if ch, ok := r.hold[req.URL.Path]; ok {
+		r.entered <- req.URL.Path
 		select {
 		case <-ch:
 		case <-req.Context().Done():
@@ -183,13 +189,20 @@ func TestProbeOperationsDoNotBlockEachOtherAtOnePermit(t *testing.T) {
 	for _, held := range []string{"/probes", "/probes/activation"} {
 		t.Run("held "+held, func(t *testing.T) {
 			release := make(chan struct{})
+			entered := make(chan string, 1)
 			rt := &transport.BackpressureTransport{
-				Base:   routedRT{hold: map[string]chan struct{}{"/v2" + held: release}},
+				Base:   routedRT{hold: map[string]chan struct{}{"/v2" + held: release}, entered: entered},
 				Mgr:    cappedAtOne(t),
 				Exempt: exemptDrainOps,
 			}
 			holder := send(rt, held)
-			time.Sleep(50 * time.Millisecond) // let it take the permit
+			// Only once the held request is inside the transport does it hold the permit; sending
+			// the others earlier could pass without the gate ever being under test.
+			select {
+			case <-entered:
+			case <-time.After(5 * time.Second):
+				t.Fatalf("POST %s never reached the transport", held)
+			}
 
 			for _, other := range []string{"/probes", "/probes/activation", "/probes/2251799813685249/answer"} {
 				if other == held {
