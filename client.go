@@ -274,8 +274,8 @@ func pemBytes(inline, path string) ([]byte, error) {
 }
 
 // exemptDrainOps reports whether a request is a drain operation (job
-// completion/failure/error, user-task completion) that should bypass the
-// backpressure gate.
+// completion/failure/error, user-task completion, probe answers) that should
+// bypass the backpressure gate.
 func exemptDrainOps(req *http.Request) bool {
 	p := req.URL.Path
 	if strings.Contains(p, "/jobs/") &&
@@ -283,6 +283,12 @@ func exemptDrainOps(req *http.Request) bool {
 		return true
 	}
 	if strings.Contains(p, "/user-tasks/") && strings.HasSuffix(p, "/completion") {
+		return true
+	}
+	// Answering a probe finishes work a worker already activated, like completing
+	// a job. createProbe and the activation long poll hold permits while they wait,
+	// so a gated answer could miss its probe's deadline and be rejected with a 404.
+	if strings.Contains(p, "/probes/") && strings.HasSuffix(p, "/answer") {
 		return true
 	}
 	return false

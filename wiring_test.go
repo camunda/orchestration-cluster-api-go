@@ -64,6 +64,10 @@ func TestExemptDrainOps(t *testing.T) {
 		"http://x/v2/jobs/123/failure",
 		"http://x/v2/jobs/123/error",
 		"http://x/v2/user-tasks/456/completion",
+		// A probe answer finishes work a worker already activated. Pending probe
+		// creations and activation long polls hold permits, so a gated answer could
+		// miss its probe's deadline and be rejected with a 404.
+		"http://x/v2/probes/2251799813685249/answer",
 	}
 	for _, u := range exempt {
 		req, _ := http.NewRequest(http.MethodPost, u, nil)
@@ -74,6 +78,8 @@ func TestExemptDrainOps(t *testing.T) {
 	gated := []string{
 		"http://x/v2/process-instances/search",
 		"http://x/v2/jobs/activation",
+		"http://x/v2/probes",
+		"http://x/v2/probes/activation",
 	}
 	for _, u := range gated {
 		req, _ := http.NewRequest(http.MethodPost, u, nil)
