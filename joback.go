@@ -93,7 +93,7 @@ func (c *CamundaClient) postJobAck(ctx context.Context, op, jobKey, suffix strin
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode >= 300 {
 		b, _ := io.ReadAll(resp.Body)
 		return &APIError{Status: resp.StatusCode, Body: string(b)}

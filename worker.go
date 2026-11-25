@@ -272,12 +272,13 @@ func newSlotGate(maxConcurrent int) *slotGate {
 	if maxConcurrent < 1 {
 		maxConcurrent = 1
 	}
-	if maxConcurrent > math.MaxInt32 {
-		maxConcurrent = math.MaxInt32
+	m := int32(math.MaxInt32)
+	if maxConcurrent < math.MaxInt32 {
+		m = int32(maxConcurrent)
 	}
 	return &slotGate{
-		max:       int32(maxConcurrent),
-		threshold: int32(max(1, maxConcurrent/4)),
+		max:       m,
+		threshold: max(1, m/4),
 		wake:      make(chan struct{}, 1),
 	}
 }
