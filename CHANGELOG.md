@@ -1,3 +1,10 @@
+# [11.0.0-alpha.23](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.22...v11.0.0-alpha.23) (2026-11-25)
+
+
+### Features
+
+* add example coverage for createProbe, activateProbes, answerProbe ([#237](https://github.com/camunda/orchestration-cluster-api-go/issues/237)) ([74b8fc4](https://github.com/camunda/orchestration-cluster-api-go/commit/74b8fc49ee326ce0cf1a00711eaed20154f4c049)), closes [#233](https://github.com/camunda/orchestration-cluster-api-go/issues/233)
+
 # [11.0.0-alpha.22](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.21...v11.0.0-alpha.22) (2026-11-25)
 
 
