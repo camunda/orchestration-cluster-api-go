@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
+	"net/http"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -60,8 +62,9 @@ func WithRequestTimeout(d time.Duration) WorkerOption {
 	return func(w *JobWorker) { w.requestTimeout = d }
 }
 
-// WithPollInterval sets the pause between polls when idle, at capacity, or after
-// an activation error.
+// WithPollInterval sets the pause after an empty poll or an activation error. A
+// worker at capacity does not wait this interval: it polls again as soon as
+// enough slots free up.
 func WithPollInterval(d time.Duration) WorkerOption {
 	return func(w *JobWorker) { w.pollInterval = d }
 }
@@ -248,15 +251,84 @@ func (w *JobWorker) handleFalcon(ctx context.Context, sw *falcon.StreamWorker, j
 	sw.Complete(job.Key(), vars)
 }
 
+// slotGate tracks a worker's in-flight jobs and wakes the poll loop when enough
+// capacity has opened up to make another activation worthwhile.
+//
+// The poll loop never sleeps a fixed interval while at capacity: it blocks on
+// wake, which release signals as soon as free capacity reaches threshold or the
+// worker becomes idle. The threshold (a quarter of maxConcurrent, at least one)
+// stops a large worker from micro-polling one job at a time; the idle rule
+// ensures a tail of fewer than threshold jobs never stalls the worker.
+type slotGate struct {
+	max       int32
+	threshold int32
+	inFlight  atomic.Int32
+	// wake has capacity one, so a release while the poller is not waiting is
+	// remembered instead of lost, and releases never block.
+	wake chan struct{}
+}
+
+func newSlotGate(maxConcurrent int) *slotGate {
+	if maxConcurrent < 1 {
+		maxConcurrent = 1
+	}
+	m := int32(math.MaxInt32)
+	if maxConcurrent < math.MaxInt32 {
+		m = int32(maxConcurrent)
+	}
+	return &slotGate{
+		max:       m,
+		threshold: max(1, m/4),
+		wake:      make(chan struct{}, 1),
+	}
+}
+
+// free returns the number of jobs the worker should request now, or 0 when it
+// should wait: below threshold while jobs are still in flight.
+func (g *slotGate) free() int {
+	n := g.inFlight.Load()
+	f := g.max - n
+	if f <= 0 || (f < g.threshold && n > 0) {
+		return 0
+	}
+	return int(f)
+}
+
+func (g *slotGate) acquire(n int) { g.inFlight.Add(int32(n)) }
+
+// release frees one slot and wakes the poller if capacity crossed the threshold.
+func (g *slotGate) release() {
+	n := g.inFlight.Add(-1)
+	if n == 0 || g.max-n >= g.threshold {
+		select {
+		case g.wake <- struct{}{}:
+		default:
+		}
+	}
+}
+
+// wait blocks until release signals or ctx is canceled.
+func (g *slotGate) wait(ctx context.Context) error {
+	select {
+	case <-g.wake:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
 // runRESTPoll is the REST long-polling worker loop (also the FALCON fallback).
+//
+// At capacity it waits for a slot to open rather than for pollInterval; the
+// interval paces only empty polls and activation-error backoff.
 func (w *JobWorker) runRESTPoll(ctx context.Context) error {
-	var inFlight atomic.Int32
+	gate := newSlotGate(w.maxConcurrent)
 	var wg sync.WaitGroup
 
 	for ctx.Err() == nil {
-		free := w.maxConcurrent - int(inFlight.Load())
+		free := gate.free()
 		if free <= 0 {
-			if err := sleepCtx(ctx, w.client.clock, w.pollInterval); err != nil {
+			if err := gate.wait(ctx); err != nil {
 				break
 			}
 			continue
@@ -274,13 +346,13 @@ func (w *JobWorker) runRESTPoll(ctx context.Context) error {
 			continue
 		}
 
+		gate.acquire(len(jobs))
 		for i := range jobs {
 			job := newRESTJob(jobs[i], w.client.clock)
-			inFlight.Add(1)
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				defer inFlight.Add(-1)
+				defer gate.release()
 				w.handle(ctx, job)
 			}()
 		}
@@ -408,56 +480,106 @@ func (c *CamundaClient) restAck(ctx context.Context, job *Job, vars map[string]a
 // restCompleteJob completes a job over REST. result must already have been passed
 // through completionResult, or be nil.
 func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[string]any, result *JobResult) {
-	req := camundaapi.NewJobCompletionRequest()
-	if len(vars) > 0 {
-		req.SetVariables(vars)
+	var err error
+	if c.useGeneratedAck() {
+		req := camundaapi.NewJobCompletionRequest()
+		if len(vars) > 0 {
+			req.SetVariables(vars)
+		}
+		if result != nil {
+			req.SetResult(*result)
+		}
+		if job.leaseToken != "" {
+			req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
+		}
+		var resp *http.Response
+		resp, err = c.raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
+			JobCompletionRequest(*req).Execute()
+		err = c.wrapError(resp, err)
+	} else {
+		body := emptyObject
+		if len(vars) > 0 || result != nil || job.leaseToken != "" {
+			if len(vars) == 0 {
+				vars = nil
+			}
+			body, err = json.Marshal(jobCompletionBody{Variables: vars, Result: result, JobLeaseToken: job.leaseToken})
+		}
+		if err == nil {
+			err = c.postJobAck(ctx, "JobAPIService.CompleteJob", job.key, "completion", body)
+		}
 	}
-	if result != nil {
-		req.SetResult(*result)
-	}
-	if job.leaseToken != "" {
-		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
-	}
-	_, err := c.raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
-		JobCompletionRequest(*req).Execute()
 	if err != nil {
 		c.logger.Error("complete job failed", "job", job.Key(), "error", err)
 	}
 }
 
 func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) {
-	req := camundaapi.NewJobFailRequest()
 	retries := job.Retries() - 1
 	if retries < 0 {
 		retries = 0
 	}
-	req.SetRetries(retries)
+	var msg *string
 	if cause != nil {
-		req.SetErrorMessage(cause.Error())
+		m := cause.Error()
+		msg = &m
 	}
-	if job.leaseToken != "" {
-		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
+	var err error
+	if c.useGeneratedAck() {
+		req := camundaapi.NewJobFailRequest()
+		req.SetRetries(retries)
+		if msg != nil {
+			req.SetErrorMessage(*msg)
+		}
+		if job.leaseToken != "" {
+			req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
+		}
+		var resp *http.Response
+		resp, err = c.raw.JobAPI.FailJob(ctx, camundaapi.JobKey(job.key)).
+			JobFailRequest(*req).Execute()
+		err = c.wrapError(resp, err)
+	} else {
+		var body []byte
+		body, err = json.Marshal(jobFailBody{Retries: retries, ErrorMessage: msg, JobLeaseToken: job.leaseToken})
+		if err == nil {
+			err = c.postJobAck(ctx, "JobAPIService.FailJob", job.key, "failure", body)
+		}
 	}
-	_, err := c.raw.JobAPI.FailJob(ctx, camundaapi.JobKey(job.key)).
-		JobFailRequest(*req).Execute()
 	if err != nil {
 		c.logger.Error("fail job failed", "job", job.Key(), "error", err)
 	}
 }
 
 func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *BpmnError) {
-	req := camundaapi.NewJobErrorRequest(bpmn.Code)
-	if bpmn.Message != "" {
-		req.SetErrorMessage(bpmn.Message)
+	var err error
+	if c.useGeneratedAck() {
+		req := camundaapi.NewJobErrorRequest(bpmn.Code)
+		if bpmn.Message != "" {
+			req.SetErrorMessage(bpmn.Message)
+		}
+		if len(bpmn.Variables) > 0 {
+			req.SetVariables(bpmn.Variables)
+		}
+		if job.leaseToken != "" {
+			req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
+		}
+		var resp *http.Response
+		resp, err = c.raw.JobAPI.ThrowJobError(ctx, camundaapi.JobKey(job.key)).
+			JobErrorRequest(*req).Execute()
+		err = c.wrapError(resp, err)
+	} else {
+		b := jobErrorBody{ErrorCode: bpmn.Code, JobLeaseToken: job.leaseToken}
+		if bpmn.Message != "" {
+			b.ErrorMessage = &bpmn.Message
+		}
+		if len(bpmn.Variables) > 0 {
+			b.Variables = bpmn.Variables
+		}
+		var body []byte
+		body, err = json.Marshal(b)
+		if err == nil {
+			err = c.postJobAck(ctx, "JobAPIService.ThrowJobError", job.key, "error", body)
+		}
 	}
-	if len(bpmn.Variables) > 0 {
-		req.SetVariables(bpmn.Variables)
-	}
-	if job.leaseToken != "" {
-		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
-	}
-	_, err := c.raw.JobAPI.ThrowJobError(ctx, camundaapi.JobKey(job.key)).
-		JobErrorRequest(*req).Execute()
 	if err != nil {
 		c.logger.Error("throw job error failed", "job", job.Key(), "error", err)
 	}
