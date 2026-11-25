@@ -2816,6 +2816,35 @@ func (c *CamundaClient) SearchMessageSubscriptions(ctx context.Context, body Mes
 }
 
 // ActivateProbes calls the ActivateProbes operation.
+//
+// Example:
+//
+//	req := camunda.NewProbeActivationRequest([]camunda.ProbeId{
+//		camunda.MustProbeId("validate-configuration/io.camunda:aws-credential:1"),
+//		camunda.MustProbeId("validate-configuration/io.camunda:slack:1"),
+//	}, 10)
+//	req.SetWorker("connectors-runtime")
+//	// A negative timeout turns long polling off: the request returns at once,
+//	// with an empty list when no probe is waiting.
+//	req.SetRequestTimeout(-1)
+//
+//	result, err := client.ActivateProbes(ctx, *req)
+//	if err != nil {
+//		return err
+//	}
+//
+//	// The activated input holds resolved secret values, so log identifiers only.
+//	for _, probe := range result.GetProbes() {
+//		fmt.Printf("Probe %v (%v) must be answered by %d\n", probe.GetProbeKey(), probe.GetProbeId(), probe.GetDeadline())
+//
+//		// Answer before the deadline.
+//		answer := camunda.ProbeOkAnswerRequestAsProbeAnswerRequest(
+//			camunda.NewProbeOkAnswerRequest("OK", map[string]interface{}{"valid": true}),
+//		)
+//		if err := client.AnswerProbe(ctx, probe.GetProbeKey(), answer); err != nil {
+//			return err
+//		}
+//	}
 func (c *CamundaClient) ActivateProbes(ctx context.Context, body ProbeActivationRequest, opts ...func(ApiActivateProbesRequest) ApiActivateProbesRequest) (*ProbeActivationResult, error) {
 	req := c.raw.ProbeAPI.ActivateProbes(ctx)
 	req = req.ProbeActivationRequest(body)
@@ -2830,6 +2859,20 @@ func (c *CamundaClient) ActivateProbes(ctx context.Context, body ProbeActivation
 }
 
 // AnswerProbe calls the AnswerProbe operation.
+//
+// Example:
+//
+//	// Answer with `UNSUPPORTED`, or with `ERROR` and a message, when the worker
+//	// cannot produce a result.
+//	answer := camunda.ProbeOkAnswerRequestAsProbeAnswerRequest(
+//		camunda.NewProbeOkAnswerRequest("OK", map[string]interface{}{
+//			"valid":  true,
+//			"region": "eu-west-1",
+//		}),
+//	)
+//	if err := client.AnswerProbe(ctx, camunda.MustProbeKey("2251799813685249"), answer); err != nil {
+//		return err
+//	}
 func (c *CamundaClient) AnswerProbe(ctx context.Context, probeKey ProbeKey, body ProbeAnswerRequest, opts ...func(ApiAnswerProbeRequest) ApiAnswerProbeRequest) error {
 	req := c.raw.ProbeAPI.AnswerProbe(ctx, probeKey)
 	req = req.ProbeAnswerRequest(body)
@@ -2841,6 +2884,35 @@ func (c *CamundaClient) AnswerProbe(ctx context.Context, probeKey ProbeKey, body
 }
 
 // CreateProbe calls the CreateProbe operation.
+//
+// Example:
+//
+//	// Ask the worker registered for this probe ID a question and wait for its answer.
+//	// `input` is a FEEL expression; secrets are injected by the engine, never by the client.
+//	req := camunda.NewProbeCreationRequest(
+//		camunda.MustProbeId("validate-configuration/io.camunda:aws-credential:1"),
+//		`={region: "eu-west-1", accessKey: camunda.secrets.awsKey}`,
+//	)
+//	req.SetRequestTimeout(10_000)
+//
+//	result, err := client.CreateProbe(ctx, *req)
+//	if camunda.IsNotFound(err) {
+//		// 404: no worker collected the probe, so nothing can answer it.
+//		fmt.Println("No worker is polling this probe ID")
+//		return nil
+//	}
+//	if err != nil {
+//		return err
+//	}
+//
+//	switch {
+//	case result.ProbeOkResult != nil:
+//		fmt.Printf("Worker %s answered: %v\n", result.ProbeOkResult.GetWorker(), result.ProbeOkResult.GetData())
+//	case result.ProbeUnsupportedResult != nil:
+//		fmt.Printf("Worker %s does not support this probe\n", result.ProbeUnsupportedResult.GetWorker())
+//	case result.ProbeErrorResult != nil:
+//		fmt.Printf("Worker %s failed: %s\n", result.ProbeErrorResult.GetWorker(), result.ProbeErrorResult.GetMessage())
+//	}
 func (c *CamundaClient) CreateProbe(ctx context.Context, body ProbeCreationRequest, opts ...func(ApiCreateProbeRequest) ApiCreateProbeRequest) (*ProbeResult, error) {
 	req := c.raw.ProbeAPI.CreateProbe(ctx)
 	req = req.ProbeCreationRequest(body)
