@@ -274,8 +274,8 @@ func pemBytes(inline, path string) ([]byte, error) {
 }
 
 // exemptDrainOps reports whether a request is a drain operation (job
-// completion/failure/error, user-task completion, probe answers) that should
-// bypass the backpressure gate.
+// completion/failure/error, user-task completion, probe activation and answers)
+// that should bypass the backpressure gate.
 func exemptDrainOps(req *http.Request) bool {
 	p := req.URL.Path
 	if strings.Contains(p, "/jobs/") &&
@@ -285,10 +285,15 @@ func exemptDrainOps(req *http.Request) bool {
 	if strings.Contains(p, "/user-tasks/") && strings.HasSuffix(p, "/completion") {
 		return true
 	}
-	// Answering a probe finishes work a worker already activated, like completing
-	// a job. createProbe and the activation long poll hold permits while they wait,
-	// so a gated answer could miss its probe's deadline and be rejected with a 404.
-	if strings.Contains(p, "/probes/") && strings.HasSuffix(p, "/answer") {
+	// Probe activation and answers. createProbe holds its permit until a worker
+	// answers, and an activation long poll holds one while it waits for a probe, so
+	// at the limiter's one-permit floor either could starve the other, and a gated
+	// answer could miss its probe's deadline and be rejected with a 404. The probe
+	// could then never complete on one client. Answering finishes work a worker
+	// already activated, like completing a job, and activation is what delivers the
+	// work to answer. createProbe stays gated: it is the initiating call.
+	if strings.HasSuffix(p, "/probes/activation") ||
+		(strings.Contains(p, "/probes/") && strings.HasSuffix(p, "/answer")) {
 		return true
 	}
 	return false
