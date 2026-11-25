@@ -72,6 +72,70 @@ func TestIsRetryableStatus(t *testing.T) {
 	}
 }
 
+func problem(title string) string {
+	return `{"type":"about:blank","title":"` + title + `","status":504}`
+}
+
+// createProbe answers 504 for outcomes that end the probe: a worker collected it and did
+// not answer by its deadline, or it still waited for its secrets. Retrying would create
+// the probe again and run the worker again, only to fail the same way after another full
+// timeout, so those are attempted once, and the caller still gets the problem body.
+func TestTerminalProbeTimeoutsAreAttemptedOnce(t *testing.T) {
+	for _, title := range []string{"WORKER_DID_NOT_ANSWER", "SECRET_RESOLUTION_TIMEOUT"} {
+		base := &stubRT{statuses: []int{504}, bodies: []string{problem(title)}}
+		resp, err := newTransport(base).RoundTrip(req(t))
+		if err != nil {
+			t.Fatalf("%s: unexpected error: %v", title, err)
+		}
+		if resp.StatusCode != 504 {
+			t.Errorf("%s: expected the 504 back, got %d", title, resp.StatusCode)
+		}
+		if base.calls != 1 {
+			t.Errorf("%s: expected 1 attempt, got %d", title, base.calls)
+		}
+		got, _ := io.ReadAll(resp.Body)
+		if string(got) != problem(title) {
+			t.Errorf("%s: response body not preserved: %q", title, got)
+		}
+	}
+}
+
+// Every other 504 stays transient: a gateway timeout after a leader change
+// (DEADLINE_EXCEEDED), and one whose body is missing or unreadable.
+func TestOtherGatewayTimeoutsAreStillRetried(t *testing.T) {
+	for name, body := range map[string]string{
+		"deadline exceeded": problem("DEADLINE_EXCEEDED"),
+		"empty":             "",
+		"not json":          "<html>Gateway Timeout</html>",
+		"array":             "[]",
+		"title not string":  `{"title":7}`,
+		"no title":          `{"detail":"x"}`,
+	} {
+		base := &stubRT{statuses: []int{504}, bodies: []string{body, body, body, body}}
+		resp, err := newTransport(base).RoundTrip(req(t))
+		if err != nil {
+			t.Fatalf("%s: unexpected error: %v", name, err)
+		}
+		if resp.StatusCode != 504 || base.calls != 4 {
+			t.Errorf("%s: expected 4 attempts ending in 504, got %d attempts, status %d", name, base.calls, resp.StatusCode)
+		}
+	}
+}
+
+// The terminal titles only mean "over" on a 504; on any other retryable status the
+// body is not consulted.
+func TestTerminalTitlesDoNotChangeOtherStatuses(t *testing.T) {
+	for _, status := range []int{429, 502, 503} {
+		base := &stubRT{statuses: []int{status}, bodies: []string{problem("WORKER_DID_NOT_ANSWER")}}
+		if _, err := newTransport(base).RoundTrip(req(t)); err != nil {
+			t.Fatal(err)
+		}
+		if base.calls != 4 {
+			t.Errorf("status %d: expected 4 attempts, got %d", status, base.calls)
+		}
+	}
+}
+
 func TestRetriesUntilSuccess(t *testing.T) {
 	base := &stubRT{statuses: []int{503, 503, 200}}
 	resp, err := newTransport(base).RoundTrip(req(t))
