@@ -226,6 +226,7 @@ import (
 \t"encoding/json"
 \t"fmt"
 \t"regexp"
+\t"unicode/utf8"
 )
 
 // {_BASE_TYPE} is the base type the OpenAPI generator uses for Camunda semantic
@@ -263,10 +264,11 @@ type keySpec struct {{
 }}
 
 func (s keySpec) validate(v string) error {{
-\tif s.min > 0 && len(v) < s.min {{
+\t// minLength/maxLength count characters, not bytes.
+\tif n := utf8.RuneCountInString(v); s.min > 0 && n < s.min {{
 \t\treturn fmt.Errorf("%s: value %q is shorter than the minimum length %d", s.name, v, s.min)
 \t}}
-\tif s.max > 0 && len(v) > s.max {{
+\tif n := utf8.RuneCountInString(v); s.max > 0 && n > s.max {{
 \t\treturn fmt.Errorf("%s: value %q is longer than the maximum length %d", s.name, v, s.max)
 \t}}
 \tif s.pattern != nil && !s.pattern.MatchString(v) {{

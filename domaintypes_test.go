@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
 )
 
 // TestEverySemanticKeyHasAGeneratedType is a class-scoped guard for the Domain
@@ -223,5 +225,20 @@ func goTypeString(e ast.Expr) string {
 		return goTypeString(x.X) + "." + x.Sel.Name
 	default:
 		return ""
+	}
+}
+
+// Length constraints in the spec count characters, not bytes. ProbeId allows 1 to 256
+// non-whitespace characters, so 256 multibyte characters are valid (768 bytes) and 257 are not.
+func TestKeyLengthIsMeasuredInCharacters(t *testing.T) {
+	valid := strings.Repeat("界", 256)
+	if _, err := camunda.NewProbeId(valid); err != nil {
+		t.Errorf("256 multibyte characters rejected: %v", err)
+	}
+	if _, err := camunda.NewProbeId(valid + "界"); err == nil {
+		t.Error("257 multibyte characters accepted, want a maximum length error")
+	}
+	if _, err := camunda.NewProbeId(""); err == nil {
+		t.Error("empty probe id accepted, want a minimum length error")
 	}
 }
