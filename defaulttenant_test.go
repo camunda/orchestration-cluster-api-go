@@ -410,6 +410,59 @@ func TestActivateJobsDefaultTenant(t *testing.T) {
 	})
 }
 
+// TestActivateProbesDefaultTenant applies the same rule 2 to activateProbes, the second
+// operation whose body carries an optional tenantIds list: with tenantFilter PROVIDED or
+// unset and no ids (absent or empty), it sends [<effective default tenant>]; ASSIGNED leaves
+// the list alone; explicit ids always win.
+func TestActivateProbesDefaultTenant(t *testing.T) {
+	probeID := camundaapi.MustProbeId("validate-configuration/io.camunda:aws-credential:1")
+	newActivation := func() *camundaapi.ProbeActivationRequest {
+		return camundaapi.NewProbeActivationRequest([]camundaapi.ProbeId{probeID}, 10)
+	}
+	cases := []struct {
+		name    string
+		options []camunda.Option
+		mutate  func(*camundaapi.ProbeActivationRequest)
+		want    []string // nil: tenantIds must be absent
+	}{
+		{"NoConfiguredDefaultSendsDefaultIdentifier", nil, nil, []string{camunda.DefaultTenantIdentifier}},
+		{"EmptyListTreatedAsAbsent", nil, func(r *camundaapi.ProbeActivationRequest) {
+			r.SetTenantIds([]camundaapi.TenantId{})
+		}, []string{camunda.DefaultTenantIdentifier}},
+		{"ConfiguredDefaultSent", []camunda.Option{camunda.WithDefaultTenantID("acme")}, nil, []string{"acme"}},
+		{"ProvidedFilterInjectsDefault", nil, func(r *camundaapi.ProbeActivationRequest) {
+			r.SetTenantFilter(camundaapi.TENANTFILTERENUM_PROVIDED)
+		}, []string{camunda.DefaultTenantIdentifier}},
+		{"ExplicitTenantIdsWin", []camunda.Option{camunda.WithDefaultTenantID("acme")}, func(r *camundaapi.ProbeActivationRequest) {
+			r.SetTenantIds([]camundaapi.TenantId{camundaapi.MustTenantId("explicit")})
+		}, []string{"explicit"}},
+		{"AssignedFilterLeavesTenantIdsAlone", []camunda.Option{camunda.WithDefaultTenantID("acme")}, func(r *camundaapi.ProbeActivationRequest) {
+			r.SetTenantFilter(camundaapi.TENANTFILTERENUM_ASSIGNED)
+		}, nil},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			bc := newBodyCapture(t)
+			client := bc.client(t, tc.options...)
+			req := newActivation()
+			req.TenantFilter = nil
+			if tc.mutate != nil {
+				tc.mutate(req)
+			}
+			_, _ = client.ActivateProbes(context.Background(), *req)
+			if tc.want == nil {
+				if _, present := bc.body["tenantIds"]; present {
+					t.Errorf("tenantIds present (%v), want absent", bc.body["tenantIds"])
+				}
+				return
+			}
+			if got := bc.tenantIDsOf(); !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("tenantIds = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
 // TestDefaultTenantSurvivesBodyReplacingOpt: a body-builder opt that REPLACES
 // the request body (r.<Body>(replacement)) must not discard the configured
 // default tenant — the facade defaults the tenant on the final body, after the
