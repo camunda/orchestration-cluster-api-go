@@ -85,11 +85,17 @@ var handwrittenOps = map[string]bool{
 	"CreateProcessInstance": true,
 }
 
-// tenantIDsBodyHook is the hand-written default-tenant helper (in
-// defaulttenant.go) for bodies the spec metadata flags with
+// tenantIDsHook names the hand-written default-tenant helper (in
+// defaulttenant.go) for a body the spec metadata flags with
 // optionalTenantIdsInBody: an optional tenantIds list (plus a tenantFilter)
-// instead of a single tenantId (activateJobs). It injects the effective default
-// tenant only when the list is unset/empty and the filter is PROVIDED or unset.
+// instead of a single tenantId (activateJobs, activateProbes). The name follows
+// the body type, withDefaultTenant<Body without its Request suffix>, so each such
+// operation reaches the helper for its own body type
+// (JobActivationRequest -> withDefaultTenantJobActivation). The helper injects the
+// effective default tenant only when the list is unset/empty and the filter is
+// PROVIDED or unset. Like reqTenantHookPrefix, it is derived from the metadata,
+// never from an operation list, and a missing helper fails the build rather than
+// silently dropping injection.
 //
 // Every other JSON body is covered by optionalTenantIdInBodyVariants (see
 // tenantShapeOf): when the body — or, for a oneOf union, any of its variants —
@@ -97,7 +103,9 @@ var handwrittenOps = map[string]bool{
 // tenant (the configured WithDefaultTenantID / CAMUNDA_DEFAULT_TENANT_ID, or
 // "<default>") when the caller left it unset, matching the Camunda Java client.
 // No operation list is maintained: a new tenant-scoped body is covered on regen.
-const tenantIDsBodyHook = "withDefaultTenantJobActivation"
+func tenantIDsHook(bodyBuilder string) string {
+	return "withDefaultTenant" + strings.TrimSuffix(bodyBuilder, "Request")
+}
 
 // reqTenantHookPrefix names the hand-written default-tenant helper (in
 // defaulttenant.go) for an operation whose body the spec metadata flags with
@@ -248,7 +256,7 @@ func generateFacade(clientDir, metadataPath, examplesDir string) (string, int, e
 			op.bodyType = r.typeString(ast.NewIdent(bi.builder))
 			op.bodyBuilder = bi.builder
 			if bi.tenantIDsInBody {
-				op.tenantHook = tenantIDsBodyHook
+				op.tenantHook = tenantIDsHook(bi.builder)
 			} else if op.tenant, err = tenantShapeOf(bi.builder, tenantVariantsOf(bi), structs, r); err != nil {
 				return "", 0, fmt.Errorf("%s: %w", op.name, err)
 			}
