@@ -99,7 +99,11 @@ func (c *CamundaClient) postJobAck(ctx context.Context, op, jobKey, suffix strin
 		return &APIError{Status: resp.StatusCode, Body: string(b)}
 	}
 	if resp.ContentLength != 0 {
-		_, _ = io.Copy(io.Discard, resp.Body)
+		// Propagate drain errors (truncated body, deadline expiry) exactly as
+		// the generated path's io.ReadAll would.
+		if _, err := io.Copy(io.Discard, resp.Body); err != nil {
+			return err
+		}
 	}
 	return nil
 }

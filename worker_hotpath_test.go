@@ -370,3 +370,34 @@ func BenchmarkJobWorkerThroughput(b *testing.B) {
 	cancel()
 	<-done
 }
+
+// TestRESTAckLightPathLogsDrainError pins that a truncated 2xx ack response is
+// reported as an ack failure, as the generated client's io.ReadAll would.
+func TestRESTAckLightPathLogsDrainError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.Header().Set("Content-Length", "10")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("x"))
+	}))
+	defer srv.Close()
+	c, err := New(WithRestAddress(srv.URL), WithLogLevel(LogOff))
+	if err != nil {
+		t.Fatal(err)
+	}
+	buf := &syncBuffer{}
+	c.logger = diag.New(diag.LevelTrace, buf, c.clock)
+	c.restAck(context.Background(), &Job{key: "9", retries: 1}, nil, nil)
+	if out := buf.String(); !strings.Contains(out, "complete job failed") {
+		t.Fatalf("log = %q, want complete-job failure for truncated body", out)
+	}
+}
+
+// TestSlotGateClampsHugeMax pins that an out-of-range concurrency does not
+// overflow the int32 gate into a negative capacity.
+func TestSlotGateClampsHugeMax(t *testing.T) {
+	g := newSlotGate(int(^uint(0) >> 1))
+	if g.max <= 0 || g.threshold <= 0 {
+		t.Fatalf("max=%d threshold=%d, want positive", g.max, g.threshold)
+	}
+}

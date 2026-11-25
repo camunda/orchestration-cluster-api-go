@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"runtime/debug"
 	"sync"
@@ -270,6 +271,9 @@ type slotGate struct {
 func newSlotGate(maxConcurrent int) *slotGate {
 	if maxConcurrent < 1 {
 		maxConcurrent = 1
+	}
+	if maxConcurrent > math.MaxInt32 {
+		maxConcurrent = math.MaxInt32
 	}
 	return &slotGate{
 		max:       int32(maxConcurrent),
