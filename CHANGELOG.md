@@ -1,3 +1,10 @@
+# [11.0.0-alpha.22](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.21...v11.0.0-alpha.22) (2026-11-25)
+
+
+### Performance Improvements
+
+* **worker:** event-driven slot wake-up and lighter REST ack hot path ([#235](https://github.com/camunda/orchestration-cluster-api-go/issues/235)) ([39594d7](https://github.com/camunda/orchestration-cluster-api-go/commit/39594d7effc8264c3bb34c3f7f72763f7851dbf5)), closes [#234](https://github.com/camunda/orchestration-cluster-api-go/issues/234)
+
 # [11.0.0-alpha.21](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.20...v11.0.0-alpha.21) (2026-11-24)
 
 
