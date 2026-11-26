@@ -302,7 +302,6 @@ func TestJobWorkerReceivesPushedJobOverFalcon(t *testing.T) {
 	}
 }
 
-<<<<<<< HEAD
 // A worker restricted to a non-default tenant must not use FALCON, whose
 // subscription carries no gateway-enforced tenant filter.
 func TestJobWorkerWithNonDefaultTenantBypassesFalcon(t *testing.T) {
@@ -354,7 +353,7 @@ func TestJobWorkerWithNonDefaultTenantBypassesFalcon(t *testing.T) {
 		})
 	}
 }
-=======
+
 // TestConcurrentJobWorkersAllSubscribeOverFalcon is the regression test for
 // https://github.com/camunda/orchestration-cluster-api-go/issues/240: workers
 // started concurrently on one client must all wait for the in-flight capability
@@ -484,4 +483,3 @@ func TestConcurrentJobWorkersSurviveCancelledProber(t *testing.T) {
 	cancelProber()
 	waitSubscribed(t, subscribed, restPolls, n)
 }
->>>>>>> 0498e51 (fix: concurrent JobWorkers wait for in-flight FALCON probe (#241))
