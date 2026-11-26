@@ -36,7 +36,10 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	if !c.cfg.FalconEnabled() {
 		return nil
 	}
-	skipBackoff := false
+	// One deadline for the whole call, shared by waits and any re-probe, so
+	// repeated cancelled probers can't stretch it past falconDetectTimeout.
+	dctx, dcancel := context.WithTimeout(ctx, falconDetectTimeout)
+	defer dcancel()
 retry:
 	c.falconMu.Lock()
 	if c.falconResolved {
@@ -49,11 +52,9 @@ retry:
 	// started workers don't lock themselves into REST polling (issue #240).
 	if done := c.falconProbeDone; done != nil {
 		c.falconMu.Unlock()
-		wctx, cancel := context.WithTimeout(ctx, falconDetectTimeout)
-		defer cancel()
 		select {
 		case <-done:
-		case <-wctx.Done():
+		case <-dctx.Done():
 			return nil
 		}
 		c.falconMu.Lock()
@@ -63,14 +64,13 @@ retry:
 		// worker's Run ctx was cancelled) while ours is still live: that says
 		// nothing about the gateway, so probe again ourselves rather than
 		// inheriting the failure and staying on REST for good.
-		if !resolved && proberCanceled && ctx.Err() == nil {
-			skipBackoff = true
+		if !resolved && proberCanceled && dctx.Err() == nil {
 			goto retry
 		}
 		return caps // nil if the probe failed transiently or found stock Camunda
 	}
 	// Inside the retry backoff after a transient failure: fall back to REST.
-	if !skipBackoff && !c.falconLastProbe.IsZero() && c.clock.Now().Sub(c.falconLastProbe) < falconProbeRetryInterval {
+	if !c.falconLastProbe.IsZero() && c.clock.Now().Sub(c.falconLastProbe) < falconProbeRetryInterval {
 		c.falconMu.Unlock()
 		return nil
 	}
@@ -93,9 +93,7 @@ retry:
 	// Probe WITHOUT holding the mutex; concurrent callers wait on done. Honour the
 	// caller's context but cap it at falconDetectTimeout; a ctx-canceled probe is
 	// transient and retried on a later call.
-	pctx, cancel := context.WithTimeout(ctx, falconDetectTimeout)
-	caps, err := falcon.Detect(pctx, v2BaseURL(c.cfg.RestAddress, c.cfg.ExactRestAddress), dialer.HTTPClient)
-	cancel()
+	caps, err := falcon.Detect(dctx, v2BaseURL(c.cfg.RestAddress, c.cfg.ExactRestAddress), dialer.HTTPClient)
 
 	c.falconMu.Lock()
 	c.falconProbeDone = nil
@@ -103,6 +101,12 @@ retry:
 	// Record whether the failure came from the prober's own ctx (not the
 	// gateway), so waiters with a live ctx re-probe instead of inheriting it.
 	c.falconProbeCanceled = err != nil && ctx.Err() != nil
+	if c.falconProbeCanceled {
+		// Not a gateway failure: don't arm the retry backoff, so a caller that
+		// arrives before a waiter re-probes starts a fresh probe instead of
+		// falling back to REST.
+		c.falconLastProbe = time.Time{}
+	}
 	if err != nil {
 		c.falconMu.Unlock()
 		c.logger.Debug("falcon detection failed; will retry", "error", err)

@@ -517,7 +517,9 @@ func TestConcurrentJobWorkersSurviveCancelledProber(t *testing.T) {
 		w := c.NewJobWorker("email", handler)
 		go func() { _ = w.Run(ctx) }()
 	}
-	time.Sleep(100 * time.Millisecond) // let the waiters block on the in-flight probe
+	// No sync needed: workers that are waiting re-probe, and workers that
+	// arrive after the cancelled probe ends find no backoff armed and probe
+	// themselves, so every interleaving must end on FALCON.
 	cancelProber()
 	waitSubscribed(t, subscribed, restPolls, n)
 }
