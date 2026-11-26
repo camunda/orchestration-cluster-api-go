@@ -1,3 +1,10 @@
+## [10.4.1](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.4.0...v10.4.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* concurrent JobWorkers wait for in-flight FALCON probe (backport [#241](https://github.com/camunda/orchestration-cluster-api-go/issues/241) to stable/10) ([#242](https://github.com/camunda/orchestration-cluster-api-go/issues/242)) ([aa78f14](https://github.com/camunda/orchestration-cluster-api-go/commit/aa78f1445ec130ca569b0c90e2b7d28ce0e3a8b7))
+
 # [10.4.0](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.3.0...v10.4.0) (2026-11-21)
 
 
