@@ -41,15 +41,16 @@ type CamundaClient struct {
 	// client's lifetime. falconMu guards a probe that caches a definitive result
 	// (nano detected, or confirmed stock) but retries after a transient failure;
 	// falconProdOnce builds the shared create producer on first stream create.
-	falconMu        sync.Mutex
-	falconResolved  bool
-	falconProbeDone chan struct{} // non-nil while a probe is in flight; closed when it ends
-	falconLastProbe time.Time
-	falconCapsV     *falcon.Caps
-	falconDialer    *falcon.Dialer
-	falconProdOnce  sync.Once
-	falconProd      *falcon.Producer
-	falconProdErr   error
+	falconMu            sync.Mutex
+	falconResolved      bool
+	falconProbeDone     chan struct{} // non-nil while a probe is in flight; closed when it ends
+	falconProbeCanceled bool          // last probe failed because the prober's own ctx ended
+	falconLastProbe     time.Time
+	falconCapsV         *falcon.Caps
+	falconDialer        *falcon.Dialer
+	falconProdOnce      sync.Once
+	falconProd          *falcon.Producer
+	falconProdErr       error
 }
 
 // New resolves configuration from environment variables and options, then builds

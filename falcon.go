@@ -36,6 +36,8 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	if !c.cfg.FalconEnabled() {
 		return nil
 	}
+	skipBackoff := false
+retry:
 	c.falconMu.Lock()
 	if c.falconResolved {
 		caps := c.falconCapsV
@@ -55,12 +57,20 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 			return nil
 		}
 		c.falconMu.Lock()
-		caps := c.falconCapsV
+		caps, resolved, proberCanceled := c.falconCapsV, c.falconResolved, c.falconProbeCanceled
 		c.falconMu.Unlock()
+		// The probe was aborted by the PROBER's own context (e.g. another
+		// worker's Run ctx was cancelled) while ours is still live: that says
+		// nothing about the gateway, so probe again ourselves rather than
+		// inheriting the failure and staying on REST for good.
+		if !resolved && proberCanceled && ctx.Err() == nil {
+			skipBackoff = true
+			goto retry
+		}
 		return caps // nil if the probe failed transiently or found stock Camunda
 	}
 	// Inside the retry backoff after a transient failure: fall back to REST.
-	if !c.falconLastProbe.IsZero() && c.clock.Now().Sub(c.falconLastProbe) < falconProbeRetryInterval {
+	if !skipBackoff && !c.falconLastProbe.IsZero() && c.clock.Now().Sub(c.falconLastProbe) < falconProbeRetryInterval {
 		c.falconMu.Unlock()
 		return nil
 	}
@@ -90,6 +100,9 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	c.falconMu.Lock()
 	c.falconProbeDone = nil
 	defer close(done)
+	// Record whether the failure came from the prober's own ctx (not the
+	// gateway), so waiters with a live ctx re-probe instead of inheriting it.
+	c.falconProbeCanceled = err != nil && ctx.Err() != nil
 	if err != nil {
 		c.falconMu.Unlock()
 		c.logger.Debug("falcon detection failed; will retry", "error", err)
