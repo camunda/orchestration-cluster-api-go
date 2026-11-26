@@ -393,3 +393,133 @@ func TestJobWorkerReceivesPushedJobOverFalcon(t *testing.T) {
 		t.Error("handler was not invoked")
 	}
 }
+
+// TestConcurrentJobWorkersAllSubscribeOverFalcon is the regression test for
+// https://github.com/camunda/orchestration-cluster-api-go/issues/240: workers
+// started concurrently on one client must all wait for the in-flight capability
+// probe and subscribe over FALCON, rather than all but the probe winner locking
+// into REST polling.
+// concurrentFalconGateway is a fake FALCON-capable gateway whose topology
+// handler is supplied by the test; it counts FALCON subscriptions and REST polls.
+func concurrentFalconGateway(t *testing.T, topology http.HandlerFunc) (srv *httptest.Server, subscribed, restPolls *atomic.Int32) {
+	t.Helper()
+	subscribed, restPolls = new(atomic.Int32), new(atomic.Int32)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v2/topology", topology)
+	mux.HandleFunc("/v2/jobs/activation", func(w http.ResponseWriter, _ *http.Request) {
+		restPolls.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"jobs":[]}`))
+	})
+	mux.HandleFunc("/falcon", func(w http.ResponseWriter, r *http.Request) {
+		c, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer func() { _ = c.CloseNow() }()
+		ctx := r.Context()
+		sub, err := wsReadJSON(ctx, c)
+		if err != nil || sub["type"] != "subscribe" {
+			return
+		}
+		subscribed.Add(1)
+		wsWriteJSON(ctx, c, map[string]any{"type": "welcome", "heartbeatMs": 15000})
+		for {
+			if _, err := wsReadJSON(ctx, c); err != nil {
+				return
+			}
+		}
+	})
+	srv = httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+	return srv, subscribed, restPolls
+}
+
+func writeNanoTopology(w http.ResponseWriter) {
+	_ = json.NewEncoder(w).Encode(map[string]any{"nano": map[string]any{"falconPath": "/falcon"}})
+}
+
+func waitSubscribed(t *testing.T, subscribed, restPolls *atomic.Int32, n int32) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for subscribed.Load() < n && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if got := subscribed.Load(); got != n {
+		t.Fatalf("%d of %d concurrent workers subscribed over FALCON (REST polls: %d)", got, n, restPolls.Load())
+	}
+	if got := restPolls.Load(); got != 0 {
+		t.Errorf("workers polled REST %d times; want all on FALCON", got)
+	}
+}
+
+// TestConcurrentJobWorkersAllSubscribeOverFalcon is the regression test for
+// https://github.com/camunda/orchestration-cluster-api-go/issues/240: workers
+// started concurrently on one client must all wait for the in-flight capability
+// probe and subscribe over FALCON, rather than all but the probe winner locking
+// into REST polling.
+func TestConcurrentJobWorkersAllSubscribeOverFalcon(t *testing.T) {
+	const n = 10
+	srv, subscribed, restPolls := concurrentFalconGateway(t, func(w http.ResponseWriter, _ *http.Request) {
+		time.Sleep(200 * time.Millisecond) // keep the probe in flight while the others start
+		writeNanoTopology(w)
+	})
+	c, err := camunda.New(camunda.WithRestAddress(srv.URL+"/v2"), camunda.WithFalcon(true))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	start := make(chan struct{})
+	for i := 0; i < n; i++ {
+		w := c.NewJobWorker("email", func(context.Context, *camunda.Job) (map[string]any, error) {
+			return nil, nil
+		})
+		go func() { <-start; _ = w.Run(ctx) }()
+	}
+	close(start)
+	waitSubscribed(t, subscribed, restPolls, n)
+}
+
+// TestConcurrentJobWorkersSurviveCancelledProber: when the worker running the
+// first probe has its ctx cancelled mid-probe, workers waiting on that probe
+// with a live ctx must re-probe and still subscribe over FALCON, not inherit
+// the prober's cancellation and stay on REST.
+func TestConcurrentJobWorkersSurviveCancelledProber(t *testing.T) {
+	const n = 5
+	var probes atomic.Int32
+	firstProbe := make(chan struct{})
+	srv, subscribed, restPolls := concurrentFalconGateway(t, func(w http.ResponseWriter, r *http.Request) {
+		if probes.Add(1) == 1 {
+			close(firstProbe)
+			<-r.Context().Done() // hang until the prober's ctx is cancelled
+			return
+		}
+		writeNanoTopology(w)
+	})
+	c, err := camunda.New(camunda.WithRestAddress(srv.URL+"/v2"), camunda.WithFalcon(true))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	handler := func(context.Context, *camunda.Job) (map[string]any, error) { return nil, nil }
+
+	proberCtx, cancelProber := context.WithCancel(context.Background())
+	go func() { _ = c.NewJobWorker("email", handler).Run(proberCtx) }()
+	select {
+	case <-firstProbe:
+	case <-time.After(5 * time.Second):
+		t.Fatal("first probe never arrived")
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	for i := 0; i < n; i++ {
+		w := c.NewJobWorker("email", handler)
+		go func() { _ = w.Run(ctx) }()
+	}
+	// No sync needed: workers that are waiting re-probe, and workers that
+	// arrive after the cancelled probe ends find no backoff armed and probe
+	// themselves, so every interleaving must end on FALCON.
+	cancelProber()
+	waitSubscribed(t, subscribed, restPolls, n)
+}
