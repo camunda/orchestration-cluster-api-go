@@ -2,6 +2,7 @@ package falcon
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -163,3 +164,42 @@ func containsSuffix(ss []string, suffix string) bool {
 	}
 	return false
 }
+
+// Cancellation after the 200 headers but before the body completes is a
+// transient failure, not a "stock gateway" verdict: Detect must return the
+// context error so the caller re-probes rather than caching nil caps.
+func TestDetectCanceledMidBodyReturnsContextError(t *testing.T) {
+	release := make(chan struct{})
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"nano":{`))
+		w.(http.Flusher).Flush()
+		select {
+		case <-release:
+		case <-r.Context().Done():
+		}
+	}))
+	defer srv.Close()
+	defer close(release)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	client := &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+		resp, err := http.DefaultTransport.RoundTrip(r)
+		if err == nil {
+			cancel() // headers have arrived; cancel while the body is in flight
+		}
+		return resp, err
+	})}
+	caps, err := Detect(ctx, srv.URL+"/v2", client)
+	if caps != nil {
+		t.Fatalf("caps = %+v, want nil", caps)
+	}
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("err = %v, want context.Canceled", err)
+	}
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
