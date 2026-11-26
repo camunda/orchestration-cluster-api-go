@@ -76,6 +76,11 @@ func Detect(ctx context.Context, v2BaseURL string, httpClient *http.Client) (*Ca
 
 	var body topology
 	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		// A canceled/expired context mid-body is transient, not a stock answer:
+		// surface it so the caller re-probes instead of caching "no FALCON".
+		if cerr := ctx.Err(); cerr != nil {
+			return nil, cerr
+		}
 		// Reached a 2xx endpoint but the body isn't a topology: treat as stock
 		// (definitive) rather than a transient failure, so we don't re-probe forever.
 		return nil, nil

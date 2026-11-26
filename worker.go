@@ -175,6 +175,10 @@ func (w *JobWorker) Run(ctx context.Context) error {
 			return ctx.Err()
 		}
 	}
+	if w.client.cfg.FalconEnabled() && ctx.Err() == nil {
+		w.client.logger.Info("falcon enabled but command stream not in use; worker using REST job polling",
+			"type", w.jobType)
+	}
 	return w.runRESTPoll(ctx)
 }
 
