@@ -30,6 +30,8 @@ const falconProbeRetryInterval = 30 * time.Second
 // honours the caller's context (bounded by falconDetectTimeout), so a short request
 // deadline can't make it exceed the caller's budget; because a ctx-canceled probe
 // is treated as transient, a brief first deadline never permanently forces REST.
+// Callers that arrive while a probe is in flight wait for its result (bounded by
+// falconDetectTimeout and ctx) instead of falling back to REST.
 func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	if !c.cfg.FalconEnabled() {
 		return nil
@@ -40,10 +42,25 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 		c.falconMu.Unlock()
 		return caps
 	}
-	// Another goroutine is already probing, or we're inside the retry backoff after
-	// a transient failure: fall back to REST immediately rather than blocking.
-	if c.falconProbing ||
-		(!c.falconLastProbe.IsZero() && c.clock.Now().Sub(c.falconLastProbe) < falconProbeRetryInterval) {
+	// Another goroutine is already probing: wait for its result (bounded by
+	// falconDetectTimeout and ctx) rather than returning nil, so concurrently
+	// started workers don't lock themselves into REST polling (issue #240).
+	if done := c.falconProbeDone; done != nil {
+		c.falconMu.Unlock()
+		wctx, cancel := context.WithTimeout(ctx, falconDetectTimeout)
+		defer cancel()
+		select {
+		case <-done:
+		case <-wctx.Done():
+			return nil
+		}
+		c.falconMu.Lock()
+		caps := c.falconCapsV
+		c.falconMu.Unlock()
+		return caps // nil if the probe failed transiently or found stock Camunda
+	}
+	// Inside the retry backoff after a transient failure: fall back to REST.
+	if !c.falconLastProbe.IsZero() && c.clock.Now().Sub(c.falconLastProbe) < falconProbeRetryInterval {
 		c.falconMu.Unlock()
 		return nil
 	}
@@ -57,13 +74,13 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 		}
 		c.falconDialer = d
 	}
-	c.falconProbing = true
+	done := make(chan struct{})
+	c.falconProbeDone = done
 	c.falconLastProbe = c.clock.Now()
 	dialer := c.falconDialer
 	c.falconMu.Unlock()
 
-	// Probe WITHOUT holding the mutex, so concurrent callers fall back to REST
-	// immediately instead of serializing behind a network round-trip. Honour the
+	// Probe WITHOUT holding the mutex; concurrent callers wait on done. Honour the
 	// caller's context but cap it at falconDetectTimeout; a ctx-canceled probe is
 	// transient and retried on a later call.
 	pctx, cancel := context.WithTimeout(ctx, falconDetectTimeout)
@@ -71,7 +88,8 @@ func (c *CamundaClient) falconCaps(ctx context.Context) *falcon.Caps {
 	cancel()
 
 	c.falconMu.Lock()
-	c.falconProbing = false
+	c.falconProbeDone = nil
+	defer close(done)
 	if err != nil {
 		c.falconMu.Unlock()
 		c.logger.Debug("falcon detection failed; will retry", "error", err)

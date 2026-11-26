@@ -393,3 +393,70 @@ func TestJobWorkerReceivesPushedJobOverFalcon(t *testing.T) {
 		t.Error("handler was not invoked")
 	}
 }
+
+// TestConcurrentJobWorkersAllSubscribeOverFalcon is the regression test for
+// https://github.com/camunda/orchestration-cluster-api-go/issues/240: workers
+// started concurrently on one client must all wait for the in-flight capability
+// probe and subscribe over FALCON, rather than all but the probe winner locking
+// into REST polling.
+func TestConcurrentJobWorkersAllSubscribeOverFalcon(t *testing.T) {
+	const n = 10
+	var subscribed, restPolls atomic.Int32
+	mux := http.NewServeMux()
+	mux.HandleFunc("/v2/topology", func(w http.ResponseWriter, _ *http.Request) {
+		time.Sleep(200 * time.Millisecond) // keep the probe in flight while the others start
+		_ = json.NewEncoder(w).Encode(map[string]any{"nano": map[string]any{"falconPath": "/falcon"}})
+	})
+	mux.HandleFunc("/v2/jobs/activation", func(w http.ResponseWriter, _ *http.Request) {
+		restPolls.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"jobs":[]}`))
+	})
+	mux.HandleFunc("/falcon", func(w http.ResponseWriter, r *http.Request) {
+		c, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer func() { _ = c.CloseNow() }()
+		ctx := r.Context()
+		sub, err := wsReadJSON(ctx, c)
+		if err != nil || sub["type"] != "subscribe" {
+			return
+		}
+		subscribed.Add(1)
+		wsWriteJSON(ctx, c, map[string]any{"type": "welcome", "heartbeatMs": 15000})
+		for {
+			if _, err := wsReadJSON(ctx, c); err != nil {
+				return
+			}
+		}
+	})
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+
+	c, err := camunda.New(camunda.WithRestAddress(srv.URL+"/v2"), camunda.WithFalcon(true))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	start := make(chan struct{})
+	for i := 0; i < n; i++ {
+		w := c.NewJobWorker("email", func(context.Context, *camunda.Job) (map[string]any, error) {
+			return nil, nil
+		})
+		go func() { <-start; _ = w.Run(ctx) }()
+	}
+	close(start)
+
+	deadline := time.Now().Add(5 * time.Second)
+	for subscribed.Load() < n && time.Now().Before(deadline) {
+		time.Sleep(10 * time.Millisecond)
+	}
+	if got := subscribed.Load(); got != n {
+		t.Fatalf("%d of %d concurrent workers subscribed over FALCON (REST polls: %d)", got, n, restPolls.Load())
+	}
+	if got := restPolls.Load(); got != 0 {
+		t.Errorf("workers polled REST %d times; want all on FALCON", got)
+	}
+}
