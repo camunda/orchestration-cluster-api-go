@@ -37,6 +37,10 @@ func ProcessDefinitionResumptionInstructionByKeyAsProcessDefinitionResumptionIns
 
 // Unmarshal JSON data into one of the pointers in the struct
 func (dst *ProcessDefinitionResumptionInstruction) UnmarshalJSON(data []byte) error {
+	// Replace semantics: start from a zero receiver so decoding over a previously
+	// populated value never keeps a branch from the earlier decode, which
+	// MarshalJSON would then send (orchestration-cluster-api-go#238).
+	*dst = ProcessDefinitionResumptionInstruction{}
 	var err error
 	match := 0
 	// try to unmarshal data into ProcessDefinitionResumptionInstructionById
