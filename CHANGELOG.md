@@ -1,3 +1,10 @@
+## [10.4.2](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.4.1...v10.4.2) (2026-11-27)
+
+
+### Bug Fixes
+
+* reset generated oneOf wrappers before decoding (backport [#243](https://github.com/camunda/orchestration-cluster-api-go/issues/243) to stable/10) ([#244](https://github.com/camunda/orchestration-cluster-api-go/issues/244)) ([c5330ea](https://github.com/camunda/orchestration-cluster-api-go/commit/c5330ead9d34314e746b541fef1ed56758194d60))
+
 ## [10.4.1](https://github.com/camunda/orchestration-cluster-api-go/compare/v10.4.0...v10.4.1) (2026-11-26)
 
 
