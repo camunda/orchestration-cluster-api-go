@@ -45,6 +45,10 @@ func AgentInstanceTextContentAsAgentInstanceMessageContent(v *AgentInstanceTextC
 
 // Unmarshal JSON data into one of the pointers in the struct
 func (dst *AgentInstanceMessageContent) UnmarshalJSON(data []byte) error {
+	// Replace semantics: start from a zero receiver so decoding over a previously
+	// populated value never keeps a branch from the earlier decode, which
+	// MarshalJSON would then send (orchestration-cluster-api-go#238).
+	*dst = AgentInstanceMessageContent{}
 	var err error
 	// use discriminator value to speed up the lookup
 	var jsonDict map[string]interface{}
