@@ -61,15 +61,17 @@ func TestOneOfWrapperReplacesPreviousDecode(t *testing.T) {
 	})
 
 	t.Run("a failed decode does not keep the earlier value", func(t *testing.T) {
+		// The earlier value is a different branch from the one the failing
+		// payload selects, so only the receiver reset can clear it.
 		var a camundaapi.ProbeAnswerRequest
-		if err := json.Unmarshal([]byte(`{"outcome":"OK","data":{}}`), &a); err != nil {
-			t.Fatalf("decode OK: %v", err)
+		if err := json.Unmarshal([]byte(`{"outcome":"ERROR","message":"x"}`), &a); err != nil {
+			t.Fatalf("decode ERROR: %v", err)
 		}
 		if err := json.Unmarshal([]byte(`{"outcome":"OK","data":5}`), &a); err == nil {
 			t.Fatalf("expected an error decoding an invalid OK payload")
 		}
-		if a.ProbeOkAnswerRequest != nil {
-			t.Errorf("stale branch survived a failed decode")
+		if a.ProbeErrorAnswerRequest != nil || a.ProbeOkAnswerRequest != nil || a.ProbeUnsupportedAnswerRequest != nil {
+			t.Errorf("wrapper kept a branch after a failed decode: %+v", a)
 		}
 	})
 }
