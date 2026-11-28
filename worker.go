@@ -406,9 +406,9 @@ func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[
 	if job.leaseToken != "" {
 		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
 	}
-	_, err := c.raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
+	resp, err := c.raw.JobAPI.CompleteJob(ctx, camundaapi.JobKey(job.key)).
 		JobCompletionRequest(*req).Execute()
-	if err != nil {
+	if err := c.wrapError(resp, err); err != nil {
 		c.logJobCommandFailure("complete job", job.Key(), classifyRESTJobCommandErr(err), err)
 	}
 }
@@ -426,9 +426,9 @@ func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) 
 	if job.leaseToken != "" {
 		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
 	}
-	_, err := c.raw.JobAPI.FailJob(ctx, camundaapi.JobKey(job.key)).
+	resp, err := c.raw.JobAPI.FailJob(ctx, camundaapi.JobKey(job.key)).
 		JobFailRequest(*req).Execute()
-	if err != nil {
+	if err := c.wrapError(resp, err); err != nil {
 		c.logJobCommandFailure("fail job", job.Key(), classifyRESTJobCommandErr(err), err)
 	}
 }
@@ -444,9 +444,9 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 	if job.leaseToken != "" {
 		req.SetJobLeaseToken(camundaapi.JobLeaseToken(job.leaseToken))
 	}
-	_, err := c.raw.JobAPI.ThrowJobError(ctx, camundaapi.JobKey(job.key)).
+	resp, err := c.raw.JobAPI.ThrowJobError(ctx, camundaapi.JobKey(job.key)).
 		JobErrorRequest(*req).Execute()
-	if err != nil {
+	if err := c.wrapError(resp, err); err != nil {
 		c.logJobCommandFailure("throw job error", job.Key(), classifyRESTJobCommandErr(err), err)
 	}
 }
