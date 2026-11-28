@@ -284,9 +284,31 @@ func isJobCommand(req *http.Request) bool {
 	if req.Method != http.MethodPost {
 		return false
 	}
-	p := req.URL.Path
-	return strings.Contains(p, "/jobs/") &&
-		(strings.HasSuffix(p, "/completion") || strings.HasSuffix(p, "/failure") || strings.HasSuffix(p, "/error"))
+	return isJobCommandPath(req.URL.Path)
+}
+
+// isJobCommandPath matches the final path segments /jobs/{key}/{command}, so a
+// proxy base path containing "/jobs/" (e.g. /jobs/proxy/user-tasks/1/completion)
+// is not mistaken for a job command.
+func isJobCommandPath(p string) bool {
+	segs := strings.Split(strings.TrimSuffix(p, "/"), "/")
+	n := len(segs)
+	if n < 3 || segs[n-3] != "jobs" || segs[n-2] == "" {
+		return false
+	}
+	switch segs[n-1] {
+	case "completion", "failure", "error":
+		return true
+	}
+	return false
+}
+
+// isUserTaskCompletionPath matches the final path segments
+// /user-tasks/{key}/completion.
+func isUserTaskCompletionPath(p string) bool {
+	segs := strings.Split(strings.TrimSuffix(p, "/"), "/")
+	n := len(segs)
+	return n >= 3 && segs[n-3] == "user-tasks" && segs[n-2] != "" && segs[n-1] == "completion"
 }
 
 // exemptDrainOps reports whether a request is a drain operation (job
@@ -294,11 +316,7 @@ func isJobCommand(req *http.Request) bool {
 // that should bypass the backpressure gate.
 func exemptDrainOps(req *http.Request) bool {
 	p := req.URL.Path
-	if strings.Contains(p, "/jobs/") &&
-		(strings.HasSuffix(p, "/completion") || strings.HasSuffix(p, "/failure") || strings.HasSuffix(p, "/error")) {
-		return true
-	}
-	if strings.Contains(p, "/user-tasks/") && strings.HasSuffix(p, "/completion") {
+	if isJobCommandPath(p) || isUserTaskCompletionPath(p) {
 		return true
 	}
 	// Probe activation and answers. createProbe holds its permit until a worker
