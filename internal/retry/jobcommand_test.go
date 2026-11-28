@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -108,5 +109,48 @@ func TestNonIdempotentDoesNotRetryPostSendFailure(t *testing.T) {
 	}
 	if n.Load() != 1 {
 		t.Fatalf("requests = %d, want 1", n.Load())
+	}
+}
+
+type errRoundTripper struct {
+	n   atomic.Int32
+	err error
+}
+
+func (e *errRoundTripper) RoundTrip(*http.Request) (*http.Response, error) {
+	e.n.Add(1)
+	return nil, e.err
+}
+
+// A custom transport that emits no connection trace and fails with an error
+// that does not prove a pre-send failure is not retried.
+func TestNonIdempotentDoesNotRetryUntracedTransportError(t *testing.T) {
+	for _, err := range []error{
+		errors.New("read: connection reset"),
+		&net.OpError{Op: "read", Err: errors.New("reset")},
+		io.ErrUnexpectedEOF,
+	} {
+		rt := &errRoundTripper{err: err}
+		if _, got := strictTransport(rt).RoundTrip(jobCommandReq(t, "http://example")); got == nil {
+			t.Fatal("want error")
+		}
+		if rt.n.Load() != 1 {
+			t.Errorf("%v: attempts = %d, want 1", err, rt.n.Load())
+		}
+	}
+}
+
+// Pre-send failures are retried even when an earlier connection (e.g. an
+// OAuth token fetch sharing the request context) succeeded.
+func TestNonIdempotentRetriesPreSendErrorAfterOtherConnection(t *testing.T) {
+	for _, err := range []error{
+		&net.OpError{Op: "dial", Err: errors.New("refused")},
+		&net.DNSError{Err: "no such host", Name: "x"},
+	} {
+		rt := &errRoundTripper{err: err}
+		_, _ = strictTransport(rt).RoundTrip(jobCommandReq(t, "http://example"))
+		if rt.n.Load() != 4 {
+			t.Errorf("%v: attempts = %d, want 4", err, rt.n.Load())
+		}
 	}
 }

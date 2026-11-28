@@ -1,8 +1,10 @@
 package camunda
 
 import (
+	"encoding/json"
 	"errors"
-	"net"
+
+	"github.com/camunda/orchestration-cluster-api-go/v11/internal/retry"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,12 +42,17 @@ func classifyRESTJobCommandErr(err error) jobCommandOutcome {
 		}
 		return jobCommandFailed
 	}
+	// A request body that could not be serialized was never sent.
+	var unsupType *json.UnsupportedTypeError
+	var unsupVal *json.UnsupportedValueError
+	var marshalErr *json.MarshalerError
+	if errors.As(err, &unsupType) || errors.As(err, &unsupVal) || errors.As(err, &marshalErr) {
+		return jobCommandFailed
+	}
 	// A connection that was never established (connect refused, DNS) means
 	// the command was not sent; any other transport error (timeout, reset,
 	// truncated response) may have happened after it was applied.
-	var opErr *net.OpError
-	var dnsErr *net.DNSError
-	if errors.As(err, &dnsErr) || (errors.As(err, &opErr) && opErr.Op == "dial") {
+	if retry.IsPreSendError(err) {
 		return jobCommandFailed
 	}
 	return jobCommandUnknown

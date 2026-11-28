@@ -1,7 +1,11 @@
 package camunda
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"math"
+	"net"
 	"testing"
 
 	"google.golang.org/grpc/codes"
@@ -18,6 +22,12 @@ func TestClassifyJobCommandErrors(t *testing.T) {
 		&APIError{Status: 400}:   jobCommandFailed,
 		errors.New("conn reset"): jobCommandUnknown,
 	}
+	_, marshalErr := json.Marshal(map[string]any{"c": make(chan int)})
+	rest[fmt.Errorf("encode: %w", marshalErr)] = jobCommandFailed
+	_, nanErr := json.Marshal(math.NaN())
+	rest[nanErr] = jobCommandFailed
+	rest[&net.OpError{Op: "dial", Err: errors.New("refused")}] = jobCommandFailed
+	rest[&net.OpError{Op: "read", Err: errors.New("reset")}] = jobCommandUnknown
 	for err, want := range rest {
 		if got := classifyRESTJobCommandErr(err); got != want {
 			t.Errorf("REST %v: got %d, want %d", err, got, want)

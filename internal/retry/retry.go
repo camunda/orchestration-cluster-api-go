@@ -12,9 +12,8 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net"
 	"net/http"
-	"net/http/httptrace"
-	"sync/atomic"
 	"time"
 )
 
@@ -148,6 +147,19 @@ func IsRetryableStatus(status int) bool {
 	}
 }
 
+// IsPreSendError reports whether err proves the request never reached the
+// server: a DNS failure or a failed dial. Any other transport error (including
+// one from a custom RoundTripper) may have happened after the request was sent,
+// so a non-idempotent request must not be retried on it.
+func IsPreSendError(err error) bool {
+	var dnsErr *net.DNSError
+	if errors.As(err, &dnsErr) {
+		return true
+	}
+	var opErr *net.OpError
+	return errors.As(err, &opErr) && opErr.Op == "dial"
+}
+
 // isRetryableErr reports whether a transport-level error is transient. Context
 // cancellation/deadline errors are terminal and never retried.
 func isRetryableErr(err error) bool {
@@ -183,16 +195,6 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	ctx := req.Context()
 
 	strict := t.NonIdempotent != nil && t.NonIdempotent(req)
-	// sent records whether the current attempt obtained a connection, after
-	// which the request may have reached the server. A failure before that
-	// (dial, DNS, TLS handshake) means the command was never sent.
-	var sent atomic.Bool
-	if strict {
-		ctx = httptrace.WithClientTrace(ctx, &httptrace.ClientTrace{
-			GotConn: func(httptrace.GotConnInfo) { sent.Store(true) },
-		})
-		req = req.WithContext(ctx)
-	}
 
 	var lastResp *http.Response
 	var lastErr error
@@ -215,11 +217,10 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 			}
 		}
 
-		sent.Store(false)
 		resp, err := t.base().RoundTrip(req)
 		if err != nil {
 			lastErr, lastResp = err, nil
-			if !isRetryableErr(err) || (strict && sent.Load()) || attempt == max-1 {
+			if !isRetryableErr(err) || (strict && !IsPreSendError(err)) || attempt == max-1 {
 				return nil, err
 			}
 			continue
