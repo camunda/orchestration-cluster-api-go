@@ -513,7 +513,7 @@ func (c *CamundaClient) restCompleteJob(ctx context.Context, job *Job, vars map[
 		}
 	}
 	if err != nil {
-		c.logger.Error("complete job failed", "job", job.Key(), "error", err)
+		c.logJobCommandFailure("complete job", job.Key(), classifyRESTJobCommandErr(err), err)
 	}
 }
 
@@ -549,7 +549,7 @@ func (c *CamundaClient) restFailJob(ctx context.Context, job *Job, cause error) 
 		}
 	}
 	if err != nil {
-		c.logger.Error("fail job failed", "job", job.Key(), "error", err)
+		c.logJobCommandFailure("fail job", job.Key(), classifyRESTJobCommandErr(err), err)
 	}
 }
 
@@ -585,7 +585,7 @@ func (c *CamundaClient) restThrowError(ctx context.Context, job *Job, bpmn *Bpmn
 		}
 	}
 	if err != nil {
-		c.logger.Error("throw job error failed", "job", job.Key(), "error", err)
+		c.logJobCommandFailure("throw job error", job.Key(), classifyRESTJobCommandErr(err), err)
 	}
 }
 
