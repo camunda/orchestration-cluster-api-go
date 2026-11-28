@@ -3,6 +3,7 @@ package camunda
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/camunda/orchestration-cluster-api-go/v10/internal/retry"
 
@@ -75,13 +76,22 @@ func classifyGRPCJobCommandErr(err error) jobCommandOutcome {
 }
 
 // logJobCommandFailure logs a failed job command. action is e.g. "complete job".
+//
+// The error text can carry a raw HTTP response body (*APIError) and the job
+// key comes from the server, so both are %q-escaped: a body with newlines
+// must not be able to forge worker log records.
 func (c *CamundaClient) logJobCommandFailure(action, jobKey string, outcome jobCommandOutcome, err error) {
+	jobKey = fmt.Sprintf("%q", jobKey)
+	errText := "<nil>"
+	if err != nil {
+		errText = fmt.Sprintf("%q", err.Error())
+	}
 	switch outcome {
 	case jobCommandNotFound:
-		c.logger.Warn(action+" failed: job not found (already completed, failed or timed out)", "job", jobKey, "error", err)
+		c.logger.Warn(action+" failed: job not found (already completed, failed or timed out)", "job", jobKey, "error", errText)
 	case jobCommandUnknown:
-		c.logger.Warn(action+" failed: outcome unknown; the job may have completed, otherwise it will time out and be re-activated", "job", jobKey, "error", err)
+		c.logger.Warn(action+" failed: outcome unknown; the job may have completed, otherwise it will time out and be re-activated", "job", jobKey, "error", errText)
 	default:
-		c.logger.Error(action+" failed", "job", jobKey, "error", err)
+		c.logger.Error(action+" failed", "job", jobKey, "error", errText)
 	}
 }

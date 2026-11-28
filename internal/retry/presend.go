@@ -34,9 +34,9 @@ func MarkPreSend(err error) error {
 	return &preSendError{err: err}
 }
 
-// PreSendTracer is the innermost RoundTripper layer: it observes the TLS
-// handshake of the connection dialed for this request and, when the round
-// trip fails after a failed handshake and before a connection was obtained,
+// PreSendTracer is the innermost RoundTripper layer: it observes connection
+// setup for this request and, when the round trip fails after connection setup
+// began (or a TLS handshake failed) and before a connection was obtained,
 // marks the error as pre-send. It sits below the auth layer, so the token
 // fetch's own connections are not traced.
 type PreSendTracer struct {
@@ -53,8 +53,13 @@ func (t *PreSendTracer) base() http.RoundTripper {
 // RoundTrip implements http.RoundTripper.
 func (t *PreSendTracer) RoundTrip(req *http.Request) (*http.Response, error) {
 	var mu sync.Mutex
-	var handshakeFailed, gotConn bool
+	var handshakeFailed, getConn, gotConn bool
 	trace := &httptrace.ClientTrace{
+		GetConn: func(string) {
+			mu.Lock()
+			getConn = true
+			mu.Unlock()
+		},
 		TLSHandshakeDone: func(_ tls.ConnectionState, err error) {
 			if err != nil {
 				mu.Lock()
@@ -72,7 +77,11 @@ func (t *PreSendTracer) RoundTrip(req *http.Request) (*http.Response, error) {
 	resp, err := t.base().RoundTrip(r)
 	if err != nil {
 		mu.Lock()
-		preSend := handshakeFailed && !gotConn
+		// http.Transport fires GotConn before writing the request, so a
+		// traced failure after GetConn but before GotConn (dial error, proxy
+		// CONNECT rejection, failed TLS handshake) never reached the server.
+		// An untraced custom transport fires neither and stays conservative.
+		preSend := (getConn || handshakeFailed) && !gotConn
 		mu.Unlock()
 		if preSend {
 			return nil, MarkPreSend(err)
