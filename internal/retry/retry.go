@@ -179,15 +179,11 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 			continue
 		}
 
-<<<<<<< HEAD
-		if !IsRetryableStatus(resp.StatusCode) || attempt == max-1 {
-=======
 		retryable := IsRetryableStatus(resp.StatusCode)
 		if strict {
 			retryable = IsNotAppliedStatus(resp.StatusCode)
 		}
-		if !retryable || isTerminalGatewayTimeout(resp) || attempt == max-1 {
->>>>>>> 3377ac5 (fix: retry job commands only when the server did not apply them (#247))
+		if !retryable || attempt == max-1 {
 			return resp, nil
 		}
 

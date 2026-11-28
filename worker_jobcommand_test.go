@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	camunda "github.com/camunda/orchestration-cluster-api-go/v11"
+	camunda "github.com/camunda/orchestration-cluster-api-go/v10"
 )
 
 // A job command whose outcome is unknown (504) is sent once and is not followed by

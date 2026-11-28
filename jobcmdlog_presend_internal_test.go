@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/camunda/orchestration-cluster-api-go/v11/internal/auth"
-	"github.com/camunda/orchestration-cluster-api-go/v11/internal/retry"
-	"github.com/camunda/orchestration-cluster-api-go/v11/internal/transport"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/auth"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/retry"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/transport"
 )
 
 type fixedClock struct{}

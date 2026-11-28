@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/camunda/orchestration-cluster-api-go/v11/internal/retry"
+	"github.com/camunda/orchestration-cluster-api-go/v10/internal/retry"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
