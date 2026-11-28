@@ -90,11 +90,12 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	bp := backpressure.New(backpressureProfile(cfg.BackpressureProfile), clk)
 
 	rt := transport.New(transport.Options{
-		Base:         base,
-		Auth:         authT,
-		Retry:        retry.Config{MaxAttempts: cfg.Retry.MaxAttempts, BaseDelay: cfg.Retry.BaseDelay, MaxDelay: cfg.Retry.MaxDelay},
-		Backpressure: bp,
-		Exempt:       exemptDrainOps,
+		Base:          base,
+		Auth:          authT,
+		Retry:         retry.Config{MaxAttempts: cfg.Retry.MaxAttempts, BaseDelay: cfg.Retry.BaseDelay, MaxDelay: cfg.Retry.MaxDelay},
+		Backpressure:  bp,
+		Exempt:        exemptDrainOps,
+		NonIdempotent: isJobCommand,
 	}, clk, rnd)
 
 	oc := camundaapi.NewConfiguration()
@@ -267,16 +268,48 @@ func pemBytes(inline, path string) ([]byte, error) {
 	return nil, nil
 }
 
+// isJobCommand reports whether a request is a job command (POST
+// /jobs/{key}/completion, /failure or /error). Job commands are not idempotent:
+// a replay after an applied-but-lost response gets 404, so they are retried only
+// when the server says the command was not applied (429, 503) or the connection
+// failed before the request was sent.
+func isJobCommand(req *http.Request) bool {
+	if req.Method != http.MethodPost {
+		return false
+	}
+	return isJobCommandPath(req.URL.Path)
+}
+
+// isJobCommandPath matches the final path segments /jobs/{key}/{command}, so a
+// proxy base path containing "/jobs/" (e.g. /jobs/proxy/user-tasks/1/completion)
+// is not mistaken for a job command.
+func isJobCommandPath(p string) bool {
+	segs := strings.Split(strings.TrimSuffix(p, "/"), "/")
+	n := len(segs)
+	if n < 3 || segs[n-3] != "jobs" || segs[n-2] == "" {
+		return false
+	}
+	switch segs[n-1] {
+	case "completion", "failure", "error":
+		return true
+	}
+	return false
+}
+
+// isUserTaskCompletionPath matches the final path segments
+// /user-tasks/{key}/completion.
+func isUserTaskCompletionPath(p string) bool {
+	segs := strings.Split(strings.TrimSuffix(p, "/"), "/")
+	n := len(segs)
+	return n >= 3 && segs[n-3] == "user-tasks" && segs[n-2] != "" && segs[n-1] == "completion"
+}
+
 // exemptDrainOps reports whether a request is a drain operation (job
 // completion/failure/error, user-task completion) that should bypass the
 // backpressure gate.
 func exemptDrainOps(req *http.Request) bool {
 	p := req.URL.Path
-	if strings.Contains(p, "/jobs/") &&
-		(strings.HasSuffix(p, "/completion") || strings.HasSuffix(p, "/failure") || strings.HasSuffix(p, "/error")) {
-		return true
-	}
-	if strings.Contains(p, "/user-tasks/") && strings.HasSuffix(p, "/completion") {
+	if isJobCommandPath(p) || isUserTaskCompletionPath(p) {
 		return true
 	}
 	return false

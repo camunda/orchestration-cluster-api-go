@@ -33,6 +33,9 @@ type Options struct {
 	// Exempt marks requests (e.g. job-completion drains) that bypass the
 	// backpressure gate. If nil, all requests are gated.
 	Exempt func(*http.Request) bool
+	// NonIdempotent marks requests (job commands) that are retried only when
+	// the server says they were not applied; see retry.Transport.NonIdempotent.
+	NonIdempotent func(*http.Request) bool
 }
 
 // New builds the RoundTripper chain described in the package doc. clock and
@@ -43,11 +46,12 @@ func New(o Options, clock retry.Clock, random retry.Random) http.RoundTripper {
 	if inner == nil {
 		inner = http.DefaultTransport
 	}
+	inner = &retry.PreSendTracer{Base: inner}
 	if o.Auth != nil {
 		o.Auth.Base = inner
 		inner = o.Auth
 	}
-	inner = &retry.Transport{Base: inner, Cfg: o.Retry, Clock: clock, Random: random}
+	inner = &retry.Transport{Base: inner, Cfg: o.Retry, Clock: clock, Random: random, NonIdempotent: o.NonIdempotent}
 	if o.Backpressure != nil {
 		inner = &BackpressureTransport{Base: inner, Mgr: o.Backpressure, Exempt: o.Exempt}
 	}

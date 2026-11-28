@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"time"
 )
@@ -40,6 +41,21 @@ type Transport struct {
 
 	// Random draws the jitter. Required; transport.New always sets it.
 	Random Random
+
+	// NonIdempotent marks requests (job commands: completion, failure, error)
+	// that must not be replayed when their outcome is unknown. Such a request is
+	// retried only when the server says it was not applied (429, 503) or when the
+	// connection failed before the request was sent. A 502, 504, other status, or
+	// a transport error after the request was sent is returned after one attempt.
+	// If nil, every request follows the default policy.
+	NonIdempotent func(*http.Request) bool
+}
+
+// IsNotAppliedStatus reports whether a status code means the server did not
+// apply the command (backpressure or unavailable), so replaying it is safe even
+// for a non-idempotent command.
+func IsNotAppliedStatus(status int) bool {
+	return status == http.StatusTooManyRequests || status == http.StatusServiceUnavailable
 }
 
 // Random is the part of the SDK random source this package needs, declared here
@@ -79,6 +95,24 @@ func IsRetryableStatus(status int) bool {
 	}
 }
 
+// IsPreSendError reports whether err proves the request never reached the
+// server: a DNS failure, a failed dial, or an error marked pre-send
+// (MarkPreSend, or any error with a PreSend() bool method, e.g. an OAuth token-fetch failure or a failed TLS handshake). Any other transport error (including
+// one from a custom RoundTripper) may have happened after the request was sent,
+// so a non-idempotent request must not be retried on it.
+func IsPreSendError(err error) bool {
+	var marked preSendMarker
+	if errors.As(err, &marked) && marked.PreSend() {
+		return true
+	}
+	var dnsErr *net.DNSError
+	if errors.As(err, &dnsErr) {
+		return true
+	}
+	var opErr *net.OpError
+	return errors.As(err, &opErr) && opErr.Op == "dial"
+}
+
 // isRetryableErr reports whether a transport-level error is transient. Context
 // cancellation/deadline errors are terminal and never retried.
 func isRetryableErr(err error) bool {
@@ -113,6 +147,8 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 	ctx := req.Context()
 
+	strict := t.NonIdempotent != nil && t.NonIdempotent(req)
+
 	var lastResp *http.Response
 	var lastErr error
 
@@ -137,13 +173,21 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		resp, err := t.base().RoundTrip(req)
 		if err != nil {
 			lastErr, lastResp = err, nil
-			if !isRetryableErr(err) || attempt == max-1 {
+			if !isRetryableErr(err) || (strict && !IsPreSendError(err)) || attempt == max-1 {
 				return nil, err
 			}
 			continue
 		}
 
+<<<<<<< HEAD
 		if !IsRetryableStatus(resp.StatusCode) || attempt == max-1 {
+=======
+		retryable := IsRetryableStatus(resp.StatusCode)
+		if strict {
+			retryable = IsNotAppliedStatus(resp.StatusCode)
+		}
+		if !retryable || isTerminalGatewayTimeout(resp) || attempt == max-1 {
+>>>>>>> 3377ac5 (fix: retry job commands only when the server did not apply them (#247))
 			return resp, nil
 		}
 
