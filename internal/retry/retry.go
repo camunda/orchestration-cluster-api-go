@@ -148,10 +148,15 @@ func IsRetryableStatus(status int) bool {
 }
 
 // IsPreSendError reports whether err proves the request never reached the
-// server: a DNS failure or a failed dial. Any other transport error (including
+// server: a DNS failure, a failed dial, or an error marked pre-send
+// (MarkPreSend, or any error with a PreSend() bool method, e.g. an OAuth token-fetch failure or a failed TLS handshake). Any other transport error (including
 // one from a custom RoundTripper) may have happened after the request was sent,
 // so a non-idempotent request must not be retried on it.
 func IsPreSendError(err error) bool {
+	var marked preSendMarker
+	if errors.As(err, &marked) && marked.PreSend() {
+		return true
+	}
 	var dnsErr *net.DNSError
 	if errors.As(err, &dnsErr) {
 		return true

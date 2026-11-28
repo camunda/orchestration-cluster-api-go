@@ -46,6 +46,7 @@ func New(o Options, clock retry.Clock, random retry.Random) http.RoundTripper {
 	if inner == nil {
 		inner = http.DefaultTransport
 	}
+	inner = &retry.PreSendTracer{Base: inner}
 	if o.Auth != nil {
 		o.Auth.Base = inner
 		inner = o.Auth

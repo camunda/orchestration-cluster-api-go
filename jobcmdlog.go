@@ -49,7 +49,8 @@ func classifyRESTJobCommandErr(err error) jobCommandOutcome {
 	if errors.As(err, &unsupType) || errors.As(err, &unsupVal) || errors.As(err, &marshalErr) {
 		return jobCommandFailed
 	}
-	// A connection that was never established (connect refused, DNS) means
+	// A connection that was never established (connect refused, DNS, failed
+	// TLS handshake) or a failed OAuth token fetch means
 	// the command was not sent; any other transport error (timeout, reset,
 	// truncated response) may have happened after it was applied.
 	if retry.IsPreSendError(err) {
