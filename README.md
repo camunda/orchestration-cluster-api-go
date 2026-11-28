@@ -639,6 +639,28 @@ Only transient failures are retried. A `400`, `403`, or `404` is returned to you
 immediately — retrying a request the server has definitively rejected wastes time
 and hides the real error.
 
+### Job commands (complete, fail, throw error)
+
+Job commands are **not idempotent**: if a command was applied but its response
+was lost, a retry gets `404 Job not found`. So job commands follow a stricter rule:
+
+- They are retried only when the server says the command was **not applied** —
+  `429` or `503` — or when the connection failed **before** the request was sent
+  (connect refused, DNS, TLS handshake).
+- They are **never** retried on `504`, `502`, `500`, a read timeout, or a
+  connection reset after the request was sent: the outcome is unknown.
+- When the outcome is unknown, the worker does **not** send a follow-up `failJob`.
+  It logs a warning ("… failed: outcome unknown; the job may have completed, otherwise it
+  will time out and be re-activated") and frees the slot. If the command was not
+  applied, the job timeout makes the job available again.
+- A `404` is logged at warn level as "job not found (already completed, failed or
+  timed out)".
+
+The gRPC streaming worker sends its job commands once, with the same logging
+(`NOT_FOUND` → job not found; `DEADLINE_EXCEEDED` / `UNAVAILABLE` / `UNKNOWN` /
+`INTERNAL` → outcome unknown). Other operations keep the transient retry policy
+above.
+
 ## Eventual consistency
 
 Reads are served from the cluster's secondary storage and are eventually

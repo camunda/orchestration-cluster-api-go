@@ -90,11 +90,12 @@ func newFromConfig(cfg *Config) (*CamundaClient, error) {
 	bp := backpressure.New(backpressureProfile(cfg.BackpressureProfile), clk)
 
 	rt := transport.New(transport.Options{
-		Base:         base,
-		Auth:         authT,
-		Retry:        retry.Config{MaxAttempts: cfg.Retry.MaxAttempts, BaseDelay: cfg.Retry.BaseDelay, MaxDelay: cfg.Retry.MaxDelay},
-		Backpressure: bp,
-		Exempt:       exemptDrainOps,
+		Base:          base,
+		Auth:          authT,
+		Retry:         retry.Config{MaxAttempts: cfg.Retry.MaxAttempts, BaseDelay: cfg.Retry.BaseDelay, MaxDelay: cfg.Retry.MaxDelay},
+		Backpressure:  bp,
+		Exempt:        exemptDrainOps,
+		NonIdempotent: isJobCommand,
 	}, clk, rnd)
 
 	oc := camundaapi.NewConfiguration()
@@ -272,6 +273,20 @@ func pemBytes(inline, path string) ([]byte, error) {
 		return b, nil
 	}
 	return nil, nil
+}
+
+// isJobCommand reports whether a request is a job command (POST
+// /jobs/{key}/completion, /failure or /error). Job commands are not idempotent:
+// a replay after an applied-but-lost response gets 404, so they are retried only
+// when the server says the command was not applied (429, 503) or the connection
+// failed before the request was sent.
+func isJobCommand(req *http.Request) bool {
+	if req.Method != http.MethodPost {
+		return false
+	}
+	p := req.URL.Path
+	return strings.Contains(p, "/jobs/") &&
+		(strings.HasSuffix(p, "/completion") || strings.HasSuffix(p, "/failure") || strings.HasSuffix(p, "/error"))
 }
 
 // exemptDrainOps reports whether a request is a drain operation (job

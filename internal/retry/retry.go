@@ -13,6 +13,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/http/httptrace"
+	"sync/atomic"
 	"time"
 )
 
@@ -43,6 +45,21 @@ type Transport struct {
 
 	// Random draws the jitter. Required; transport.New always sets it.
 	Random Random
+
+	// NonIdempotent marks requests (job commands: completion, failure, error)
+	// that must not be replayed when their outcome is unknown. Such a request is
+	// retried only when the server says it was not applied (429, 503) or when the
+	// connection failed before the request was sent. A 502, 504, other status, or
+	// a transport error after the request was sent is returned after one attempt.
+	// If nil, every request follows the default policy.
+	NonIdempotent func(*http.Request) bool
+}
+
+// IsNotAppliedStatus reports whether a status code means the server did not
+// apply the command (backpressure or unavailable), so replaying it is safe even
+// for a non-idempotent command.
+func IsNotAppliedStatus(status int) bool {
+	return status == http.StatusTooManyRequests || status == http.StatusServiceUnavailable
 }
 
 // Random is the part of the SDK random source this package needs, declared here
@@ -165,6 +182,18 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 	ctx := req.Context()
 
+	strict := t.NonIdempotent != nil && t.NonIdempotent(req)
+	// sent records whether the current attempt obtained a connection, after
+	// which the request may have reached the server. A failure before that
+	// (dial, DNS, TLS handshake) means the command was never sent.
+	var sent atomic.Bool
+	if strict {
+		ctx = httptrace.WithClientTrace(ctx, &httptrace.ClientTrace{
+			GotConn: func(httptrace.GotConnInfo) { sent.Store(true) },
+		})
+		req = req.WithContext(ctx)
+	}
+
 	var lastResp *http.Response
 	var lastErr error
 
@@ -186,16 +215,21 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 			}
 		}
 
+		sent.Store(false)
 		resp, err := t.base().RoundTrip(req)
 		if err != nil {
 			lastErr, lastResp = err, nil
-			if !isRetryableErr(err) || attempt == max-1 {
+			if !isRetryableErr(err) || (strict && sent.Load()) || attempt == max-1 {
 				return nil, err
 			}
 			continue
 		}
 
-		if !IsRetryableStatus(resp.StatusCode) || isTerminalGatewayTimeout(resp) || attempt == max-1 {
+		retryable := IsRetryableStatus(resp.StatusCode)
+		if strict {
+			retryable = IsNotAppliedStatus(resp.StatusCode)
+		}
+		if !retryable || isTerminalGatewayTimeout(resp) || attempt == max-1 {
 			return resp, nil
 		}
 
