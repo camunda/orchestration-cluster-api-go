@@ -1,3 +1,10 @@
+# [11.0.0-alpha.26](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.25...v11.0.0-alpha.26) (2026-11-28)
+
+
+### Bug Fixes
+
+* retry job commands only when the server did not apply them ([#247](https://github.com/camunda/orchestration-cluster-api-go/issues/247)) ([3377ac5](https://github.com/camunda/orchestration-cluster-api-go/commit/3377ac57da901b0dd568975f4fbaf3d567ea7895)), closes [#246](https://github.com/camunda/orchestration-cluster-api-go/issues/246)
+
 # [11.0.0-alpha.25](https://github.com/camunda/orchestration-cluster-api-go/compare/v11.0.0-alpha.24...v11.0.0-alpha.25) (2026-11-27)
 
 
