@@ -381,11 +381,13 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		r.SetBasicAuth(t.BasicUsername, t.BasicPassword)
 	case OAuth:
 		if t.TokenSource == nil {
-			return nil, fmt.Errorf("oauth strategy selected but no token source configured")
+			return nil, preSend(fmt.Errorf("oauth strategy selected but no token source configured"))
 		}
 		tok, err := t.TokenSource.Token(req.Context())
 		if err != nil {
-			return nil, err
+			// The request was never sent: mark it so non-idempotent retry and
+			// job-command outcome classification treat it as not applied.
+			return nil, preSend(err)
 		}
 		r.Header.Set("Authorization", "Bearer "+tok)
 	case None:
@@ -411,3 +413,16 @@ func decodeError(err error) error {
 	}
 	return errors.New("decoding token response: malformed response")
 }
+
+// tokenAcquisitionError wraps a failure to obtain a bearer token. The request
+// was never sent; PreSend lets the retry layer and job-command outcome
+// classification recognise that without importing this package.
+type tokenAcquisitionError struct{ err error }
+
+func (e *tokenAcquisitionError) Error() string { return e.err.Error() }
+func (e *tokenAcquisitionError) Unwrap() error { return e.err }
+
+// PreSend reports that the request was not sent.
+func (e *tokenAcquisitionError) PreSend() bool { return true }
+
+func preSend(err error) error { return &tokenAcquisitionError{err: err} }
