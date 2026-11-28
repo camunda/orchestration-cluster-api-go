@@ -273,11 +273,22 @@ func pemBytes(inline, path string) ([]byte, error) {
 // a replay after an applied-but-lost response gets 404, so they are retried only
 // when the server says the command was not applied (429, 503) or the connection
 // failed before the request was sent.
+//
+// A redirected request (307/308 preserve the POST body) keeps the
+// classification of the original request: the redirect chain is walked via
+// Response.Request, so a redirect to a path that does not look like a job
+// command cannot fall back to the default retry policy.
 func isJobCommand(req *http.Request) bool {
-	if req.Method != http.MethodPost {
-		return false
+	for r, depth := req, 0; r != nil && depth < 32; depth++ {
+		if r.Method == http.MethodPost && r.URL != nil && isJobCommandPath(r.URL.Path) {
+			return true
+		}
+		if r.Response == nil {
+			break
+		}
+		r = r.Response.Request
 	}
-	return isJobCommandPath(req.URL.Path)
+	return false
 }
 
 // isJobCommandPath matches the final path segments /jobs/{key}/{command}, so a
